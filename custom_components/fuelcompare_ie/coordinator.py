@@ -81,6 +81,9 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 else:
                     fuel_data[fuel_type] = None
 
+            # Store last updated timestamp from the station data
+            fuel_data["lastupdated"] = initial_station.get("lastupdated")
+
             _LOGGER.debug("Fetched fuel data for station %s: %s", self.station_id, fuel_data)
             return fuel_data
 

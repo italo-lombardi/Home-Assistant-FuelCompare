@@ -106,8 +106,13 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
     @property
     def extra_state_attributes(self) -> dict[str, str]:
         """Return additional attributes."""
-        return {
+        attrs = {
             "station_id": self._station_id,
             "fuel_type": self._fuel_type,
             "source": "fuelcompare.ie",
         }
+        if self.coordinator.data:
+            lastupdated = self.coordinator.data.get("lastupdated")
+            if lastupdated:
+                attrs["price_last_updated"] = lastupdated
+        return attrs
