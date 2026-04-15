@@ -42,3 +42,6 @@ home-assistant.log
 
 # Ruff / linting
 .ruff_cache/
+
+# Claude
+.claude/
