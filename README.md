@@ -6,7 +6,7 @@
 
 ## What this is
 
-A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices for Irish petrol stations listed on [fuelcompare.ie](https://fuelcompare.ie). It creates sensors for unleaded and diesel prices at any station you choose, letting you use those prices in dashboards, automations, or cost calculations.
+A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices and station information for Irish petrol stations listed on [fuelcompare.ie](https://fuelcompare.ie). Each station you add creates a full set of sensors covering prices, opening hours, facilities, and real-time open/closed status.
 
 ## How it works
 
@@ -20,28 +20,46 @@ This integration:
 
 1. Loads the station HTML page once to extract the current `buildId`.
 2. Fetches the Next.js JSON endpoint for that station to get the full station record.
-3. Reads the `unleaded` and `diesel` price fields from the JSON and converts them to euros.
+3. Parses prices, opening hours, facilities, and location from the JSON.
 4. Repeats the fetch every **30 minutes** via Home Assistant's `DataUpdateCoordinator`.
 5. If the `buildId` becomes stale (Next.js redeploys the site), it automatically re-fetches it before retrying.
 
 No unofficial API keys, no scraping fragile HTML — just the same structured JSON the browser receives.
 
-## Sensors created
+## Entities created
 
 ![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
 
-For each station you add, the integration creates two sensors:
+Each station creates **11 entities** grouped under a single device.
 
-| Sensor | Unit | Icon |
-|--------|------|------|
-| `sensor.<name>_unleaded` | € | `mdi:gas-station` |
-| `sensor.<name>_diesel` | € | `mdi:gas-station-outline` |
+### Fuel price sensors
 
-Each sensor also exposes these attributes:
+| Entity | Unit | Attributes |
+|--------|------|------------|
+| `sensor.<name>_unleaded` | € | `station_id`, `fuel_type`, `price_last_updated` |
+| `sensor.<name>_diesel` | € | `station_id`, `fuel_type`, `price_last_updated` |
 
-- `station_id` — the FuelCompare.ie numeric ID for the station
-- `fuel_type` — `unleaded` or `diesel`
-- `source` — `fuelcompare.ie`
+### Station info sensors
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `sensor.<name>_brand` | Chain name e.g. `Circle K` | — |
+| `sensor.<name>_county` | County e.g. `Co. Dublin` | — |
+| `sensor.<name>_working_hours` | Today's hours e.g. `6a.m.-10p.m.` | Full weekly schedule |
+| `sensor.<name>_accessibility` | Active features e.g. `Wheelchair-accessible entrance` | Full category dict |
+| `sensor.<name>_offerings` | Active offerings e.g. `Car wash, Diesel fuel` | Full category dict |
+| `sensor.<name>_amenities` | Active amenities e.g. `Toilets` | Full category dict |
+| `sensor.<name>_payments` | Accepted payments e.g. `Debit cards, NFC mobile payments` | Full category dict |
+
+> Facility sensors (`accessibility`, `offerings`, `amenities`, `payments`) are marked unavailable if a station does not provide data for that category.
+
+### Binary sensor
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `today_hours` |
+
+The is-open state is derived by parsing today's working hours against the current time. Supports standard ranges (`6a.m.-10p.m.`), 24-hour stations, and closed days.
 
 ## Installation
 
