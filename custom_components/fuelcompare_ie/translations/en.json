@@ -24,6 +24,32 @@
       },
       "diesel": {
         "name": "Diesel"
+      },
+      "brand": {
+        "name": "Brand"
+      },
+      "county": {
+        "name": "County"
+      },
+      "working_hours": {
+        "name": "Working Hours"
+      },
+      "accessibility": {
+        "name": "Accessibility"
+      },
+      "offerings": {
+        "name": "Offerings"
+      },
+      "amenities": {
+        "name": "Amenities"
+      },
+      "payments": {
+        "name": "Payments"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Is Open"
       }
     }
   }

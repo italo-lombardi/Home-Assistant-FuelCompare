@@ -65,7 +65,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             # Parse fuel prices
             fuel_data: dict[str, float | None] = {}
 
-            for fuel_type in ["unleaded", "diesel", "premium_unleaded"]:
+            for fuel_type in ["unleaded", "diesel"]:
                 raw_value = initial_station.get(fuel_type)
                 if raw_value and raw_value != "":
                     try:
@@ -83,6 +83,10 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
 
             # Store last updated timestamp from the station data
             fuel_data["lastupdated"] = initial_station.get("lastupdated")
+
+            # Store extra station metadata for sensor attributes
+            for field in ["tablename", "working_hours", "about", "county"]:
+                fuel_data[field] = initial_station.get(field)
 
             _LOGGER.debug("Fetched fuel data for station %s: %s", self.station_id, fuel_data)
             return fuel_data

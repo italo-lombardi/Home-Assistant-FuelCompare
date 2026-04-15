@@ -11,6 +11,8 @@
     "nextjs",
     "homeassistant",
     "voluptuous",
-    "unleaded"
+    "unleaded",
+    "lastupdated",
+    "tablename"
   ]
 }
