@@ -88,7 +88,9 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
     def native_value(self) -> float | None:
         """Return the state of the sensor."""
         if self.coordinator.data:
-            return self.coordinator.data.get(self._fuel_type)
+            value = self.coordinator.data.get(self._fuel_type)
+            if value is not None:
+                return round(value, 3)
         return None
 
     @property
