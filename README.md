@@ -28,6 +28,8 @@ No unofficial API keys, no scraping fragile HTML — just the same structured JS
 
 ## Sensors created
 
+![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
+
 For each station you add, the integration creates two sensors:
 
 | Sensor | Unit | Icon |
