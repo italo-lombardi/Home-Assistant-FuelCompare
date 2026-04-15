@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add FuelCompare.ie Station",
+        "description": "Enter the station ID from fuelcompare.ie (e.g., 790 for Circle K Taney Dublin)",
+        "data": {
+          "station_id": "Station ID",
+          "name": "Name (Optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Invalid station ID. Please enter a valid positive number."
+    },
+    "abort": {
+      "already_configured": "This station is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Unleaded"
+      },
+      "diesel": {
+        "name": "Diesel"
+      }
+    }
+  }
+}

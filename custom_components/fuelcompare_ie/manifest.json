@@ -1,0 +1,14 @@
+{
+  "domain": "fuelcompare_ie",
+  "name": "FuelCompare.ie",
+  "codeowners": ["@italo-lombardi"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/italo-lombardi/Home-Assistant-FuelCompare",
+  "issue_tracker": "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "quality_scale": "custom",
+  "requirements": [],
+  "version": "0.0.1"
+}

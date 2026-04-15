@@ -1,0 +1,7 @@
+{
+"name": "FuelCompare.ie for Home Assistant",
+"render_readme": true,
+"country": "IE",
+"zip_release": false,
+"homeassistant": "2024.1.0"
+}
