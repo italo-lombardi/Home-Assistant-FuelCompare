@@ -1,5 +1,10 @@
 # FuelCompare.ie — Home Assistant Custom Integration
 
+[![Integration usage](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=integration%20usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=%24.fuelcompare_ie.total)](https://analytics.home-assistant.io)
+[![Latest Release](https://img.shields.io/github/v/release/italo-lombardi/Home-Assistant-FuelCompare)](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/releases)
+[![Validate](https://img.shields.io/github/actions/workflow/status/italo-lombardi/Home-Assistant-FuelCompare/validate.yml?label=validate)](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/actions/workflows/validate.yml)
+[![License](https://img.shields.io/github/license/italo-lombardi/Home-Assistant-FuelCompare)](LICENSE)
+
 > **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to FuelCompare.ie or its owners. The FuelCompare.ie name and website are the property of their respective owners. This project simply reads publicly available data from their website for personal use.
 
 ---
