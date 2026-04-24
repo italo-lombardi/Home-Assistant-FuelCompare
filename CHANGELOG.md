@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-04-24
+
+### Added
+- Dedicated Price Last Updated timestamp sensor (`SensorDeviceClass.TIMESTAMP`)
+- Robust ISO 8601 date parsing with edge case handling
+
+### Changed
+- Use Home Assistant's shared HTTP session (`async_get_clientsession`) instead of creating sessions per update
+- Fixed license reference in README (GPL-3.0, not MIT)
+
 ## [0.1.0] - 2026-04-15
 
 ### Added

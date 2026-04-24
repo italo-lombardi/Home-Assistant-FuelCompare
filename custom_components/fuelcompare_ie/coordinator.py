@@ -5,12 +5,18 @@ import logging
 import re
 from datetime import timedelta
 
-import aiohttp
+from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import API_TIMEOUT, BASE_URL, DEFAULT_SCAN_INTERVAL
+
+_TIMEOUT = ClientTimeout(total=API_TIMEOUT)
+_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+}
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,29 +38,25 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
     async def _async_update_data(self) -> dict[str, float | None]:
         """Fetch data from FuelCompare.ie using Next.js JSON extraction."""
         try:
-            timeout = aiohttp.ClientTimeout(total=API_TIMEOUT)
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-            }
+            session = async_get_clientsession(self.hass)
 
             # Step 1: Fetch HTML to extract buildId (if we don't have it or if data fetch fails)
             if self._build_id is None:
-                self._build_id = await self._fetch_build_id(timeout, headers)
+                self._build_id = await self._fetch_build_id(session)
 
             # Step 2: Fetch Next.js JSON data
             data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
 
-            async with aiohttp.ClientSession(timeout=timeout, headers=headers) as session:
-                async with session.get(data_url) as response:
-                    if response.status != 200:
-                        # Build ID might be stale, refresh it
-                        self._build_id = await self._fetch_build_id(timeout, headers)
-                        data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
-                        async with session.get(data_url) as retry_response:
-                            retry_response.raise_for_status()
-                            json_data = await retry_response.json()
-                    else:
-                        json_data = await response.json()
+            async with session.get(data_url, timeout=_TIMEOUT, headers=_HEADERS) as response:
+                if response.status != 200:
+                    # Build ID might be stale, refresh it
+                    self._build_id = await self._fetch_build_id(session)
+                    data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
+                    async with session.get(data_url, timeout=_TIMEOUT, headers=_HEADERS) as retry_response:
+                        retry_response.raise_for_status()
+                        json_data = await retry_response.json()
+                else:
+                    json_data = await response.json()
 
             # Extract fuel prices from JSON
             initial_station = json_data.get("pageProps", {}).get("initialStation", {})
@@ -91,19 +93,20 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             _LOGGER.debug("Fetched fuel data for station %s: %s", self.station_id, fuel_data)
             return fuel_data
 
-        except aiohttp.ClientError as err:
+        except ClientError as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
+        except UpdateFailed:
+            raise
         except Exception as err:
             raise UpdateFailed(f"Unexpected error: {err}") from err
 
-    async def _fetch_build_id(self, timeout: aiohttp.ClientTimeout, headers: dict[str, str]) -> str:
+    async def _fetch_build_id(self, session: ClientSession) -> str:
         """Fetch the Next.js buildId from the HTML page."""
         url = f"{BASE_URL}/station/{self.station_id}"
 
-        async with aiohttp.ClientSession(timeout=timeout, headers=headers) as session:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                html = await response.text()
+        async with session.get(url, timeout=_TIMEOUT, headers=_HEADERS) as response:
+            response.raise_for_status()
+            html = await response.text()
 
         # Extract buildId from HTML
         build_match = re.search(r'"buildId":"([^"]+)"', html)

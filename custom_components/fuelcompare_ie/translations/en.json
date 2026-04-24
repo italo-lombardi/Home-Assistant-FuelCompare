@@ -45,6 +45,9 @@
       },
       "payments": {
         "name": "Payments"
+      },
+      "price_last_updated": {
+        "name": "Price Last Updated"
       }
     },
     "binary_sensor": {

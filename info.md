@@ -7,6 +7,7 @@ Track live unleaded and diesel prices from Irish petrol stations directly in you
 ## Features
 
 - Live unleaded and diesel prices for any station on [fuelcompare.ie](https://fuelcompare.ie)
+- Timestamp sensor showing when prices were last updated on fuelcompare.ie
 - Prices refresh automatically every 30 minutes
 - Add as many stations as you like
 - Easy setup — no YAML, no API keys

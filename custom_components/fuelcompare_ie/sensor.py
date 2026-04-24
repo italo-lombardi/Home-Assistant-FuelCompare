@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import json as json_lib
-from datetime import datetime
+import logging
+from datetime import datetime, timezone
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -18,6 +19,41 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
 from .const import CONF_STATION_ID, DOMAIN, FUEL_TYPES
 from .coordinator import FuelCompareIECoordinator
+
+_LOGGER = logging.getLogger(__name__)
+
+
+def _parse_lastupdated(raw: str | None) -> datetime | None:
+    """Parse fuelcompare.ie lastupdated string into an aware datetime, or None on failure."""
+    if not raw or not isinstance(raw, str):
+        return None
+    value = raw.strip()
+    if not value:
+        return None
+    # Try ISO 8601 with trailing Z (most common from the API)
+    for fmt in (
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%dT%H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d",
+    ):
+        try:
+            dt = datetime.strptime(value, fmt)
+            # Treat naive datetimes as UTC
+            return dt.replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    # Last resort: fromisoformat (Python 3.11+ handles Z, older versions don't)
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except (ValueError, AttributeError):
+        pass
+    _LOGGER.debug("Could not parse lastupdated value: %r", raw)
+    return None
 
 
 async def async_setup_entry(
@@ -45,6 +81,7 @@ async def async_setup_entry(
 
     # One set of station-level sensors per station
     entities.extend([
+        StationPriceLastUpdatedSensor(coordinator, station_id, station_name),
         StationBrandSensor(coordinator, station_id, station_name),
         StationCountySensor(coordinator, station_id, station_name),
         StationWorkingHoursSensor(coordinator, station_id, station_name),
@@ -131,6 +168,32 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
 
 
 # ── Station-level sensors ─────────────────────────────────────────────────────
+
+class StationPriceLastUpdatedSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+    """Sensor exposing when fuel prices were last updated on fuelcompare.ie."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_icon = "mdi:clock-check-outline"
+
+    def __init__(
+        self,
+        coordinator: FuelCompareIECoordinator,
+        station_id: str,
+        station_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_price_last_updated"
+        self._attr_name = f"{station_name} Price Last Updated"
+        self._attr_device_info = _device_info(station_id, station_name)
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return the timestamp when prices were last updated on fuelcompare.ie."""
+        if not self.coordinator.data:
+            return None
+        return _parse_lastupdated(self.coordinator.data.get("lastupdated"))
+
 
 class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
     """Sensor exposing the station brand/chain name."""

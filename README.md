@@ -35,19 +35,20 @@ No unofficial API keys, no scraping fragile HTML — just the same structured JS
 
 ![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
 
-Each station creates **11 entities** grouped under a single device.
+Each station creates **12 entities** grouped under a single device.
 
 ### Fuel price sensors
 
 | Entity | Unit | Attributes |
 |--------|------|------------|
-| `sensor.<name>_unleaded` | € | `station_id`, `fuel_type`, `price_last_updated` |
-| `sensor.<name>_diesel` | € | `station_id`, `fuel_type`, `price_last_updated` |
+| `sensor.<name>_unleaded` | € | `station_id`, `fuel_type`, `source`, `price_last_updated` |
+| `sensor.<name>_diesel` | € | `station_id`, `fuel_type`, `source`, `price_last_updated` |
 
 ### Station info sensors
 
 | Entity | State | Attributes |
 |--------|-------|------------|
+| `sensor.<name>_price_last_updated` | Timestamp (UTC) of last price update on fuelcompare.ie | — |
 | `sensor.<name>_brand` | Chain name e.g. `Circle K` | — |
 | `sensor.<name>_county` | County e.g. `Co. Dublin` | — |
 | `sensor.<name>_working_hours` | Today's hours e.g. `6a.m.-10p.m.` | Full weekly schedule |
@@ -107,7 +108,7 @@ This project is a personal, community tool. It is **not** the official FuelCompa
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+GPL-3.0 — see [LICENSE](LICENSE).
 
 ## Issues & contributions
 
