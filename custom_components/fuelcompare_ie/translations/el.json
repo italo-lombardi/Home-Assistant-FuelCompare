@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Προσθήκη σταθμού FuelCompare.ie",
+        "description": "Εισάγετε το αναγνωριστικό σταθμού από το fuelcompare.ie (π.χ. 790 για Circle K Taney Dublin)",
+        "data": {
+          "station_id": "Αναγνωριστικό Σταθμού",
+          "name": "Όνομα (Προαιρετικό)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Μη έγκυρο αναγνωριστικό σταθμού. Εισάγετε έναν έγκυρο θετικό αριθμό."
+    },
+    "abort": {
+      "already_configured": "Αυτός ο σταθμός είναι ήδη διαμορφωμένος."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Αμόλυβδη"
+      },
+      "diesel": {
+        "name": "Ντίζελ"
+      },
+      "brand": {
+        "name": "Μάρκα"
+      },
+      "county": {
+        "name": "Κομητεία"
+      },
+      "working_hours": {
+        "name": "Ώρες λειτουργίας"
+      },
+      "accessibility": {
+        "name": "Προσβασιμότητα"
+      },
+      "offerings": {
+        "name": "Υπηρεσίες"
+      },
+      "amenities": {
+        "name": "Παροχές"
+      },
+      "payments": {
+        "name": "Πληρωμές"
+      },
+      "price_last_updated": {
+        "name": "Τελευταία ενημέρωση τιμής"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Είναι ανοιχτό"
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dodaj postajo FuelCompare.ie",
+        "description": "Vnesite ID postaje s fuelcompare.ie (npr. 790 za Circle K Taney Dublin)",
+        "data": {
+          "station_id": "ID Postaje",
+          "name": "Ime (Neobvezno)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Neveljaven ID postaje. Vnesite veljavno pozitivno število."
+    },
+    "abort": {
+      "already_configured": "Ta postaja je že nastavljena."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Neosvinčen"
+      },
+      "diesel": {
+        "name": "Dizel"
+      },
+      "brand": {
+        "name": "Znamka"
+      },
+      "county": {
+        "name": "Okrožje"
+      },
+      "working_hours": {
+        "name": "Delovni čas"
+      },
+      "accessibility": {
+        "name": "Dostopnost"
+      },
+      "offerings": {
+        "name": "Storitve"
+      },
+      "amenities": {
+        "name": "Ugodnosti"
+      },
+      "payments": {
+        "name": "Plačila"
+      },
+      "price_last_updated": {
+        "name": "Zadnja posodobitev cene"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Je odprto"
+      }
+    }
+  }
+}

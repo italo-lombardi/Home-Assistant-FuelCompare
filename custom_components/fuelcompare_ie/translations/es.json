@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Añadir estación FuelCompare.ie",
+        "description": "Introduzca el ID de la estación de fuelcompare.ie (ej.: 790 para Circle K Taney Dublin)",
+        "data": {
+          "station_id": "ID de la Estación",
+          "name": "Nombre (Opcional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "ID de estación no válido. Introduzca un número positivo válido."
+    },
+    "abort": {
+      "already_configured": "Esta estación ya está configurada."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Sin plomo"
+      },
+      "diesel": {
+        "name": "Diésel"
+      },
+      "brand": {
+        "name": "Marca"
+      },
+      "county": {
+        "name": "Condado"
+      },
+      "working_hours": {
+        "name": "Horario de apertura"
+      },
+      "accessibility": {
+        "name": "Accesibilidad"
+      },
+      "offerings": {
+        "name": "Servicios"
+      },
+      "amenities": {
+        "name": "Comodidades"
+      },
+      "payments": {
+        "name": "Pagos"
+      },
+      "price_last_updated": {
+        "name": "Última actualización del precio"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Está abierto"
+      }
+    }
+  }
+}

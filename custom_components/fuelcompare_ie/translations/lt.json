@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Pridėti FuelCompare.ie stotį",
+        "description": "Įveskite stoties ID iš fuelcompare.ie (pvz., 790 – Circle K Taney Dublin)",
+        "data": {
+          "station_id": "Stoties ID",
+          "name": "Pavadinimas (Neprivaloma)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Neteisingas stoties ID. Įveskite teigiamą skaičių."
+    },
+    "abort": {
+      "already_configured": "Ši stotis jau sukonfigūruota."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Bešvinis"
+      },
+      "diesel": {
+        "name": "Dyzelinas"
+      },
+      "brand": {
+        "name": "Prekės ženklas"
+      },
+      "county": {
+        "name": "Apskritis"
+      },
+      "working_hours": {
+        "name": "Darbo laikas"
+      },
+      "accessibility": {
+        "name": "Prieinamumas"
+      },
+      "offerings": {
+        "name": "Paslaugos"
+      },
+      "amenities": {
+        "name": "Patogumai"
+      },
+      "payments": {
+        "name": "Mokėjimai"
+      },
+      "price_last_updated": {
+        "name": "Paskutinis kainos atnaujinimas"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Atidaryta"
+      }
+    }
+  }
+}

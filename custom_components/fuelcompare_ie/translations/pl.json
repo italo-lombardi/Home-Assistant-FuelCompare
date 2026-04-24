@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dodaj stację FuelCompare.ie",
+        "description": "Wprowadź ID stacji z fuelcompare.ie (np. 790 dla Circle K Taney Dublin)",
+        "data": {
+          "station_id": "ID Stacji",
+          "name": "Nazwa (Opcjonalna)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Nieprawidłowe ID stacji. Wprowadź prawidłową liczbę dodatnią."
+    },
+    "abort": {
+      "already_configured": "Ta stacja jest już skonfigurowana."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Benzyna bezołowiowa"
+      },
+      "diesel": {
+        "name": "Olej napędowy"
+      },
+      "brand": {
+        "name": "Marka"
+      },
+      "county": {
+        "name": "Hrabstwo"
+      },
+      "working_hours": {
+        "name": "Godziny otwarcia"
+      },
+      "accessibility": {
+        "name": "Dostępność"
+      },
+      "offerings": {
+        "name": "Usługi"
+      },
+      "amenities": {
+        "name": "Udogodnienia"
+      },
+      "payments": {
+        "name": "Płatności"
+      },
+      "price_last_updated": {
+        "name": "Ostatnia aktualizacja ceny"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Jest otwarty"
+      }
+    }
+  }
+}

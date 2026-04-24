@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Adăugare stație FuelCompare.ie",
+        "description": "Introduceți ID-ul stației de pe fuelcompare.ie (ex.: 790 pentru Circle K Taney Dublin)",
+        "data": {
+          "station_id": "ID Stație",
+          "name": "Nume (Opțional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "ID stație invalid. Introduceți un număr pozitiv valid."
+    },
+    "abort": {
+      "already_configured": "Această stație este deja configurată."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Fără plumb"
+      },
+      "diesel": {
+        "name": "Motorină"
+      },
+      "brand": {
+        "name": "Marcă"
+      },
+      "county": {
+        "name": "Județ"
+      },
+      "working_hours": {
+        "name": "Program de lucru"
+      },
+      "accessibility": {
+        "name": "Accesibilitate"
+      },
+      "offerings": {
+        "name": "Servicii"
+      },
+      "amenities": {
+        "name": "Facilități"
+      },
+      "payments": {
+        "name": "Plăți"
+      },
+      "price_last_updated": {
+        "name": "Ultima actualizare a prețului"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Este deschis"
+      }
+    }
+  }
+}

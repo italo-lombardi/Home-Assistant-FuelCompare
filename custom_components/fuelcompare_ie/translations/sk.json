@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Pridať stanicu FuelCompare.ie",
+        "description": "Zadajte ID stanice z fuelcompare.ie (napr. 790 pre Circle K Taney Dublin)",
+        "data": {
+          "station_id": "ID Stanice",
+          "name": "Názov (Voliteľné)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Neplatné ID stanice. Zadajte platné kladné číslo."
+    },
+    "abort": {
+      "already_configured": "Táto stanica je už nakonfigurovaná."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Bezolovnatý"
+      },
+      "diesel": {
+        "name": "Nafta"
+      },
+      "brand": {
+        "name": "Značka"
+      },
+      "county": {
+        "name": "Okres"
+      },
+      "working_hours": {
+        "name": "Otváracie hodiny"
+      },
+      "accessibility": {
+        "name": "Prístupnosť"
+      },
+      "offerings": {
+        "name": "Služby"
+      },
+      "amenities": {
+        "name": "Vybavenie"
+      },
+      "payments": {
+        "name": "Platby"
+      },
+      "price_last_updated": {
+        "name": "Posledná aktualizácia ceny"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Je otvorené"
+      }
+    }
+  }
+}

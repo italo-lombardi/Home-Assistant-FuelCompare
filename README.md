@@ -102,6 +102,10 @@ You can add as many stations as you like; each gets its own device entry.
 - Home Assistant 2024.1.0 or newer
 - Internet access from the Home Assistant host
 
+## Supported languages
+
+Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, German, Greek, Hungarian, Irish, Italian, Latvian, Lithuanian, Norwegian, Polish, Portuguese, Romanian, Slovak, Slovenian, Spanish, Swedish, Ukrainian.
+
 ## Disclaimer (repeated for clarity)
 
 This project is a personal, community tool. It is **not** the official FuelCompare.ie app or service. The author has no relationship with FuelCompare.ie. If FuelCompare.ie changes their website structure this integration may stop working; please open an issue and it will be looked at when time allows.

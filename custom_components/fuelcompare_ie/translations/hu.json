@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "FuelCompare.ie állomás hozzáadása",
+        "description": "Adja meg az állomás azonosítóját a fuelcompare.ie oldalról (pl. 790 a Circle K Taney Dublin esetén)",
+        "data": {
+          "station_id": "Állomás azonosító",
+          "name": "Név (Opcionális)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Érvénytelen állomás azonosító. Kérjük, adjon meg egy érvényes pozitív számot."
+    },
+    "abort": {
+      "already_configured": "Ez az állomás már konfigurálva van."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Ólommentes"
+      },
+      "diesel": {
+        "name": "Dízel"
+      },
+      "brand": {
+        "name": "Márka"
+      },
+      "county": {
+        "name": "Megye"
+      },
+      "working_hours": {
+        "name": "Nyitvatartás"
+      },
+      "accessibility": {
+        "name": "Akadálymentesség"
+      },
+      "offerings": {
+        "name": "Szolgáltatások"
+      },
+      "amenities": {
+        "name": "Felszereltség"
+      },
+      "payments": {
+        "name": "Fizetési módok"
+      },
+      "price_last_updated": {
+        "name": "Ár utolsó frissítése"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Nyitva van"
+      }
+    }
+  }
+}

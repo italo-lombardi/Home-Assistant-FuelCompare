@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Pievienot FuelCompare.ie staciju",
+        "description": "Ievadiet stacijas ID no fuelcompare.ie (piem., 790 priekš Circle K Taney Dublin)",
+        "data": {
+          "station_id": "Stacijas ID",
+          "name": "Nosaukums (Neobligāts)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Nederīgs stacijas ID. Lūdzu, ievadiet derīgu pozitīvu skaitli."
+    },
+    "abort": {
+      "already_configured": "Šī stacija jau ir konfigurēta."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Bezsvina"
+      },
+      "diesel": {
+        "name": "Dīzeļdegviela"
+      },
+      "brand": {
+        "name": "Zīmols"
+      },
+      "county": {
+        "name": "Apgabals"
+      },
+      "working_hours": {
+        "name": "Darba laiks"
+      },
+      "accessibility": {
+        "name": "Pieejamība"
+      },
+      "offerings": {
+        "name": "Pakalpojumi"
+      },
+      "amenities": {
+        "name": "Ērtības"
+      },
+      "payments": {
+        "name": "Maksājumi"
+      },
+      "price_last_updated": {
+        "name": "Cenas pēdējā atjaunināšana"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Ir atvērts"
+      }
+    }
+  }
+}

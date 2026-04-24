@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Lisää FuelCompare.ie-asema",
+        "description": "Syötä aseman tunnus fuelcompare.ie-sivustolta (esim. 790 Circle K Taney Dublin)",
+        "data": {
+          "station_id": "Aseman tunnus",
+          "name": "Nimi (Valinnainen)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Virheellinen aseman tunnus. Syötä kelvollinen positiivinen luku."
+    },
+    "abort": {
+      "already_configured": "Tämä asema on jo määritetty."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Lyijytön"
+      },
+      "diesel": {
+        "name": "Diesel"
+      },
+      "brand": {
+        "name": "Merkki"
+      },
+      "county": {
+        "name": "Lääni"
+      },
+      "working_hours": {
+        "name": "Aukioloajat"
+      },
+      "accessibility": {
+        "name": "Esteettömyys"
+      },
+      "offerings": {
+        "name": "Palvelut"
+      },
+      "amenities": {
+        "name": "Mukavuudet"
+      },
+      "payments": {
+        "name": "Maksutavat"
+      },
+      "price_last_updated": {
+        "name": "Hinnan viimeisin päivitys"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "On auki"
+      }
+    }
+  }
+}

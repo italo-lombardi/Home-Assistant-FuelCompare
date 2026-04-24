@@ -11,6 +11,7 @@ Track live unleaded and diesel prices from Irish petrol stations directly in you
 - Prices refresh automatically every 30 minutes
 - Add as many stations as you like
 - Easy setup — no YAML, no API keys
+- Translated into 25 languages
 
 ## Setup
 

@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Lägg till FuelCompare.ie-station",
+        "description": "Ange stations-ID från fuelcompare.ie (t.ex. 790 för Circle K Taney Dublin)",
+        "data": {
+          "station_id": "Stations-ID",
+          "name": "Namn (Valfritt)"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Ogiltigt stations-ID. Ange ett giltigt positivt tal."
+    },
+    "abort": {
+      "already_configured": "Denna station är redan konfigurerad."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "unleaded": {
+        "name": "Blyfri"
+      },
+      "diesel": {
+        "name": "Diesel"
+      },
+      "brand": {
+        "name": "Märke"
+      },
+      "county": {
+        "name": "Län"
+      },
+      "working_hours": {
+        "name": "Öppettider"
+      },
+      "accessibility": {
+        "name": "Tillgänglighet"
+      },
+      "offerings": {
+        "name": "Tjänster"
+      },
+      "amenities": {
+        "name": "Bekvämligheter"
+      },
+      "payments": {
+        "name": "Betalningar"
+      },
+      "price_last_updated": {
+        "name": "Pris senast uppdaterat"
+      }
+    },
+    "binary_sensor": {
+      "is_open": {
+        "name": "Är öppen"
+      }
+    }
+  }
+}
