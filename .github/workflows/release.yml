@@ -32,3 +32,4 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           body: ${{ steps.changelog.outputs.notes }}
+          prerelease: ${{ contains(github.ref_name, '-') }}

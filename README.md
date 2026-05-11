@@ -5,6 +5,9 @@
 [![Validate](https://img.shields.io/github/actions/workflow/status/italo-lombardi/Home-Assistant-FuelCompare/validate.yml?label=validate)](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/actions/workflows/validate.yml)
 [![License](https://img.shields.io/github/license/italo-lombardi/Home-Assistant-FuelCompare)](LICENSE)
 
+[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
+[![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
+
 > **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to FuelCompare.ie or its owners. The FuelCompare.ie name and website are the property of their respective owners. This project simply reads publicly available data from their website for personal use.
 
 ---
@@ -86,7 +89,7 @@ The is-open state is derived by parsing today's working hours against the curren
 
 1. Go to **Settings → Devices & Services → Add Integration**.
 2. Search for **FuelCompare.ie**.
-3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie.
+3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
 4. Optionally enter a friendly name (defaults to `Station <id>`).
 
 ### Finding a station ID

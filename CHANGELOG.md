@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-05-11
+
+### Added
+- Full test suite: 45 tests covering coordinator, sensors, binary sensor, and config flow
+- `SECURITY.md` — vulnerability reporting policy via GitHub Private Security Advisory
+- Dependabot configured for pip and GitHub Actions dependencies
+- CI: ruff lint and pytest jobs added to validate workflow (4 separate jobs)
+- `translations/en.json` — entity names served from HA translations system
+
+### Changed
+- All entity classes use `_attr_has_entity_name = True` + `_attr_translation_key` — names driven by translations instead of hardcoded strings
+- `strings.json` and `translations/en.json` fully synced
+- Station ID leading zeros stripped on entry (e.g. `007` → `7`) to prevent duplicate entries
+- `DeviceInfo` definition consolidated — binary sensor reuses shared helper from sensor platform
+- Coordinator iterates fuel types via `FUEL_TYPES` constant instead of hardcoded list
+
 ## [0.3.0] - 2026-04-24
 
 ### Added

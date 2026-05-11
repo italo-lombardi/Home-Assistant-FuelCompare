@@ -1,4 +1,5 @@
 """Binary sensor platform for FuelCompare.ie integration."""
+
 from __future__ import annotations
 
 import json as json_lib
@@ -13,10 +14,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
 from .const import CONF_STATION_ID, DOMAIN
 from .coordinator import FuelCompareIECoordinator
+from .sensor import _device_info
 
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
 
@@ -67,16 +68,22 @@ async def async_setup_entry(
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = entry.data[CONF_STATION_ID]
     station_name = entry.title
-    async_add_entities([
-        StationIsOpenBinarySensor(coordinator, station_id, station_name),
-    ])
+    async_add_entities(
+        [
+            StationIsOpenBinarySensor(coordinator, station_id, station_name),
+        ]
+    )
 
 
-class StationIsOpenBinarySensor(CoordinatorEntity[FuelCompareIECoordinator], BinarySensorEntity):
+class StationIsOpenBinarySensor(
+    CoordinatorEntity[FuelCompareIECoordinator], BinarySensorEntity
+):
     """Binary sensor indicating whether the station is currently open."""
 
     _attr_device_class = BinarySensorDeviceClass.OPENING
     _attr_icon = "mdi:store-clock"
+    _attr_has_entity_name = True
+    _attr_translation_key = "is_open"
 
     def __init__(
         self,
@@ -87,13 +94,7 @@ class StationIsOpenBinarySensor(CoordinatorEntity[FuelCompareIECoordinator], Bin
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
-        self._attr_name = f"{station_name} Is Open"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, station_id)},
-            name=station_name,
-            manufacturer="FuelCompare.ie",
-            entry_type=DeviceEntryType.SERVICE,
-        )
+        self._attr_device_info = _device_info(station_id, station_name)
 
     @property
     def is_on(self) -> bool | None:

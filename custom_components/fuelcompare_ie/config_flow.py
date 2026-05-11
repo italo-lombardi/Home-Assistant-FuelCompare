@@ -1,4 +1,5 @@
 """Config flow for FuelCompare.ie integration."""
+
 from __future__ import annotations
 
 import logging
@@ -37,6 +38,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 station_id_int = int(station_id)
                 if station_id_int <= 0:
                     errors[CONF_STATION_ID] = "invalid_station_id"
+                else:
+                    station_id = str(station_id_int)  # normalize "007" → "7"
             except (ValueError, TypeError):
                 errors[CONF_STATION_ID] = "invalid_station_id"
 

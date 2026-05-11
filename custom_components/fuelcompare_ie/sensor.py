@@ -1,4 +1,5 @@
 """Sensor platform for FuelCompare.ie integration."""
+
 from __future__ import annotations
 
 import json as json_lib
@@ -13,9 +14,9 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CURRENCY_EURO
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
 from .const import CONF_STATION_ID, DOMAIN, FUEL_TYPES
 from .coordinator import FuelCompareIECoordinator
@@ -80,16 +81,46 @@ async def async_setup_entry(
         )
 
     # One set of station-level sensors per station
-    entities.extend([
-        StationPriceLastUpdatedSensor(coordinator, station_id, station_name),
-        StationBrandSensor(coordinator, station_id, station_name),
-        StationCountySensor(coordinator, station_id, station_name),
-        StationWorkingHoursSensor(coordinator, station_id, station_name),
-        StationAboutCategorySensor(coordinator, station_id, station_name, "Accessibility", "mdi:wheelchair-accessibility"),
-        StationAboutCategorySensor(coordinator, station_id, station_name, "Offerings", "mdi:store"),
-        StationAboutCategorySensor(coordinator, station_id, station_name, "Amenities", "mdi:toilet"),
-        StationAboutCategorySensor(coordinator, station_id, station_name, "Payments", "mdi:credit-card"),
-    ])
+    entities.extend(
+        [
+            StationPriceLastUpdatedSensor(coordinator, station_id, station_name),
+            StationBrandSensor(coordinator, station_id, station_name),
+            StationCountySensor(coordinator, station_id, station_name),
+            StationWorkingHoursSensor(coordinator, station_id, station_name),
+            StationAboutCategorySensor(
+                coordinator,
+                station_id,
+                station_name,
+                "Accessibility",
+                "accessibility",
+                "mdi:wheelchair-accessibility",
+            ),
+            StationAboutCategorySensor(
+                coordinator,
+                station_id,
+                station_name,
+                "Offerings",
+                "offerings",
+                "mdi:store",
+            ),
+            StationAboutCategorySensor(
+                coordinator,
+                station_id,
+                station_name,
+                "Amenities",
+                "amenities",
+                "mdi:toilet",
+            ),
+            StationAboutCategorySensor(
+                coordinator,
+                station_id,
+                station_name,
+                "Payments",
+                "payments",
+                "mdi:credit-card",
+            ),
+        ]
+    )
 
     async_add_entities(entities)
 
@@ -106,12 +137,14 @@ def _device_info(station_id: str, station_name: str) -> DeviceInfo:
 
 # ── Fuel price sensors ────────────────────────────────────────────────────────
 
+
 class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
     """Representation of a FuelCompare.ie fuel price sensor."""
 
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = CURRENCY_EURO
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -125,8 +158,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         self._station_id = station_id
         self._fuel_type = fuel_type
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{fuel_type}"
-        fuel_name = fuel_type.replace("_", " ").title()
-        self._attr_name = f"{station_name} {fuel_name}"
+        self._attr_translation_key = fuel_type
         icon_map = {
             "unleaded": "mdi:gas-station",
             "diesel": "mdi:gas-station-outline",
@@ -169,11 +201,16 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
 
 # ── Station-level sensors ─────────────────────────────────────────────────────
 
-class StationPriceLastUpdatedSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+
+class StationPriceLastUpdatedSensor(
+    CoordinatorEntity[FuelCompareIECoordinator], SensorEntity
+):
     """Sensor exposing when fuel prices were last updated on fuelcompare.ie."""
 
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_icon = "mdi:clock-check-outline"
+    _attr_has_entity_name = True
+    _attr_translation_key = "price_last_updated"
 
     def __init__(
         self,
@@ -184,7 +221,6 @@ class StationPriceLastUpdatedSensor(CoordinatorEntity[FuelCompareIECoordinator],
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_{station_id}_price_last_updated"
-        self._attr_name = f"{station_name} Price Last Updated"
         self._attr_device_info = _device_info(station_id, station_name)
 
     @property
@@ -199,6 +235,8 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
     """Sensor exposing the station brand/chain name."""
 
     _attr_icon = "mdi:domain"
+    _attr_has_entity_name = True
+    _attr_translation_key = "brand"
 
     def __init__(
         self,
@@ -209,7 +247,6 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_{station_id}_brand"
-        self._attr_name = f"{station_name} Brand"
         self._attr_device_info = _device_info(station_id, station_name)
 
     @property
@@ -226,6 +263,8 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
     """Sensor exposing the station county/location."""
 
     _attr_icon = "mdi:map-marker"
+    _attr_has_entity_name = True
+    _attr_translation_key = "county"
 
     def __init__(
         self,
@@ -236,7 +275,6 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_{station_id}_county"
-        self._attr_name = f"{station_name} County"
         self._attr_device_info = _device_info(station_id, station_name)
 
     @property
@@ -247,10 +285,14 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         return None
 
 
-class StationWorkingHoursSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+class StationWorkingHoursSensor(
+    CoordinatorEntity[FuelCompareIECoordinator], SensorEntity
+):
     """Sensor exposing today's opening hours for the station."""
 
     _attr_icon = "mdi:clock-outline"
+    _attr_has_entity_name = True
+    _attr_translation_key = "working_hours"
 
     def __init__(
         self,
@@ -261,7 +303,6 @@ class StationWorkingHoursSensor(CoordinatorEntity[FuelCompareIECoordinator], Sen
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_{station_id}_working_hours"
-        self._attr_name = f"{station_name} Working Hours"
         self._attr_device_info = _device_info(station_id, station_name)
 
     @property
@@ -293,8 +334,12 @@ class StationWorkingHoursSensor(CoordinatorEntity[FuelCompareIECoordinator], Sen
             return {}
 
 
-class StationAboutCategorySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+class StationAboutCategorySensor(
+    CoordinatorEntity[FuelCompareIECoordinator], SensorEntity
+):
     """Sensor exposing one category of station facilities (e.g. Accessibility, Offerings)."""
+
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -302,6 +347,7 @@ class StationAboutCategorySensor(CoordinatorEntity[FuelCompareIECoordinator], Se
         station_id: str,
         station_name: str,
         category: str,
+        translation_key: str,
         icon: str,
     ) -> None:
         """Initialize the sensor."""
@@ -309,7 +355,7 @@ class StationAboutCategorySensor(CoordinatorEntity[FuelCompareIECoordinator], Se
         self._category = category
         self._attr_icon = icon
         self._attr_unique_id = f"{DOMAIN}_{station_id}_about_{category.lower()}"
-        self._attr_name = f"{station_name} {category}"
+        self._attr_translation_key = translation_key
         self._attr_device_info = _device_info(station_id, station_name)
 
     def _get_category_data(self) -> dict:

@@ -1,4 +1,5 @@
 """DataUpdateCoordinator for FuelCompare.ie."""
+
 from __future__ import annotations
 
 import logging
@@ -11,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import API_TIMEOUT, BASE_URL, DEFAULT_SCAN_INTERVAL
+from .const import API_TIMEOUT, BASE_URL, DEFAULT_SCAN_INTERVAL, FUEL_TYPES
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _HEADERS = {
@@ -45,14 +46,20 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 self._build_id = await self._fetch_build_id(session)
 
             # Step 2: Fetch Next.js JSON data
-            data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
+            data_url = (
+                f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
+            )
 
-            async with session.get(data_url, timeout=_TIMEOUT, headers=_HEADERS) as response:
+            async with session.get(
+                data_url, timeout=_TIMEOUT, headers=_HEADERS
+            ) as response:
                 if response.status != 200:
                     # Build ID might be stale, refresh it
                     self._build_id = await self._fetch_build_id(session)
                     data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
-                    async with session.get(data_url, timeout=_TIMEOUT, headers=_HEADERS) as retry_response:
+                    async with session.get(
+                        data_url, timeout=_TIMEOUT, headers=_HEADERS
+                    ) as retry_response:
                         retry_response.raise_for_status()
                         json_data = await retry_response.json()
                 else:
@@ -67,18 +74,22 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             # Parse fuel prices
             fuel_data: dict[str, float | None] = {}
 
-            for fuel_type in ["unleaded", "diesel"]:
+            for fuel_type in FUEL_TYPES:
                 raw_value = initial_station.get(fuel_type)
                 if raw_value and raw_value != "":
                     try:
                         # Parse the price (remove €, commas, etc.)
-                        price = float(str(raw_value).replace("€", "").replace(",", "").strip())
+                        price = float(
+                            str(raw_value).replace("€", "").replace(",", "").strip()
+                        )
                         # Convert cents to euros if necessary
                         if price > 10:
                             price = price / 100
                         fuel_data[fuel_type] = round(price, 3)
                     except (ValueError, TypeError):
-                        _LOGGER.warning("Failed to parse %s price: %s", fuel_type, raw_value)
+                        _LOGGER.warning(
+                            "Failed to parse %s price: %s", fuel_type, raw_value
+                        )
                         fuel_data[fuel_type] = None
                 else:
                     fuel_data[fuel_type] = None
@@ -90,7 +101,9 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             for field in ["tablename", "working_hours", "about", "county"]:
                 fuel_data[field] = initial_station.get(field)
 
-            _LOGGER.debug("Fetched fuel data for station %s: %s", self.station_id, fuel_data)
+            _LOGGER.debug(
+                "Fetched fuel data for station %s: %s", self.station_id, fuel_data
+            )
             return fuel_data
 
         except ClientError as err:

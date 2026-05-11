@@ -2,16 +2,19 @@
   "config": {
     "step": {
       "user": {
-        "title": "Add FuelCompare.ie Station",
-        "description": "Enter the station ID from fuelcompare.ie (e.g., 790 for Circle K Taney Dublin)",
+        "title": "Add Station",
+        "description": "Enter the station ID from the fuelcompare.ie URL (e.g. for fuelcompare.ie/station/790, enter 790).",
         "data": {
           "station_id": "Station ID",
-          "name": "Name (Optional)"
+          "name": "Name (optional)"
+        },
+        "data_description": {
+          "station_id": "The number at the end of the station URL on fuelcompare.ie."
         }
       }
     },
     "error": {
-      "invalid_station_id": "Invalid station ID. Please enter a valid positive number."
+      "invalid_station_id": "Station ID must be a positive integer."
     },
     "abort": {
       "already_configured": "This station is already configured."
@@ -19,41 +22,19 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Unleaded"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Brand"
-      },
-      "county": {
-        "name": "County"
-      },
-      "working_hours": {
-        "name": "Working Hours"
-      },
-      "accessibility": {
-        "name": "Accessibility"
-      },
-      "offerings": {
-        "name": "Offerings"
-      },
-      "amenities": {
-        "name": "Amenities"
-      },
-      "payments": {
-        "name": "Payments"
-      },
-      "price_last_updated": {
-        "name": "Price Last Updated"
-      }
+      "unleaded": { "name": "Unleaded" },
+      "diesel": { "name": "Diesel" },
+      "price_last_updated": { "name": "Price Last Updated" },
+      "brand": { "name": "Brand" },
+      "county": { "name": "County" },
+      "working_hours": { "name": "Working Hours" },
+      "accessibility": { "name": "Accessibility" },
+      "offerings": { "name": "Offerings" },
+      "amenities": { "name": "Amenities" },
+      "payments": { "name": "Payments" }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Is Open"
-      }
+      "is_open": { "name": "Is Open" }
     }
   }
 }
