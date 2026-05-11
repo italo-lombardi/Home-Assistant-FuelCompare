@@ -29,11 +29,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             station_id = user_input[CONF_STATION_ID]
 
-            # Set unique ID based on station ID
-            await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
-            self._abort_if_unique_id_configured()
-
-            # Validate station ID (basic check - just ensure it's a positive integer)
+            # Validate and normalize station ID before setting unique_id
             try:
                 station_id_int = int(station_id)
                 if station_id_int <= 0:
@@ -44,6 +40,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors[CONF_STATION_ID] = "invalid_station_id"
 
             if not errors:
+                # Set unique ID after normalization so "007" and "7" map to same entry
+                await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
+                self._abort_if_unique_id_configured()
+
                 # Create the entry with a title based on station ID
                 title = user_input.get(CONF_NAME, f"Station {station_id}")
                 return self.async_create_entry(

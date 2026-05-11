@@ -54,7 +54,7 @@ def _is_open(hours_str: str) -> bool | None:
     if open_time is None or close_time is None:
         return None
     now = datetime.now().time()
-    if close_time <= open_time:  # crosses midnight
+    if close_time < open_time:  # crosses midnight
         return now >= open_time or now < close_time
     return open_time <= now < close_time
 
