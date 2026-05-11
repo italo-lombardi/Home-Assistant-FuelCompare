@@ -5,13 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - unreleased
+## [0.4.0] - 2026-05-11
+
+### Added
+- Full test suite: 45 tests covering coordinator, sensors, binary sensor, and config flow
+- `SECURITY.md` — vulnerability reporting policy via GitHub Private Security Advisory
+- Dependabot configured for pip and GitHub Actions dependencies
+- CI: ruff lint and pytest jobs added to validate workflow (4 separate jobs)
+- `translations/en.json` — entity names served from HA translations system
+
+### Changed
+- All entity classes use `_attr_has_entity_name = True` + `_attr_translation_key` — names driven by translations instead of hardcoded strings
+- `strings.json` and `translations/en.json` fully synced
+- Station ID leading zeros stripped on entry (e.g. `007` → `7`) to prevent duplicate entries
+- `DeviceInfo` definition consolidated — binary sensor reuses shared helper from sensor platform
+- Coordinator iterates fuel types via `FUEL_TYPES` constant instead of hardcoded list
 
 ### Fixed
 - `config_flow`: unique ID was set before station ID normalization — entering `007` and `7` could create duplicate entries for the same station; unique ID is now set after normalization
 - `__init__`: `async_unload_entry` used `dict.pop(key)` which would raise `KeyError` if coordinator was never stored due to a failed setup; changed to `.pop(key, None)`
 - `binary_sensor`: midnight-crossing detection used `close_time <= open_time` — equal times (e.g. 9 a.m.–9 a.m.) were incorrectly treated as midnight-crossing ranges; changed to `<`
-- `sensor`: `FuelPriceSensor` used `state_class = MEASUREMENT` with `device_class = MONETARY` — invalid combination; changed to `TOTAL`
+- `sensor`: `FuelPriceSensor` used `state_class = MEASUREMENT` with `device_class = MONETARY` — invalid combination per HA validation; changed to `TOTAL`
 
 ## [0.4.0-beta.3] - 2026-05-11
 
