@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-05-18
+
+### Added
+- Encrypted API fallback path: stations no longer served via Next.js SSR (e.g. Circle K Taney, id 790) now fetched via `POST /fuelcompareback/stationbyid`
+- Dynamic AES decrypt key extraction from fuelcompare.ie JS bundle — no hardcoded key, automatically refreshed on key rotation
+- Automatic stale-key recovery: decrypt failure triggers key re-extraction and one retry before giving up
+- 7 new coordinator tests covering the encrypted API path, key extraction, key rotation recovery, and failure cases
+
+### Fixed
+- `UpdateFailed` re-raise was silent — all error branches now log at DEBUG before raising, enabling proper debug-mode diagnostics
+- `_parse_station` extracted as shared method — both fetch paths use identical price parsing and sensor field population
+
 ## [0.4.0] - 2026-05-11
 
 ### Added

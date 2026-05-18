@@ -18,21 +18,31 @@ A [Home Assistant](https://www.home-assistant.io/) custom integration that track
 
 ## How it works
 
-FuelCompare.ie is built with [Next.js](https://nextjs.org/). Next.js embeds a `buildId` in every HTML page and serves its page data as structured JSON at a predictable path:
+FuelCompare.ie is built with [Next.js](https://nextjs.org/). The integration uses two data paths with automatic fallback:
+
+**Primary path — Next.js static JSON**
+
+Next.js embeds a `buildId` in every HTML page and serves page data as structured JSON at a predictable path:
 
 ```
 https://fuelcompare.ie/_next/data/{buildId}/station/{stationId}.json
 ```
 
-This integration:
+The integration extracts the `buildId` from the station HTML page and fetches that JSON directly. If the `buildId` becomes stale (site redeploys), it is refreshed automatically before retrying.
 
-1. Loads the station HTML page once to extract the current `buildId`.
-2. Fetches the Next.js JSON endpoint for that station to get the full station record.
-3. Parses prices, opening hours, facilities, and location from the JSON.
-4. Repeats the fetch every **30 minutes** via Home Assistant's `DataUpdateCoordinator`.
-5. If the `buildId` becomes stale (Next.js redeploys the site), it automatically re-fetches it before retrying.
+**Fallback path — encrypted POST API**
 
-No unofficial API keys, no scraping fragile HTML — just the same structured JSON the browser receives.
+FuelCompare.ie migrated some stations (including stations not available via SSR) to a client-side API endpoint (`/fuelcompareback/stationbyid`). Responses from this endpoint are AES-encrypted using a key embedded in their JS bundle. The integration:
+
+1. Extracts the decrypt key from the station JS chunk (same HTML fetch as the `buildId`).
+2. Caches the key and reuses it across updates.
+3. If decryption fails (site redeployed with a new key), automatically re-extracts the key and retries.
+
+Both paths feed the same sensor pipeline — all entities are identical regardless of which path succeeds.
+
+**Update cycle**
+
+The integration repeats data fetch every **30 minutes** via Home Assistant's `DataUpdateCoordinator`. No unofficial API keys required.
 
 ## Entities created
 
