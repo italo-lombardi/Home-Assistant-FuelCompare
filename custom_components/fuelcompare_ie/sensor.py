@@ -6,6 +6,7 @@ import json as json_lib
 import logging
 from datetime import datetime, timezone
 
+import homeassistant.util.dt as dt_util
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -315,9 +316,10 @@ class StationWorkingHoursSensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = datetime.now().strftime("%A")
+            today = dt_util.now().strftime("%A")
             return hours.get(today)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug("Failed to parse working_hours for native_value: %s", err)
             return None
 
     @property
@@ -330,7 +332,10 @@ class StationWorkingHoursSensor(
             return {}
         try:
             return json_lib.loads(raw) if isinstance(raw, str) else raw
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug(
+                "Failed to parse working_hours for extra_state_attributes: %s", err
+            )
             return {}
 
 
@@ -368,7 +373,10 @@ class StationAboutCategorySensor(
         try:
             about = json_lib.loads(raw) if isinstance(raw, str) else raw
             return about.get(self._category) or {}
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug(
+                "Failed to parse about data for category %s: %s", self._category, err
+            )
             return {}
 
     @property

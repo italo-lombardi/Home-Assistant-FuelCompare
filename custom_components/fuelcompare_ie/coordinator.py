@@ -119,15 +119,6 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 # First run — fetch HTML to extract buildId and decrypt key together
                 await self._fetch_page_assets(session)
 
-            if self._build_id is None:
-                # _fetch_page_assets raised internally but we're inside a broad except below;
-                # this guard makes the None-return path explicit for the fallback
-                _LOGGER.debug(
-                    "buildId unavailable for station %s — skipping Next.js path",
-                    self.station_id,
-                )
-                return None
-
             data_url = (
                 f"{BASE_URL}/_next/data/{self._build_id}/station/{self.station_id}.json"
             )

@@ -6,7 +6,6 @@ DOMAIN = "fuelcompare_ie"
 CONF_STATION_ID = "station_id"
 
 # Defaults
-DEFAULT_NAME = "FuelCompare.ie"
 DEFAULT_SCAN_INTERVAL = 1800  # 30 minutes
 
 # API

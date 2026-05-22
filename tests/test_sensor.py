@@ -11,6 +11,9 @@ import pytest
 from custom_components.fuelcompare_ie.sensor import (
     FuelPriceSensor,
     StationAboutCategorySensor,
+    StationBrandSensor,
+    StationCountySensor,
+    StationPriceLastUpdatedSensor,
     StationWorkingHoursSensor,
     _parse_lastupdated,
 )
@@ -164,8 +167,8 @@ async def test_working_hours_from_json_string() -> None:
     data = {"working_hours": json.dumps(hours)}
     sensor = _make_working_hours_sensor(data)
 
-    with patch("custom_components.fuelcompare_ie.sensor.datetime") as mock_dt:
-        mock_dt.now.return_value.strftime.return_value = "Monday"
+    with patch("custom_components.fuelcompare_ie.sensor.dt_util.now") as mock_now:
+        mock_now.return_value.strftime.return_value = "Monday"
         result = sensor.native_value
 
     assert result == "6a.m.-10p.m."
@@ -177,8 +180,8 @@ async def test_working_hours_from_dict() -> None:
     data = {"working_hours": hours}
     sensor = _make_working_hours_sensor(data)
 
-    with patch("custom_components.fuelcompare_ie.sensor.datetime") as mock_dt:
-        mock_dt.now.return_value.strftime.return_value = "Monday"
+    with patch("custom_components.fuelcompare_ie.sensor.dt_util.now") as mock_now:
+        mock_now.return_value.strftime.return_value = "Monday"
         result = sensor.native_value
 
     assert result == "6a.m.-10p.m."
@@ -214,3 +217,181 @@ async def test_about_category_available_false_when_empty() -> None:
     )
 
     assert sensor.available is False
+
+
+async def test_parse_lastupdated_whitespace_only() -> None:
+    """Whitespace-only string returns None."""
+    assert _parse_lastupdated("   ") is None
+
+
+async def test_parse_lastupdated_fromisoformat_fallback() -> None:
+    """ISO string with timezone offset falls through to fromisoformat path."""
+    result = _parse_lastupdated("2024-06-01T12:00:00+01:00")
+    assert result is not None
+    assert result.tzinfo is not None
+
+
+async def test_parse_lastupdated_fromisoformat_naive_gets_utc() -> None:
+    """Space-separated datetime (no T) reaches fromisoformat and gets UTC attached."""
+    result = _parse_lastupdated("2024-01-15 10:30:00")
+    assert result is not None
+    from datetime import timezone
+
+    assert result.tzinfo == timezone.utc
+
+
+async def test_fuel_price_sensor_extra_state_attributes_with_lastupdated() -> None:
+    """extra_state_attributes includes price_last_updated when present."""
+    data = {"unleaded": 1.85, "lastupdated": "2024-01-15T10:30:00.000Z"}
+    sensor = _make_fuel_sensor("unleaded", data=data)
+    attrs = sensor.extra_state_attributes
+    assert attrs["station_id"] == "12345"
+    assert attrs["fuel_type"] == "unleaded"
+    assert attrs["source"] == "fuelcompare.ie"
+    assert attrs["price_last_updated"] == "2024-01-15T10:30:00.000Z"
+
+
+async def test_fuel_price_sensor_extra_state_attributes_no_lastupdated() -> None:
+    """extra_state_attributes omits price_last_updated when absent."""
+    data = {"unleaded": 1.85}
+    sensor = _make_fuel_sensor("unleaded", data=data)
+    attrs = sensor.extra_state_attributes
+    assert "price_last_updated" not in attrs
+
+
+async def test_fuel_price_sensor_extra_state_attributes_no_data() -> None:
+    """extra_state_attributes works when coordinator.data is None."""
+    sensor = _make_fuel_sensor("unleaded", data=None)
+    attrs = sensor.extra_state_attributes
+    assert attrs["station_id"] == "12345"
+    assert "price_last_updated" not in attrs
+
+
+def _make_last_updated_sensor(data: dict | None) -> StationPriceLastUpdatedSensor:
+    """Return a StationPriceLastUpdatedSensor with a mocked coordinator."""
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationPriceLastUpdatedSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(
+        sensor, "_attr_unique_id", "fuelcompare_ie_12345_price_last_updated"
+    )
+    return sensor
+
+
+def _make_brand_sensor(data: dict | None) -> StationBrandSensor:
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationBrandSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_attr_unique_id", "fuelcompare_ie_12345_brand")
+    return sensor
+
+
+def _make_county_sensor(data: dict | None) -> StationCountySensor:
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationCountySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_attr_unique_id", "fuelcompare_ie_12345_county")
+    return sensor
+
+
+async def test_last_updated_sensor_with_data() -> None:
+    """StationPriceLastUpdatedSensor returns parsed datetime."""
+    sensor = _make_last_updated_sensor({"lastupdated": "2024-01-15T10:30:00.000Z"})
+    from datetime import datetime, timezone
+
+    assert sensor.native_value == datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc)
+
+
+async def test_last_updated_sensor_no_data() -> None:
+    """StationPriceLastUpdatedSensor returns None when data is None."""
+    sensor = _make_last_updated_sensor(None)
+    assert sensor.native_value is None
+
+
+async def test_brand_sensor_with_tablename() -> None:
+    """StationBrandSensor formats tablename as title case."""
+    sensor = _make_brand_sensor({"tablename": "circle_k"})
+    assert sensor.native_value == "Circle K"
+
+
+async def test_brand_sensor_no_tablename() -> None:
+    """StationBrandSensor returns None when tablename absent."""
+    sensor = _make_brand_sensor({"county": "Dublin"})
+    assert sensor.native_value is None
+
+
+async def test_brand_sensor_no_data() -> None:
+    """StationBrandSensor returns None when data is None."""
+    sensor = _make_brand_sensor(None)
+    assert sensor.native_value is None
+
+
+async def test_county_sensor_with_data() -> None:
+    """StationCountySensor returns county string."""
+    sensor = _make_county_sensor({"county": "Cork"})
+    assert sensor.native_value == "Cork"
+
+
+async def test_county_sensor_no_data() -> None:
+    """StationCountySensor returns None when data is None."""
+    sensor = _make_county_sensor(None)
+    assert sensor.native_value is None
+
+
+async def test_working_hours_invalid_json() -> None:
+    """Invalid JSON in working_hours causes native_value to return None."""
+    sensor = _make_working_hours_sensor({"working_hours": "not valid {"})
+    assert sensor.native_value is None
+
+
+async def test_working_hours_extra_attributes_full_schedule() -> None:
+    """extra_state_attributes returns full week schedule."""
+    hours = {"Monday": "6a.m.-10p.m.", "Tuesday": "7a.m.-9p.m."}
+    sensor = _make_working_hours_sensor({"working_hours": json.dumps(hours)})
+    assert sensor.extra_state_attributes == hours
+
+
+async def test_working_hours_extra_attributes_no_data() -> None:
+    """extra_state_attributes returns empty dict when data is None."""
+    sensor = _make_working_hours_sensor(None)
+    assert sensor.extra_state_attributes == {}
+
+
+async def test_working_hours_extra_attributes_invalid_json() -> None:
+    """extra_state_attributes returns empty dict on JSON parse error."""
+    sensor = _make_working_hours_sensor({"working_hours": "bad json {"})
+    assert sensor.extra_state_attributes == {}
+
+
+async def test_about_category_invalid_json() -> None:
+    """Invalid JSON in about causes native_value to return None."""
+    sensor = _make_about_sensor({"about": "not valid {"}, category="Accessibility")
+    assert sensor.native_value is None
+
+
+async def test_about_category_no_active_features() -> None:
+    """Category with all features disabled returns None for native_value."""
+    about = {"Accessibility": {"Wheelchair ramp": False, "Elevator": False}}
+    sensor = _make_about_sensor({"about": json.dumps(about)}, category="Accessibility")
+    assert sensor.native_value is None
+
+
+async def test_about_category_extra_attributes() -> None:
+    """extra_state_attributes returns the full feature dict."""
+    about = {"Accessibility": {"Wheelchair ramp": True, "Elevator": False}}
+    sensor = _make_about_sensor({"about": json.dumps(about)}, category="Accessibility")
+    result = sensor.extra_state_attributes
+    assert result == {"Wheelchair ramp": True, "Elevator": False}
+
+
+async def test_working_hours_extra_attributes_no_raw() -> None:
+    """extra_state_attributes returns empty dict when working_hours is None in data."""
+    sensor = _make_working_hours_sensor({"working_hours": None})
+    assert sensor.extra_state_attributes == {}
+
+
+async def test_about_category_get_data_no_about() -> None:
+    """_get_category_data returns empty dict when about key is absent."""
+    sensor = _make_about_sensor({"county": "Dublin"}, category="Accessibility")
+    assert sensor.native_value is None
+    assert sensor.extra_state_attributes == {}

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-beta.1] - 2026-05-22
+
+### Fixed
+- `working_hours` and `is_open` now use `dt_util.now()` (HA configured timezone) instead of `datetime.now()` (system timezone) — open/closed state and today's hours are now correct when HA timezone differs from the host system timezone
+- Silent failures in `working_hours`, `about`, and time-parsing now emit `DEBUG` log messages, making it easier to diagnose missing sensor values with debug logging enabled
+
+### Changed
+- Removed unused `DEFAULT_NAME` constant from `const.py`
+- Removed unused `_LOGGER` and `logging` import from `__init__.py` and `config_flow.py`
+- Removed unreachable `_build_id is None` guard in `_fetch_nextjs` (dead code after `_fetch_page_assets` refactor)
+- `pytest.ini`: set `asyncio_default_fixture_loop_scope = function` to silence pytest-asyncio deprecation warning
+
+### Tests
+- 37 new tests covering all previously uncovered branches — 100% line coverage across all source files (89 tests total)
+
 ## [0.5.0] - 2026-05-18
 
 ### Added

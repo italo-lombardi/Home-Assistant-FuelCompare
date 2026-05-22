@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import voluptuous as vol
@@ -11,8 +10,6 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_NAME
 
 from .const import CONF_STATION_ID, DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json as json_lib
+import logging
 import re
-from datetime import datetime, time as dt_time
+from datetime import time as dt_time
 
+import homeassistant.util.dt as dt_util
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -19,6 +21,7 @@ from .const import CONF_STATION_ID, DOMAIN
 from .coordinator import FuelCompareIECoordinator
 from .sensor import _device_info
 
+_LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
 
 
@@ -53,7 +56,7 @@ def _is_open(hours_str: str) -> bool | None:
     close_time = _parse_time(f"{times[1][0]}:{times[1][1] or '0'}{times[1][2]}")
     if open_time is None or close_time is None:
         return None
-    now = datetime.now().time()
+    now = dt_util.now().time()
     if close_time < open_time:  # crosses midnight
         return now >= open_time or now < close_time
     return open_time <= now < close_time
@@ -106,12 +109,14 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = datetime.now().strftime("%A")
+            today = dt_util.now().strftime("%A")
             today_hours = hours.get(today)
             if today_hours is None:
+                _LOGGER.debug("No working hours entry for %s", today)
                 return None
             return _is_open(today_hours)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug("Failed to parse working_hours for is_on: %s", err)
             return None
 
     @property
@@ -124,7 +129,10 @@ class StationIsOpenBinarySensor(
             return {}
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = datetime.now().strftime("%A")
+            today = dt_util.now().strftime("%A")
             return {"today_hours": hours.get(today)}
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug(
+                "Failed to parse working_hours for extra_state_attributes: %s", err
+            )
             return {}

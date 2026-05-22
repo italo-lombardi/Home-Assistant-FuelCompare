@@ -581,3 +581,200 @@ async def test_encrypted_api_decrypt_key_unavailable_skips_api(
     ):
         with pytest.raises(UpdateFailed, match="Station data not found"):
             await coordinator._async_update_data()
+
+
+# ---------------------------------------------------------------------------
+# test_async_update_data_generic_exception
+# ---------------------------------------------------------------------------
+
+
+async def test_async_update_data_generic_exception(hass: HomeAssistant) -> None:
+    """An unexpected (non-ClientError) exception propagates as UpdateFailed."""
+    session = MagicMock()
+    session.get = MagicMock(side_effect=RuntimeError("unexpected"))
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator._build_id = "test_build"
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=session,
+    ):
+        with pytest.raises(UpdateFailed, match="Unexpected error"):
+            await coordinator._async_update_data()
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_nextjs_build_id_none_after_page_assets
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_nextjs_build_id_none_after_page_assets(
+    hass: HomeAssistant,
+) -> None:
+    """If _fetch_page_assets raises (no buildId), _fetch_nextjs returns None."""
+    html_resp = _make_mock_response(200, text_data="<html>no build id</html>")
+    # Second HTML call for the encrypted API fallback (also has no build id)
+    html_resp2 = _make_mock_response(200, text_data="<html>no build id</html>")
+    session = _make_session(html_resp, html_resp2)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    # _build_id is None so _fetch_page_assets will be called; it raises UpdateFailed
+    # which is caught inside _fetch_nextjs, leaving _build_id=None → returns None
+    # Then _fetch_encrypted_api also calls _fetch_page_assets, fails → returns None
+    # → UpdateFailed raised
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=session,
+    ):
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+
+# ---------------------------------------------------------------------------
+# test_encrypted_api_empty_data_field
+# ---------------------------------------------------------------------------
+
+
+async def test_encrypted_api_empty_data_field(hass: HomeAssistant) -> None:
+    """Encrypted API returning success=True but empty data field returns None."""
+    nextjs_resp = _make_mock_response(
+        200, json_data={"pageProps": {"initialStation": None}}
+    )
+    post_resp = _make_mock_response(200, json_data={"success": True, "data": None})
+    session = _make_session(nextjs_resp, post_responses=(post_resp,))
+
+    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator._build_id = "test_build"
+    coordinator._decrypt_key = _TEST_DECRYPT_KEY
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=session,
+    ):
+        with pytest.raises(UpdateFailed, match="Station data not found"):
+            await coordinator._async_update_data()
+
+
+# ---------------------------------------------------------------------------
+# test_encrypted_api_empty_stations_list
+# ---------------------------------------------------------------------------
+
+
+async def test_encrypted_api_empty_stations_list(hass: HomeAssistant) -> None:
+    """Encrypted API returning an empty stations list returns None."""
+    nextjs_resp = _make_mock_response(
+        200, json_data={"pageProps": {"initialStation": None}}
+    )
+    # Encrypt a payload with empty stations list
+    encrypted = _make_encrypted_payload([[], {}], _TEST_DECRYPT_KEY)
+    post_resp = _make_mock_response(200, json_data={"success": True, "data": encrypted})
+    session = _make_session(nextjs_resp, post_responses=(post_resp,))
+
+    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator._build_id = "test_build"
+    coordinator._decrypt_key = _TEST_DECRYPT_KEY
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=session,
+    ):
+        with pytest.raises(UpdateFailed, match="Station data not found"):
+            await coordinator._async_update_data()
+
+
+# ---------------------------------------------------------------------------
+# test_parse_station_invalid_price_value
+# ---------------------------------------------------------------------------
+
+
+async def test_parse_station_invalid_price_value(hass: HomeAssistant) -> None:
+    """Non-numeric price value is stored as None with a warning."""
+    station = {
+        "unleaded": "N/A",
+        "diesel": 175,
+        "tablename": "circle_k",
+        "county": "Dublin",
+        "working_hours": None,
+        "about": None,
+        "lastupdated": None,
+    }
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    data = coordinator._parse_station(station)
+
+    assert data["unleaded"] is None
+    assert data["diesel"] == pytest.approx(1.75)
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_js_chunk_key_pattern_not_found
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_js_chunk_key_pattern_not_found(
+    hass: HomeAssistant,
+) -> None:
+    """JS chunk with no AES.decrypt pattern leaves _decrypt_key unchanged."""
+    html = (
+        '"buildId":"abc123" '
+        'src="/_next/static/chunks/pages/station/%5Bid%5D-deadbeef.js"'
+    )
+    js = "// no decrypt call here"
+    html_resp = _make_mock_response(200, text_data=html)
+    js_resp = _make_mock_response(200, text_data=js)
+    session = _make_session(html_resp, js_resp)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator._decrypt_key = "previously_cached_key"
+    await coordinator._fetch_page_assets(session)
+
+    # Key unchanged because pattern wasn't found
+    assert coordinator._decrypt_key == "previously_cached_key"
+    assert coordinator._build_id == "abc123"
+
+
+# ---------------------------------------------------------------------------
+# test_encrypted_api_second_decrypt_fails_returns_none
+# ---------------------------------------------------------------------------
+
+
+async def test_encrypted_api_second_decrypt_fails_returns_none(
+    hass: HomeAssistant,
+) -> None:
+    """If both first and retry decrypt fail, encrypted API returns None → UpdateFailed."""
+    nextjs_resp = _make_mock_response(
+        200, json_data={"pageProps": {"initialStation": None}}
+    )
+    # HTML with chunk URL, JS with no valid key pattern → _decrypt_key won't update
+    html = (
+        '"buildId":"build2" '
+        'src="/_next/static/chunks/pages/station/%5Bid%5D-newchunk.js"'
+    )
+    js = "// no decrypt key here"
+    html_resp = _make_mock_response(200, text_data=html)
+    js_resp = _make_mock_response(200, text_data=js)
+
+    # Payload encrypted with a key that doesn't match the coordinator's stale key
+    bad_key = "c" * 64
+    post_resp = _make_mock_response(
+        200,
+        json_data={
+            "success": True,
+            "data": _make_encrypted_payload([[_encrypted_station()], {}], bad_key),
+        },
+    )
+    session = _make_session(
+        nextjs_resp, html_resp, js_resp, post_responses=(post_resp,)
+    )
+
+    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator._build_id = "build1"
+    coordinator._decrypt_key = "a" * 64  # stale — won't decrypt payload
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=session,
+    ):
+        with pytest.raises(UpdateFailed, match="Station data not found"):
+            await coordinator._async_update_data()
