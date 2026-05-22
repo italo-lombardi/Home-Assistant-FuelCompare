@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-beta.3] - 2026-05-22
+
+### Added
+- New `station_name` sensor exposing the full station name (e.g. `Circle K Mulhuddart`) from the API `name` field, distinct from the `brand` sensor which shows chain name only
+- Config flow name auto-fetch now uses the `name` field first, falls back to formatted `tablename`
+- Config flow screenshots added to README (step 1, step 1 error, step 2)
+
+### Changed
+- All 25 translations updated: `station_name` entity added, `name` config flow step added, legacy `name` field removed from `user` step
+- Station count updated to 13 entities per station in README and info.md
+
+### Tests
+- 99 tests, 100% line coverage across all source files
+
 ## [0.5.1-beta.2] - 2026-05-22
 
 ### Added
