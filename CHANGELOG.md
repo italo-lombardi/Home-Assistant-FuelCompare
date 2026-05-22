@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-05-22
+
+### Added
+- Two-step config flow: station name auto-fetched from fuelcompare.ie and pre-populated; user can confirm or override
+- New `station_name` sensor exposing the full station name (e.g. `Circle K Mulhuddart`), distinct from `brand` (chain only)
+- `station_id` exposed in `extra_state_attributes` on all 13 sensors and the binary sensor
+
+### Fixed
+- `working_hours` and `is_open` now use `dt_util.now()` (HA configured timezone) instead of `datetime.now()` (system timezone)
+- Silent failures in `working_hours`, `about`, and time-parsing now emit `DEBUG` log messages
+
+### Changed
+- Removed dead code: unused `DEFAULT_NAME` constant, unused `_LOGGER` in `__init__.py`
+- CI upgraded to Python 3.13
+- 99 tests, 100% line coverage across all source files
+
 ## [0.5.1-beta.4] - 2026-05-22
 
 ### Fixed
