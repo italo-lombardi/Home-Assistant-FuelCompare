@@ -61,14 +61,14 @@ Each station creates **12 entities** grouped under a single device.
 
 | Entity | State | Attributes |
 |--------|-------|------------|
-| `sensor.<name>_price_last_updated` | Timestamp (UTC) of last price update on fuelcompare.ie | — |
-| `sensor.<name>_brand` | Chain name e.g. `Circle K` | — |
-| `sensor.<name>_county` | County e.g. `Co. Dublin` | — |
-| `sensor.<name>_working_hours` | Today's hours e.g. `6a.m.-10p.m.` | Full weekly schedule |
-| `sensor.<name>_accessibility` | Active features e.g. `Wheelchair-accessible entrance` | Full category dict |
-| `sensor.<name>_offerings` | Active offerings e.g. `Car wash, Diesel fuel` | Full category dict |
-| `sensor.<name>_amenities` | Active amenities e.g. `Toilets` | Full category dict |
-| `sensor.<name>_payments` | Accepted payments e.g. `Debit cards, NFC mobile payments` | Full category dict |
+| `sensor.<name>_price_last_updated` | Timestamp (UTC) of last price update on fuelcompare.ie | `station_id` |
+| `sensor.<name>_brand` | Chain name e.g. `Circle K` | `station_id` |
+| `sensor.<name>_county` | County e.g. `Co. Dublin` | `station_id` |
+| `sensor.<name>_working_hours` | Today's hours e.g. `6a.m.-10p.m.` | `station_id`, full weekly schedule |
+| `sensor.<name>_accessibility` | Active features e.g. `Wheelchair-accessible entrance` | `station_id`, full category dict |
+| `sensor.<name>_offerings` | Active offerings e.g. `Car wash, Diesel fuel` | `station_id`, full category dict |
+| `sensor.<name>_amenities` | Active amenities e.g. `Toilets` | `station_id`, full category dict |
+| `sensor.<name>_payments` | Accepted payments e.g. `Debit cards, NFC mobile payments` | `station_id`, full category dict |
 
 > Facility sensors (`accessibility`, `offerings`, `amenities`, `payments`) are marked unavailable if a station does not provide data for that category.
 
@@ -76,7 +76,7 @@ Each station creates **12 entities** grouped under a single device.
 
 | Entity | State | Attributes |
 |--------|-------|------------|
-| `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `today_hours` |
+| `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `station_id`, `today_hours` |
 
 The is-open state is derived by parsing today's working hours against the current time. Supports standard ranges (`6a.m.-10p.m.`), 24-hour stations, and closed days.
 
@@ -100,7 +100,7 @@ The is-open state is derived by parsing today's working hours against the curren
 1. Go to **Settings → Devices & Services → Add Integration**.
 2. Search for **FuelCompare.ie**.
 3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
-4. Optionally enter a friendly name (defaults to `Station <id>`).
+4. The integration will automatically fetch the station's brand name and pre-populate the name field. Confirm or enter a custom name.
 
 ### Finding a station ID
 
