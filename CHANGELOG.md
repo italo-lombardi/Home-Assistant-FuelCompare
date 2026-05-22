@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-beta.2] - 2026-05-22
+
+### Added
+- Two-step config flow: station name auto-fetched from fuelcompare.ie during setup and pre-populated; user can confirm or override
+- `station_id` exposed in `extra_state_attributes` on all sensors and binary sensors
+
+### Tests
+- 5 new tests for two-step config flow and `_fetch_station_name` helper (94 tests total, 100% coverage)
+
 ## [0.5.1-beta.1] - 2026-05-22
 
 ### Fixed

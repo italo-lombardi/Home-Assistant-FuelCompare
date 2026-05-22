@@ -208,12 +208,12 @@ async def test_binary_sensor_is_on_invalid_json() -> None:
 
 
 async def test_binary_sensor_extra_attributes_invalid_json() -> None:
-    """Invalid JSON in working_hours causes extra_state_attributes to return empty dict."""
+    """Invalid JSON in working_hours causes extra_state_attributes to return station_id only."""
     sensor = _make_binary_sensor({"working_hours": "not valid json {"})
-    assert sensor.extra_state_attributes == {}
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
 
 
 async def test_binary_sensor_extra_attributes_no_raw() -> None:
-    """extra_state_attributes returns empty dict when working_hours is None in data."""
+    """extra_state_attributes returns station_id only when working_hours is None in data."""
     sensor = _make_binary_sensor({"working_hours": None})
-    assert sensor.extra_state_attributes == {}
+    assert sensor.extra_state_attributes == {"station_id": "12345"}

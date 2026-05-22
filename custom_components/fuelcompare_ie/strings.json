@@ -5,11 +5,17 @@
         "title": "Add Station",
         "description": "Enter the station ID from the fuelcompare.ie URL (e.g. for fuelcompare.ie/station/790, enter 790).",
         "data": {
-          "station_id": "Station ID",
-          "name": "Name (optional)"
+          "station_id": "Station ID"
         },
         "data_description": {
           "station_id": "The number at the end of the station URL on fuelcompare.ie."
+        }
+      },
+      "name": {
+        "title": "Station Name",
+        "description": "Confirm or edit the name for this station.",
+        "data": {
+          "name": "Name"
         }
       }
     },

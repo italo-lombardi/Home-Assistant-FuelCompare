@@ -221,6 +221,7 @@ class StationPriceLastUpdatedSensor(
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_price_last_updated"
         self._attr_device_info = _device_info(station_id, station_name)
 
@@ -230,6 +231,11 @@ class StationPriceLastUpdatedSensor(
         if not self.coordinator.data:
             return None
         return _parse_lastupdated(self.coordinator.data.get("lastupdated"))
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return station_id attribute."""
+        return {"station_id": self._station_id}
 
 
 class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
@@ -247,6 +253,7 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_brand"
         self._attr_device_info = _device_info(station_id, station_name)
 
@@ -258,6 +265,11 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
             if tablename:
                 return tablename.replace("_", " ").title()
         return None
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return station_id attribute."""
+        return {"station_id": self._station_id}
 
 
 class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
@@ -275,6 +287,7 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_county"
         self._attr_device_info = _device_info(station_id, station_name)
 
@@ -284,6 +297,11 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         if self.coordinator.data:
             return self.coordinator.data.get("county")
         return None
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return station_id attribute."""
+        return {"station_id": self._station_id}
 
 
 class StationWorkingHoursSensor(
@@ -303,6 +321,7 @@ class StationWorkingHoursSensor(
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_working_hours"
         self._attr_device_info = _device_info(station_id, station_name)
 
@@ -324,19 +343,20 @@ class StationWorkingHoursSensor(
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Return the full weekly schedule."""
+        """Return the full weekly schedule plus station_id."""
         if not self.coordinator.data:
-            return {}
+            return {"station_id": self._station_id}
         raw = self.coordinator.data.get("working_hours")
         if not raw:
-            return {}
+            return {"station_id": self._station_id}
         try:
-            return json_lib.loads(raw) if isinstance(raw, str) else raw
+            hours = json_lib.loads(raw) if isinstance(raw, str) else raw
+            return {"station_id": self._station_id, **hours}
         except (ValueError, TypeError) as err:
             _LOGGER.debug(
                 "Failed to parse working_hours for extra_state_attributes: %s", err
             )
-            return {}
+            return {"station_id": self._station_id}
 
 
 class StationAboutCategorySensor(
@@ -357,6 +377,7 @@ class StationAboutCategorySensor(
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self._station_id = station_id
         self._category = category
         self._attr_icon = icon
         self._attr_unique_id = f"{DOMAIN}_{station_id}_about_{category.lower()}"
@@ -395,5 +416,5 @@ class StationAboutCategorySensor(
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Return all features in this category with their enabled state."""
-        return self._get_category_data()
+        """Return all features in this category with their enabled state, plus station_id."""
+        return {"station_id": self._station_id, **self._get_category_data()}

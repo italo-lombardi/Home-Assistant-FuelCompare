@@ -345,22 +345,22 @@ async def test_working_hours_invalid_json() -> None:
 
 
 async def test_working_hours_extra_attributes_full_schedule() -> None:
-    """extra_state_attributes returns full week schedule."""
+    """extra_state_attributes returns full week schedule plus station_id."""
     hours = {"Monday": "6a.m.-10p.m.", "Tuesday": "7a.m.-9p.m."}
     sensor = _make_working_hours_sensor({"working_hours": json.dumps(hours)})
-    assert sensor.extra_state_attributes == hours
+    assert sensor.extra_state_attributes == {"station_id": "12345", **hours}
 
 
 async def test_working_hours_extra_attributes_no_data() -> None:
-    """extra_state_attributes returns empty dict when data is None."""
+    """extra_state_attributes returns station_id only when data is None."""
     sensor = _make_working_hours_sensor(None)
-    assert sensor.extra_state_attributes == {}
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
 
 
 async def test_working_hours_extra_attributes_invalid_json() -> None:
-    """extra_state_attributes returns empty dict on JSON parse error."""
+    """extra_state_attributes returns station_id only on JSON parse error."""
     sensor = _make_working_hours_sensor({"working_hours": "bad json {"})
-    assert sensor.extra_state_attributes == {}
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
 
 
 async def test_about_category_invalid_json() -> None:
@@ -377,21 +377,21 @@ async def test_about_category_no_active_features() -> None:
 
 
 async def test_about_category_extra_attributes() -> None:
-    """extra_state_attributes returns the full feature dict."""
+    """extra_state_attributes returns full feature dict plus station_id."""
     about = {"Accessibility": {"Wheelchair ramp": True, "Elevator": False}}
     sensor = _make_about_sensor({"about": json.dumps(about)}, category="Accessibility")
     result = sensor.extra_state_attributes
-    assert result == {"Wheelchair ramp": True, "Elevator": False}
+    assert result == {"station_id": "12345", "Wheelchair ramp": True, "Elevator": False}
 
 
 async def test_working_hours_extra_attributes_no_raw() -> None:
-    """extra_state_attributes returns empty dict when working_hours is None in data."""
+    """extra_state_attributes returns station_id only when working_hours is None in data."""
     sensor = _make_working_hours_sensor({"working_hours": None})
-    assert sensor.extra_state_attributes == {}
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
 
 
 async def test_about_category_get_data_no_about() -> None:
     """_get_category_data returns empty dict when about key is absent."""
     sensor = _make_about_sensor({"county": "Dublin"}, category="Accessibility")
     assert sensor.native_value is None
-    assert sensor.extra_state_attributes == {}
+    assert sensor.extra_state_attributes == {"station_id": "12345"}

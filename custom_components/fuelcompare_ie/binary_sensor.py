@@ -96,6 +96,7 @@ class StationIsOpenBinarySensor(
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator)
+        self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
         self._attr_device_info = _device_info(station_id, station_name)
 
@@ -121,18 +122,19 @@ class StationIsOpenBinarySensor(
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Return today's hours as an attribute."""
+        """Return today's hours and station_id as attributes."""
+        base = {"station_id": self._station_id}
         if not self.coordinator.data:
-            return {}
+            return base
         raw = self.coordinator.data.get("working_hours")
         if not raw:
-            return {}
+            return base
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
             today = dt_util.now().strftime("%A")
-            return {"today_hours": hours.get(today)}
+            return {**base, "today_hours": hours.get(today)}
         except (ValueError, TypeError) as err:
             _LOGGER.debug(
                 "Failed to parse working_hours for extra_state_attributes: %s", err
             )
-            return {}
+            return base
