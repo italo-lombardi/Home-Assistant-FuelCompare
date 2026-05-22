@@ -48,7 +48,7 @@ The integration repeats data fetch every **30 minutes** via Home Assistant's `Da
 
 ![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
 
-Each station creates **12 entities** grouped under a single device.
+Each station creates **13 entities** grouped under a single device.
 
 ### Fuel price sensors
 
@@ -62,6 +62,7 @@ Each station creates **12 entities** grouped under a single device.
 | Entity | State | Attributes |
 |--------|-------|------------|
 | `sensor.<name>_price_last_updated` | Timestamp (UTC) of last price update on fuelcompare.ie | `station_id` |
+| `sensor.<name>_station_name` | Full station name e.g. `Circle K Mulhuddart` | `station_id` |
 | `sensor.<name>_brand` | Chain name e.g. `Circle K` | `station_id` |
 | `sensor.<name>_county` | County e.g. `Co. Dublin` | `station_id` |
 | `sensor.<name>_working_hours` | Today's hours e.g. `6a.m.-10p.m.` | `station_id`, full weekly schedule |
@@ -100,7 +101,16 @@ The is-open state is derived by parsing today's working hours against the curren
 1. Go to **Settings → Devices & Services → Add Integration**.
 2. Search for **FuelCompare.ie**.
 3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
-4. The integration will automatically fetch the station's brand name and pre-populate the name field. Confirm or enter a custom name.
+
+   ![Config flow step 1](custom_components/fuelcompare_ie/docs/config_flow_step_1.png)
+
+   If you enter an invalid ID, an error is shown inline:
+
+   ![Config flow step 1 error](custom_components/fuelcompare_ie/docs/config_flow_step_1_error.png)
+
+4. The integration will automatically fetch the station's name and pre-populate the name field. Confirm or enter a custom name.
+
+   ![Config flow step 2](custom_components/fuelcompare_ie/docs/config_flow_step_2.png)
 
 ### Finding a station ID
 

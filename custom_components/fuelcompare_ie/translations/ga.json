@@ -5,8 +5,14 @@
         "title": "Cuir Stáisiún FuelCompare.ie Leis",
         "description": "Cuir isteach aitheantas an stáisiúin ó fuelcompare.ie (m.sh., 790 le haghaidh Circle K Taney Baile Átha Cliath)",
         "data": {
-          "station_id": "Aitheantas Stáisiúin",
-          "name": "Ainm (Roghnach)"
+          "station_id": "Aitheantas Stáisiúin"
+        }
+      },
+      "name": {
+        "title": "Ainm an Stáisiúin",
+        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.",
+        "data": {
+          "name": "Ainm"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Praghas Nuashonraithe go Deireanach"
+      },
+      "station_name": {
+        "name": "Ainm an Stáisiúin"
       }
     },
     "binary_sensor": {

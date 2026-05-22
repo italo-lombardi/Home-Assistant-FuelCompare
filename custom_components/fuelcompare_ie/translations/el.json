@@ -5,8 +5,14 @@
         "title": "Προσθήκη σταθμού FuelCompare.ie",
         "description": "Εισάγετε το αναγνωριστικό σταθμού από το fuelcompare.ie (π.χ. 790 για Circle K Taney Dublin)",
         "data": {
-          "station_id": "Αναγνωριστικό Σταθμού",
-          "name": "Όνομα (Προαιρετικό)"
+          "station_id": "Αναγνωριστικό Σταθμού"
+        }
+      },
+      "name": {
+        "title": "Όνομα Σταθμού",
+        "description": "Επιβεβαιώστε ή επεξεργαστείτε το όνομα αυτού του σταθμού.",
+        "data": {
+          "name": "Όνομα"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Τελευταία ενημέρωση τιμής"
+      },
+      "station_name": {
+        "name": "Όνομα Σταθμού"
       }
     },
     "binary_sensor": {

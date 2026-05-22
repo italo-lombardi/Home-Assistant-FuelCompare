@@ -307,7 +307,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 fuel_data[fuel_type] = None
 
         fuel_data["lastupdated"] = station.get("lastupdated")
-        for field in ["tablename", "working_hours", "about", "county"]:
+        for field in ["name", "tablename", "working_hours", "about", "county"]:
             fuel_data[field] = station.get(field)
 
         _LOGGER.debug(

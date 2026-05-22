@@ -5,8 +5,14 @@
         "title": "Adicionar Estação FuelCompare.ie",
         "description": "Introduza o ID da estação em fuelcompare.ie (ex.: 790 para Circle K Taney Dublin)",
         "data": {
-          "station_id": "ID da Estação",
-          "name": "Nome (Opcional)"
+          "station_id": "ID da Estação"
+        }
+      },
+      "name": {
+        "title": "Nome da Estação",
+        "description": "Confirme ou edite o nome desta estação.",
+        "data": {
+          "name": "Nome"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Última Atualização do Preço"
+      },
+      "station_name": {
+        "name": "Nome da Estação"
       }
     },
     "binary_sensor": {

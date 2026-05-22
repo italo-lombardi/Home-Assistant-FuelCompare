@@ -216,7 +216,28 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
 
 
 async def test_fetch_station_name_success(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns formatted brand name when Next.js path succeeds."""
+    """_fetch_station_name returns the name field when present."""
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
+            new_callable=AsyncMock,
+            return_value={"name": "Circle K Mulhuddart", "tablename": "circle_k"},
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+    ):
+        result = await _fetch_station_name(hass, "791")
+
+    assert result == "Circle K Mulhuddart"
+
+
+async def test_fetch_station_name_tablename_fallback(hass: HomeAssistant) -> None:
+    """_fetch_station_name falls back to formatted tablename when name field absent."""
     with (
         patch(
             "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
@@ -251,7 +272,7 @@ async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) ->
         patch(
             "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_encrypted_api",
             new_callable=AsyncMock,
-            return_value={"tablename": "applegreen"},
+            return_value={"name": "Applegreen Cookstown", "tablename": "applegreen"},
         ),
         patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
@@ -259,11 +280,11 @@ async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) ->
     ):
         result = await _fetch_station_name(hass, "790")
 
-    assert result == "Applegreen"
+    assert result == "Applegreen Cookstown"
 
 
-async def test_fetch_station_name_no_tablename(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns None when station data has no tablename."""
+async def test_fetch_station_name_no_name_no_tablename(hass: HomeAssistant) -> None:
+    """_fetch_station_name returns None when station data has neither name nor tablename."""
     with (
         patch(
             "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",

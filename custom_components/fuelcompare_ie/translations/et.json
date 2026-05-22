@@ -5,8 +5,14 @@
         "title": "Lisa FuelCompare.ie jaam",
         "description": "Sisestage jaama ID fuelcompare.ie lehelt (nt 790 Circle K Taney Dublin jaoks)",
         "data": {
-          "station_id": "Jaama ID",
-          "name": "Nimi (Valikuline)"
+          "station_id": "Jaama ID"
+        }
+      },
+      "name": {
+        "title": "Jaama Nimi",
+        "description": "Kinnitage või muutke selle jaama nime.",
+        "data": {
+          "name": "Nimi"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Hinna viimane uuendus"
+      },
+      "station_name": {
+        "name": "Jaama Nimi"
       }
     },
     "binary_sensor": {

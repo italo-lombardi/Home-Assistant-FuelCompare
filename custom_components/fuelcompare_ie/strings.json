@@ -31,6 +31,7 @@
       "unleaded": { "name": "Unleaded" },
       "diesel": { "name": "Diesel" },
       "price_last_updated": { "name": "Price Last Updated" },
+      "station_name": { "name": "Station Name" },
       "brand": { "name": "Brand" },
       "county": { "name": "County" },
       "working_hours": { "name": "Working Hours" },

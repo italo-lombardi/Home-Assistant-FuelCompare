@@ -85,6 +85,7 @@ async def async_setup_entry(
     entities.extend(
         [
             StationPriceLastUpdatedSensor(coordinator, station_id, station_name),
+            StationNameSensor(coordinator, station_id, station_name),
             StationBrandSensor(coordinator, station_id, station_name),
             StationCountySensor(coordinator, station_id, station_name),
             StationWorkingHoursSensor(coordinator, station_id, station_name),
@@ -231,6 +232,38 @@ class StationPriceLastUpdatedSensor(
         if not self.coordinator.data:
             return None
         return _parse_lastupdated(self.coordinator.data.get("lastupdated"))
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return station_id attribute."""
+        return {"station_id": self._station_id}
+
+
+class StationNameSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+    """Sensor exposing the full station name (e.g. 'Circle K Mulhuddart')."""
+
+    _attr_icon = "mdi:gas-station"
+    _attr_has_entity_name = True
+    _attr_translation_key = "station_name"
+
+    def __init__(
+        self,
+        coordinator: FuelCompareIECoordinator,
+        station_id: str,
+        station_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_station_name"
+        self._attr_device_info = _device_info(station_id, station_name)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the full station name."""
+        if self.coordinator.data:
+            return self.coordinator.data.get("name")
+        return None
 
     @property
     def extra_state_attributes(self) -> dict:

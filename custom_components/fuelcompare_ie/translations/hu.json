@@ -5,8 +5,14 @@
         "title": "FuelCompare.ie állomás hozzáadása",
         "description": "Adja meg az állomás azonosítóját a fuelcompare.ie oldalról (pl. 790 a Circle K Taney Dublin esetén)",
         "data": {
-          "station_id": "Állomás azonosító",
-          "name": "Név (Opcionális)"
+          "station_id": "Állomás azonosító"
+        }
+      },
+      "name": {
+        "title": "Állomás Neve",
+        "description": "Erősítse meg vagy szerkessze az állomás nevét.",
+        "data": {
+          "name": "Név"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Ár utolsó frissítése"
+      },
+      "station_name": {
+        "name": "Állomás Neve"
       }
     },
     "binary_sensor": {

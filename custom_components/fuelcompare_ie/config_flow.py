@@ -26,7 +26,9 @@ async def _fetch_station_name(hass, station_id: str) -> str | None:
         data = await coordinator._fetch_nextjs(session)
         if data is None:
             data = await coordinator._fetch_encrypted_api(session)
-        if data and data.get("tablename"):
+        if data and (data.get("name") or data.get("tablename")):
+            if data.get("name"):
+                return data["name"]
             return data["tablename"].replace("_", " ").title()
     except Exception:  # noqa: BLE001
         pass

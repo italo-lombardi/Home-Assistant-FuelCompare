@@ -5,8 +5,14 @@
         "title": "Lisää FuelCompare.ie-asema",
         "description": "Syötä aseman tunnus fuelcompare.ie-sivustolta (esim. 790 Circle K Taney Dublin)",
         "data": {
-          "station_id": "Aseman tunnus",
-          "name": "Nimi (Valinnainen)"
+          "station_id": "Aseman tunnus"
+        }
+      },
+      "name": {
+        "title": "Aseman Nimi",
+        "description": "Vahvista tai muuta tämän aseman nimeä.",
+        "data": {
+          "name": "Nimi"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Hinnan viimeisin päivitys"
+      },
+      "station_name": {
+        "name": "Aseman Nimi"
       }
     },
     "binary_sensor": {

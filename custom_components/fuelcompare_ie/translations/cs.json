@@ -5,8 +5,14 @@
         "title": "Přidat stanici FuelCompare.ie",
         "description": "Zadejte ID stanice z fuelcompare.ie (např. 790 pro Circle K Taney Dublin)",
         "data": {
-          "station_id": "ID Stanice",
-          "name": "Název (Volitelné)"
+          "station_id": "ID Stanice"
+        }
+      },
+      "name": {
+        "title": "Název Stanice",
+        "description": "Potvrďte nebo upravte název této stanice.",
+        "data": {
+          "name": "Název"
         }
       }
     },
@@ -48,6 +54,9 @@
       },
       "price_last_updated": {
         "name": "Poslední aktualizace ceny"
+      },
+      "station_name": {
+        "name": "Název Stanice"
       }
     },
     "binary_sensor": {

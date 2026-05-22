@@ -13,6 +13,7 @@ from custom_components.fuelcompare_ie.sensor import (
     StationAboutCategorySensor,
     StationBrandSensor,
     StationCountySensor,
+    StationNameSensor,
     StationPriceLastUpdatedSensor,
     StationWorkingHoursSensor,
     _parse_lastupdated,
@@ -394,4 +395,37 @@ async def test_about_category_get_data_no_about() -> None:
     """_get_category_data returns empty dict when about key is absent."""
     sensor = _make_about_sensor({"county": "Dublin"}, category="Accessibility")
     assert sensor.native_value is None
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+def _make_name_sensor(data: dict | None) -> StationNameSensor:
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationNameSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+    object.__setattr__(sensor, "_attr_unique_id", "fuelcompare_ie_12345_station_name")
+    return sensor
+
+
+async def test_name_sensor_with_data() -> None:
+    """StationNameSensor returns the name field."""
+    sensor = _make_name_sensor({"name": "Circle K Mulhuddart"})
+    assert sensor.native_value == "Circle K Mulhuddart"
+
+
+async def test_name_sensor_no_name_field() -> None:
+    """StationNameSensor returns None when name absent."""
+    sensor = _make_name_sensor({"tablename": "circle_k"})
+    assert sensor.native_value is None
+
+
+async def test_name_sensor_no_data() -> None:
+    """StationNameSensor returns None when data is None."""
+    sensor = _make_name_sensor(None)
+    assert sensor.native_value is None
+
+
+async def test_name_sensor_extra_attributes() -> None:
+    """StationNameSensor extra_state_attributes contains station_id."""
+    sensor = _make_name_sensor({"name": "Circle K Mulhuddart"})
     assert sensor.extra_state_attributes == {"station_id": "12345"}
