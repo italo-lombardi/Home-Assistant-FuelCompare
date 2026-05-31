@@ -30,8 +30,8 @@ async def _fetch_station_name(hass, station_id: str) -> str | None:
             if data.get("name"):
                 return data["name"]
             return data["tablename"].replace("_", " ").title()
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as err:  # noqa: BLE001
+        _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
     return None
 
 

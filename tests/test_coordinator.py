@@ -18,7 +18,10 @@ from cryptography.hazmat.primitives.ciphers import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
-from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+from custom_components.fuelcompare_ie.coordinator import (
+    FuelCompareIECoordinator,
+    _cryptojs_decrypt,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -778,3 +781,33 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
     ):
         with pytest.raises(UpdateFailed, match="Station data not found"):
             await coordinator._async_update_data()
+
+
+# ---------------------------------------------------------------------------
+# test_cryptojs_decrypt_invalid_padding
+# ---------------------------------------------------------------------------
+
+
+def test_cryptojs_decrypt_invalid_padding() -> None:
+    """Corrupted payload whose last byte encodes pad_len=0 (invalid) raises ValueError."""
+    import os
+
+    passphrase = _TEST_DECRYPT_KEY
+    salt = os.urandom(8)
+    # 16-byte block with last byte = 0 (invalid: PKCS7 requires 1–16)
+    plaintext = b"\x00" * 16
+
+    d, d_i = b"", b""
+    while len(d) < 48:
+        d_i = hashlib.md5(d_i + passphrase.encode() + salt).digest()
+        d += d_i
+    key, iv = d[:32], d[32:48]
+
+    cipher = _Cipher(_algorithms.AES(key), _modes.CBC(iv), backend=_default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+    bad_payload = base64.b64encode(b"Salted__" + salt + ciphertext).decode()
+
+    with pytest.raises(ValueError, match="Invalid PKCS7 padding length"):
+        _cryptojs_decrypt(bad_payload, passphrase)
