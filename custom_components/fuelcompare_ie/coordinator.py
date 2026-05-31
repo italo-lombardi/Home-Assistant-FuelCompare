@@ -26,23 +26,23 @@ _HEADERS = {
 _LOGGER = logging.getLogger(__name__)
 
 
-def _cryptojs_decrypt(encrypted_b64: str, passphrase: str) -> list:
+def _cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
     """Decrypt a CryptoJS AES-CBC base64 payload using EvpKDF key derivation.
 
-    fuelcompare.ie API responses are encrypted with CryptoJS AES using a passphrase
+    fuelcompare.ie API responses are encrypted with CryptoJS AES using a key
     hardcoded in their station JS bundle. CryptoJS uses a non-standard OpenSSL-compatible
     format: base64("Salted__" + 8-byte-salt + ciphertext), with key+IV derived via
-    iterative MD5 (EvpKDF). The passphrase is extracted dynamically by _fetch_page_assets.
+    iterative MD5 (EvpKDF). The key is extracted dynamically by _fetch_page_assets.
     """
     raw = base64.b64decode(encrypted_b64)
     # CryptoJS Salted__ format: bytes 0-7 = magic, 8-15 = salt, 16+ = ciphertext
     salt = raw[8:16]
     ciphertext = raw[16:]
 
-    # EvpKDF: chain MD5(prev + passphrase + salt) until we have 48 bytes (32 key + 16 IV)
+    # EvpKDF: chain MD5(prev + evp_key + salt) until we have 48 bytes (32 key + 16 IV)
     d, d_i = b"", b""
     while len(d) < 48:
-        d_i = hashlib.md5(d_i + passphrase.encode() + salt).digest()
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt).digest()
         d += d_i
     key, iv = d[:32], d[32:48]
 

@@ -327,8 +327,8 @@ async def test_coordinator_stores_metadata(hass: HomeAssistant) -> None:
 # is exercised without hitting the live site.
 
 
-def _make_encrypted_payload(data: list, passphrase: str) -> str:
-    """Encrypt *data* with CryptoJS-compatible AES for use in mock responses."""
+def _make_encrypted_payload(data: list, evp_key: str) -> str:
+    """Encrypt *data* with CryptoJS-compatible AES (EvpKDF) for use in mock responses."""
     import os
 
     salt = os.urandom(8)
@@ -339,7 +339,7 @@ def _make_encrypted_payload(data: list, passphrase: str) -> str:
 
     d, d_i = b"", b""
     while len(d) < 48:
-        d_i = hashlib.md5(d_i + passphrase.encode() + salt).digest()
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt).digest()
         d += d_i
     key, iv = d[:32], d[32:48]
 
@@ -350,7 +350,7 @@ def _make_encrypted_payload(data: list, passphrase: str) -> str:
     return base64.b64encode(b"Salted__" + salt + ciphertext).decode()
 
 
-_TEST_DECRYPT_KEY = "a" * 64  # 64-char hex passphrase used across encrypted API tests
+_TEST_DECRYPT_KEY = "a" * 64  # 64-char hex EvpKDF key used across encrypted API tests
 
 
 def _encrypted_api_response(station: dict) -> dict:
@@ -792,14 +792,14 @@ def test_cryptojs_decrypt_invalid_padding() -> None:
     """Corrupted payload whose last byte encodes pad_len=0 (invalid) raises ValueError."""
     import os
 
-    passphrase = _TEST_DECRYPT_KEY
+    evp_key = _TEST_DECRYPT_KEY
     salt = os.urandom(8)
     # 16-byte block with last byte = 0 (invalid: PKCS7 requires 1–16)
     plaintext = b"\x00" * 16
 
     d, d_i = b"", b""
     while len(d) < 48:
-        d_i = hashlib.md5(d_i + passphrase.encode() + salt).digest()
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt).digest()
         d += d_i
     key, iv = d[:32], d[32:48]
 
@@ -810,4 +810,4 @@ def test_cryptojs_decrypt_invalid_padding() -> None:
     bad_payload = base64.b64encode(b"Salted__" + salt + ciphertext).decode()
 
     with pytest.raises(ValueError, match="Invalid PKCS7 padding length"):
-        _cryptojs_decrypt(bad_payload, passphrase)
+        _cryptojs_decrypt(bad_payload, evp_key)
