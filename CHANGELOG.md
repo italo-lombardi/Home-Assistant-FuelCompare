@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-06-01
+
+### Fixed
+- PKCS7 padding validation in `_cryptojs_decrypt`: pad length outside 1–16 now raises `ValueError` instead of silently producing a bad slice or invalid JSON on corrupted payloads
+- Config flow `_fetch_station_name` exception now logged at DEBUG (station ID + error message) instead of swallowed silently
+- Renamed internal `passphrase` variable to `evp_key` to accurately reflect it is a CryptoJS EvpKDF key, not a user password
+
+### Changed
+- README: added Sibling integrations section linking Entity Guard, Entity Availability, and Entity Distance
+
+### Tests
+- 100 tests, 100% line coverage across all source files
+
 ## [0.5.2-beta.1] - 2026-05-31
 
 ### Fixed
