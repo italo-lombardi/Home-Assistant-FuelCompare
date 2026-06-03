@@ -405,6 +405,152 @@ async def test_fetch_page_assets_extracts_decrypt_key(hass: HomeAssistant) -> No
 
 
 # ---------------------------------------------------------------------------
+# test_fetch_page_assets_extracts_decrypt_key_from_shared_chunk
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_extracts_decrypt_key_from_shared_chunk(
+    hass: HomeAssistant,
+) -> None:
+    """Decrypt key is found in a non-station shared chunk when station chunk lacks it.
+
+    fuelcompare.ie moved the AES key from the per-page station chunk into a
+    shared vendor chunk. _fetch_page_assets must scan all chunks listed in
+    the HTML, not just the station-specific one.
+    """
+    html = (
+        '"buildId":"abc123" '
+        'src="/_next/static/chunks/pages/station/%5Bid%5D-deadbeef.js" '
+        'src="/_next/static/chunks/1890-shared.js"'
+    )
+    station_js = "// no decrypt key in this chunk anymore"
+    shared_js = f'AES.decrypt(e,"{_TEST_DECRYPT_KEY}")'
+    html_resp = _make_mock_response(200, text_data=html)
+    station_resp = _make_mock_response(200, text_data=station_js)
+    shared_resp = _make_mock_response(200, text_data=shared_js)
+    session = _make_session(html_resp, station_resp, shared_resp)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    await coordinator._fetch_page_assets(session, broad=True)
+
+    assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
+    assert coordinator._build_id == "abc123"
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_skips_chunk_with_non_200_status
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_skips_chunk_with_non_200_status(
+    hass: HomeAssistant,
+) -> None:
+    """A chunk responding with HTTP non-200 is skipped; scan continues to next chunk."""
+    html = (
+        '"buildId":"abc123" '
+        'src="/_next/static/chunks/pages/station/%5Bid%5D-deadbeef.js" '
+        'src="/_next/static/chunks/1890-shared.js"'
+    )
+    html_resp = _make_mock_response(200, text_data=html)
+    bad_resp = _make_mock_response(404, text_data="")
+    good_resp = _make_mock_response(
+        200, text_data=f'AES.decrypt(e,"{_TEST_DECRYPT_KEY}")'
+    )
+    session = _make_session(html_resp, bad_resp, good_resp)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    await coordinator._fetch_page_assets(session, broad=True)
+
+    assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_skips_chunk_on_client_error
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_skips_chunk_on_client_error(
+    hass: HomeAssistant,
+) -> None:
+    """A chunk fetch raising ClientError is skipped; scan continues to next chunk."""
+    html = (
+        '"buildId":"abc123" '
+        'src="/_next/static/chunks/pages/station/%5Bid%5D-deadbeef.js" '
+        'src="/_next/static/chunks/1890-shared.js"'
+    )
+    html_resp = _make_mock_response(200, text_data=html)
+    good_resp = _make_mock_response(
+        200, text_data=f'AES.decrypt(e,"{_TEST_DECRYPT_KEY}")'
+    )
+
+    session = MagicMock()
+    get_calls = [html_resp, ClientError("network down"), good_resp]
+    call_iter = iter(get_calls)
+
+    def _get(*_args, **_kwargs):
+        item = next(call_iter)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    session.get = MagicMock(side_effect=_get)
+    session.post = MagicMock()
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    await coordinator._fetch_page_assets(session, broad=True)
+
+    assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_all_chunks_fail_leaves_key_unchanged
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_all_chunks_fail_leaves_key_unchanged(
+    hass: HomeAssistant,
+) -> None:
+    """When every chunk lacks the AES key pattern, _decrypt_key stays unchanged."""
+    html = (
+        '"buildId":"abc123" '
+        'src="/_next/static/chunks/pages/station/%5Bid%5D-deadbeef.js" '
+        'src="/_next/static/chunks/1890-shared.js"'
+    )
+    html_resp = _make_mock_response(200, text_data=html)
+    a_resp = _make_mock_response(200, text_data="// no key")
+    b_resp = _make_mock_response(200, text_data="// also no key")
+    session = _make_session(html_resp, a_resp, b_resp)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator._decrypt_key = "previously_cached_key"
+    await coordinator._fetch_page_assets(session, broad=True)
+
+    assert coordinator._decrypt_key == "previously_cached_key"
+    assert coordinator._build_id == "abc123"
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_broad_no_chunks_leaves_key_unchanged
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_broad_no_chunks_leaves_key_unchanged(
+    hass: HomeAssistant,
+) -> None:
+    """Broad mode with HTML containing zero chunk URLs leaves _decrypt_key unchanged."""
+    html = '"buildId":"abc123"'  # buildId only, no chunk src anywhere
+    html_resp = _make_mock_response(200, text_data=html)
+    session = _make_session(html_resp)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator._decrypt_key = "previously_cached_key"
+    await coordinator._fetch_page_assets(session, broad=True)
+
+    assert coordinator._decrypt_key == "previously_cached_key"
+    assert coordinator._build_id == "abc123"
+
+
+# ---------------------------------------------------------------------------
 # test_fetch_page_assets_no_js_chunk_leaves_key_unchanged
 # ---------------------------------------------------------------------------
 
@@ -570,9 +716,11 @@ async def test_encrypted_api_decrypt_key_unavailable_skips_api(
     nextjs_resp = _make_mock_response(
         200, json_data={"pageProps": {"initialStation": None}}
     )
-    # _fetch_page_assets called by encrypted API path — HTML has no chunk URL
+    # _fetch_page_assets called by encrypted API path — HTML has no chunk URL.
+    # Two HTML responses needed: standard refresh + broad scan retry.
     html_resp = _make_mock_response(200, text_data='"buildId":"build1"')
-    session = _make_session(nextjs_resp, html_resp)
+    html_resp_2 = _make_mock_response(200, text_data='"buildId":"build1"')
+    session = _make_session(nextjs_resp, html_resp, html_resp_2)
 
     coordinator = FuelCompareIECoordinator(hass, "790")
     coordinator._build_id = "test_build"
@@ -745,7 +893,7 @@ async def test_fetch_page_assets_js_chunk_key_pattern_not_found(
 async def test_encrypted_api_second_decrypt_fails_returns_none(
     hass: HomeAssistant,
 ) -> None:
-    """If both first and retry decrypt fail, encrypted API returns None → UpdateFailed."""
+    """If standard refresh and broad fallback both fail to find a working key, encrypted API returns None → UpdateFailed."""
     nextjs_resp = _make_mock_response(
         200, json_data={"pageProps": {"initialStation": None}}
     )
@@ -757,6 +905,10 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
     js = "// no decrypt key here"
     html_resp = _make_mock_response(200, text_data=html)
     js_resp = _make_mock_response(200, text_data=js)
+    # Broad-scan retry re-fetches HTML and the same single chunk (no other
+    # chunk URLs in the HTML), neither yields the key.
+    html_resp_2 = _make_mock_response(200, text_data=html)
+    js_resp_2 = _make_mock_response(200, text_data=js)
 
     # Payload encrypted with a key that doesn't match the coordinator's stale key
     bad_key = "c" * 64
@@ -768,7 +920,12 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
         },
     )
     session = _make_session(
-        nextjs_resp, html_resp, js_resp, post_responses=(post_resp,)
+        nextjs_resp,
+        html_resp,
+        js_resp,
+        html_resp_2,
+        js_resp_2,
+        post_responses=(post_resp,),
     )
 
     coordinator = FuelCompareIECoordinator(hass, "790")

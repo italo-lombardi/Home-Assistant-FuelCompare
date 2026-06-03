@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2026-06-03
+
+### Fixed
+- AES decrypt key extraction now uses a layered fallback: the legacy single-chunk lookup against `pages/station/[id]-*.js` runs first, and a broad scan across every chunk URL in the HTML is the inner fallback. fuelcompare.ie relocated the key into a shared vendor chunk in a recent deploy, which caused both the Next.js and encrypted-API fetch paths to fail with `Station data not found via any available method`.
+- High-visibility `ERROR` log now fires when every fetch and key-extraction strategy is exhausted, pointing users to the issue tracker so site-side breakages can be reported quickly.
+
+### Changed
+- `coordinator.py` modularized: AES decryption moved to `crypto.py`, page-asset extraction (buildId + decrypt key, both single-chunk and broad modes) moved to `page_assets.py`. Public coordinator API and test imports are unchanged via property/alias re-exports.
+
+### Tests
+- 105 tests, 100% line coverage across all source files
+
 ## [0.5.2] - 2026-06-01
 
 ### Fixed

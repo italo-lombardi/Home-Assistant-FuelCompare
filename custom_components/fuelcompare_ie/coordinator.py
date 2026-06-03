@@ -2,22 +2,18 @@
 
 from __future__ import annotations
 
-import base64
-import hashlib
-import json
 import logging
-import re
 from datetime import timedelta
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import API_TIMEOUT, BASE_URL, DEFAULT_SCAN_INTERVAL, FUEL_TYPES
+from .crypto import cryptojs_decrypt as _cryptojs_decrypt
+from .page_assets import PageAssets
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _HEADERS = {
@@ -25,35 +21,9 @@ _HEADERS = {
 }
 _LOGGER = logging.getLogger(__name__)
 
-
-def _cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
-    """Decrypt a CryptoJS AES-CBC base64 payload using EvpKDF key derivation.
-
-    fuelcompare.ie API responses are encrypted with CryptoJS AES using a key
-    hardcoded in their station JS bundle. CryptoJS uses a non-standard OpenSSL-compatible
-    format: base64("Salted__" + 8-byte-salt + ciphertext), with key+IV derived via
-    iterative MD5 (EvpKDF). The key is extracted dynamically by _fetch_page_assets.
-    """
-    raw = base64.b64decode(encrypted_b64)
-    # CryptoJS Salted__ format: bytes 0-7 = magic, 8-15 = salt, 16+ = ciphertext
-    salt = raw[8:16]
-    ciphertext = raw[16:]
-
-    # EvpKDF: chain MD5(prev + evp_key + salt) until we have 48 bytes (32 key + 16 IV)
-    d, d_i = b"", b""
-    while len(d) < 48:
-        d_i = hashlib.md5(d_i + evp_key.encode() + salt).digest()
-        d += d_i
-    key, iv = d[:32], d[32:48]
-
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    decryptor = cipher.decryptor()
-    padded = decryptor.update(ciphertext) + decryptor.finalize()
-    # Remove PKCS7 padding — last byte is the pad length; AES block size is 16
-    pad_len = padded[-1]
-    if not (1 <= pad_len <= 16):
-        raise ValueError(f"Invalid PKCS7 padding length: {pad_len}")
-    return json.loads(padded[:-pad_len])
+_ISSUE_TRACKER_URL = (
+    "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues"
+)
 
 
 class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
@@ -69,8 +39,42 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
         )
         self.station_id = station_id
         # Cached across updates; refreshed automatically when stale (HTTP non-200 or decrypt failure)
-        self._build_id: str | None = None
-        self._decrypt_key: str | None = None
+        self._assets = PageAssets(station_id)
+
+    # ---- Backwards-compatible accessors used by tests / older imports -------
+
+    @property
+    def _build_id(self) -> str | None:
+        """Cached Next.js buildId (proxied to PageAssets)."""
+        return self._assets.build_id
+
+    @_build_id.setter
+    def _build_id(self, value: str | None) -> None:
+        """Setter mirror so ``coordinator._build_id = ...`` propagates to PageAssets."""
+        self._assets.build_id = value
+
+    @property
+    def _decrypt_key(self) -> str | None:
+        """Cached AES decrypt key (proxied to PageAssets)."""
+        return self._assets.decrypt_key
+
+    @_decrypt_key.setter
+    def _decrypt_key(self, value: str | None) -> None:
+        """Setter mirror so ``coordinator._decrypt_key = ...`` propagates to PageAssets."""
+        self._assets.decrypt_key = value
+
+    async def _fetch_page_assets(
+        self, session: ClientSession, broad: bool = False
+    ) -> None:
+        """Refresh buildId and AES decrypt key from the station HTML.
+
+        Thin wrapper kept for test compatibility — real work happens inside
+        :class:`PageAssets`. ``broad=True`` enables scanning every chunk in
+        the HTML; default mode only checks the per-page station chunk.
+        """
+        await self._assets.refresh(session, broad=broad)
+
+    # ---- Main update flow ----------------------------------------------------
 
     async def _async_update_data(self) -> dict[str, float | None]:
         """Fetch data from FuelCompare.ie using two paths with automatic fallback.
@@ -94,6 +98,18 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 station_data = await self._fetch_encrypted_api(session)
 
             if station_data is None:
+                # All known fetch and key-extraction strategies failed. Surface
+                # a high-visibility error pointing to the issue tracker so users
+                # can report site-side breakages quickly — past failures (Next.js
+                # SSR removal, AES key relocation) needed code changes to recover.
+                _LOGGER.error(
+                    "FuelCompare.ie integration could not retrieve data for station %s "
+                    "via any available method (Next.js JSON, encrypted API, broad chunk "
+                    "scan). The site may have changed again. Please open an issue at %s "
+                    "with your station ID and Home Assistant debug logs.",
+                    self.station_id,
+                    _ISSUE_TRACKER_URL,
+                )
                 raise UpdateFailed("Station data not found via any available method")
 
             _LOGGER.debug("Raw station data for %s: %s", self.station_id, station_data)
@@ -109,6 +125,8 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 "Unexpected error fetching station %s: %s", self.station_id, err
             )
             raise UpdateFailed(f"Unexpected error: {err}") from err
+
+    # ---- Path A: Next.js static JSON ----------------------------------------
 
     async def _fetch_nextjs(self, session: ClientSession) -> dict | None:
         """Try fetching station data via the Next.js static JSON path.
@@ -170,17 +188,31 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             )
             return None
 
+    # ---- Path B: encrypted POST API -----------------------------------------
+
     async def _fetch_encrypted_api(self, session: ClientSession) -> dict | None:
         """Fetch station data from the encrypted POST API endpoint.
 
         fuelcompare.ie introduced a /fuelcompareback/stationbyid endpoint that returns
         AES-encrypted JSON. The decrypt key is extracted from their JS bundle and cached
-        in self._decrypt_key. On decrypt failure the key is re-fetched automatically to
-        handle site redeployments that rotate the key.
+        on the PageAssets instance. On decrypt failure the key is re-fetched automatically
+        to handle site redeployments that rotate or relocate the key — first via the
+        original single-chunk lookup, then via a broad scan across every chunk in the HTML.
         """
         if self._decrypt_key is None:
             # Key not yet extracted — fetch page assets now (also refreshes buildId)
             await self._fetch_page_assets(session)
+
+        if self._decrypt_key is None:
+            # Standard single-chunk search came up empty — fall back to broad
+            # scan across every chunk in the HTML before giving up. Without this
+            # the encrypted API would never be hit on first run for site builds
+            # where the AES key has been relocated to a shared vendor chunk.
+            _LOGGER.debug(
+                "Decrypt key not found via standard path for station %s — trying broad chunk scan",
+                self.station_id,
+            )
+            await self._fetch_page_assets(session, broad=True)
 
         if self._decrypt_key is None:
             # JS chunk was unreachable or key pattern changed — cannot proceed
@@ -190,6 +222,41 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             )
             return None
 
+        encrypted = await self._post_encrypted(session)
+        if encrypted is None:
+            return None
+
+        decrypted = await self._decrypt_with_recovery(session, encrypted)
+        if decrypted is None:
+            return None
+
+        _LOGGER.debug(
+            "Decrypted response for station %s: %s", self.station_id, decrypted
+        )
+
+        # Decrypted payload is [[station_dict, ...], mysql_metadata_dict]
+        stations = decrypted[0] if isinstance(decrypted, list) and decrypted else None
+        if not stations:
+            _LOGGER.debug(
+                "No stations in decrypted payload for station %s", self.station_id
+            )
+            return None
+
+        station = stations[0] if isinstance(stations, list) else stations
+
+        # Encrypted API uses 'state' where the Next.js path uses 'county' —
+        # normalise so _parse_station and all sensors work identically for both paths
+        if "state" in station and "county" not in station:
+            station["county"] = station["state"]
+
+        return station
+
+    async def _post_encrypted(self, session: ClientSession) -> str | None:
+        """POST to /fuelcompareback/stationbyid and return the encrypted blob.
+
+        Returns None when the response is non-success or carries no data, so the
+        caller can short-circuit before attempting decryption.
+        """
         url = f"{BASE_URL}/fuelcompareback/stationbyid"
         _LOGGER.debug(
             "Posting to encrypted API for station %s: %s", self.station_id, url
@@ -228,46 +295,49 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             )
             return None
 
+        return encrypted
+
+    async def _decrypt_with_recovery(
+        self, session: ClientSession, encrypted: str
+    ) -> list | None:
+        """Decrypt ``encrypted`` with automatic key recovery on failure.
+
+        Tries the cached key first. On failure: refresh via the standard
+        single-chunk lookup and retry; on still-failure: refresh via the broad
+        chunk scan and retry once more. Returns the decoded JSON list or None
+        if every attempt failed.
+        """
         try:
-            decrypted = _cryptojs_decrypt(encrypted, self._decrypt_key)
+            return _cryptojs_decrypt(encrypted, self._decrypt_key)
         except Exception as err:
-            # Likely cause: site redeployed with a new key — refresh and retry once
             _LOGGER.debug(
                 "Decrypt failed for station %s (stale key?): %s — refreshing key and retrying",
                 self.station_id,
                 err,
             )
-            await self._fetch_page_assets(session)
-            try:
-                decrypted = _cryptojs_decrypt(encrypted, self._decrypt_key)
-            except Exception as retry_err:
-                _LOGGER.debug(
-                    "Decrypt failed again for station %s after key refresh: %s",
-                    self.station_id,
-                    retry_err,
-                )
-                return None
 
-        _LOGGER.debug(
-            "Decrypted response for station %s: %s", self.station_id, decrypted
-        )
-
-        # Decrypted payload is [[station_dict, ...], mysql_metadata_dict]
-        stations = decrypted[0] if isinstance(decrypted, list) and decrypted else None
-        if not stations:
+        await self._fetch_page_assets(session)
+        try:
+            return _cryptojs_decrypt(encrypted, self._decrypt_key)
+        except Exception as retry_err:
             _LOGGER.debug(
-                "No stations in decrypted payload for station %s", self.station_id
+                "Decrypt failed again for station %s after standard refresh: %s — retrying with broad chunk scan",
+                self.station_id,
+                retry_err,
+            )
+
+        await self._fetch_page_assets(session, broad=True)
+        try:
+            return _cryptojs_decrypt(encrypted, self._decrypt_key)
+        except Exception as broad_err:
+            _LOGGER.debug(
+                "Decrypt failed for station %s even after broad chunk scan: %s",
+                self.station_id,
+                broad_err,
             )
             return None
 
-        station = stations[0] if isinstance(stations, list) else stations
-
-        # Encrypted API uses 'state' where the Next.js path uses 'county' —
-        # normalise so _parse_station and all sensors work identically for both paths
-        if "state" in station and "county" not in station:
-            station["county"] = station["state"]
-
-        return station
+    # ---- Shared parser -------------------------------------------------------
 
     def _parse_station(self, station: dict) -> dict[str, float | None]:
         """Parse a raw station dict (from either fetch path) into coordinator data."""
@@ -316,69 +386,3 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
             "Final parsed data for station %s: %s", self.station_id, fuel_data
         )
         return fuel_data
-
-    async def _fetch_page_assets(self, session: ClientSession) -> None:
-        """Fetch the station HTML page and extract buildId and AES decrypt key.
-
-        Both assets are extracted in a single HTML fetch plus one JS chunk fetch.
-        Called on first run, on stale buildId (HTTP non-200), and on decrypt failure.
-        Updates self._build_id and self._decrypt_key in place.
-        """
-        url = f"{BASE_URL}/station/{self.station_id}"
-        _LOGGER.debug("Fetching page assets from %s", url)
-
-        async with session.get(url, timeout=_TIMEOUT, headers=_HEADERS) as response:
-            response.raise_for_status()
-            html = await response.text()
-
-        build_match = re.search(r'"buildId":"([^"]+)"', html)
-        if not build_match:
-            _LOGGER.debug(
-                "buildId pattern not found in HTML for station %s", self.station_id
-            )
-            raise UpdateFailed("buildId not found in page")
-        self._build_id = build_match.group(1)
-        _LOGGER.debug(
-            "Extracted buildId for station %s: %s", self.station_id, self._build_id
-        )
-
-        # The decrypt key lives in the station-specific JS chunk, not the main bundle —
-        # its filename contains the chunk hash and changes with each site deploy
-        chunk_match = re.search(r'(/_next/static/chunks/pages/station/[^"]+\.js)', html)
-        if not chunk_match:
-            # No chunk URL in HTML — site may have restructured; key stays as-is
-            _LOGGER.debug(
-                "Station JS chunk URL not found in HTML for station %s — decrypt key not refreshed",
-                self.station_id,
-            )
-            return
-
-        chunk_url = BASE_URL + chunk_match.group(1)
-        _LOGGER.debug(
-            "Fetching station JS chunk for decrypt key (station %s): %s",
-            self.station_id,
-            chunk_url,
-        )
-
-        async with session.get(
-            chunk_url, timeout=_TIMEOUT, headers=_HEADERS
-        ) as response:
-            response.raise_for_status()
-            js = await response.text()
-
-        # Pattern matches: AES.decrypt(e,"<64-char-hex-key>")
-        key_match = re.search(r'AES\.decrypt\(e,"([a-f0-9]{64})"', js)
-        if not key_match:
-            # Site may have obfuscated or renamed the decrypt call
-            _LOGGER.debug(
-                "AES decrypt key pattern not found in JS chunk for station %s — key not updated",
-                self.station_id,
-            )
-            return
-
-        self._decrypt_key = key_match.group(1)
-        _LOGGER.debug(
-            "Extracted decrypt key for station %s: %s…",
-            self.station_id,
-            self._decrypt_key[:8],
-        )
