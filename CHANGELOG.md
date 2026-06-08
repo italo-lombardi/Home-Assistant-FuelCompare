@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed (BREAKING)
 - Entities now retain the last known value when a fetch fails instead of flipping to `unavailable`. Price, station info, working-hours, facility, and is-open entities all stay populated through transient outages (site offline, throttling, network blips). Automations that previously relied on `state == 'unavailable'` to detect integration outages must migrate to `binary_sensor.<station>_data_fetch_problem` (or compare `now()` against `sensor.<station>_last_successful_fetch`). First-ever fetch failures still show `unavailable` because no last-known value exists.
 - `available` properties on `FuelPriceSensor` and `StationAboutCategorySensor` no longer gate on `coordinator.last_update_success`. Station-level info sensors and `StationIsOpenBinarySensor` gain explicit `available` overrides that drop the same gate.
-- Each station now creates **15 entities** (was 13): the two new diagnostic entities are added per station.
+- Each station now creates **14 entities** (was 12): the two new diagnostic entities are added per station.
 
 ### Tests
 - New tests cover stale retention across all entity types, the `data_fetch_problem` binary sensor's diagnostic attributes, and `last_successful_fetch` stamping on the coordinator. 100% line coverage maintained.
