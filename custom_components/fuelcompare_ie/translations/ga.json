@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Ainm an Stáisiúin"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Aisghabháil dheireanach rathúil"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Ar Oscailt"
       },
-      "fetch_ok": {
-        "name": "Aisghabháil ceart go leor"
+      "data_fetch_problem": {
+        "name": "Fadhb le sonraí a fháil"
       }
     }
   }

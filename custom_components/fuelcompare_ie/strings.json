@@ -28,22 +28,50 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": { "name": "Unleaded" },
-      "diesel": { "name": "Diesel" },
-      "price_last_updated": { "name": "Price Last Updated" },
-      "station_name": { "name": "Station Name" },
-      "brand": { "name": "Brand" },
-      "county": { "name": "County" },
-      "working_hours": { "name": "Working Hours" },
-      "accessibility": { "name": "Accessibility" },
-      "offerings": { "name": "Offerings" },
-      "amenities": { "name": "Amenities" },
-      "payments": { "name": "Payments" },
-      "integration_last_success": { "name": "Integration Last Success" }
+      "unleaded": {
+        "name": "Unleaded"
+      },
+      "diesel": {
+        "name": "Diesel"
+      },
+      "price_last_updated": {
+        "name": "Price Last Updated"
+      },
+      "station_name": {
+        "name": "Station Name"
+      },
+      "brand": {
+        "name": "Brand"
+      },
+      "county": {
+        "name": "County"
+      },
+      "working_hours": {
+        "name": "Working Hours"
+      },
+      "accessibility": {
+        "name": "Accessibility"
+      },
+      "offerings": {
+        "name": "Offerings"
+      },
+      "amenities": {
+        "name": "Amenities"
+      },
+      "payments": {
+        "name": "Payments"
+      },
+      "last_successful_fetch": {
+        "name": "Last Successful Fetch"
+      }
     },
     "binary_sensor": {
-      "is_open": { "name": "Is Open" },
-      "fetch_ok": { "name": "Fetch OK" }
+      "is_open": {
+        "name": "Is Open"
+      },
+      "data_fetch_problem": {
+        "name": "Data Fetch Problem"
+      }
     }
   }
 }

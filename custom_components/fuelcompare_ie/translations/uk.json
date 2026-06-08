@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Назва Станції"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Останнє успішне завантаження"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Відчинено"
       },
-      "fetch_ok": {
-        "name": "Завантаження ОК"
+      "data_fetch_problem": {
+        "name": "Проблема із завантаженням даних"
       }
     }
   }

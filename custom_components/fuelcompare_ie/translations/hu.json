@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Állomás Neve"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Utolsó sikeres lekérdezés"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Nyitva van"
       },
-      "fetch_ok": {
-        "name": "Lekérdezés OK"
+      "data_fetch_problem": {
+        "name": "Adatlekérési probléma"
       }
     }
   }

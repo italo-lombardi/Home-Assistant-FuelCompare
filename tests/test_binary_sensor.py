@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 
 from custom_components.fuelcompare_ie.binary_sensor import (
-    StationFetchOkBinarySensor,
+    DataFetchProblemBinarySensor,
     StationIsOpenBinarySensor,
     _is_open,
     _parse_time,
@@ -263,49 +263,51 @@ async def test_is_open_unavailable_when_working_hours_missing() -> None:
 
 
 # ---------------------------------------------------------------------------
-# StationFetchOkBinarySensor
+# DataFetchProblemBinarySensor
 # ---------------------------------------------------------------------------
 
 
-def _make_fetch_ok_sensor(
+def _make_data_fetch_problem_sensor(
     last_update_success: bool,
     last_exception: Exception | None = None,
     last_successful_fetch: datetime | None = None,
-) -> StationFetchOkBinarySensor:
-    """Return a StationFetchOkBinarySensor with a mocked coordinator."""
+) -> DataFetchProblemBinarySensor:
+    """Return a DataFetchProblemBinarySensor with a mocked coordinator."""
     coord = MagicMock()
     coord.last_update_success = last_update_success
     coord.last_exception = last_exception
     coord.last_successful_fetch = last_successful_fetch
-    sensor = object.__new__(StationFetchOkBinarySensor)
+    sensor = object.__new__(DataFetchProblemBinarySensor)
     object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "12345")
-    object.__setattr__(sensor, "_attr_unique_id", "fuelcompare_ie_12345_fetch_ok")
+    object.__setattr__(
+        sensor, "_attr_unique_id", "fuelcompare_ie_12345_data_fetch_problem"
+    )
     return sensor
 
 
-async def test_fetch_ok_is_on_when_success() -> None:
-    """fetch_ok is_on=True when last update succeeded."""
-    sensor = _make_fetch_ok_sensor(last_update_success=True)
-    assert sensor.is_on is True
-
-
-async def test_fetch_ok_is_off_when_failure() -> None:
-    """fetch_ok is_on=False when last update failed."""
-    sensor = _make_fetch_ok_sensor(last_update_success=False)
+async def test_data_fetch_problem_is_off_when_success() -> None:
+    """data_fetch_problem is_on=False when last update succeeded (no problem)."""
+    sensor = _make_data_fetch_problem_sensor(last_update_success=True)
     assert sensor.is_on is False
 
 
-async def test_fetch_ok_always_available() -> None:
-    """fetch_ok is always available, even on first-fetch failure."""
-    sensor = _make_fetch_ok_sensor(last_update_success=False)
+async def test_data_fetch_problem_is_on_when_failure() -> None:
+    """data_fetch_problem is_on=True when last update failed (problem present)."""
+    sensor = _make_data_fetch_problem_sensor(last_update_success=False)
+    assert sensor.is_on is True
+
+
+async def test_data_fetch_problem_always_available() -> None:
+    """data_fetch_problem is always available, even on first-fetch failure."""
+    sensor = _make_data_fetch_problem_sensor(last_update_success=False)
     assert sensor.available is True
 
 
-async def test_fetch_ok_attributes_with_exception_and_timestamp() -> None:
+async def test_data_fetch_problem_attributes_with_exception_and_timestamp() -> None:
     """Attributes carry stringified last exception and ISO last_successful_fetch."""
     ts = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
-    sensor = _make_fetch_ok_sensor(
+    sensor = _make_data_fetch_problem_sensor(
         last_update_success=False,
         last_exception=RuntimeError("boom"),
         last_successful_fetch=ts,
@@ -316,9 +318,9 @@ async def test_fetch_ok_attributes_with_exception_and_timestamp() -> None:
     assert attrs["last_successful_fetch"] == ts.isoformat()
 
 
-async def test_fetch_ok_attributes_no_exception_no_timestamp() -> None:
+async def test_data_fetch_problem_attributes_no_exception_no_timestamp() -> None:
     """Attributes are None for missing last exception and timestamp."""
-    sensor = _make_fetch_ok_sensor(last_update_success=True)
+    sensor = _make_data_fetch_problem_sensor(last_update_success=True)
     attrs = sensor.extra_state_attributes
     assert attrs == {
         "station_id": "12345",

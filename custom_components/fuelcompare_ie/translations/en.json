@@ -61,16 +61,16 @@
       "payments": {
         "name": "Payments"
       },
-      "integration_last_success": {
-        "name": "Integration Last Success"
+      "last_successful_fetch": {
+        "name": "Last Successful Fetch"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Is Open"
       },
-      "fetch_ok": {
-        "name": "Fetch OK"
+      "data_fetch_problem": {
+        "name": "Data Fetch Problem"
       }
     }
   }

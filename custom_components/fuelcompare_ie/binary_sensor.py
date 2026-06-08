@@ -75,7 +75,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             StationIsOpenBinarySensor(coordinator, station_id, station_name),
-            StationFetchOkBinarySensor(coordinator, station_id, station_name),
+            DataFetchProblemBinarySensor(coordinator, station_id, station_name),
         ]
     )
 
@@ -107,7 +107,7 @@ class StationIsOpenBinarySensor(
         """Stay available with last known data even when last fetch failed.
 
         Drops the ``coordinator.last_update_success`` gate so the open/closed
-        state survives transient site outages — see fetch_ok binary sensor for
+        state survives transient site outages — see data_fetch_problem binary sensor for
         live fetch health.
         """
         return self.coordinator.data is not None and bool(
@@ -154,24 +154,25 @@ class StationIsOpenBinarySensor(
             return base
 
 
-class StationFetchOkBinarySensor(
+class DataFetchProblemBinarySensor(
     CoordinatorEntity[FuelCompareIECoordinator], BinarySensorEntity
 ):
-    """Diagnostic binary sensor exposing the integration's fetch health.
+    """Diagnostic binary sensor exposing whether the last data fetch failed.
 
-    State is ``on`` when the last poll succeeded, ``off`` when it failed.
-    Always reports as available so automations can rely on it being a
-    deterministic on/off signal — even before the first successful fetch.
+    State is ``on`` when there is a problem (last poll failed), ``off`` when
+    the last poll succeeded. Always reports as available so automations can
+    rely on it being a deterministic on/off signal — even before the first
+    successful fetch (no fetch yet ⇒ problem ⇒ on).
 
     Pair with the stale-retention behaviour of the price/info sensors:
     those keep their last known value during outages, this one tells you
     whether the last refresh actually worked.
     """
 
-    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_has_entity_name = True
-    _attr_translation_key = "fetch_ok"
+    _attr_translation_key = "data_fetch_problem"
 
     def __init__(
         self,
@@ -182,7 +183,7 @@ class StationFetchOkBinarySensor(
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._station_id = station_id
-        self._attr_unique_id = f"{DOMAIN}_{station_id}_fetch_ok"
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_data_fetch_problem"
         self._attr_device_info = _device_info(station_id, station_name)
 
     @property
@@ -192,8 +193,8 @@ class StationFetchOkBinarySensor(
 
     @property
     def is_on(self) -> bool:
-        """Return True if the last coordinator update succeeded."""
-        return bool(self.coordinator.last_update_success)
+        """Return True if the last coordinator update FAILED (problem present)."""
+        return not bool(self.coordinator.last_update_success)
 
     @property
     def extra_state_attributes(self) -> dict:

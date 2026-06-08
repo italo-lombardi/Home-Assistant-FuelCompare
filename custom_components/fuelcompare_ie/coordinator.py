@@ -42,7 +42,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
         # Cached across updates; refreshed automatically when stale (HTTP non-200 or decrypt failure)
         self._assets = PageAssets(station_id)
         # Timestamp of the last successful fetch — exposed via the
-        # IntegrationLastSuccessSensor and the StationFetchOkBinarySensor
+        # LastSuccessfulFetchSensor and the DataFetchProblemBinarySensor
         # so automations can distinguish "site stamp didn't change" (price
         # genuinely unchanged) from "integration hasn't fetched in N hours"
         # (transient site outage / throttling). Stays None until first success.

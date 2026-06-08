@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Numele Stației"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Ultima preluare reușită"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Este deschis"
       },
-      "fetch_ok": {
-        "name": "Preluare OK"
+      "data_fetch_problem": {
+        "name": "Problemă la preluarea datelor"
       }
     }
   }

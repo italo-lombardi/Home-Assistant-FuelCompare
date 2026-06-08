@@ -10,7 +10,7 @@ import pytest
 
 from custom_components.fuelcompare_ie.sensor import (
     FuelPriceSensor,
-    IntegrationLastSuccessSensor,
+    LastSuccessfulFetchSensor,
     StationAboutCategorySensor,
     StationBrandSensor,
     StationCountySensor,
@@ -574,47 +574,47 @@ async def test_working_hours_sensor_unavailable_when_no_data() -> None:
 
 
 # ---------------------------------------------------------------------------
-# IntegrationLastSuccessSensor
+# LastSuccessfulFetchSensor
 # ---------------------------------------------------------------------------
 
 
-def _make_last_success_sensor(
+def _make_last_fetch_sensor(
     last_successful_fetch: datetime | None,
-) -> IntegrationLastSuccessSensor:
-    """Return an IntegrationLastSuccessSensor with a mocked coordinator."""
+) -> LastSuccessfulFetchSensor:
+    """Return an LastSuccessfulFetchSensor with a mocked coordinator."""
     coord = MagicMock()
     coord.last_successful_fetch = last_successful_fetch
-    sensor = object.__new__(IntegrationLastSuccessSensor)
+    sensor = object.__new__(LastSuccessfulFetchSensor)
     object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "12345")
     object.__setattr__(
-        sensor, "_attr_unique_id", "fuelcompare_ie_12345_integration_last_success"
+        sensor, "_attr_unique_id", "fuelcompare_ie_12345_last_successful_fetch"
     )
     return sensor
 
 
-async def test_integration_last_success_native_value() -> None:
-    """IntegrationLastSuccessSensor returns the coordinator's last_successful_fetch."""
+async def test_last_successful_fetch_native_value() -> None:
+    """LastSuccessfulFetchSensor returns the coordinator's last_successful_fetch."""
     ts = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
-    sensor = _make_last_success_sensor(ts)
+    sensor = _make_last_fetch_sensor(ts)
     assert sensor.native_value == ts
 
 
-async def test_integration_last_success_native_value_none() -> None:
-    """IntegrationLastSuccessSensor returns None before first successful fetch."""
-    sensor = _make_last_success_sensor(None)
+async def test_last_successful_fetch_native_value_none() -> None:
+    """LastSuccessfulFetchSensor returns None before first successful fetch."""
+    sensor = _make_last_fetch_sensor(None)
     assert sensor.native_value is None
 
 
-async def test_integration_last_success_always_available() -> None:
-    """IntegrationLastSuccessSensor is always available, even before any fetch."""
-    sensor = _make_last_success_sensor(None)
+async def test_last_successful_fetch_always_available() -> None:
+    """LastSuccessfulFetchSensor is always available, even before any fetch."""
+    sensor = _make_last_fetch_sensor(None)
     assert sensor.available is True
 
 
-async def test_integration_last_success_extra_attributes() -> None:
-    """IntegrationLastSuccessSensor exposes station_id."""
-    sensor = _make_last_success_sensor(None)
+async def test_last_successful_fetch_extra_attributes() -> None:
+    """LastSuccessfulFetchSensor exposes station_id."""
+    sensor = _make_last_fetch_sensor(None)
     assert sensor.extra_state_attributes == {"station_id": "12345"}
 
 

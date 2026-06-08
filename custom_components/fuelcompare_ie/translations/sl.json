@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Ime Postaje"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Zadnji uspešni prenos"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Je odprto"
       },
-      "fetch_ok": {
-        "name": "Prenos OK"
+      "data_fetch_problem": {
+        "name": "Težava pri prenosu podatkov"
       }
     }
   }

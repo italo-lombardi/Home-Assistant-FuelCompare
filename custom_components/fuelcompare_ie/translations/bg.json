@@ -58,16 +58,16 @@
       "station_name": {
         "name": "Име на Станция"
       },
-      "integration_last_success": {
-        "name": "Последен успешен опит"
+      "last_successful_fetch": {
+        "name": "Последно успешно извличане"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Отворено е"
       },
-      "fetch_ok": {
-        "name": "Извличането е успешно"
+      "data_fetch_problem": {
+        "name": "Проблем при извличане на данни"
       }
     }
   }

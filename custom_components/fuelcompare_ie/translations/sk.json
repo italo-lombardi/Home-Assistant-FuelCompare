@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Názov Stanice"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Posledné úspešné načítanie"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Je otvorené"
       },
-      "fetch_ok": {
-        "name": "Načítanie OK"
+      "data_fetch_problem": {
+        "name": "Problém s načítaním dát"
       }
     }
   }

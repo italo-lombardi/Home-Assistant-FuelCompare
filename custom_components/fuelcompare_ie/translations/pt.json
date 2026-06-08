@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Nome da Estação"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Última obtenção bem-sucedida"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Está Aberto"
       },
-      "fetch_ok": {
-        "name": "Obtenção OK"
+      "data_fetch_problem": {
+        "name": "Problema na obtenção de dados"
       }
     }
   }

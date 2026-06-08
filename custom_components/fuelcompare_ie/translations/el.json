@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Όνομα Σταθμού"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Τελευταία επιτυχημένη λήψη"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Είναι ανοιχτό"
       },
-      "fetch_ok": {
-        "name": "Η λήψη είναι εντάξει"
+      "data_fetch_problem": {
+        "name": "Πρόβλημα λήψης δεδομένων"
       }
     }
   }

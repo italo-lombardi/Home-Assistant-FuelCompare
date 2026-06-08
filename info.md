@@ -13,7 +13,7 @@ Track live unleaded and diesel prices from Irish petrol stations directly in you
 - Prices refresh automatically every 30 minutes
 - Add as many stations as you like
 - Easy setup — no YAML, no API keys, station name auto-fetched during setup
-- Stale-retention on transient outages: entities keep their last known value when the site is offline or throttling, with a dedicated `fetch_ok` connectivity binary sensor and `integration_last_success` timestamp sensor for automations
+- Stale-retention on transient outages: entities keep their last known value when the site is offline or throttling, with a dedicated `data_fetch_problem` problem binary sensor and `last_successful_fetch` timestamp sensor for automations
 - Translated into 25 languages
 
 ## Setup

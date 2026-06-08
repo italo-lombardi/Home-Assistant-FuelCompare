@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Jaama Nimi"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Viimane edukas pärimine"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "On avatud"
       },
-      "fetch_ok": {
-        "name": "Pärimine OK"
+      "data_fetch_problem": {
+        "name": "Andmete pärimise probleem"
       }
     }
   }

@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Stationsnaam"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Laatste succesvolle ophaalactie"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Is open"
       },
-      "fetch_ok": {
-        "name": "Ophalen OK"
+      "data_fetch_problem": {
+        "name": "Probleem met gegevensophalen"
       }
     }
   }

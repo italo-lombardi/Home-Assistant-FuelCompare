@@ -122,7 +122,7 @@ async def async_setup_entry(
                 "payments",
                 "mdi:credit-card",
             ),
-            IntegrationLastSuccessSensor(coordinator, station_id, station_name),
+            LastSuccessfulFetchSensor(coordinator, station_id, station_name),
         ]
     )
 
@@ -186,7 +186,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         Stale-retention behaviour: we deliberately drop the
         ``coordinator.last_update_success`` check here so the last good price
         survives transient fetch failures (site outage, throttling, network
-        blips). Use ``binary_sensor.<station>_fetch_ok`` to detect failures.
+        blips). Use ``binary_sensor.<station>_data_fetch_problem`` to detect failures.
         """
         return (
             self.coordinator.data is not None
@@ -492,7 +492,7 @@ class StationAboutCategorySensor(
 # ── Diagnostic sensors ────────────────────────────────────────────────────────
 
 
-class IntegrationLastSuccessSensor(
+class LastSuccessfulFetchSensor(
     CoordinatorEntity[FuelCompareIECoordinator], SensorEntity
 ):
     """Diagnostic sensor exposing when the integration last fetched data successfully.
@@ -508,7 +508,7 @@ class IntegrationLastSuccessSensor(
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:cloud-check"
     _attr_has_entity_name = True
-    _attr_translation_key = "integration_last_success"
+    _attr_translation_key = "last_successful_fetch"
 
     def __init__(
         self,
@@ -519,7 +519,7 @@ class IntegrationLastSuccessSensor(
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._station_id = station_id
-        self._attr_unique_id = f"{DOMAIN}_{station_id}_integration_last_success"
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_last_successful_fetch"
         self._attr_device_info = _device_info(station_id, station_name)
 
     @property

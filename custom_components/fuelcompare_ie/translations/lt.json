@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Stoties Pavadinimas"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Paskutinis sėkmingas paėmimas"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Atidaryta"
       },
-      "fetch_ok": {
-        "name": "Paėmimas OK"
+      "data_fetch_problem": {
+        "name": "Duomenų gavimo problema"
       }
     }
   }

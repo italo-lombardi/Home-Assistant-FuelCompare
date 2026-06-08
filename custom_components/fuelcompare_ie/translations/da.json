@@ -58,7 +58,7 @@
       "station_name": {
         "name": "Stationsnavn"
       },
-      "integration_last_success": {
+      "last_successful_fetch": {
         "name": "Seneste vellykkede hentning"
       }
     },
@@ -66,8 +66,8 @@
       "is_open": {
         "name": "Er åben"
       },
-      "fetch_ok": {
-        "name": "Hentning OK"
+      "data_fetch_problem": {
+        "name": "Fejl ved datahentning"
       }
     }
   }
