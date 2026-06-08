@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Назва Станції"
+      },
+      "integration_last_success": {
+        "name": "Останнє успішне завантаження"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Відчинено"
+      },
+      "fetch_ok": {
+        "name": "Завантаження ОК"
       }
     }
   }

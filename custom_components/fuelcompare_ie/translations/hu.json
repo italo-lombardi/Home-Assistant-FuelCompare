@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Állomás Neve"
+      },
+      "integration_last_success": {
+        "name": "Utolsó sikeres lekérdezés"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Nyitva van"
+      },
+      "fetch_ok": {
+        "name": "Lekérdezés OK"
       }
     }
   }

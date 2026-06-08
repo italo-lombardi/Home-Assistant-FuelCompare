@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Stationsnavn"
+      },
+      "integration_last_success": {
+        "name": "Seneste vellykkede hentning"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Er åben"
+      },
+      "fetch_ok": {
+        "name": "Hentning OK"
       }
     }
   }

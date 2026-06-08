@@ -10,6 +10,7 @@ import pytest
 
 from custom_components.fuelcompare_ie.sensor import (
     FuelPriceSensor,
+    IntegrationLastSuccessSensor,
     StationAboutCategorySensor,
     StationBrandSensor,
     StationCountySensor,
@@ -429,3 +430,221 @@ async def test_name_sensor_extra_attributes() -> None:
     """StationNameSensor extra_state_attributes contains station_id."""
     sensor = _make_name_sensor({"name": "Circle K Mulhuddart"})
     assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# Stale retention — entities stay available with last known data even when the
+# coordinator's last update failed (last_update_success=False).
+# ---------------------------------------------------------------------------
+
+
+async def test_fuel_price_sensor_stale_retention_after_failure() -> None:
+    """FuelPriceSensor stays available with last good price when last fetch failed."""
+    sensor = _make_fuel_sensor(
+        "unleaded",
+        data={"unleaded": 1.85},
+        last_update_success=False,
+    )
+    assert sensor.available is True
+    assert sensor.native_value == pytest.approx(1.85)
+
+
+async def test_about_category_stale_retention_after_failure() -> None:
+    """StationAboutCategorySensor stays available with last good data when last fetch failed."""
+    about = {"Accessibility": {"Wheelchair ramp": True}}
+    sensor = _make_about_sensor(
+        {"about": json.dumps(about)},
+        category="Accessibility",
+        last_update_success=False,
+    )
+    assert sensor.available is True
+    assert sensor.native_value == "Wheelchair ramp"
+
+
+async def test_price_last_updated_stale_retention_after_failure() -> None:
+    """StationPriceLastUpdatedSensor stays available with last good timestamp on failure."""
+    coord = _make_coordinator(
+        {"lastupdated": "2024-01-15T10:30:00.000Z"}, last_update_success=False
+    )
+    sensor = object.__new__(StationPriceLastUpdatedSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+    object.__setattr__(
+        sensor, "_attr_unique_id", "fuelcompare_ie_12345_price_last_updated"
+    )
+
+    assert sensor.available is True
+    assert sensor.native_value == datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc)
+
+
+async def test_price_last_updated_unavailable_when_no_data() -> None:
+    """StationPriceLastUpdatedSensor is unavailable when no data has ever been fetched."""
+    coord = _make_coordinator(None, last_update_success=False)
+    sensor = object.__new__(StationPriceLastUpdatedSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+async def test_name_sensor_stale_retention_after_failure() -> None:
+    """StationNameSensor stays available with last known name on failure."""
+    coord = _make_coordinator({"name": "Circle K"}, last_update_success=False)
+    sensor = object.__new__(StationNameSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is True
+    assert sensor.native_value == "Circle K"
+
+
+async def test_name_sensor_unavailable_when_no_data() -> None:
+    """StationNameSensor is unavailable when no data has ever been fetched."""
+    coord = _make_coordinator(None, last_update_success=False)
+    sensor = object.__new__(StationNameSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+async def test_brand_sensor_stale_retention_after_failure() -> None:
+    """StationBrandSensor stays available with last known brand on failure."""
+    coord = _make_coordinator({"tablename": "circle_k"}, last_update_success=False)
+    sensor = object.__new__(StationBrandSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is True
+    assert sensor.native_value == "Circle K"
+
+
+async def test_brand_sensor_unavailable_when_no_data() -> None:
+    """StationBrandSensor is unavailable when no data has ever been fetched."""
+    coord = _make_coordinator(None, last_update_success=False)
+    sensor = object.__new__(StationBrandSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+async def test_county_sensor_stale_retention_after_failure() -> None:
+    """StationCountySensor stays available with last known county on failure."""
+    coord = _make_coordinator({"county": "Dublin"}, last_update_success=False)
+    sensor = object.__new__(StationCountySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is True
+    assert sensor.native_value == "Dublin"
+
+
+async def test_county_sensor_unavailable_when_no_data() -> None:
+    """StationCountySensor is unavailable when no data has ever been fetched."""
+    coord = _make_coordinator(None, last_update_success=False)
+    sensor = object.__new__(StationCountySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+async def test_working_hours_sensor_stale_retention_after_failure() -> None:
+    """StationWorkingHoursSensor stays available with last known hours on failure."""
+    hours = {"Monday": "6a.m.-10p.m."}
+    coord = _make_coordinator(
+        {"working_hours": json.dumps(hours)}, last_update_success=False
+    )
+    sensor = object.__new__(StationWorkingHoursSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is True
+
+
+async def test_working_hours_sensor_unavailable_when_no_data() -> None:
+    """StationWorkingHoursSensor is unavailable when no data has ever been fetched."""
+    coord = _make_coordinator(None, last_update_success=False)
+    sensor = object.__new__(StationWorkingHoursSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+# ---------------------------------------------------------------------------
+# IntegrationLastSuccessSensor
+# ---------------------------------------------------------------------------
+
+
+def _make_last_success_sensor(
+    last_successful_fetch: datetime | None,
+) -> IntegrationLastSuccessSensor:
+    """Return an IntegrationLastSuccessSensor with a mocked coordinator."""
+    coord = MagicMock()
+    coord.last_successful_fetch = last_successful_fetch
+    sensor = object.__new__(IntegrationLastSuccessSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+    object.__setattr__(
+        sensor, "_attr_unique_id", "fuelcompare_ie_12345_integration_last_success"
+    )
+    return sensor
+
+
+async def test_integration_last_success_native_value() -> None:
+    """IntegrationLastSuccessSensor returns the coordinator's last_successful_fetch."""
+    ts = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
+    sensor = _make_last_success_sensor(ts)
+    assert sensor.native_value == ts
+
+
+async def test_integration_last_success_native_value_none() -> None:
+    """IntegrationLastSuccessSensor returns None before first successful fetch."""
+    sensor = _make_last_success_sensor(None)
+    assert sensor.native_value is None
+
+
+async def test_integration_last_success_always_available() -> None:
+    """IntegrationLastSuccessSensor is always available, even before any fetch."""
+    sensor = _make_last_success_sensor(None)
+    assert sensor.available is True
+
+
+async def test_integration_last_success_extra_attributes() -> None:
+    """IntegrationLastSuccessSensor exposes station_id."""
+    sensor = _make_last_success_sensor(None)
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# extra_state_attributes coverage for station-level sensors
+# ---------------------------------------------------------------------------
+
+
+async def test_price_last_updated_extra_attributes() -> None:
+    """StationPriceLastUpdatedSensor extra_state_attributes contains station_id."""
+    sensor = _make_last_updated_sensor({"lastupdated": "2024-01-15T10:30:00.000Z"})
+    object.__setattr__(sensor, "_station_id", "12345")
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+async def test_brand_sensor_extra_attributes() -> None:
+    """StationBrandSensor extra_state_attributes contains station_id."""
+    sensor = _make_brand_sensor({"tablename": "circle_k"})
+    object.__setattr__(sensor, "_station_id", "12345")
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+async def test_county_sensor_extra_attributes() -> None:
+    """StationCountySensor extra_state_attributes contains station_id."""
+    sensor = _make_county_sensor({"county": "Cork"})
+    object.__setattr__(sensor, "_station_id", "12345")
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+async def test_working_hours_native_value_no_data() -> None:
+    """StationWorkingHoursSensor native_value is None when coordinator.data is None."""
+    sensor = _make_working_hours_sensor(None)
+    assert sensor.native_value is None

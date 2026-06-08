@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Stationsnaam"
+      },
+      "integration_last_success": {
+        "name": "Laatste succesvolle ophaalactie"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Is open"
+      },
+      "fetch_ok": {
+        "name": "Ophalen OK"
       }
     }
   }

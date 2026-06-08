@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import json
-from datetime import time as dt_time
+from datetime import datetime, time as dt_time, timezone
 from unittest.mock import MagicMock, patch
 
 
 from custom_components.fuelcompare_ie.binary_sensor import (
+    StationFetchOkBinarySensor,
     StationIsOpenBinarySensor,
     _is_open,
     _parse_time,
@@ -216,4 +217,117 @@ async def test_binary_sensor_extra_attributes_invalid_json() -> None:
 async def test_binary_sensor_extra_attributes_no_raw() -> None:
     """extra_state_attributes returns station_id only when working_hours is None in data."""
     sensor = _make_binary_sensor({"working_hours": None})
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# StationIsOpenBinarySensor — stale retention
+# ---------------------------------------------------------------------------
+
+
+async def test_is_open_available_with_data_after_failure() -> None:
+    """is_open binary sensor stays available with last good working_hours after failure."""
+    hours = {"Monday": "6a.m.-10p.m."}
+    coord = MagicMock()
+    coord.data = {"working_hours": json.dumps(hours)}
+    coord.last_update_success = False
+    sensor = object.__new__(StationIsOpenBinarySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is True
+
+
+async def test_is_open_unavailable_when_no_data() -> None:
+    """is_open binary sensor is unavailable when coordinator has no data at all."""
+    coord = MagicMock()
+    coord.data = None
+    coord.last_update_success = False
+    sensor = object.__new__(StationIsOpenBinarySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+async def test_is_open_unavailable_when_working_hours_missing() -> None:
+    """is_open binary sensor is unavailable when working_hours field is missing."""
+    coord = MagicMock()
+    coord.data = {"unleaded": 1.85}
+    coord.last_update_success = True
+    sensor = object.__new__(StationIsOpenBinarySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+
+    assert sensor.available is False
+
+
+# ---------------------------------------------------------------------------
+# StationFetchOkBinarySensor
+# ---------------------------------------------------------------------------
+
+
+def _make_fetch_ok_sensor(
+    last_update_success: bool,
+    last_exception: Exception | None = None,
+    last_successful_fetch: datetime | None = None,
+) -> StationFetchOkBinarySensor:
+    """Return a StationFetchOkBinarySensor with a mocked coordinator."""
+    coord = MagicMock()
+    coord.last_update_success = last_update_success
+    coord.last_exception = last_exception
+    coord.last_successful_fetch = last_successful_fetch
+    sensor = object.__new__(StationFetchOkBinarySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "12345")
+    object.__setattr__(sensor, "_attr_unique_id", "fuelcompare_ie_12345_fetch_ok")
+    return sensor
+
+
+async def test_fetch_ok_is_on_when_success() -> None:
+    """fetch_ok is_on=True when last update succeeded."""
+    sensor = _make_fetch_ok_sensor(last_update_success=True)
+    assert sensor.is_on is True
+
+
+async def test_fetch_ok_is_off_when_failure() -> None:
+    """fetch_ok is_on=False when last update failed."""
+    sensor = _make_fetch_ok_sensor(last_update_success=False)
+    assert sensor.is_on is False
+
+
+async def test_fetch_ok_always_available() -> None:
+    """fetch_ok is always available, even on first-fetch failure."""
+    sensor = _make_fetch_ok_sensor(last_update_success=False)
+    assert sensor.available is True
+
+
+async def test_fetch_ok_attributes_with_exception_and_timestamp() -> None:
+    """Attributes carry stringified last exception and ISO last_successful_fetch."""
+    ts = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)
+    sensor = _make_fetch_ok_sensor(
+        last_update_success=False,
+        last_exception=RuntimeError("boom"),
+        last_successful_fetch=ts,
+    )
+    attrs = sensor.extra_state_attributes
+    assert attrs["station_id"] == "12345"
+    assert attrs["last_exception"] == "boom"
+    assert attrs["last_successful_fetch"] == ts.isoformat()
+
+
+async def test_fetch_ok_attributes_no_exception_no_timestamp() -> None:
+    """Attributes are None for missing last exception and timestamp."""
+    sensor = _make_fetch_ok_sensor(last_update_success=True)
+    attrs = sensor.extra_state_attributes
+    assert attrs == {
+        "station_id": "12345",
+        "last_exception": None,
+        "last_successful_fetch": None,
+    }
+
+
+async def test_is_open_extra_attributes_no_data() -> None:
+    """StationIsOpenBinarySensor extra_state_attributes returns base when data is None."""
+    sensor = _make_binary_sensor(None)
     assert sensor.extra_state_attributes == {"station_id": "12345"}

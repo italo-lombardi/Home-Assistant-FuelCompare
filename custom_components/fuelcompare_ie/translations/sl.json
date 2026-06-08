@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Ime Postaje"
+      },
+      "integration_last_success": {
+        "name": "Zadnji uspešni prenos"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Je odprto"
+      },
+      "fetch_ok": {
+        "name": "Prenos OK"
       }
     }
   }

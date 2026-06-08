@@ -38,10 +38,12 @@
       "accessibility": { "name": "Accessibility" },
       "offerings": { "name": "Offerings" },
       "amenities": { "name": "Amenities" },
-      "payments": { "name": "Payments" }
+      "payments": { "name": "Payments" },
+      "integration_last_success": { "name": "Integration Last Success" }
     },
     "binary_sensor": {
-      "is_open": { "name": "Is Open" }
+      "is_open": { "name": "Is Open" },
+      "fetch_ok": { "name": "Fetch OK" }
     }
   }
 }

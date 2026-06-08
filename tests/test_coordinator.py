@@ -968,3 +968,62 @@ def test_cryptojs_decrypt_invalid_padding() -> None:
 
     with pytest.raises(ValueError, match="Invalid PKCS7 padding length"):
         _cryptojs_decrypt(bad_payload, evp_key)
+
+
+# ---------------------------------------------------------------------------
+# last_successful_fetch stamping
+# ---------------------------------------------------------------------------
+
+
+async def test_last_successful_fetch_initially_none(hass: HomeAssistant) -> None:
+    """Coordinator starts with last_successful_fetch = None."""
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    assert coordinator.last_successful_fetch is None
+
+
+async def test_last_successful_fetch_stamped_on_success(hass: HomeAssistant) -> None:
+    """Successful fetch stamps last_successful_fetch with the current UTC time."""
+    data_resp = _make_mock_response(
+        200, json_data=_station_json(unleaded=185, diesel=175)
+    )
+    session = _make_session(data_resp)
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator._build_id = "test_build"
+
+    fixed_now = __import__("datetime").datetime(
+        2026, 6, 8, 12, 0, 0, tzinfo=__import__("datetime").timezone.utc
+    )
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.dt_util.utcnow",
+            return_value=fixed_now,
+        ),
+    ):
+        await coordinator._async_update_data()
+
+    assert coordinator.last_successful_fetch == fixed_now
+
+
+async def test_last_successful_fetch_unchanged_on_failure(
+    hass: HomeAssistant,
+) -> None:
+    """Failed fetch does not advance last_successful_fetch."""
+    session = MagicMock()
+    session.get = MagicMock(side_effect=ClientError("network error"))
+
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator._build_id = "test_build"
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=session,
+    ):
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+    assert coordinator.last_successful_fetch is None

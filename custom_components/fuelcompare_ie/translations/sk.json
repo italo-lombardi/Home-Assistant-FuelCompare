@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Názov Stanice"
+      },
+      "integration_last_success": {
+        "name": "Posledné úspešné načítanie"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Je otvorené"
+      },
+      "fetch_ok": {
+        "name": "Načítanie OK"
       }
     }
   }

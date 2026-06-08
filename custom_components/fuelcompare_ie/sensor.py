@@ -16,6 +16,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CURRENCY_EURO
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -121,6 +122,7 @@ async def async_setup_entry(
                 "payments",
                 "mdi:credit-card",
             ),
+            IntegrationLastSuccessSensor(coordinator, station_id, station_name),
         ]
     )
 
@@ -179,10 +181,15 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        Stale-retention behaviour: we deliberately drop the
+        ``coordinator.last_update_success`` check here so the last good price
+        survives transient fetch failures (site outage, throttling, network
+        blips). Use ``binary_sensor.<station>_fetch_ok`` to detect failures.
+        """
         return (
-            self.coordinator.last_update_success
-            and self.coordinator.data is not None
+            self.coordinator.data is not None
             and self._fuel_type in self.coordinator.data
             and self.coordinator.data[self._fuel_type] is not None
         )
@@ -234,6 +241,11 @@ class StationPriceLastUpdatedSensor(
         return _parse_lastupdated(self.coordinator.data.get("lastupdated"))
 
     @property
+    def available(self) -> bool:
+        """Stay available with last known data even when last fetch failed."""
+        return self.coordinator.data is not None
+
+    @property
     def extra_state_attributes(self) -> dict:
         """Return station_id attribute."""
         return {"station_id": self._station_id}
@@ -264,6 +276,11 @@ class StationNameSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntit
         if self.coordinator.data:
             return self.coordinator.data.get("name")
         return None
+
+    @property
+    def available(self) -> bool:
+        """Stay available with last known data even when last fetch failed."""
+        return self.coordinator.data is not None
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -300,6 +317,11 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
         return None
 
     @property
+    def available(self) -> bool:
+        """Stay available with last known data even when last fetch failed."""
+        return self.coordinator.data is not None
+
+    @property
     def extra_state_attributes(self) -> dict:
         """Return station_id attribute."""
         return {"station_id": self._station_id}
@@ -332,6 +354,11 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         return None
 
     @property
+    def available(self) -> bool:
+        """Stay available with last known data even when last fetch failed."""
+        return self.coordinator.data is not None
+
+    @property
     def extra_state_attributes(self) -> dict:
         """Return station_id attribute."""
         return {"station_id": self._station_id}
@@ -357,6 +384,11 @@ class StationWorkingHoursSensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_working_hours"
         self._attr_device_info = _device_info(station_id, station_name)
+
+    @property
+    def available(self) -> bool:
+        """Stay available with last known data even when last fetch failed."""
+        return self.coordinator.data is not None
 
     @property
     def native_value(self) -> str | None:
@@ -435,8 +467,12 @@ class StationAboutCategorySensor(
 
     @property
     def available(self) -> bool:
-        """Return True only if the category exists and has at least one entry."""
-        return self.coordinator.last_update_success and bool(self._get_category_data())
+        """Return True only if the category exists and has at least one entry.
+
+        Stale-retention: drop the ``last_update_success`` gate so the last
+        known facility data survives transient fetch failures.
+        """
+        return bool(self._get_category_data())
 
     @property
     def native_value(self) -> str | None:
@@ -451,3 +487,52 @@ class StationAboutCategorySensor(
     def extra_state_attributes(self) -> dict:
         """Return all features in this category with their enabled state, plus station_id."""
         return {"station_id": self._station_id, **self._get_category_data()}
+
+
+# ── Diagnostic sensors ────────────────────────────────────────────────────────
+
+
+class IntegrationLastSuccessSensor(
+    CoordinatorEntity[FuelCompareIECoordinator], SensorEntity
+):
+    """Diagnostic sensor exposing when the integration last fetched data successfully.
+
+    Distinct from ``price_last_updated`` — that one reflects fuelcompare.ie's
+    own server-side timestamp for the price record. This sensor reflects the
+    integration's own poll cadence, so automations can detect "fetch loop
+    has been failing for hours" independently of whether the site has refreshed
+    its price record.
+    """
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:cloud-check"
+    _attr_has_entity_name = True
+    _attr_translation_key = "integration_last_success"
+
+    def __init__(
+        self,
+        coordinator: FuelCompareIECoordinator,
+        station_id: str,
+        station_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_integration_last_success"
+        self._attr_device_info = _device_info(station_id, station_name)
+
+    @property
+    def available(self) -> bool:
+        """Always available — value is None until first successful fetch."""
+        return True
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return the timestamp of the last successful integration fetch."""
+        return self.coordinator.last_successful_fetch
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return station_id attribute."""
+        return {"station_id": self._station_id}

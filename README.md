@@ -49,7 +49,7 @@ The integration repeats data fetch every **30 minutes** via Home Assistant's `Da
 
 ![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
 
-Each station creates **13 entities** grouped under a single device.
+Each station creates **15 entities** grouped under a single device.
 
 ### Fuel price sensors
 
@@ -74,13 +74,53 @@ Each station creates **13 entities** grouped under a single device.
 
 > Facility sensors (`accessibility`, `offerings`, `amenities`, `payments`) are marked unavailable if a station does not provide data for that category.
 
-### Binary sensor
+### Diagnostic sensor
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `sensor.<name>_integration_last_success` | Timestamp (UTC) of the last successful fetch by *this integration* | `station_id` |
+
+This is distinct from `price_last_updated`: that sensor reflects the timestamp the **site** records for the price record, while `integration_last_success` reflects the **integration's own poll cadence**. Use it to detect "the integration hasn't fetched anything in N hours" independently of whether the site has refreshed its prices.
+
+### Binary sensors
 
 | Entity | State | Attributes |
 |--------|-------|------------|
 | `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `station_id`, `today_hours` |
+| `binary_sensor.<name>_fetch_ok` | `on` = last fetch succeeded, `off` = last fetch failed | `station_id`, `last_exception`, `last_successful_fetch` |
 
 The is-open state is derived by parsing today's working hours against the current time. Supports standard ranges (`6a.m.-10p.m.`), 24-hour stations, and closed days.
+
+The `fetch_ok` sensor (device class `connectivity`, diagnostic category) is always available and gives automations a single deterministic on/off signal for "is the integration successfully reaching fuelcompare.ie?". Pairs with the stale-retention behaviour described below.
+
+## Behaviour during fetch failures
+
+When the site is offline, throttling, or returning errors, the integration **keeps the last known values** for prices, station info, and is-open state instead of flipping every entity to `unavailable`. This lets dashboards keep showing the most recent prices through transient outages.
+
+To detect that a fetch has actually failed, automations should monitor:
+
+- `binary_sensor.<name>_fetch_ok` — flips to `off` immediately when a poll fails. Attributes carry the last exception and the timestamp of the last successful fetch.
+- `sensor.<name>_integration_last_success` — automations can compare this against `now()` to alert when the gap exceeds a threshold (e.g. no successful fetch in 6 hours).
+
+> **Breaking change in 0.6.0:** Earlier versions marked all entities as `unavailable` whenever a fetch failed. From 0.6.0 onward, entities retain the last good value on failure. Automations that previously detected outages via `state == 'unavailable'` should migrate to the `fetch_ok` binary sensor.
+
+Example automation skeleton:
+
+```yaml
+- alias: "FuelCompare integration unhealthy"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.my_station_fetch_ok
+      to: "off"
+      for: "01:00:00"
+  action:
+    - service: notify.mobile_app
+      data:
+        message: >
+          FuelCompare hasn't fetched successfully for over an hour.
+          Last success: {{ state_attr('binary_sensor.my_station_fetch_ok',
+          'last_successful_fetch') }}.
+```
 
 ## Installation
 

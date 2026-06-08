@@ -14,6 +14,7 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -74,6 +75,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             StationIsOpenBinarySensor(coordinator, station_id, station_name),
+            StationFetchOkBinarySensor(coordinator, station_id, station_name),
         ]
     )
 
@@ -99,6 +101,18 @@ class StationIsOpenBinarySensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
         self._attr_device_info = _device_info(station_id, station_name)
+
+    @property
+    def available(self) -> bool:
+        """Stay available with last known data even when last fetch failed.
+
+        Drops the ``coordinator.last_update_success`` gate so the open/closed
+        state survives transient site outages — see fetch_ok binary sensor for
+        live fetch health.
+        """
+        return self.coordinator.data is not None and bool(
+            self.coordinator.data.get("working_hours")
+        )
 
     @property
     def is_on(self) -> bool | None:
@@ -138,3 +152,57 @@ class StationIsOpenBinarySensor(
                 "Failed to parse working_hours for extra_state_attributes: %s", err
             )
             return base
+
+
+class StationFetchOkBinarySensor(
+    CoordinatorEntity[FuelCompareIECoordinator], BinarySensorEntity
+):
+    """Diagnostic binary sensor exposing the integration's fetch health.
+
+    State is ``on`` when the last poll succeeded, ``off`` when it failed.
+    Always reports as available so automations can rely on it being a
+    deterministic on/off signal — even before the first successful fetch.
+
+    Pair with the stale-retention behaviour of the price/info sensors:
+    those keep their last known value during outages, this one tells you
+    whether the last refresh actually worked.
+    """
+
+    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_has_entity_name = True
+    _attr_translation_key = "fetch_ok"
+
+    def __init__(
+        self,
+        coordinator: FuelCompareIECoordinator,
+        station_id: str,
+        station_name: str,
+    ) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_fetch_ok"
+        self._attr_device_info = _device_info(station_id, station_name)
+
+    @property
+    def available(self) -> bool:
+        """Always available — we want a deterministic on/off signal."""
+        return True
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if the last coordinator update succeeded."""
+        return bool(self.coordinator.last_update_success)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return diagnostic context: last exception and last successful fetch."""
+        c = self.coordinator
+        last_exc = getattr(c, "last_exception", None)
+        last_success = getattr(c, "last_successful_fetch", None)
+        return {
+            "station_id": self._station_id,
+            "last_exception": str(last_exc) if last_exc else None,
+            "last_successful_fetch": last_success.isoformat() if last_success else None,
+        }

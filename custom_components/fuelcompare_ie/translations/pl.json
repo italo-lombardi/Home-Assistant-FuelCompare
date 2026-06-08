@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Nazwa Stacji"
+      },
+      "integration_last_success": {
+        "name": "Ostatnie udane pobranie"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Jest otwarty"
+      },
+      "fetch_ok": {
+        "name": "Pobieranie OK"
       }
     }
   }

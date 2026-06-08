@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Aseman Nimi"
+      },
+      "integration_last_success": {
+        "name": "Viimeisin onnistunut haku"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "On auki"
+      },
+      "fetch_ok": {
+        "name": "Haku OK"
       }
     }
   }

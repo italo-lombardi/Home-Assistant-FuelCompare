@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Stoties Pavadinimas"
+      },
+      "integration_last_success": {
+        "name": "Paskutinis sėkmingas paėmimas"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Atidaryta"
+      },
+      "fetch_ok": {
+        "name": "Paėmimas OK"
       }
     }
   }
