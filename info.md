@@ -2,7 +2,7 @@
 
 Track live unleaded and diesel prices from Irish petrol stations directly in your Home Assistant dashboard.
 
-![Sensors](custom_components/fuelcompare_ie/docs/sensors.png)
+![Sensors](assets/sensors.png)
 
 ## Features
 

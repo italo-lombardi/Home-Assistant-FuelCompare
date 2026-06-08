@@ -47,7 +47,7 @@ The integration repeats data fetch every **30 minutes** via Home Assistant's `Da
 
 ## Entities created
 
-![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
+![Sensors screenshot](assets/sensors.png)
 
 Each station creates **15 entities** grouped under a single device.
 
@@ -143,15 +143,15 @@ Example automation skeleton:
 2. Search for **FuelCompare.ie**.
 3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
 
-   ![Config flow step 1](custom_components/fuelcompare_ie/docs/config_flow_step_1.png)
+   ![Config flow step 1](assets/config_flow_step_1.png)
 
    If you enter an invalid ID, an error is shown inline:
 
-   ![Config flow step 1 error](custom_components/fuelcompare_ie/docs/config_flow_step_1_error.png)
+   ![Config flow step 1 error](assets/config_flow_step_1_error.png)
 
 4. The integration will automatically fetch the station's name and pre-populate the name field. Confirm or enter a custom name.
 
-   ![Config flow step 2](custom_components/fuelcompare_ie/docs/config_flow_step_2.png)
+   ![Config flow step 2](assets/config_flow_step_2.png)
 
 ### Finding a station ID
 
