@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Όνομα Σταθμού"
+      },
+      "last_successful_fetch": {
+        "name": "Τελευταία επιτυχημένη λήψη"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Είναι ανοιχτό"
+      },
+      "data_fetch_problem": {
+        "name": "Πρόβλημα λήψης δεδομένων"
       }
     }
   }

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+import homeassistant.util.dt as dt_util
 from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from homeassistant.core import HomeAssistant
@@ -40,6 +41,12 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
         self.station_id = station_id
         # Cached across updates; refreshed automatically when stale (HTTP non-200 or decrypt failure)
         self._assets = PageAssets(station_id)
+        # Timestamp of the last successful fetch — exposed via the
+        # LastSuccessfulFetchSensor and the DataFetchProblemBinarySensor
+        # so automations can distinguish "site stamp didn't change" (price
+        # genuinely unchanged) from "integration hasn't fetched in N hours"
+        # (transient site outage / throttling). Stays None until first success.
+        self.last_successful_fetch: datetime | None = None
 
     # ---- Backwards-compatible accessors used by tests / older imports -------
 
@@ -113,7 +120,11 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict[str, float | None]]):
                 raise UpdateFailed("Station data not found via any available method")
 
             _LOGGER.debug("Raw station data for %s: %s", self.station_id, station_data)
-            return self._parse_station(station_data)
+            parsed = self._parse_station(station_data)
+            # Stamp success only after parsing succeeds — a parse exception still
+            # raises UpdateFailed below and must not advance the timestamp.
+            self.last_successful_fetch = dt_util.utcnow()
+            return parsed
 
         except ClientError as err:
             _LOGGER.debug("HTTP error fetching station %s: %s", self.station_id, err)

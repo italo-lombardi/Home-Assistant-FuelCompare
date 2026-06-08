@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Numele Stației"
+      },
+      "last_successful_fetch": {
+        "name": "Ultima preluare reușită"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Este deschis"
+      },
+      "data_fetch_problem": {
+        "name": "Problemă la preluarea datelor"
       }
     }
   }

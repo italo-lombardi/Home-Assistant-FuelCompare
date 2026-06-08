@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Jaama Nimi"
+      },
+      "last_successful_fetch": {
+        "name": "Viimane edukas pärimine"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "On avatud"
+      },
+      "data_fetch_problem": {
+        "name": "Andmete pärimise probleem"
       }
     }
   }

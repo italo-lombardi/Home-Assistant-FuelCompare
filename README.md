@@ -47,9 +47,9 @@ The integration repeats data fetch every **30 minutes** via Home Assistant's `Da
 
 ## Entities created
 
-![Sensors screenshot](custom_components/fuelcompare_ie/docs/sensors.png)
+![Sensors screenshot](assets/sensors.png)
 
-Each station creates **13 entities** grouped under a single device.
+Each station creates **15 entities** grouped under a single device.
 
 ### Fuel price sensors
 
@@ -74,13 +74,53 @@ Each station creates **13 entities** grouped under a single device.
 
 > Facility sensors (`accessibility`, `offerings`, `amenities`, `payments`) are marked unavailable if a station does not provide data for that category.
 
-### Binary sensor
+### Diagnostic sensor
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `sensor.<name>_last_successful_fetch` | Timestamp (UTC) of the last successful fetch by *this integration* | `station_id` |
+
+This is distinct from `price_last_updated`: that sensor reflects the timestamp the **site** records for the price record, while `last_successful_fetch` reflects the **integration's own poll cadence**. Use it to detect "the integration hasn't fetched anything in N hours" independently of whether the site has refreshed its prices.
+
+### Binary sensors
 
 | Entity | State | Attributes |
 |--------|-------|------------|
 | `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `station_id`, `today_hours` |
+| `binary_sensor.<name>_data_fetch_problem` | `on` = problem (last fetch failed), `off` = healthy (last fetch succeeded) | `station_id`, `last_exception`, `last_successful_fetch` |
 
 The is-open state is derived by parsing today's working hours against the current time. Supports standard ranges (`6a.m.-10p.m.`), 24-hour stations, and closed days.
+
+The `data_fetch_problem` sensor (device class `problem`, diagnostic category) is always available and gives automations a single deterministic on/off signal for "is the integration currently failing to reach fuelcompare.ie?". Pairs with the stale-retention behaviour described below.
+
+## Behaviour during fetch failures
+
+When the site is offline, throttling, or returning errors, the integration **keeps the last known values** for prices, station info, and is-open state instead of flipping every entity to `unavailable`. This lets dashboards keep showing the most recent prices through transient outages.
+
+To detect that a fetch has actually failed, automations should monitor:
+
+- `binary_sensor.<name>_data_fetch_problem` — flips to `on` immediately when a poll fails. Attributes carry the last exception and the timestamp of the last successful fetch.
+- `sensor.<name>_last_successful_fetch` — automations can compare this against `now()` to alert when the gap exceeds a threshold (e.g. no successful fetch in 6 hours).
+
+> **Breaking change in 0.6.0:** Earlier versions marked all entities as `unavailable` whenever a fetch failed. From 0.6.0 onward, entities retain the last good value on failure. Automations that previously detected outages via `state == 'unavailable'` should migrate to the `data_fetch_problem` binary sensor.
+
+Example automation skeleton:
+
+```yaml
+- alias: "FuelCompare integration unhealthy"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.my_station_data_fetch_problem
+      to: "on"
+      for: "01:00:00"
+  action:
+    - service: notify.mobile_app
+      data:
+        message: >
+          FuelCompare hasn't fetched successfully for over an hour.
+          Last success: {{ state_attr('binary_sensor.my_station_data_fetch_problem',
+          'last_successful_fetch') }}.
+```
 
 ## Installation
 
@@ -103,15 +143,15 @@ The is-open state is derived by parsing today's working hours against the curren
 2. Search for **FuelCompare.ie**.
 3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
 
-   ![Config flow step 1](custom_components/fuelcompare_ie/docs/config_flow_step_1.png)
+   ![Config flow step 1](assets/config_flow_step_1.png)
 
    If you enter an invalid ID, an error is shown inline:
 
-   ![Config flow step 1 error](custom_components/fuelcompare_ie/docs/config_flow_step_1_error.png)
+   ![Config flow step 1 error](assets/config_flow_step_1_error.png)
 
 4. The integration will automatically fetch the station's name and pre-populate the name field. Confirm or enter a custom name.
 
-   ![Config flow step 2](custom_components/fuelcompare_ie/docs/config_flow_step_2.png)
+   ![Config flow step 2](assets/config_flow_step_2.png)
 
 ### Finding a station ID
 

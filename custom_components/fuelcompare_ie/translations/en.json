@@ -60,11 +60,17 @@
       },
       "payments": {
         "name": "Payments"
+      },
+      "last_successful_fetch": {
+        "name": "Last Successful Fetch"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Is Open"
+      },
+      "data_fetch_problem": {
+        "name": "Data Fetch Problem"
       }
     }
   }

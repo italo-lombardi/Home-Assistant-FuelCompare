@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Stationsnamn"
+      },
+      "last_successful_fetch": {
+        "name": "Senaste lyckade hämtning"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Är öppen"
+      },
+      "data_fetch_problem": {
+        "name": "Problem med datahämtning"
       }
     }
   }

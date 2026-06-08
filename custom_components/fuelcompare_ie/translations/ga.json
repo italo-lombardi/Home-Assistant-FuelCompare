@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Ainm an Stáisiúin"
+      },
+      "last_successful_fetch": {
+        "name": "Aisghabháil dheireanach rathúil"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Ar Oscailt"
+      },
+      "data_fetch_problem": {
+        "name": "Fadhb le sonraí a fháil"
       }
     }
   }

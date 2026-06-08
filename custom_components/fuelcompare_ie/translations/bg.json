@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Име на Станция"
+      },
+      "last_successful_fetch": {
+        "name": "Последно успешно извличане"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Отворено е"
+      },
+      "data_fetch_problem": {
+        "name": "Проблем при извличане на данни"
       }
     }
   }

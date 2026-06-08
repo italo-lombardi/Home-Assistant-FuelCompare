@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Nazwa Stacji"
+      },
+      "last_successful_fetch": {
+        "name": "Ostatnie udane pobranie"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Jest otwarty"
+      },
+      "data_fetch_problem": {
+        "name": "Problem z pobieraniem danych"
       }
     }
   }

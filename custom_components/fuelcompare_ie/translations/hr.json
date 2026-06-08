@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Naziv Postaje"
+      },
+      "last_successful_fetch": {
+        "name": "Posljednje uspješno dohvaćanje"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Je otvoren"
+      },
+      "data_fetch_problem": {
+        "name": "Problem s dohvaćanjem podataka"
       }
     }
   }

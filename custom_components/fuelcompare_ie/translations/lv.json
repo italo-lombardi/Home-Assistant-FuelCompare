@@ -57,11 +57,17 @@
       },
       "station_name": {
         "name": "Stacijas Nosaukums"
+      },
+      "last_successful_fetch": {
+        "name": "Pēdējā veiksmīgā ielāde"
       }
     },
     "binary_sensor": {
       "is_open": {
         "name": "Ir atvērts"
+      },
+      "data_fetch_problem": {
+        "name": "Datu ielādes problēma"
       }
     }
   }

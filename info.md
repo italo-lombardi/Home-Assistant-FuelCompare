@@ -2,7 +2,7 @@
 
 Track live unleaded and diesel prices from Irish petrol stations directly in your Home Assistant dashboard.
 
-![Sensors](custom_components/fuelcompare_ie/docs/sensors.png)
+![Sensors](assets/sensors.png)
 
 ## Features
 
@@ -13,6 +13,7 @@ Track live unleaded and diesel prices from Irish petrol stations directly in you
 - Prices refresh automatically every 30 minutes
 - Add as many stations as you like
 - Easy setup — no YAML, no API keys, station name auto-fetched during setup
+- Stale-retention on transient outages: entities keep their last known value when the site is offline or throttling, with a dedicated `data_fetch_problem` problem binary sensor and `last_successful_fetch` timestamp sensor for automations
 - Translated into 25 languages
 
 ## Setup
