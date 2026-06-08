@@ -49,7 +49,7 @@ The integration repeats data fetch every **30 minutes** via Home Assistant's `Da
 
 ![Sensors screenshot](assets/sensors.png)
 
-Each station creates **15 entities** grouped under a single device.
+Each station creates **14 entities** grouped under a single device.
 
 ### Fuel price sensors
 
