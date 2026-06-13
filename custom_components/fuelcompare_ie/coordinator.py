@@ -13,7 +13,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DEFAULT_SCAN_INTERVAL
-from .crypto import cryptojs_decrypt as _cryptojs_decrypt  # re-exported for test compat
+from .crypto import cryptojs_decrypt as _cryptojs_decrypt  # re-exported for test compat  # noqa: F401
 from .providers.base import BaseProvider
 
 _LOGGER = logging.getLogger(__name__)

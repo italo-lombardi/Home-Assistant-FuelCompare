@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from aiohttp import ClientError, ClientSession, ClientTimeout
+from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT, BASE_URL, FUEL_TYPES
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
