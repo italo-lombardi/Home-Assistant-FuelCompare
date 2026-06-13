@@ -1,6 +1,6 @@
 {
   "domain": "fuelcompare_ie",
-  "name": "FuelCompare.ie",
+  "name": "Fuel Compare",
   "codeowners": ["@italo-lombardi"],
   "config_flow": true,
   "dependencies": [],

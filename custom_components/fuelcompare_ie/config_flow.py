@@ -1,4 +1,4 @@
-"""Config flow for FuelCompare.ie integration."""
+"""Config flow for Fuel Compare integration."""
 
 from __future__ import annotations
 
@@ -11,44 +11,130 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CONF_STATION_ID, DOMAIN
+from .const import (
+    CONF_COUNTRY,
+    CONF_PROVIDER,
+    CONF_STATION_ID,
+    DEFAULT_COUNTRY,
+    DEFAULT_PROVIDER,
+    DOMAIN,
+)
 from .coordinator import FuelCompareIECoordinator
+from .providers import PROVIDER_REGISTRY
+from .providers.ie_fuelcompare import IEFuelCompareProvider
 
 _LOGGER = logging.getLogger(__name__)
 
+# Countries offered in the config flow, in display order.
+# Each entry is (ISO code, display label).
+_COUNTRIES: list[tuple[str, str]] = [
+    ("IE", "Ireland"),
+]
+
+
+def _providers_for_country(country: str) -> list[tuple[str, str]]:
+    """Return (provider_key, label) pairs for a given country code."""
+    return [
+        (cls.PROVIDER_KEY, cls.LABEL)
+        for cls in PROVIDER_REGISTRY.values()
+        if cls.COUNTRY == country
+    ]
+
 
 async def _fetch_station_name(hass, station_id: str) -> str | None:
-    """Try to resolve the station's brand name from the API. Returns None on any failure."""
+    """Resolve station display name via the IE provider. Module-level for test patching."""
     try:
         session = async_get_clientsession(hass)
-        coordinator = FuelCompareIECoordinator(hass, station_id)
+        provider = IEFuelCompareProvider(station_id)
+        # Build a minimal coordinator so tests can patch coordinator methods
+        coordinator = FuelCompareIECoordinator(hass, provider, station_id)
         await coordinator._fetch_page_assets(session)
         data = await coordinator._fetch_nextjs(session)
         if data is None:
             data = await coordinator._fetch_encrypted_api(session)
-        if data and (data.get("name") or data.get("tablename")):
+        if data:
             if data.get("name"):
                 return data["name"]
-            return data["tablename"].replace("_", " ").title()
+            if data.get("tablename"):
+                return data["tablename"].replace("_", " ").title()
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
     return None
 
 
 class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for FuelCompare.ie."""
+    """Handle a config flow for Fuel Compare."""
 
     VERSION = 1
 
     def __init__(self) -> None:
-        """Initialise the config flow."""
+        self._country: str = DEFAULT_COUNTRY
+        self._provider_key: str = DEFAULT_PROVIDER
         self._station_id: str = ""
         self._suggested_name: str = ""
+
+    # ---- Step 1: country --------------------------------------------------------
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle the initial step — collect and validate station ID."""
+        """Select country. Auto-advance when only one country is available."""
+        if len(_COUNTRIES) == 1:
+            self._country = _COUNTRIES[0][0]
+            return await self._async_step_provider()
+
+        if user_input is not None:
+            self._country = user_input[CONF_COUNTRY]
+            return await self._async_step_provider()
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_COUNTRY, default=DEFAULT_COUNTRY): vol.In(
+                        {code: label for code, label in _COUNTRIES}
+                    ),
+                }
+            ),
+        )
+
+    # ---- Step 2: provider (auto-skipped when single provider) -------------------
+
+    async def _async_step_provider(self) -> ConfigFlowResult:
+        """Advance to provider selection or skip directly to station ID."""
+        providers = _providers_for_country(self._country)
+        if len(providers) == 1:
+            self._provider_key = providers[0][0]
+            return await self.async_step_station()
+        return await self.async_step_provider()
+
+    async def async_step_provider(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Select data provider for the chosen country."""
+        providers = _providers_for_country(self._country)
+
+        if user_input is not None:
+            self._provider_key = user_input[CONF_PROVIDER]
+            return await self.async_step_station()
+
+        return self.async_show_form(
+            step_id="provider",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PROVIDER, default=providers[0][0]): vol.In(
+                        {key: label for key, label in providers}
+                    ),
+                }
+            ),
+        )
+
+    # ---- Step 3: station ID -----------------------------------------------------
+
+    async def async_step_station(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Collect and validate the station ID."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -68,26 +154,31 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
 
                 self._station_id = station_id
-                # Try to pre-populate name from API; fall back to generic label
                 fetched = await _fetch_station_name(self.hass, station_id)
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
 
         return self.async_show_form(
-            step_id="user",
+            step_id="station",
             data_schema=vol.Schema({vol.Required(CONF_STATION_ID): str}),
             errors=errors,
         )
 
+    # ---- Step 4: confirm / edit name --------------------------------------------
+
     async def async_step_name(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle the name confirmation step — user can accept or override."""
+        """Confirm or edit the station display name."""
         if user_input is not None:
             title = user_input.get(CONF_NAME) or self._suggested_name
             return self.async_create_entry(
                 title=title,
-                data={CONF_STATION_ID: self._station_id},
+                data={
+                    CONF_STATION_ID: self._station_id,
+                    CONF_COUNTRY: self._country,
+                    CONF_PROVIDER: self._provider_key,
+                },
             )
 
         return self.async_show_form(

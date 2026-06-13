@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Cuir Stáisiún FuelCompare.ie Leis",
-        "description": "Cuir isteach aitheantas an stáisiúin ó fuelcompare.ie (m.sh., 790 le haghaidh Circle K Taney Baile Átha Cliath)",
+        "title": "Cuir Stáisiún Fuel Compare Leis",
+        "description": "Cuir isteach aitheantas an stáisiúin ó (m.sh., 790 le haghaidh Circle K Taney Baile Átha Cliath)",
         "data": {
           "station_id": "Aitheantas Stáisiúin"
         }

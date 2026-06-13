@@ -1,4 +1,4 @@
-"""Tests for FuelCompare.ie config flow."""
+"""Tests for Fuel Compare config flow."""
 
 from __future__ import annotations
 
@@ -9,7 +9,14 @@ from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.fuelcompare_ie.config_flow import _fetch_station_name
-from custom_components.fuelcompare_ie.const import CONF_STATION_ID, DOMAIN
+from custom_components.fuelcompare_ie.const import (
+    CONF_COUNTRY,
+    CONF_PROVIDER,
+    CONF_STATION_ID,
+    DEFAULT_COUNTRY,
+    DEFAULT_PROVIDER,
+    DOMAIN,
+)
 
 _PATCH_FETCH_NAME = patch(
     "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
@@ -31,11 +38,13 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
         mock_fetch.return_value = "Circle K"
 
+        # Step 1: user (country) — auto-advances since only IE is available
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        # Single country auto-skips to station step
         assert result["type"] == "form"
-        assert result["step_id"] == "user"
+        assert result["step_id"] == "station"
 
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -44,7 +53,6 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
 
     assert result["type"] == "form"
     assert result["step_id"] == "name"
-    # Pre-populated with fetched name
     assert result["data_schema"]({}) == {"name": "Circle K"}
 
     with _PATCH_FIRST_REFRESH:
@@ -54,7 +62,9 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
         )
 
     assert result["type"] == "create_entry"
-    assert result["data"] == {CONF_STATION_ID: "123"}
+    assert result["data"][CONF_STATION_ID] == "123"
+    assert result["data"][CONF_COUNTRY] == DEFAULT_COUNTRY
+    assert result["data"][CONF_PROVIDER] == DEFAULT_PROVIDER
     assert result["title"] == "Circle K"
 
 
@@ -71,6 +81,7 @@ async def test_config_flow_custom_name(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        assert result["step_id"] == "station"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             user_input={CONF_STATION_ID: "123"},
@@ -103,6 +114,7 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        assert result["step_id"] == "station"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             user_input={CONF_STATION_ID: "456"},
@@ -131,6 +143,7 @@ async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -151,6 +164,7 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -171,6 +185,7 @@ async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -199,6 +214,7 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     with _PATCH_FETCH_NAME:
         result = await hass.config_entries.flow.async_configure(

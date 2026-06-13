@@ -1,4 +1,4 @@
-# FuelCompare.ie — Home Assistant Custom Integration
+# Fuel Compare — Home Assistant Custom Integration
 
 <a href="https://analytics.home-assistant.io"><img src="https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=integration%20usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=%24.fuelcompare_ie.total" alt="Integration usage"></a>
 <a href="https://github.com/italo-lombardi/Home-Assistant-FuelCompare/releases"><img src="https://img.shields.io/github/v/release/italo-lombardi/Home-Assistant-FuelCompare" alt="Latest Release"></a>
@@ -13,9 +13,13 @@
 
 ---
 
+> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. A provider abstraction layer has been introduced to allow alternative data sources to be added without breaking existing installations. See [#roadmap](#roadmap) below.
+
+---
+
 ## What this is
 
-A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices and station information for Irish petrol stations listed on [fuelcompare.ie](https://fuelcompare.ie). Each station you add creates a full set of sensors covering prices, opening hours, facilities, and real-time open/closed status.
+A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices and station information for Irish petrol stations. Each station you add creates a full set of sensors covering prices, opening hours, facilities, and real-time open/closed status.
 
 ## How it works
 
@@ -129,7 +133,7 @@ Example automation skeleton:
 1. Open HACS in Home Assistant.
 2. Go to **Integrations** → three-dot menu → **Custom repositories**.
 3. Add `https://github.com/italo-lombardi/Home-Assistant-FuelCompare` with category **Integration**.
-4. Search for **FuelCompare.ie** and install it.
+4. Search for **Fuel Compare** and install it.
 5. Restart Home Assistant.
 
 ### Manual
@@ -140,7 +144,7 @@ Example automation skeleton:
 ## Configuration
 
 1. Go to **Settings → Devices & Services → Add Integration**.
-2. Search for **FuelCompare.ie**.
+2. Search for **Fuel Compare**.
 3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
 
    ![Config flow step 1](assets/config_flow_step_1.png)
@@ -173,6 +177,17 @@ Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, G
 ## Disclaimer (repeated for clarity)
 
 This project is a personal, community tool. It is **not** the official FuelCompare.ie app or service. The author has no relationship with FuelCompare.ie. If FuelCompare.ie changes their website structure this integration may stop working; please open an issue and it will be looked at when time allows.
+
+## Roadmap
+
+fuelcompare.ie announced it is closing at end of June 2025. The integration has been restructured with a provider abstraction layer so alternative data sources can be added without breaking existing installations or requiring users to reconfigure anything.
+
+**Planned:**
+- Investigate and integrate FuelFinder.ie (Conjora) as an Ireland fallback source
+- Explore fuelwatch.ie API access (1,800+ stations, API listed as coming soon)
+- Potentially expand to additional countries where government open-data fuel price APIs exist (e.g. Germany via Tankerkoenig, Spain via MINETUR, Portugal via DGEG)
+
+Existing users: your installation continues to work as long as fuelcompare.ie remains online. When an alternative source is ready, it will be available as a new option in the config flow — no reinstallation required.
 
 ## Sibling integrations
 

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Renamed integration display name** from "FuelCompare.ie" to "Fuel Compare". The internal domain (`fuelcompare_ie`) and all existing config entries are unchanged — no migration required for existing users.
+- Config flow now includes a country selector step and a data source (provider) selector step. Currently only Ireland / fuelcompare.ie is available; both steps auto-advance when there is only one option, so the setup experience is identical to previous versions.
+
+### Added
+- Provider abstraction layer (`providers/`): data-fetching logic is now in `providers/ie_fuelcompare.py` (`IEFuelCompareProvider`), implementing the new `BaseProvider` ABC. This makes it possible to add alternative Ireland sources (e.g. FuelFinder.ie) and additional countries in future releases without touching the sensor/coordinator/entity layer.
+- `CONF_COUNTRY` and `CONF_PROVIDER` stored in config entry data. Existing entries without these keys default to `IE` / `ie_fuelcompare`.
+- `requirements_test.txt`: updated `pytest-homeassistant-custom-component` to `>=0.13.338,<0.13.339`.
+
+### Context
+fuelcompare.ie announced closure at end of June 2025. This release lays the groundwork to support alternative Irish data sources and additional countries without breaking existing installations. The fuelcompare.ie scraper continues to work as before until a replacement source is integrated.
+
 ## [0.6.0] - 2026-06-08
 
 ### Added

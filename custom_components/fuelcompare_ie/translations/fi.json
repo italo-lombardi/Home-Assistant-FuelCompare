@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Lisää FuelCompare.ie-asema",
-        "description": "Syötä aseman tunnus fuelcompare.ie-sivustolta (esim. 790 Circle K Taney Dublin)",
+        "title": "Lisää Fuel Compare-asema",
+        "description": "Syötä aseman tunnus-sivustolta (esim. 790 Circle K Taney Dublin)",
         "data": {
           "station_id": "Aseman tunnus"
         }
