@@ -70,7 +70,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Fuel Compare binary sensor based on a config entry."""
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
-    station_id = entry.data[CONF_STATION_ID]
+    station_id = entry.data.get(CONF_STATION_ID, "")
     station_name = entry.title
     async_add_entities(
         [

@@ -15,7 +15,7 @@ PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Fuel Compare from a config entry."""
-    station_id = entry.data[CONF_STATION_ID]
+    station_id = entry.data.get(CONF_STATION_ID, "")
 
     # Existing entries have no CONF_PROVIDER key — default to ie_fuelcompare
     # so they continue working without any migration.
