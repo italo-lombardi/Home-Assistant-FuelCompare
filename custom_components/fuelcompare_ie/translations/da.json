@@ -1,7 +1,9 @@
 {
   "config": {
     "step": {
-      "user": {
+      "user": {},
+      "provider": {},
+      "station": {
         "title": "Tilføj Fuel Compare-station",
         "description": "Indtast stations-ID fra (f.eks. 790 for Circle K Taney Dublin)",
         "data": {

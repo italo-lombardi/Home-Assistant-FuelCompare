@@ -14,7 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import DEFAULT_SCAN_INTERVAL
 from .crypto import cryptojs_decrypt as _cryptojs_decrypt  # re-exported for test compat  # noqa: F401
-from .providers.base import BaseProvider
+from .providers.base import BaseProvider, ProviderError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,6 +101,9 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict]):
         except ClientError as err:
             _LOGGER.debug("HTTP error fetching station %s: %s", self.station_id, err)
             raise UpdateFailed(f"Error communicating with API: {err}") from err
+        except ProviderError as err:
+            _LOGGER.debug("Provider error for station %s: %s", self.station_id, err)
+            raise UpdateFailed(str(err)) from err
         except UpdateFailed:
             raise
         except Exception as err:

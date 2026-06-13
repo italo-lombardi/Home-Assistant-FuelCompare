@@ -25,11 +25,20 @@ from .providers.ie_fuelcompare import IEFuelCompareProvider
 
 _LOGGER = logging.getLogger(__name__)
 
-# Countries offered in the config flow, in display order.
-# Each entry is (ISO code, display label).
-_COUNTRIES: list[tuple[str, str]] = [
-    ("IE", "Ireland"),
-]
+
+def _countries_from_registry() -> list[tuple[str, str]]:
+    """Derive (ISO code, display label) list from PROVIDER_REGISTRY.
+
+    Uses the first LABEL seen per country as the country display label.
+    Keeps insertion order so the list is stable across runs.
+    """
+    seen: dict[str, str] = {}
+    for cls in PROVIDER_REGISTRY.values():
+        if cls.COUNTRY not in seen:
+            seen[cls.COUNTRY] = cls.COUNTRY  # fallback: use code as label
+    # Override with human-readable names for known codes
+    _COUNTRY_NAMES = {"IE": "Ireland"}
+    return [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
 
 
 def _providers_for_country(country: str) -> list[tuple[str, str]]:
@@ -42,7 +51,7 @@ def _providers_for_country(country: str) -> list[tuple[str, str]]:
 
 
 async def _fetch_station_name(hass, station_id: str) -> str | None:
-    """Resolve station display name via the IE provider. Module-level for test patching."""
+    """Resolve station display name. Module-level so tests can patch it."""
     try:
         session = async_get_clientsession(hass)
         provider = IEFuelCompareProvider(station_id)
@@ -79,8 +88,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Select country. Auto-advance when only one country is available."""
-        if len(_COUNTRIES) == 1:
-            self._country = _COUNTRIES[0][0]
+        countries = _countries_from_registry()
+
+        if len(countries) == 1:
+            self._country = countries[0][0]
             return await self._async_step_provider()
 
         if user_input is not None:
@@ -92,7 +103,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_COUNTRY, default=DEFAULT_COUNTRY): vol.In(
-                        {code: label for code, label in _COUNTRIES}
+                        {code: label for code, label in countries}
                     ),
                 }
             ),
@@ -103,6 +114,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _async_step_provider(self) -> ConfigFlowResult:
         """Advance to provider selection or skip directly to station ID."""
         providers = _providers_for_country(self._country)
+        if not providers:
+            # No providers registered for this country — fall back to default
+            self._provider_key = DEFAULT_PROVIDER
+            return await self.async_step_station()
         if len(providers) == 1:
             self._provider_key = providers[0][0]
             return await self.async_step_station()
@@ -189,3 +204,5 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             ),
         )
+
+

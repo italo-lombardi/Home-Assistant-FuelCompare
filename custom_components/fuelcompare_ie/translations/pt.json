@@ -1,7 +1,9 @@
 {
   "config": {
     "step": {
-      "user": {
+      "user": {},
+      "provider": {},
+      "station": {
         "title": "Adicionar Estação Fuel Compare",
         "description": "Introduza o ID da estação em (ex.: 790 para Circle K Taney Dublin)",
         "data": {

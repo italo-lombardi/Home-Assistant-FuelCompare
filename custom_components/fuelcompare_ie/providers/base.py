@@ -3,22 +3,33 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession
+
+
+class ProviderError(Exception):
+    """Raised by a provider when it cannot retrieve station data."""
 
 
 class BaseProvider(ABC):
     """Abstract base class for a fuel price data provider."""
 
-    COUNTRY: str
+    COUNTRY: ClassVar[str]
     """ISO 3166-1 alpha-2 country code this provider serves, e.g. 'IE'."""
 
-    PROVIDER_KEY: str
+    PROVIDER_KEY: ClassVar[str]
     """Unique machine key stored in config entry data, e.g. 'ie_fuelcompare'."""
 
-    LABEL: str
+    LABEL: ClassVar[str]
     """Human-readable label shown in the config flow provider picker."""
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not getattr(cls, "__abstractmethods__", None):
+            for attr in ("COUNTRY", "PROVIDER_KEY", "LABEL"):
+                if not hasattr(cls, attr):
+                    raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
 
     @abstractmethod
     async def async_fetch(

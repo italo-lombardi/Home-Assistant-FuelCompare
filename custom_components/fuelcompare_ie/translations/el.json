@@ -1,7 +1,9 @@
 {
   "config": {
     "step": {
-      "user": {
+      "user": {},
+      "provider": {},
+      "station": {
         "title": "Προσθήκη σταθμού Fuel Compare",
         "description": "Εισάγετε το αναγνωριστικό σταθμού από το (π.χ. 790 για Circle K Taney Dublin)",
         "data": {

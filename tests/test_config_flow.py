@@ -335,3 +335,52 @@ async def test_fetch_station_name_exception_returns_none(hass: HomeAssistant) ->
         result = await _fetch_station_name(hass, "790")
 
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# test_unknown_provider_fallback
+# ---------------------------------------------------------------------------
+
+
+async def test_unknown_provider_key_falls_back_to_default(
+    hass: HomeAssistant,
+) -> None:
+    """Entry with unknown provider key loads using the default provider."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_999",
+        data={CONF_STATION_ID: "999", CONF_PROVIDER: "nonexistent_provider"},
+        title="Station 999",
+    )
+    entry.add_to_hass(hass)
+
+    with _PATCH_FIRST_REFRESH:
+        assert await hass.config_entries.async_setup(entry.entry_id)
+
+    # Entry loaded without error — default provider was used as fallback
+    from custom_components.fuelcompare_ie.const import DOMAIN as _DOMAIN
+
+    coordinator = hass.data[_DOMAIN][entry.entry_id]
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    assert isinstance(coordinator._provider, IEFuelCompareProvider)
+
+
+# ---------------------------------------------------------------------------
+# test_coordinator_2arg_compat
+# ---------------------------------------------------------------------------
+
+
+async def test_coordinator_2arg_compat(hass: HomeAssistant) -> None:
+    """FuelCompareIECoordinator(hass, station_id_str) creates IEFuelCompareProvider."""
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    coordinator = FuelCompareIECoordinator(hass, "42")
+    assert coordinator.station_id == "42"
+    assert isinstance(coordinator._provider, IEFuelCompareProvider)
+

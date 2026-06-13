@@ -10,7 +10,7 @@ from aiohttp import ClientSession, ClientTimeout
 from ..const import API_TIMEOUT, BASE_URL, FUEL_TYPES
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
 from ..page_assets import PageAssets
-from .base import BaseProvider
+from .base import BaseProvider, ProviderError
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _HEADERS = {
@@ -60,7 +60,7 @@ class IEFuelCompareProvider(BaseProvider):
                 station_id,
                 _ISSUE_TRACKER_URL,
             )
-            raise RuntimeError("Station data not found via any available method")
+            raise ProviderError("Station data not found via any available method")
 
         _LOGGER.debug("Raw station data for %s: %s", station_id, station_data)
         return self._parse_station(station_data)

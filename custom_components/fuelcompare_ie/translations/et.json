@@ -1,7 +1,9 @@
 {
   "config": {
     "step": {
-      "user": {
+      "user": {},
+      "provider": {},
+      "station": {
         "title": "Lisa Fuel Compare jaam",
         "description": "Sisestage jaama ID lehelt (nt 790 Circle K Taney Dublin jaoks)",
         "data": {
