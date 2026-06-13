@@ -100,7 +100,9 @@ class StationIsOpenBinarySensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:
@@ -184,7 +186,9 @@ class DataFetchProblemBinarySensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_data_fetch_problem"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:

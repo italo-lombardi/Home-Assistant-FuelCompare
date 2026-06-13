@@ -383,4 +383,3 @@ async def test_coordinator_2arg_compat(hass: HomeAssistant) -> None:
     coordinator = FuelCompareIECoordinator(hass, "42")
     assert coordinator.station_id == "42"
     assert isinstance(coordinator._provider, IEFuelCompareProvider)
-

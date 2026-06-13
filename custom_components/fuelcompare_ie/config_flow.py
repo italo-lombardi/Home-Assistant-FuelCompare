@@ -184,7 +184,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
 
                 self._station_id = station_id
-                fetched = await _fetch_station_name(self.hass, station_id, self._provider_key)
+                fetched = await _fetch_station_name(
+                    self.hass, station_id, self._provider_key
+                )
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
 
@@ -223,7 +225,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
-                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
+                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.Coerce(
+                        float
+                    ),
                     vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.Coerce(
                         float
                     ),
@@ -248,6 +252,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 data[CONF_STATION_ID] = self._station_id
             else:
                 from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
+
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
                 data[CONF_RADIUS_KM] = self._radius_km
@@ -261,4 +266,3 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             ),
         )
-

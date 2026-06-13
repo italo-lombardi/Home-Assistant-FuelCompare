@@ -168,7 +168,9 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
             "diesel": "mdi:gas-station-outline",
         }
         self._attr_icon = icon_map.get(fuel_type, "mdi:gas-station")
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> float | None:
@@ -231,7 +233,9 @@ class StationPriceLastUpdatedSensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_price_last_updated"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> datetime | None:
@@ -268,7 +272,9 @@ class StationNameSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntit
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_station_name"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -305,7 +311,9 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_brand"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -344,7 +352,9 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_county"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -383,7 +393,9 @@ class StationWorkingHoursSensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_working_hours"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:
@@ -447,7 +459,9 @@ class StationAboutCategorySensor(
         self._attr_icon = icon
         self._attr_unique_id = f"{DOMAIN}_{station_id}_about_{category.lower()}"
         self._attr_translation_key = translation_key
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     def _get_category_data(self) -> dict:
         """Return the parsed category dict, or empty dict on any failure."""
@@ -520,7 +534,9 @@ class LastSuccessfulFetchSensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_last_successful_fetch"
-        self._attr_device_info = _device_info(station_id, station_name, coordinator._provider.LABEL)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:
