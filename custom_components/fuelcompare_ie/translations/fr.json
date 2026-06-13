@@ -5,7 +5,7 @@
       "provider": {},
       "station": {
         "title": "Ajouter une station Fuel Compare",
-        "description": "Entrez l'identifiant de la station depuis (ex. : 790 pour Circle K Taney Dublin)",
+        "description": "Entrez l'identifiant de la station depuis l'URL de la station (ex. : 790 pour Circle K Taney Dublin)",
         "data": {
           "station_id": "Identifiant de la station"
         }

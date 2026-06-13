@@ -5,7 +5,7 @@
       "provider": {},
       "station": {
         "title": "Cuir Stáisiún Fuel Compare Leis",
-        "description": "Cuir isteach aitheantas an stáisiúin ó (m.sh., 790 le haghaidh Circle K Taney Baile Átha Cliath)",
+        "description": "Cuir isteach aitheantas an stáisiúin ó URL an stáisiúin (m.sh., 790 le haghaidh Circle K Taney Baile Átha Cliath)",
         "data": {
           "station_id": "Aitheantas Stáisiúin"
         }

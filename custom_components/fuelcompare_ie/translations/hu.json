@@ -5,7 +5,7 @@
       "provider": {},
       "station": {
         "title": "Fuel Compare állomás hozzáadása",
-        "description": "Adja meg az állomás azonosítóját a oldalról (pl. 790 a Circle K Taney Dublin esetén)",
+        "description": "Adja meg az állomás azonosítóját a az állomás URL-jéről (pl. 790 a Circle K Taney Dublin esetén)",
         "data": {
           "station_id": "Állomás azonosító"
         }

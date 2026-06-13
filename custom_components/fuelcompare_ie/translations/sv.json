@@ -5,7 +5,7 @@
       "provider": {},
       "station": {
         "title": "Lägg till Fuel Compare-station",
-        "description": "Ange stations-ID från (t.ex. 790 för Circle K Taney Dublin)",
+        "description": "Ange stations-ID från stationens URL (t.ex. 790 för Circle K Taney Dublin)",
         "data": {
           "station_id": "Stations-ID"
         }

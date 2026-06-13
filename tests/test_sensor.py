@@ -31,6 +31,7 @@ def _make_coordinator(data: dict | None, last_update_success: bool = True) -> Ma
     coord = MagicMock()
     coord.data = data
     coord.last_update_success = last_update_success
+    coord._provider.LABEL = "fuelcompare.ie"
     return coord
 
 

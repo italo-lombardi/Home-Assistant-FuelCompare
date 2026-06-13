@@ -5,7 +5,7 @@
       "provider": {},
       "station": {
         "title": "Lisa Fuel Compare jaam",
-        "description": "Sisestage jaama ID lehelt (nt 790 Circle K Taney Dublin jaoks)",
+        "description": "Sisestage jaama ID jaama URL-ilt (nt 790 Circle K Taney Dublin jaoks)",
         "data": {
           "station_id": "Jaama ID"
         }

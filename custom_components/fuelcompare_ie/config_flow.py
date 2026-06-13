@@ -17,27 +17,23 @@ from .const import (
     CONF_STATION_ID,
     DEFAULT_COUNTRY,
     DEFAULT_PROVIDER,
+    DEFAULT_RADIUS_KM,
     DOMAIN,
 )
 from .coordinator import FuelCompareIECoordinator
 from .providers import PROVIDER_REGISTRY
-from .providers.ie_fuelcompare import IEFuelCompareProvider
 
 _LOGGER = logging.getLogger(__name__)
 
+_COUNTRY_NAMES: dict[str, str] = {"IE": "Ireland"}
+
 
 def _countries_from_registry() -> list[tuple[str, str]]:
-    """Derive (ISO code, display label) list from PROVIDER_REGISTRY.
-
-    Uses the first LABEL seen per country as the country display label.
-    Keeps insertion order so the list is stable across runs.
-    """
+    """Derive (ISO code, display label) list from PROVIDER_REGISTRY."""
     seen: dict[str, str] = {}
     for cls in PROVIDER_REGISTRY.values():
         if cls.COUNTRY not in seen:
-            seen[cls.COUNTRY] = cls.COUNTRY  # fallback: use code as label
-    # Override with human-readable names for known codes
-    _COUNTRY_NAMES = {"IE": "Ireland"}
+            seen[cls.COUNTRY] = cls.COUNTRY
     return [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
 
 
@@ -50,12 +46,22 @@ def _providers_for_country(country: str) -> list[tuple[str, str]]:
     ]
 
 
-async def _fetch_station_name(hass, station_id: str) -> str | None:
-    """Resolve station display name. Module-level so tests can patch it."""
+async def _fetch_station_name(
+    hass, station_id: str, provider_key: str = DEFAULT_PROVIDER
+) -> str | None:
+    """Resolve station display name via the selected provider.
+
+    Falls back to DEFAULT_PROVIDER if provider_key is not in the registry.
+    Module-level so tests can patch coordinator._fetch_* methods.
+    """
+    provider_cls = PROVIDER_REGISTRY.get(provider_key) or PROVIDER_REGISTRY.get(
+        DEFAULT_PROVIDER
+    )
+    if provider_cls is None:
+        return None
     try:
         session = async_get_clientsession(hass)
-        provider = IEFuelCompareProvider(station_id)
-        # Build a minimal coordinator so tests can patch coordinator methods
+        provider = provider_cls(station_id)
         coordinator = FuelCompareIECoordinator(hass, provider, station_id)
         await coordinator._fetch_page_assets(session)
         data = await coordinator._fetch_nextjs(session)
@@ -80,6 +86,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._country: str = DEFAULT_COUNTRY
         self._provider_key: str = DEFAULT_PROVIDER
         self._station_id: str = ""
+        self._latitude: float | None = None
+        self._longitude: float | None = None
+        self._radius_km: float = DEFAULT_RADIUS_KM
         self._suggested_name: str = ""
 
     # ---- Step 1: country --------------------------------------------------------
@@ -112,16 +121,19 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
     # ---- Step 2: provider (auto-skipped when single provider) -------------------
 
     async def _async_step_provider(self) -> ConfigFlowResult:
-        """Advance to provider selection or skip directly to station ID."""
+        """Resolve provider, then dispatch to the correct config step for its mode."""
         providers = _providers_for_country(self._country)
         if not providers:
-            # No providers registered for this country — fall back to default
             self._provider_key = DEFAULT_PROVIDER
-            return await self.async_step_station()
-        if len(providers) == 1:
+        elif len(providers) == 1:
             self._provider_key = providers[0][0]
-            return await self.async_step_station()
-        return await self.async_step_provider()
+        else:
+            return await self.async_step_provider()
+
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+        if provider_cls and provider_cls.CONFIG_MODE == "location":
+            return await self.async_step_location()
+        return await self.async_step_station()
 
     async def async_step_provider(
         self, user_input: dict[str, Any] | None = None
@@ -131,6 +143,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self._provider_key = user_input[CONF_PROVIDER]
+            provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+            if provider_cls and provider_cls.CONFIG_MODE == "location":
+                return await self.async_step_location()
             return await self.async_step_station()
 
         return self.async_show_form(
@@ -144,7 +159,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             ),
         )
 
-    # ---- Step 3: station ID -----------------------------------------------------
+    # ---- Step 3a: station ID (CONFIG_MODE='station_id') -------------------------
 
     async def async_step_station(
         self, user_input: dict[str, Any] | None = None
@@ -169,7 +184,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
 
                 self._station_id = station_id
-                fetched = await _fetch_station_name(self.hass, station_id)
+                fetched = await _fetch_station_name(self.hass, station_id, self._provider_key)
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
 
@@ -179,22 +194,64 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    # ---- Step 3b: location (CONFIG_MODE='location') -----------------------------
+
+    async def async_step_location(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Collect lat/lng and radius for location-based providers."""
+        from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
+
+        errors: dict[str, str] = {}
+
+        default_lat = self.hass.config.latitude
+        default_lon = self.hass.config.longitude
+
+        if user_input is not None:
+            self._latitude = float(user_input[CONF_LATITUDE])
+            self._longitude = float(user_input[CONF_LONGITUDE])
+            self._radius_km = float(user_input.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM))
+            self._station_id = ""
+            self._suggested_name = (
+                f"{_COUNTRY_NAMES.get(self._country, self._country)} "
+                f"({self._latitude:.3f}, {self._longitude:.3f})"
+            )
+            return await self.async_step_name()
+
+        return self.async_show_form(
+            step_id="location",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
+                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
+                    vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.Coerce(
+                        float
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
     # ---- Step 4: confirm / edit name --------------------------------------------
 
     async def async_step_name(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Confirm or edit the station display name."""
+        """Confirm or edit the entry display name."""
         if user_input is not None:
             title = user_input.get(CONF_NAME) or self._suggested_name
-            return self.async_create_entry(
-                title=title,
-                data={
-                    CONF_STATION_ID: self._station_id,
-                    CONF_COUNTRY: self._country,
-                    CONF_PROVIDER: self._provider_key,
-                },
-            )
+            data: dict[str, Any] = {
+                CONF_COUNTRY: self._country,
+                CONF_PROVIDER: self._provider_key,
+            }
+            if self._station_id:
+                data[CONF_STATION_ID] = self._station_id
+            else:
+                from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
+                data[CONF_LATITUDE] = self._latitude
+                data[CONF_LONGITUDE] = self._longitude
+                data[CONF_RADIUS_KM] = self._radius_km
+            return self.async_create_entry(title=title, data=data)
 
         return self.async_show_form(
             step_id="name",
@@ -204,5 +261,4 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             ),
         )
-
 

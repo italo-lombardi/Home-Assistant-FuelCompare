@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Literal
 
 from aiohttp import ClientSession
 
@@ -24,12 +24,22 @@ class BaseProvider(ABC):
     LABEL: ClassVar[str]
     """Human-readable label shown in the config flow provider picker."""
 
+    CONFIG_MODE: ClassVar[Literal["station_id", "location"]] = "station_id"
+    """How the user identifies what to track.
+
+    'station_id' — user enters a numeric/string station ID (current IE behaviour).
+    'location'   — user enters lat/lng + radius; coordinator fetches all stations
+                   in range and creates entities dynamically.
+    """
+
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not getattr(cls, "__abstractmethods__", None):
             for attr in ("COUNTRY", "PROVIDER_KEY", "LABEL"):
                 if not hasattr(cls, attr):
-                    raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
+                    raise TypeError(
+                        f"{cls.__name__} must define class attribute '{attr}'"
+                    )
 
     @abstractmethod
     async def async_fetch(
@@ -39,8 +49,11 @@ class BaseProvider(ABC):
     ) -> dict[str, Any]:
         """Fetch and return normalised station data.
 
-        The returned dict must contain at minimum the keys consumed by
-        coordinator._parse_station and by the sensor/binary_sensor platforms:
+        For CONFIG_MODE='station_id': station_id is the user-entered identifier.
+        For CONFIG_MODE='location': station_id is unused; the provider uses its
+        own lat/lng/radius stored at construction time.
+
+        The returned dict must contain at minimum:
         'unleaded', 'diesel', 'lastupdated', 'name', 'tablename',
         'working_hours', 'about', 'county'.  All values may be None.
         """
@@ -51,4 +64,8 @@ class BaseProvider(ABC):
         session: ClientSession,
         station_id: str,
     ) -> str | None:
-        """Return a display name for the station, or None if unavailable."""
+        """Return a display name for the station, or None if unavailable.
+
+        For CONFIG_MODE='location' providers this may return None; the config
+        flow uses the entry title from the location step instead.
+        """
