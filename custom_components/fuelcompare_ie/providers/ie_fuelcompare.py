@@ -115,9 +115,7 @@ class IEFuelCompareProvider(BaseProvider):
             if self._build_id is None:
                 await self._fetch_page_assets(session)
 
-            data_url = (
-                f"{BASE_URL}/_next/data/{self._build_id}/station/{self._station_id}.json"
-            )
+            data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self._station_id}.json"
             _LOGGER.debug("Fetching Next.js URL: %s", data_url)
 
             async with session.get(

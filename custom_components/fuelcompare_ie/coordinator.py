@@ -31,6 +31,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict]):
         # Support old 2-arg call: FuelCompareIECoordinator(hass, station_id_str)
         if isinstance(provider_or_station_id, str):
             from .providers.ie_fuelcompare import IEFuelCompareProvider
+
             _station_id = provider_or_station_id
             provider: BaseProvider = IEFuelCompareProvider(_station_id)
         else:
