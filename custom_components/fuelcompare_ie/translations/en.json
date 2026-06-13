@@ -41,7 +41,8 @@
       }
     },
     "error": {
-      "invalid_station_id": "Station ID must be a positive integer."
+      "invalid_station_id": "Station ID must be a positive integer.",
+      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values."
     },
     "abort": {
       "already_configured": "This station is already configured."

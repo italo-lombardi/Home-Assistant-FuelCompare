@@ -14,6 +14,7 @@ Track live unleaded and diesel prices from petrol stations directly in your Home
 - Add as many stations as you like
 - Easy setup — no YAML, no API keys, station name auto-fetched during setup
 - Stale-retention on transient outages: entities keep their last known value when the site is offline or throttling, with a dedicated `data_fetch_problem` problem binary sensor and `last_successful_fetch` timestamp sensor for automations
+- Provider abstraction layer: built to support additional data sources and countries in future releases
 - Translated into 25 languages
 
 ## Setup

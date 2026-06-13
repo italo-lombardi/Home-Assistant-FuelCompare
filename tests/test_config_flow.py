@@ -487,3 +487,28 @@ async def test_location_entry_loads_without_station_id_keyerror(
     with _PATCH_FIRST_REFRESH:
         # Must not raise KeyError on missing CONF_STATION_ID
         assert await hass.config_entries.async_setup(entry.entry_id)
+
+
+async def test_async_step_location_invalid_coords_returns_form_error(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_location re-shows form with error when float conversion fails."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_LATITUDE, CONF_LONGITUDE
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    # Call the step directly, bypassing HA's schema validation,
+    # with a value that passes isinstance checks but fails float()
+    class _Bad:
+        def __float__(self):
+            raise ValueError("not a number")
+
+    result = await flow.async_step_location(
+        user_input={CONF_LATITUDE: _Bad(), CONF_LONGITUDE: _Bad()}
+    )
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "location"
+    assert "base" in result["errors"]

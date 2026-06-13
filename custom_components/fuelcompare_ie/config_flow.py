@@ -204,15 +204,36 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         """Collect lat/lng and radius for location-based providers."""
         from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
 
-        errors: dict[str, str] = {}
-
         default_lat = self.hass.config.latitude
         default_lon = self.hass.config.longitude
 
         if user_input is not None:
-            self._latitude = float(user_input[CONF_LATITUDE])
-            self._longitude = float(user_input[CONF_LONGITUDE])
-            self._radius_km = float(user_input.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM))
+            errors: dict[str, str] = {}
+            try:
+                self._latitude = float(user_input[CONF_LATITUDE])
+                self._longitude = float(user_input[CONF_LONGITUDE])
+                self._radius_km = float(
+                    user_input.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM)
+                )
+            except (ValueError, TypeError):
+                errors["base"] = "invalid_location"
+                return self.async_show_form(
+                    step_id="location",
+                    data_schema=vol.Schema(
+                        {
+                            vol.Required(
+                                CONF_LATITUDE, default=default_lat
+                            ): vol.Coerce(float),
+                            vol.Required(
+                                CONF_LONGITUDE, default=default_lon
+                            ): vol.Coerce(float),
+                            vol.Optional(
+                                CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM
+                            ): vol.Coerce(float),
+                        }
+                    ),
+                    errors=errors,
+                )
             self._station_id = ""
             self._suggested_name = (
                 f"{_COUNTRY_NAMES.get(self._country, self._country)} "
@@ -233,7 +254,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     ),
                 }
             ),
-            errors=errors,
+            errors={},
         )
 
     # ---- Step 4: confirm / edit name --------------------------------------------
