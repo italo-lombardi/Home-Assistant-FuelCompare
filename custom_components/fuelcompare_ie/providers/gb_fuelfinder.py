@@ -67,6 +67,7 @@ stable station identifier.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import logging
@@ -347,8 +348,11 @@ class GbFuelfinderProvider(BaseProvider):
             GbFuelfinderProvider._csv_cache = text
             GbFuelfinderProvider._csv_cache_ts = now
 
-        reader = csv.DictReader(io.StringIO(text))
-        rows = list(reader)
+        def _parse():
+            return list(csv.DictReader(io.StringIO(text)))
+
+        loop = asyncio.get_running_loop()
+        rows = await loop.run_in_executor(None, _parse)
         _LOGGER.debug("UK Fuel Finder CSV: %d station rows loaded", len(rows))
         return rows
 

@@ -34,6 +34,8 @@ Licence: IODL 2.0 (Italian Open Data Licence v2.0).
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import logging
 from datetime import datetime
 from typing import Any
@@ -581,15 +583,19 @@ class ItMaseProvider(BaseProvider):
         Raises:
             ProviderError: On HTTP error or structurally invalid response.
         """
-        import asyncio
 
         price_task = self._fetch_csv(session, _PRICE_URL, _PRICE_ENCODING)
         meta_task = self._fetch_csv(session, _META_URL, _META_ENCODING)
 
         price_text, meta_text = await asyncio.gather(price_task, meta_task)
 
-        price_data, timestamps_data = _parse_price_csv(_skip_banner(price_text))
-        meta_data = _parse_meta_csv(_skip_banner(meta_text))
+        loop = asyncio.get_running_loop()
+        price_data, timestamps_data = await loop.run_in_executor(
+            None, functools.partial(_parse_price_csv, _skip_banner(price_text))
+        )
+        meta_data = await loop.run_in_executor(
+            None, functools.partial(_parse_meta_csv, _skip_banner(meta_text))
+        )
 
         if not price_data:
             raise ProviderError(

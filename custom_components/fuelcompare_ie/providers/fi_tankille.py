@@ -79,7 +79,7 @@ _LOGGER = logging.getLogger(__name__)
 _API_URL = "https://pxdata.stat.fi/PXWeb/api/v1/en/StatFin/ehi/12ge.px"
 
 # The PxWeb variable code for the commodity dimension.
-_DIM_COMMODITY = "Hyödyke"
+_DIM_COMMODITY = "energia_22_20200205"
 # The PxWeb variable code for the measure dimension.
 _DIM_MEASURE = "Tiedot"
 
@@ -97,7 +97,7 @@ _CODE_TO_KEYS: dict[str, list[str]] = {
 }
 
 # The PxWeb measure code for consumer price (EUR/litre, incl. VAT).
-_MEASURE_CODE = "kuluttajahinta"
+_MEASURE_CODE = "hinta"
 
 # Helsinki WGS84 — used as the nominal "location" for the national average.
 _FI_LAT = 60.1699
@@ -159,6 +159,9 @@ def _parse_price(raw: Any) -> float | None:
         return None
     if val <= 0:
         return None
+    # API returns prices in cents/litre (e.g. 193 = 1.93 EUR/L)
+    if val > 10:
+        val = val / 100.0
     return round(val, 4)
 
 
@@ -200,7 +203,7 @@ def _extract_prices_from_jsonstat2(payload: dict[str, Any]) -> dict[str, float |
     # Locate the commodity and time dimensions by their id.
     try:
         commodity_idx = ids.index(_DIM_COMMODITY)
-        time_idx = ids.index("Vuosikuukausi")  # "Year-month" — the time dimension
+        time_idx = ids.index("timeperiod_m")  # "Year-month" — the time dimension
     except ValueError:
         # Fall back: assume commodity is first, time is last.
         commodity_idx = 0
@@ -216,9 +219,11 @@ def _extract_prices_from_jsonstat2(payload: dict[str, Any]) -> dict[str, float |
     pos_to_code: dict[int, str] = {v: k for k, v in code_to_pos.items()}
 
     # For each commodity, find the most recent non-null price.
-    # The flat values array is laid out as: value[c * n_time + t]
-    # (commodity varies slowest, time varies fastest) when commodity_idx < time_idx.
+    # The flat index depends on dimension order in the response:
+    #   commodity-major (ids[0]=commodity): value[c * n_time + t]
+    #   time-major      (ids[0]=time):      value[t * n_commodity + c]
     prices: dict[str, float | None] = {}
+    commodity_is_first = commodity_idx < time_idx
     for c_pos in range(n_commodity):
         code = pos_to_code.get(c_pos)
         if code is None:
@@ -226,7 +231,10 @@ def _extract_prices_from_jsonstat2(payload: dict[str, Any]) -> dict[str, float |
         # Scan time periods from most recent (last index) backwards.
         price: float | None = None
         for t in range(n_time - 1, -1, -1):
-            flat_idx = c_pos * n_time + t
+            if commodity_is_first:
+                flat_idx = c_pos * n_time + t
+            else:
+                flat_idx = t * n_commodity + c_pos
             if flat_idx < len(values):
                 price = _parse_price(values[flat_idx])
                 if price is not None:

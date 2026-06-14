@@ -44,6 +44,8 @@ Fuel nom → StationData key mapping:
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import io
 import logging
 import time
@@ -468,7 +470,10 @@ class FrCarburantsProvider(BaseProvider):
 
         xml_bytes = await self._fetch_xml(session)
         try:
-            root = ET.fromstring(xml_bytes)
+            loop = asyncio.get_running_loop()
+            root = await loop.run_in_executor(
+                None, functools.partial(ET.fromstring, xml_bytes)
+            )
         except ET.ParseError as err:
             raise ProviderError(f"Failed to parse Prix Carburants XML: {err}") from err
 

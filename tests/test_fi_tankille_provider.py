@@ -26,10 +26,10 @@ from custom_components.fuelcompare_ie.providers.fi_tankille import (
 # Time dimension: two months (2026M01, 2026M02) to test "most recent" logic.
 _JSONSTAT2_RESPONSE: dict[str, Any] = {
     "dataset": {
-        "id": ["Hyödyke", "Tiedot", "Vuosikuukausi"],
+        "id": ["energia_22_20200205", "Tiedot", "timeperiod_m"],
         "size": [4, 1, 2],
         "dimension": {
-            "Hyödyke": {
+            "energia_22_20200205": {
                 "label": "Commodity",
                 "category": {
                     "index": {"A": 0, "B": 1, "D": 2, "E": 3},
@@ -44,11 +44,11 @@ _JSONSTAT2_RESPONSE: dict[str, Any] = {
             "Tiedot": {
                 "label": "Data",
                 "category": {
-                    "index": {"kuluttajahinta": 0},
-                    "label": {"kuluttajahinta": "Consumer price"},
+                    "index": {"hinta": 0},
+                    "label": {"hinta": "Price"},
                 },
             },
-            "Vuosikuukausi": {
+            "timeperiod_m": {
                 "label": "Year-month",
                 "category": {
                     "index": {"2026M01": 0, "2026M02": 1},
@@ -92,10 +92,10 @@ _JSONSTAT2_NULL_LATEST: dict[str, Any] = {
 # Single time period (simpler payload for basic tests)
 _JSONSTAT2_SINGLE_PERIOD: dict[str, Any] = {
     "dataset": {
-        "id": ["Hyödyke", "Tiedot", "Vuosikuukausi"],
+        "id": ["energia_22_20200205", "Tiedot", "timeperiod_m"],
         "size": [4, 1, 1],
         "dimension": {
-            "Hyödyke": {
+            "energia_22_20200205": {
                 "label": "Commodity",
                 "category": {
                     "index": {"A": 0, "B": 1, "D": 2, "E": 3},
@@ -110,11 +110,11 @@ _JSONSTAT2_SINGLE_PERIOD: dict[str, Any] = {
             "Tiedot": {
                 "label": "Data",
                 "category": {
-                    "index": {"kuluttajahinta": 0},
-                    "label": {"kuluttajahinta": "Consumer price"},
+                    "index": {"hinta": 0},
+                    "label": {"hinta": "Price"},
                 },
             },
-            "Vuosikuukausi": {
+            "timeperiod_m": {
                 "label": "Year-month",
                 "category": {
                     "index": {"2026M02": 0},
