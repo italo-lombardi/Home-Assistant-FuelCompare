@@ -5,8 +5,12 @@ from __future__ import annotations
 from .at_econtrol import AtEcontrolProvider
 from .au_fuelwatch import AuFuelwatchProvider
 from .au_nsw import AuNswProvider
+from .au_qld import AuQldProvider
+from .au_vic import AuVicProvider
 from .base import BaseProvider, ProviderError, StationData
+from .ca_qc import CaQcProvider
 from .de_tankerkoenig import DeTankerkoenigProvider
+from .dk_fuelfinder import DkFuelFinderProvider
 from .es_minetur import EsMineturProvider
 from .fr_carburants import FrCarburantsProvider
 from .gb_fuelfinder import GbFuelfinderProvider
@@ -14,7 +18,9 @@ from .hr_mzoe import HRMzoeProvider
 from .ie_fuelcompare import IEFuelCompareProvider
 from .ie_fuelfinder import IEFuelFinderProvider
 from .it_mase import ItMaseProvider
+from .no_drivstoff import NoDrivstoffProvider
 from .pt_dgeg import PtDgegProvider
+from .se_bensinpriser import SEBensinpriserProvider
 from .si_goriva import SiGorivaProvider
 
 PROVIDER_REGISTRY: dict[str, type[BaseProvider]] = {
@@ -31,6 +37,12 @@ PROVIDER_REGISTRY: dict[str, type[BaseProvider]] = {
     GbFuelfinderProvider.PROVIDER_KEY: GbFuelfinderProvider,
     AuFuelwatchProvider.PROVIDER_KEY: AuFuelwatchProvider,
     AuNswProvider.PROVIDER_KEY: AuNswProvider,
+    AuQldProvider.PROVIDER_KEY: AuQldProvider,
+    AuVicProvider.PROVIDER_KEY: AuVicProvider,
+    CaQcProvider.PROVIDER_KEY: CaQcProvider,
+    DkFuelFinderProvider.PROVIDER_KEY: DkFuelFinderProvider,
+    SEBensinpriserProvider.PROVIDER_KEY: SEBensinpriserProvider,
+    NoDrivstoffProvider.PROVIDER_KEY: NoDrivstoffProvider,
 }
 
 

@@ -46,7 +46,12 @@ from typing import Any
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -522,31 +527,3 @@ def _parse_station(
         "lastupdated": None,  # goriva.si does not return per-station timestamps
         "source_station_id": str(station.get("pk", "")),
     }
-
-
-def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Return the great-circle distance in kilometres between two WGS84 points.
-
-    Uses the haversine formula.  Accuracy is sufficient for station-proximity
-    filtering (error < 0.5% for distances under 1000 km).
-
-    Args:
-        lat1, lon1: Coordinates of the first point (degrees).
-        lat2, lon2: Coordinates of the second point (degrees).
-
-    Returns:
-        Distance in kilometres.
-    """
-    import math
-
-    r = 6371.0  # Earth radius in km
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    d_phi = math.radians(lat2 - lat1)
-    d_lam = math.radians(lon2 - lon1)
-
-    a = (
-        math.sin(d_phi / 2) ** 2
-        + math.cos(phi1) * math.cos(phi2) * math.sin(d_lam / 2) ** 2
-    )
-    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))

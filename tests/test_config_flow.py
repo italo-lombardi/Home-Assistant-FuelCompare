@@ -10,6 +10,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.fuelcompare_ie.config_flow import _fetch_station_name
 from custom_components.fuelcompare_ie.const import (
+    CONF_API_KEY,
     CONF_COUNTRY,
     CONF_PROVIDER,
     CONF_STATION_ID,
@@ -591,3 +592,179 @@ async def test_async_step_location_invalid_coords_returns_form_error(
     assert result["type"] == "form"
     assert result["step_id"] == "location"
     assert "base" in result["errors"]
+
+
+# ---------------------------------------------------------------------------
+# async_step_api_key tests
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_api_key_empty_key_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Submitting an empty API key re-shows the form with 'invalid_api_key' error."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    # Call the step with an empty string
+    result = await flow.async_step_api_key(user_input={CONF_API_KEY: ""})
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+    assert result["errors"].get(CONF_API_KEY) == "invalid_api_key"
+
+
+async def test_async_step_api_key_whitespace_only_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Submitting a whitespace-only API key re-shows the form with 'invalid_api_key' error."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    result = await flow.async_step_api_key(user_input={CONF_API_KEY: "   "})
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+    assert result["errors"].get(CONF_API_KEY) == "invalid_api_key"
+
+
+async def test_async_step_api_key_valid_key_stored_and_advances(
+    hass: HomeAssistant,
+) -> None:
+    """Submitting a valid API key stores it on the flow and advances past the step."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
+        DeTankerkoenigProvider,
+    )
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = DeTankerkoenigProvider.PROVIDER_KEY
+
+    result = await flow.async_step_api_key(user_input={CONF_API_KEY: "my-test-api-key"})
+
+    # The key must be stored
+    assert flow._api_key == "my-test-api-key"
+    # Step must have advanced (not still showing api_key form without error)
+    assert result.get("step_id") != "api_key" or result.get("errors") == {}
+
+
+async def test_async_step_api_key_initial_display_no_user_input(
+    hass: HomeAssistant,
+) -> None:
+    """Calling async_step_api_key with no user_input shows the empty form."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    result = await flow.async_step_api_key(user_input=None)
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+    assert result.get("errors", {}) == {}
+
+
+async def test_germany_provider_routes_through_api_key_step(
+    hass: HomeAssistant,
+) -> None:
+    """Selecting Germany / Tankerkoenig routes through the api_key step."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    # Country selection step
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: "DE"}
+        )
+
+    # Provider selection step (DE has only Tankerkoenig)
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_PROVIDER: "de_tankerkoenig"},
+        )
+
+    # Must land on api_key step
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+
+
+async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
+    """api_key is persisted in the config entry options dict (not data) after successful setup."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
+        DeTankerkoenigProvider,
+    )
+
+    # Minimal mock that accepts api_key
+    class _FakeDEProvider(DeTankerkoenigProvider):
+        PROVIDER_KEY = "de_tankerkoenig_test_key"
+        COUNTRY = "DE"
+        REQUIRES_API_KEY = True
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+
+        def __init__(self, station_id, api_key=None, **kwargs):
+            self._station_id = station_id
+            self._api_key = api_key
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeDEProvider.PROVIDER_KEY] = _FakeDEProvider
+    try:
+        with _PATCH_FIRST_REFRESH:
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            if result.get("step_id") == "user":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_COUNTRY: "DE"}
+                )
+            if result.get("step_id") == "provider":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_PROVIDER: _FakeDEProvider.PROVIDER_KEY},
+                )
+            assert result["step_id"] == "api_key"
+
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={CONF_API_KEY: "secret-key-123"},
+            )
+            # After api_key advances to location step
+            if result.get("step_id") == "location":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={
+                        CONF_LATITUDE: 52.52,
+                        CONF_LONGITUDE: 13.405,
+                        CONF_RADIUS_KM: 5.0,
+                    },
+                )
+            if result.get("step_id") == "name":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={"name": "Berlin Station"},
+                )
+
+        assert result["type"] == "create_entry"
+        # api_key is now stored in entry.options, not entry.data
+        assert result["options"][CONF_API_KEY] == "secret-key-123"
+        assert CONF_API_KEY not in result["data"]
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeDEProvider.PROVIDER_KEY, None)

@@ -48,13 +48,17 @@ import io
 import logging
 import zipfile
 import xml.etree.ElementTree as ET
-from math import radians, sin, cos, sqrt, atan2
 from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,20 +83,6 @@ _NOM_TO_KEY: dict[str, str] = {
     "E85": "e85",
     "GPLc": "lpg",
 }
-
-# Earth radius for haversine distance (km)
-_EARTH_RADIUS_KM = 6371.0
-
-
-def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Return the great-circle distance in km between two WGS84 points."""
-    d_lat = radians(lat2 - lat1)
-    d_lon = radians(lon2 - lon1)
-    a = (
-        sin(d_lat / 2) ** 2
-        + cos(radians(lat1)) * cos(radians(lat2)) * sin(d_lon / 2) ** 2
-    )
-    return _EARTH_RADIUS_KM * 2 * atan2(sqrt(a), sqrt(1 - a))
 
 
 def _parse_coord(raw: str | None) -> float | None:

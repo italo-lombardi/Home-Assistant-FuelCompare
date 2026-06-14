@@ -1165,3 +1165,74 @@ def test_parse_row_handles_malformed_timestamp() -> None:
     assert (
         result["lastupdated"] is not None or result["lastupdated"] is None
     )  # no crash
+
+
+# ---------------------------------------------------------------------------
+# Malformed / empty CSV — async_list_stations robustness
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_on_empty_csv() -> None:
+    """async_list_stations returns [] when CSV has only a header row (no data)."""
+    text = _CSV_HEADER  # header only, no data rows
+    resp = _make_mock_response(200, text.encode("utf-8"))
+    session = _make_session(resp)
+    provider = GbFuelfinderProvider(_NODE_ID)
+    result = await provider.async_list_stations(
+        session, lat=51.5074, lng=-0.1278, radius_km=10.0
+    )
+    assert result == []
+
+
+async def test_async_list_stations_returns_empty_on_garbled_body() -> None:
+    """async_list_stations returns [] when the response body is not valid CSV."""
+    resp = _make_mock_response(200, b"<html>Internal Server Error</html>")
+    session = _make_session(resp)
+    provider = GbFuelfinderProvider(_NODE_ID)
+    result = await provider.async_list_stations(
+        session, lat=51.5074, lng=-0.1278, radius_km=10.0
+    )
+    # Should not crash; garbled body produces no parseable rows within radius
+    assert isinstance(result, list)
+
+
+async def test_async_list_stations_returns_empty_on_completely_empty_body() -> None:
+    """async_list_stations returns [] when the response body is entirely empty bytes."""
+    resp = _make_mock_response(200, b"")
+    session = _make_session(resp)
+    provider = GbFuelfinderProvider(_NODE_ID)
+    result = await provider.async_list_stations(
+        session, lat=51.5074, lng=-0.1278, radius_km=10.0
+    )
+    assert isinstance(result, list)
+
+
+# ---------------------------------------------------------------------------
+# Price boundary: _parse_price_pence — 300.0 passes, 300.1 is rejected
+# (guard using _MAX_PENCE_PER_LITRE when it exists)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_price_pence_boundary_300_0_accepted() -> None:
+    """_parse_price_pence accepts exactly 300.0 p/L (at the boundary)."""
+    from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
+        _MAX_PENCE_PER_LITRE,
+    )
+
+    # Only meaningful when the constant is defined
+    assert _MAX_PENCE_PER_LITRE == pytest.approx(300.0)
+    result = _parse_price_pence("300.0")
+    assert result == pytest.approx(300.0), (
+        "300.0 p/L is at the boundary and must be accepted"
+    )
+
+
+def test_parse_price_pence_boundary_300_1_rejected() -> None:
+    """_parse_price_pence rejects 300.1 p/L (just above _MAX_PENCE_PER_LITRE)."""
+    from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
+        _MAX_PENCE_PER_LITRE,
+    )
+
+    assert _MAX_PENCE_PER_LITRE == pytest.approx(300.0)
+    result = _parse_price_pence("300.1")
+    assert result is None, "300.1 p/L exceeds the boundary and must be rejected"

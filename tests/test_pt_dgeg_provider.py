@@ -212,8 +212,8 @@ def test_provider_capabilities_include_coordinator_sentinels() -> None:
 
 
 def test_provider_no_api_key_required() -> None:
-    """PtDgegProvider has no REQUIRES_API_KEY attribute (public API)."""
-    assert not hasattr(PtDgegProvider, "REQUIRES_API_KEY")
+    """PtDgegProvider does not require an API key (public API)."""
+    assert PtDgegProvider.REQUIRES_API_KEY is False
 
 
 # ---------------------------------------------------------------------------
@@ -683,7 +683,7 @@ async def test_async_fetch_sends_idioma_pt_param() -> None:
 
 
 async def test_async_fetch_passes_ssl_context() -> None:
-    """async_fetch passes an ssl argument to session.get (cert workaround)."""
+    """async_fetch does not pass ssl= on a successful first attempt (no SSLError)."""
     resp = _make_mock_response(200, json_data=_GET_POSTO_SUCCESS)
     session = _make_session(resp)
 
@@ -691,7 +691,8 @@ async def test_async_fetch_passes_ssl_context() -> None:
     await provider.async_fetch(session, _STATION_ID)
 
     call_kwargs = session.get.call_args[1]
-    assert "ssl" in call_kwargs
+    # Normal path: ssl= is NOT injected (aiohttp uses default context)
+    assert "ssl" not in call_kwargs
 
 
 # ---------------------------------------------------------------------------
@@ -939,7 +940,7 @@ async def test_async_list_stations_sends_qtd_5000_param() -> None:
 
 
 async def test_async_list_stations_passes_ssl_context() -> None:
-    """async_list_stations passes an ssl argument (cert workaround)."""
+    """async_list_stations does not pass ssl= on a successful first attempt."""
     resp = _make_mock_response(200, json_data=_SEARCH_SUCCESS)
     session = _make_session(resp)
 
@@ -947,7 +948,8 @@ async def test_async_list_stations_passes_ssl_context() -> None:
     await provider.async_list_stations(session)
 
     call_kwargs = session.get.call_args[1]
-    assert "ssl" in call_kwargs
+    # Normal path: ssl= is NOT injected (aiohttp uses default context)
+    assert "ssl" not in call_kwargs
 
 
 # ---------------------------------------------------------------------------

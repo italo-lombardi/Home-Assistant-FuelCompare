@@ -156,6 +156,7 @@ class DeTankerkoenigProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 1800
     REQUIRES_API_KEY: bool = True
+    API_KEY_REGISTRATION_URL: str = "https://onboarding.tankerkoenig.de/"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

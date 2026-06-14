@@ -2,6 +2,24 @@
 
 Source: NSW Government FuelCheck via OneGov API.
 Endpoint: GET https://api.onegov.nsw.gov.au/FuelCheckApp/v1/fuel/prices
+
+Endpoint provenance
+-------------------
+The ``FuelCheckApp/v1`` path is the **undocumented mobile-app endpoint** used
+by the official NSW FuelCheck iOS/Android apps.  It is distinct from the
+published REST API listed in the NSW Government API catalog
+(https://api.nsw.gov.au/Product/Index/22), which requires OAuth2 client
+credentials and operates under a 2,500-calls/month free tier.
+
+The mobile-app endpoint requires **only** the ``requesttimestamp`` header
+(ISO 8601 UTC, e.g. ``2026-06-14T02:51:07Z``) — no API key, no OAuth token.
+
+This approach is not novel: it is the same technique used by the
+``nsw-fuel-api-client`` PyPI package (MIT licensed,
+https://pypi.org/project/nsw-fuel-api-client/), which has relied on this
+endpoint since at least 2019.  The endpoint has remained stable across that
+period with no observed breaking changes.
+
 Auth: No API key or OAuth required. Only required header is ``requesttimestamp``
       with an ISO 8601 UTC value (e.g. ``2026-06-14T02:51:07Z``).
 
@@ -50,7 +68,12 @@ Station ``address`` is a single combined string (e.g.
 "307-313 Ocean Beach Road, UMINA BEACH NSW 2257"). No separate suburb/state
 fields exist; county is extracted via regex matching the state abbreviation.
 
-Poll interval: 3600 seconds (data updates roughly hourly per lastupdated values).
+Poll interval: 3600 seconds (1 hour).  The mobile-app endpoint has no
+documented rate limit, but polling more frequently than hourly is unnecessary
+because the ``lastupdated`` timestamps in the response only advance roughly
+once per hour.  The official OAuth2 API caps the free tier at 2,500 calls/month
+(~3.4 calls/hour), so 3,600 s also keeps usage well within that budget if the
+endpoint family ever enforces the same limit.
 """
 
 from __future__ import annotations
@@ -108,7 +131,9 @@ class AuNswProvider(BaseProvider):
     LABEL = "FuelCheck NSW (Australia)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 3600  # hourly updates per source
+    POLL_INTERVAL_SECONDS = (
+        3600  # hourly — matches source update cadence; see module docstring
+    )
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

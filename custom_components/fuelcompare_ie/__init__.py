@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+import inspect
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .const import (
     CONF_API_KEY,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
     CONF_PROVIDER,
+    CONF_RADIUS_KM,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
     DEFAULT_PROVIDER,
@@ -33,17 +38,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Pass county to providers that support county_search mode.
     # Pass api_key to providers that require authentication.
+    # Pass lat/lng/radius to providers that support geo-filtering.
     # Use inspect to avoid TypeError on providers whose __init__ doesn't accept these params.
-    import inspect
-
     county = entry.data.get(CONF_STATION_COUNTY)
-    api_key = entry.data.get(CONF_API_KEY)
+    # API key is stored in entry.options (not entry.data) for security; fall back
+    # to entry.data for entries created before this change was introduced.
+    api_key = entry.options.get(CONF_API_KEY) or entry.data.get(CONF_API_KEY)
+    latitude = entry.data.get(CONF_LATITUDE)
+    longitude = entry.data.get(CONF_LONGITUDE)
+    radius_km = entry.data.get(CONF_RADIUS_KM)
     sig = inspect.signature(provider_cls.__init__)
     kwargs: dict = {}
     if county and "county" in sig.parameters:
         kwargs["county"] = county
     if api_key and "api_key" in sig.parameters:
         kwargs["api_key"] = api_key
+    if latitude and "latitude" in sig.parameters:
+        kwargs["latitude"] = latitude
+    if longitude and "longitude" in sig.parameters:
+        kwargs["longitude"] = longitude
+    if radius_km and "radius_km" in sig.parameters:
+        kwargs["radius_km"] = radius_km
     if kwargs:
         provider = provider_cls(station_id, **kwargs)
     else:

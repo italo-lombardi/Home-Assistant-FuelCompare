@@ -39,6 +39,10 @@ _COUNTRY_NAMES: dict[str, str] = {
     "SI": "Slovenia",
     "GB": "United Kingdom",
     "AU": "Australia",
+    "NO": "Norway",
+    "DK": "Denmark",
+    "SE": "Sweden",
+    "CA": "Canada",
 }
 
 
@@ -232,6 +236,20 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
     "AU": {
         "western_australia": "Western Australia",
         "nsw_tasmania": "NSW + Tasmania",
+        "queensland": "Queensland",
+        "victoria": "Victoria",
+    },
+    "NO": {
+        "norway": "Norway (all)",
+    },
+    "DK": {
+        "denmark": "Denmark (all)",
+    },
+    "SE": {
+        "sweden": "Sweden (all)",
+    },
+    "CA": {
+        "quebec": "Québec",
     },
 }
 
@@ -341,7 +359,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
-        if provider_cls.CONFIG_MODE == "location":
+        if (
+            getattr(provider_cls, "CONFIG_MODE", None) == "location"
+            or getattr(provider_cls, "STATION_LOOKUP_MODE", None) == "location_search"
+        ):
             return await self.async_step_location()
         return await self.async_step_station()
 
@@ -382,12 +403,16 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._api_key = api_key
                 return await self._dispatch_after_provider()
 
+        provider_cls_for_key = PROVIDER_REGISTRY.get(self._provider_key)
+        registration_url: str = getattr(
+            provider_cls_for_key,
+            "API_KEY_REGISTRATION_URL",
+            "https://onboarding.tankerkoenig.de/",
+        )
         return self.async_show_form(
             step_id="api_key",
             data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}),
-            description_placeholders={
-                "registration_url": "https://onboarding.tankerkoenig.de/"
-            },
+            description_placeholders={"registration_url": registration_url},
             errors=errors,
         )
 
@@ -480,9 +505,21 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         if provider_cls:
             try:
                 session = async_get_clientsession(self.hass)
-                provider_instance = provider_cls("")
+                # Build constructor kwargs so providers that require an api_key
+                # (e.g. Tankerkoenig) can authenticate the list call.
+                init_kwargs: dict[str, Any] = {}
+                if self._api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
+                    init_kwargs["api_key"] = self._api_key
+                provider_instance = provider_cls("", **init_kwargs)
+                list_kwargs: dict[str, Any] = {"county": self._station_county}
+                if self._latitude is not None:
+                    list_kwargs["lat"] = self._latitude
+                if self._longitude is not None:
+                    list_kwargs["lng"] = self._longitude
+                if self._radius_km is not None:
+                    list_kwargs["radius_km"] = self._radius_km
                 station_list = await provider_instance.async_list_stations(
-                    session, county=self._station_county
+                    session, **list_kwargs
                 )
             except Exception as err:  # noqa: BLE001
                 _LOGGER.debug("Failed to load station list: %s", err)
@@ -534,15 +571,15 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     step_id="location",
                     data_schema=vol.Schema(
                         {
-                            vol.Required(
-                                CONF_LATITUDE, default=default_lat
-                            ): vol.Coerce(float),
-                            vol.Required(
-                                CONF_LONGITUDE, default=default_lon
-                            ): vol.Coerce(float),
+                            vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
+                                vol.Coerce(float), vol.Range(min=-90, max=90)
+                            ),
+                            vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
+                                vol.Coerce(float), vol.Range(min=-180, max=180)
+                            ),
                             vol.Optional(
                                 CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM
-                            ): vol.Coerce(float),
+                            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=500)),
                         }
                     ),
                     errors=errors,
@@ -558,12 +595,14 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="location",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
-                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.Coerce(
-                        float
+                    vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
+                        vol.Coerce(float), vol.Range(min=-90, max=90)
                     ),
-                    vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.Coerce(
-                        float
+                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
+                        vol.Coerce(float), vol.Range(min=-180, max=180)
+                    ),
+                    vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                        vol.Coerce(float), vol.Range(min=0.1, max=500)
                     ),
                 }
             ),
@@ -582,8 +621,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_COUNTRY: self._country,
                 CONF_PROVIDER: self._provider_key,
             }
+            options: dict[str, Any] = {}
             if self._api_key:
-                data[CONF_API_KEY] = self._api_key
+                options[CONF_API_KEY] = self._api_key
             if self._station_id:
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
@@ -594,7 +634,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
                 data[CONF_RADIUS_KM] = self._radius_km
-            return self.async_create_entry(title=title, data=data)
+            return self.async_create_entry(title=title, data=data, options=options)
 
         return self.async_show_form(
             step_id="name",

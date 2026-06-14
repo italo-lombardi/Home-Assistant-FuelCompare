@@ -1447,3 +1447,127 @@ def test_build_station_data_no_location_field() -> None:
     assert result["longitude"] is None
     assert result["county"] is None
     assert result["address"] is None
+
+
+# ---------------------------------------------------------------------------
+# Partial timeout / partial fuel-type failure
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_populated_when_only_two_fuel_calls_return_data() -> (
+    None
+):
+    """Station is still returned when only 2 of 3 fuel-type calls return the station.
+
+    If GAS (lpg) returns an empty list, diesel and unleaded prices should still
+    be populated and the station should be retrievable.
+    """
+    die_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "DIE", "amount": 1.599}],
+    }
+    sup_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "SUP", "amount": 1.679}],
+    }
+    die_resp = _make_mock_response(200, json_data=[die_station])
+    sup_resp = _make_mock_response(200, json_data=[sup_station])
+    gas_resp = _make_mock_response(200, json_data=[])  # GAS call returns nothing
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    data = await p.async_fetch(session, _STATION_ID)
+
+    # Station is found and prices from the two successful calls are populated
+    assert data is not None
+    assert data["diesel"] == pytest.approx(1.599)
+    assert data["unleaded"] == pytest.approx(1.679)
+    # lpg is None because GAS call returned nothing
+    assert data["lpg"] is None
+
+
+async def test_async_fetch_station_populated_when_first_fuel_call_empty() -> None:
+    """Station is still returned when the first (DIE) fuel-type call returns empty.
+
+    SUP and GAS results still populate unleaded and lpg prices.
+    """
+    sup_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "SUP", "amount": 1.679}],
+    }
+    gas_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "GAS", "amount": 1.299}],
+    }
+    die_resp = _make_mock_response(200, json_data=[])  # DIE call empty
+    sup_resp = _make_mock_response(200, json_data=[sup_station])
+    gas_resp = _make_mock_response(200, json_data=[gas_station])
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    data = await p.async_fetch(session, _STATION_ID)
+
+    assert data is not None
+    assert data["diesel"] is None
+    assert data["unleaded"] == pytest.approx(1.679)
+    assert data["lpg"] == pytest.approx(1.299)
+
+
+async def test_async_list_stations_partial_fuel_calls_still_returns_station() -> None:
+    """async_list_stations returns a station even when only 1 of 3 fuel calls has it."""
+    die_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "DIE", "amount": 1.599}],
+    }
+    die_resp = _make_mock_response(200, json_data=[die_station])
+    sup_resp = _make_mock_response(200, json_data=[])
+    gas_resp = _make_mock_response(200, json_data=[])
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert len(result) == 1
+    sid, label = result[0]
+    assert sid == _STATION_ID
+    assert "Diesel" in label
+
+
+# ---------------------------------------------------------------------------
+# Non-JSON / unexpected response to _fetch_fuel_type
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_fuel_type_non_list_json_returns_empty_list() -> None:
+    """_fetch_fuel_type returns [] when API sends a non-list JSON body (e.g. a dict).
+
+    The provider's internal guard ensures non-list responses are silently
+    ignored rather than causing a crash or wrong type propagation.
+    """
+    # Return a dict instead of a list — _fetch_fuel_type should return []
+    die_resp = _make_mock_response(200, json_data={"error": "unexpected"})
+    sup_resp = _make_mock_response(200, json_data={"error": "unexpected"})
+    gas_resp = _make_mock_response(200, json_data={"error": "unexpected"})
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    # All three fuel calls return dicts; merged dict will be empty → ProviderError
+    with pytest.raises(ProviderError):
+        await p.async_fetch(session, _STATION_ID)
+
+
+async def test_async_list_stations_non_list_json_response_returns_empty() -> None:
+    """async_list_stations returns [] when all fuel-type calls return non-list JSON.
+
+    Even though _fetch_fuel_type converts the non-list response to [], the
+    merged dict will be empty, resulting in an empty stations list.
+    """
+    die_resp = _make_mock_response(200, json_data={"status": "error"})
+    sup_resp = _make_mock_response(200, json_data={"status": "error"})
+    gas_resp = _make_mock_response(200, json_data={"status": "error"})
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert result == []

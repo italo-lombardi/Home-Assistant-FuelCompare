@@ -20,9 +20,34 @@ Adding a new country / provider:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from math import atan2, cos, radians, sin, sqrt
 from typing import Any, ClassVar, Literal, TypedDict
 
 from aiohttp import ClientSession
+
+_EARTH_RADIUS_KM = 6371.0
+
+
+def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Return the great-circle distance in km between two WGS84 points.
+
+    Uses the haversine formula with atan2 for numerical stability.
+    Accuracy is better than 0.5% for distances under 1000 km.
+
+    Args:
+        lat1, lon1: Coordinates of the first point (degrees).
+        lat2, lon2: Coordinates of the second point (degrees).
+
+    Returns:
+        Distance in kilometres.
+    """
+    d_lat = radians(lat2 - lat1)
+    d_lon = radians(lon2 - lon1)
+    a = (
+        sin(d_lat / 2) ** 2
+        + cos(radians(lat1)) * cos(radians(lat2)) * sin(d_lon / 2) ** 2
+    )
+    return _EARTH_RADIUS_KM * 2 * atan2(sqrt(a), sqrt(1 - a))
 
 
 class ProviderError(Exception):
@@ -252,6 +277,20 @@ class BaseProvider(ABC):
     'manual_id'      — user types a station ID directly (default, fuelcompare.ie).
     'county_search'  — user picks a county then selects from a live station list.
     'location_search'— user enters lat/lng + radius, then selects from a live list.
+    """
+
+    REQUIRES_API_KEY: ClassVar[bool] = False
+    """Whether this provider requires an API key to function.
+
+    Set to True in subclasses that require the user to supply an API key.
+    The config flow uses this flag to conditionally show the API key input step.
+    """
+
+    API_KEY_REGISTRATION_URL: ClassVar[str] = ""
+    """URL where the user can register for an API key.
+
+    Only meaningful when REQUIRES_API_KEY is True. Shown in the config flow
+    to guide the user to the correct registration page.
     """
 
     # ── Enforcement ──────────────────────────────────────────────────────────

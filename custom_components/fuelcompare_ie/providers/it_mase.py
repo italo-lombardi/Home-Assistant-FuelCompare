@@ -35,14 +35,18 @@ Licence: IODL 2.0 (Italian Open Data Licence v2.0).
 from __future__ import annotations
 
 import logging
-import math
 from datetime import datetime
 from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -225,20 +229,6 @@ def _parse_meta_csv(text: str) -> dict[str, dict[str, Any]]:
         }
 
     return result
-
-
-def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Return the great-circle distance in km between two WGS84 points."""
-    r = 6371.0
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
-    a = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(math.radians(lat1))
-        * math.cos(math.radians(lat2))
-        * math.sin(dlon / 2) ** 2
-    )
-    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 def _parse_dtcomu(dtcomu: str) -> str | None:

@@ -7,8 +7,11 @@ Endpoint: GET https://precoscombustiveis.dgeg.gov.pt/api/PrecoComb/GetDadosPosto
 
 All stations (discovery): GET PesquisarPostos with district filter.
 
-NOTE: SSL certificate verification must be disabled (ssl=False). The API is
-served via Cloudflare with a backend cert that aiohttp cannot verify.
+NOTE: SSL certificate verification is attempted with the system/certifi bundle
+first.  If the server certificate cannot be verified (e.g. Cloudflare SNI
+mismatch or an expired intermediate), the request is retried with verification
+disabled and a WARNING is logged so the operator knows the connection is not
+fully authenticated.
 
 Fuel type mapping (TipoCombustivel field):
   'Gasóleo simples'    → diesel
@@ -30,7 +33,12 @@ from typing import Any
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,10 +50,49 @@ _DISTRICTS_URL = f"{_BASE_URL}/GetDistritos"
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
 
-# Disable SSL verification — DGEG backend has cert issues behind Cloudflare
-_SSL_CONTEXT = ssl.create_default_context()
-_SSL_CONTEXT.check_hostname = False
-_SSL_CONTEXT.verify_mode = ssl.CERT_NONE
+# Fallback SSL context used only when the server certificate cannot be
+# verified with the normal bundle.  check_hostname must be False before
+# CERT_NONE can be set.
+_SSL_FALLBACK: ssl.SSLContext = ssl.create_default_context()
+_SSL_FALLBACK.check_hostname = False
+_SSL_FALLBACK.verify_mode = ssl.CERT_NONE
+
+
+async def _get_json(
+    session: ClientSession,
+    url: str,
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """GET *url* and return the parsed JSON body.
+
+    SSL verification is attempted with the default context first.  If the
+    server certificate cannot be verified an ``ssl.SSLError`` is caught, a
+    WARNING is logged, and the request is retried with verification disabled
+    so that deployments on networks where the DGEG cert chain is valid still
+    benefit from full certificate checking.
+
+    Raises:
+        Exception: propagated to the caller on non-SSL errors or when the
+            fallback request also fails.
+    """
+    try:
+        async with session.get(url, params=params, timeout=_TIMEOUT) as resp:
+            resp.raise_for_status()
+            return await resp.json(content_type=None)
+    except ssl.SSLError as ssl_err:
+        _LOGGER.warning(
+            "DGEG: SSL certificate verification failed (%s); retrying without "
+            "verification.  Connection is not fully authenticated — consider "
+            "updating your CA bundle.",
+            ssl_err,
+        )
+    # Fallback: retry with verification disabled
+    async with session.get(
+        url, params=params, timeout=_TIMEOUT, ssl=_SSL_FALLBACK
+    ) as resp:
+        resp.raise_for_status()
+        return await resp.json(content_type=None)
+
 
 # Fuel name → StationData key mapping (Portuguese → internal key)
 # Only map types in CAPABILITIES; others are silently skipped.
@@ -139,14 +186,7 @@ class PtDgegProvider(BaseProvider):
         """Fetch all fuel prices for a single station via GetDadosPosto."""
         params = {"id": station_id, "idioma": "pt"}
         try:
-            async with session.get(
-                _GET_POSTO_URL,
-                params=params,
-                timeout=_TIMEOUT,
-                ssl=_SSL_CONTEXT,
-            ) as resp:
-                resp.raise_for_status()
-                data: dict[str, Any] = await resp.json(content_type=None)
+            data: dict[str, Any] = await _get_json(session, _GET_POSTO_URL, params)
         except Exception as err:
             raise ProviderError(
                 f"DGEG: failed to fetch station {station_id}: {err}"
@@ -174,14 +214,7 @@ class PtDgegProvider(BaseProvider):
         """Return the station name for the config flow, or None on failure."""
         try:
             params = {"id": station_id, "idioma": "pt"}
-            async with session.get(
-                _GET_POSTO_URL,
-                params=params,
-                timeout=_TIMEOUT,
-                ssl=_SSL_CONTEXT,
-            ) as resp:
-                resp.raise_for_status()
-                data: dict[str, Any] = await resp.json(content_type=None)
+            data: dict[str, Any] = await _get_json(session, _GET_POSTO_URL, params)
             resultado = data.get("resultado") or {}
             if isinstance(resultado, dict):
                 return resultado.get("Nome") or None
@@ -219,14 +252,7 @@ class PtDgegProvider(BaseProvider):
         }
 
         try:
-            async with session.get(
-                _SEARCH_URL,
-                params=params,
-                timeout=_TIMEOUT,
-                ssl=_SSL_CONTEXT,
-            ) as resp:
-                resp.raise_for_status()
-                data: dict[str, Any] = await resp.json(content_type=None)
+            data: dict[str, Any] = await _get_json(session, _SEARCH_URL, params)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("DGEG: async_list_stations request failed: %s", err)
             return []
@@ -400,19 +426,3 @@ def _parse_station(station_id: str, resultado: dict[str, Any]) -> StationData:
         "lastupdated": latest_update,
         "source_station_id": station_id,
     }
-
-
-def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    """Return the great-circle distance in kilometres between two WGS84 points."""
-    import math
-
-    r = 6371.0  # Earth radius in km
-    dlat = math.radians(lat2 - lat1)
-    dlng = math.radians(lng2 - lng1)
-    a = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(math.radians(lat1))
-        * math.cos(math.radians(lat2))
-        * math.sin(dlng / 2) ** 2
-    )
-    return r * 2 * math.asin(math.sqrt(a))

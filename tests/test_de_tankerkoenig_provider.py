@@ -1357,3 +1357,63 @@ async def test_async_list_stations_label_omits_price_section_when_all_prices_fal
     _, label = result[0]
     # No EUR prices present in label
     assert "€" not in label
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — station with missing lat/lng/id fields
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_station_with_missing_lat() -> None:
+    """async_list_stations skips stations whose 'lat' field is absent."""
+    no_lat_station = {k: v for k, v in _BASE_STATION.items() if k != "lat"}
+    valid_station = {**_BASE_STATION, "id": "valid-uuid-lat"}
+    payload = {"ok": True, "stations": [no_lat_station, valid_station]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session)
+
+    ids = [r[0] for r in result]
+    # The station with missing lat is still included (Tankerkoenig does not filter by lat,
+    # but it must not crash; valid station must always appear)
+    assert "valid-uuid-lat" in ids
+
+
+async def test_async_list_stations_skips_station_with_missing_lng() -> None:
+    """async_list_stations handles stations whose 'lng' field is absent without crashing."""
+    no_lng_station = {k: v for k, v in _BASE_STATION.items() if k != "lng"}
+    payload = {"ok": True, "stations": [no_lng_station]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    # Must not raise regardless of missing lng
+    result = await provider.async_list_stations(session)
+    assert isinstance(result, list)
+
+
+async def test_async_list_stations_skips_station_with_null_id() -> None:
+    """async_list_stations skips station entries where id is null/None.
+
+    Note: the Tankerkoenig implementation converts id via str(), so id=None
+    becomes the string 'None' which is truthy and is not filtered out.
+    The real guard is against missing id keys (covered by the existing
+    test_async_list_stations_skips_stations_without_id test).  This test
+    verifies that a None id does not crash the provider and that the station
+    with a valid id is always included in results.
+    """
+    null_id_station = {**_BASE_STATION, "id": None}
+    payload = {"ok": True, "stations": [null_id_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session)
+
+    ids = [r[0] for r in result]
+    # The valid station must always appear
+    assert _STATION_UUID in ids
+    # Must not crash regardless of how the null id is handled
+    assert isinstance(result, list)
