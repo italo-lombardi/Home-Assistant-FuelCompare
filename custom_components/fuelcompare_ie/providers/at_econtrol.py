@@ -365,4 +365,5 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
         "longitude": longitude,
         "is_open": is_open,
         "lastupdated": None,  # API does not provide per-station price timestamps
+        "source_station_id": str(raw.get("id") or ""),
     }

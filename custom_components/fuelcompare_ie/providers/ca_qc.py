@@ -105,7 +105,7 @@ def _make_station_id(name: str, address: str) -> str:
         16-character lowercase hex string.
     """
     key = f"{name}|{address}".encode("utf-8")
-    return hashlib.md5(key).hexdigest()[:16]
+    return hashlib.md5(key, usedforsecurity=False).hexdigest()[:16]  # noqa: S324
 
 
 def _parse_price(price_raw: Any) -> float | None:
