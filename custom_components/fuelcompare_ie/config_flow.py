@@ -375,6 +375,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._provider_key: str = DEFAULT_PROVIDER
         self._station_id: str = ""
         self._station_county: str = ""  # stored for county_search providers
+        self._postal_code: str = ""  # for postal-code-centric providers (e.g. be_carbu)
         self._station_list: list[tuple[str, str]] = []  # for station picker
         self._latitude: float | None = None
         self._longitude: float | None = None
@@ -635,6 +636,15 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         default_lat = self.hass.config.latitude
         default_lon = self.hass.config.longitude
 
+        # Detect if the selected provider needs a postal code (e.g. be_carbu).
+        import inspect as _inspect
+
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+        needs_postal = (
+            provider_cls is not None
+            and "postal_code" in _inspect.signature(provider_cls.__init__).parameters
+        )
+
         if user_input is not None:
             errors: dict[str, str] = {}
             try:
@@ -658,10 +668,17 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                             vol.Optional(
                                 CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM
                             ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=500)),
+                            **(
+                                {vol.Optional("postal_code", default=""): str}
+                                if needs_postal
+                                else {}
+                            ),
                         }
                     ),
                     errors=errors,
                 )
+            if needs_postal:
+                self._postal_code = str(user_input.get("postal_code") or "").strip()
             self._station_id = ""
             unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
             await self.async_set_unique_id(unique)
@@ -672,21 +689,22 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             return await self.async_step_station_picker()
 
+        schema_dict: dict = {
+            vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
+                vol.Coerce(float), vol.Range(min=-90, max=90)
+            ),
+            vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
+                vol.Coerce(float), vol.Range(min=-180, max=180)
+            ),
+            vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                vol.Coerce(float), vol.Range(min=0.1, max=500)
+            ),
+        }
+        if needs_postal:
+            schema_dict[vol.Optional("postal_code", default="")] = str
         return self.async_show_form(
             step_id="location",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
-                        vol.Coerce(float), vol.Range(min=-90, max=90)
-                    ),
-                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
-                        vol.Coerce(float), vol.Range(min=-180, max=180)
-                    ),
-                    vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
-                        vol.Coerce(float), vol.Range(min=0.1, max=500)
-                    ),
-                }
-            ),
+            data_schema=vol.Schema(schema_dict),
             errors={},
         )
 
@@ -709,6 +727,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
                     data[CONF_STATION_COUNTY] = self._station_county
+            if self._postal_code:
+                data["postal_code"] = self._postal_code
             if self._latitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
