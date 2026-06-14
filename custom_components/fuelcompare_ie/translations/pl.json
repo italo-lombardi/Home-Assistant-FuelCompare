@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Ostatnie udane pobranie"
+      },
+      "petrol": {
+        "name": "Benzyna"
+      },
+      "kerosene": {
+        "name": "Nafta"
+      },
+      "price_confidence": {
+        "name": "Wiarygodność ceny"
+      },
+      "opening_hours": {
+        "name": "Godziny otwarcia"
+      },
+      "address": {
+        "name": "Adres"
+      },
+      "latitude": {
+        "name": "Szerokość geograficzna"
+      },
+      "longitude": {
+        "name": "Długość geograficzna"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Strona internetowa"
+      },
+      "location": {
+        "name": "Lokalizacja"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problem z pobieraniem danych"
+      },
+      "has_price": {
+        "name": "Ma cenę"
+      },
+      "has_car_wash": {
+        "name": "Myjnia samochodowa"
+      },
+      "has_shop": {
+        "name": "Sklep"
+      },
+      "has_toilet": {
+        "name": "Toaleta"
+      },
+      "has_atm": {
+        "name": "Bankomat"
+      },
+      "has_disabled_access": {
+        "name": "Dostęp dla niepełnosprawnych"
+      },
+      "has_electric_charging": {
+        "name": "Ładowanie pojazdów elektrycznych"
+      },
+      "accepts_cash": {
+        "name": "Przyjmuje gotówkę"
+      },
+      "accepts_cards": {
+        "name": "Przyjmuje karty"
+      },
+      "accepts_contactless": {
+        "name": "Przyjmuje płatności zbliżeniowe"
       }
     }
   }

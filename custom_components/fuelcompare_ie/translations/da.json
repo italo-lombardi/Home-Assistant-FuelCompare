@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Seneste vellykkede hentning"
+      },
+      "petrol": {
+        "name": "Benzin"
+      },
+      "kerosene": {
+        "name": "Petroleum"
+      },
+      "price_confidence": {
+        "name": "Prisconfidentiality"
+      },
+      "opening_hours": {
+        "name": "Åbningstider"
+      },
+      "address": {
+        "name": "Adresse"
+      },
+      "latitude": {
+        "name": "Breddegrad"
+      },
+      "longitude": {
+        "name": "Længdegrad"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Hjemmeside"
+      },
+      "location": {
+        "name": "Placering"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Fejl ved datahentning"
+      },
+      "has_price": {
+        "name": "Har pris"
+      },
+      "has_car_wash": {
+        "name": "Bilvask"
+      },
+      "has_shop": {
+        "name": "Butik"
+      },
+      "has_toilet": {
+        "name": "Toilet"
+      },
+      "has_atm": {
+        "name": "Hæveautomat"
+      },
+      "has_disabled_access": {
+        "name": "Handicapadgang"
+      },
+      "has_electric_charging": {
+        "name": "Elbilsladning"
+      },
+      "accepts_cash": {
+        "name": "Accepterer kontanter"
+      },
+      "accepts_cards": {
+        "name": "Accepterer kort"
+      },
+      "accepts_contactless": {
+        "name": "Accepterer kontaktløs betaling"
       }
     }
   }

@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Utolsó sikeres lekérdezés"
+      },
+      "petrol": {
+        "name": "Benzin"
+      },
+      "kerosene": {
+        "name": "Kerozin"
+      },
+      "price_confidence": {
+        "name": "Ármeghbízhatóság"
+      },
+      "opening_hours": {
+        "name": "Nyitvatartás"
+      },
+      "address": {
+        "name": "Cím"
+      },
+      "latitude": {
+        "name": "Szélességi fok"
+      },
+      "longitude": {
+        "name": "Hosszúsági fok"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Weboldal"
+      },
+      "location": {
+        "name": "Helyszín"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Adatlekérési probléma"
+      },
+      "has_price": {
+        "name": "Van ár"
+      },
+      "has_car_wash": {
+        "name": "Autómosó"
+      },
+      "has_shop": {
+        "name": "Bolt"
+      },
+      "has_toilet": {
+        "name": "Mosdó"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_disabled_access": {
+        "name": "Akadálymentesített hozzáférés"
+      },
+      "has_electric_charging": {
+        "name": "Elektromos töltőállomás"
+      },
+      "accepts_cash": {
+        "name": "Elfogad készpénzt"
+      },
+      "accepts_cards": {
+        "name": "Elfogad kártyát"
+      },
+      "accepts_contactless": {
+        "name": "Elfogad érintésmentes fizetést"
       }
     }
   }

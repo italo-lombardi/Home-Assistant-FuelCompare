@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-06-14
+
+### Added
+- **FuelFinder.ie provider** (`providers/ie_fuelfinder.py`, `IEFuelFinderProvider`) — second Ireland data source backed by the crowd-sourced [FuelFinder.ie](https://www.fuelfinder.ie/) platform (Conjora Limited). Covers diesel, petrol, kerosene, and CNG prices for ~1,000+ Irish stations sourced from the OpenStreetMap dataset with community price submissions. Requires no API key — authentication is a static set of browser-origin headers (`Sec-Fetch-Site: same-origin`, `Referer`, and a non-blocked User-Agent; see `IEFuelFinderProvider._HEADERS`).
+- **New fuel types** — `kerosene` and `cng` price sensors are new entity types that have no fuelcompare.ie equivalent. They are created per station but shown as `unavailable` if the station has no community submissions for that fuel.
+- **`FuelFinderConfidenceSensor`** (`sensor.<name>_price_confidence`) — string sensor exposing FuelFinder's freshness tier for the station's crowd-sourced price: `fresh` (sub-24 h), `likely` (recent), or `outdated` (stale). Gives automations a data-age signal without requiring timestamp arithmetic.
+- **`FuelFinderLocationSensor`** (`sensor.<name>_location`) — exposes the station's WGS84 coordinates as `"{lat},{lng}"` (same convention as HA zone entities), with `latitude` and `longitude` as attributes. Useful for distance automations and map cards.
+- **`FuelFinderHasPriceBinarySensor`** (`binary_sensor.<name>_has_price`) — `on` when at least one community price submission exists for the station; `off` for OSM placeholder stations with no submitted prices. Device class `connectivity`.
+- **`FuelFinderIsOpenBinarySensor`** (`binary_sensor.<name>_is_open`) — open/closed state parsed from OSM `opening_hours` format strings (e.g. `"Mo-Su 07:00-23:00"`, `"24/7"`). Backed by a new `_parse_osm_opening_hours()` function; the existing `_parse_time()` logic (fuelcompare.ie `"6a.m."` format) is not reused.
+- **`FuelFinderOpeningHoursSensor`** (`sensor.<name>_opening_hours`) — exposes the raw OSM `opening_hours` string as the sensor state; attributes carry `phone` and `website` from the station record. Replaces `StationWorkingHoursSensor` for this provider (format is incompatible).
+- Each FuelFinder station creates **15 entities** (12 sensors + 3 binary sensors) vs 14 for fuelcompare.ie. The four fuelcompare.ie `about` category sensors (Accessibility, Offerings, Amenities, Payments) are absent — FuelFinder has no facility data.
+- Config flow: selecting the FuelFinder.ie provider routes to a county-picker step followed by a station-picker step (station resolved by UUID from `/api/fuelfinder/stations`). The station UUID is stored as `CONF_STATION_ID`; no leading-zero stripping is applied.
+- Poll interval remains **30 minutes** (`DEFAULT_SCAN_INTERVAL = 1800`). The FuelFinder `/api/fuelfinder/init` endpoint is CDN-cached at `s-maxage=300` (5 min) and `/api/fuelfinder/stations` is `no-store`; polling more frequently than 5 minutes provides no benefit for national stats.
+
+### Changed
+- `sensor.py`: `FuelPriceSensor` now uses `SensorStateClass.MEASUREMENT` (was `TOTAL`) for the FuelFinder provider. `MEASUREMENT` is the correct HA state class for a point-in-time price reading. The fuelcompare.ie provider is unchanged to avoid entity history migration for existing users.
+- Roadmap section in README updated — FuelFinder.ie marked as integrated; fuelcompare.ie closure notice adjusted.
+
 ## [0.7.0] - 2026-06-14
 
 ### Context

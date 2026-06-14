@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Τελευταία επιτυχημένη λήψη"
+      },
+      "petrol": {
+        "name": "Βενζίνη"
+      },
+      "kerosene": {
+        "name": "Κηροζίνη"
+      },
+      "price_confidence": {
+        "name": "Αξιοπιστία τιμής"
+      },
+      "opening_hours": {
+        "name": "Ώρες λειτουργίας"
+      },
+      "address": {
+        "name": "Διεύθυνση"
+      },
+      "latitude": {
+        "name": "Γεωγρ. πλάτος"
+      },
+      "longitude": {
+        "name": "Γεωγρ. μήκος"
+      },
+      "phone": {
+        "name": "Τηλέφωνο"
+      },
+      "website": {
+        "name": "Ιστοσελίδα"
+      },
+      "location": {
+        "name": "Τοποθεσία"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Πρόβλημα λήψης δεδομένων"
+      },
+      "has_price": {
+        "name": "Έχει τιμή"
+      },
+      "has_car_wash": {
+        "name": "Πλυντήριο αυτοκινήτων"
+      },
+      "has_shop": {
+        "name": "Κατάστημα"
+      },
+      "has_toilet": {
+        "name": "Τουαλέτα"
+      },
+      "has_atm": {
+        "name": "ΑΤΜ"
+      },
+      "has_disabled_access": {
+        "name": "Πρόσβαση ΑΜΕΑ"
+      },
+      "has_electric_charging": {
+        "name": "Φόρτιση ηλεκτρικών οχημάτων"
+      },
+      "accepts_cash": {
+        "name": "Δέχεται μετρητά"
+      },
+      "accepts_cards": {
+        "name": "Δέχεται κάρτες"
+      },
+      "accepts_contactless": {
+        "name": "Δέχεται ανέπαφη πληρωμή"
       }
     }
   }

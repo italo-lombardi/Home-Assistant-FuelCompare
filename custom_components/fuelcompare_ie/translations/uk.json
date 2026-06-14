@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Останнє успішне завантаження"
+      },
+      "petrol": {
+        "name": "Бензин"
+      },
+      "kerosene": {
+        "name": "Гас"
+      },
+      "price_confidence": {
+        "name": "Надійність ціни"
+      },
+      "opening_hours": {
+        "name": "Години роботи"
+      },
+      "address": {
+        "name": "Адреса"
+      },
+      "latitude": {
+        "name": "Широта"
+      },
+      "longitude": {
+        "name": "Довгота"
+      },
+      "phone": {
+        "name": "Телефон"
+      },
+      "website": {
+        "name": "Веб-сайт"
+      },
+      "location": {
+        "name": "Розташування"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Проблема із завантаженням даних"
+      },
+      "has_price": {
+        "name": "Має ціну"
+      },
+      "has_car_wash": {
+        "name": "Автомийка"
+      },
+      "has_shop": {
+        "name": "Магазин"
+      },
+      "has_toilet": {
+        "name": "Туалет"
+      },
+      "has_atm": {
+        "name": "Банкомат"
+      },
+      "has_disabled_access": {
+        "name": "Доступ для людей з інвалідністю"
+      },
+      "has_electric_charging": {
+        "name": "Зарядка електромобілів"
+      },
+      "accepts_cash": {
+        "name": "Приймає готівку"
+      },
+      "accepts_cards": {
+        "name": "Приймає картки"
+      },
+      "accepts_contactless": {
+        "name": "Приймає безконтактний платіж"
       }
     }
   }

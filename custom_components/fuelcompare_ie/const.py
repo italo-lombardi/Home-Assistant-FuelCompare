@@ -9,6 +9,7 @@ CONF_PROVIDER = "provider"
 CONF_LATITUDE = "latitude"
 CONF_LONGITUDE = "longitude"
 CONF_RADIUS_KM = "radius_km"
+CONF_STATION_COUNTY = "station_county"  # stored for county_search providers
 
 # Defaults
 DEFAULT_SCAN_INTERVAL = 1800  # 30 minutes

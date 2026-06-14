@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Laatste succesvolle ophaalactie"
+      },
+      "petrol": {
+        "name": "Benzine"
+      },
+      "kerosene": {
+        "name": "Kerosine"
+      },
+      "price_confidence": {
+        "name": "Prijsbetrouwbaarheid"
+      },
+      "opening_hours": {
+        "name": "Openingstijden"
+      },
+      "address": {
+        "name": "Adres"
+      },
+      "latitude": {
+        "name": "Breedtegraad"
+      },
+      "longitude": {
+        "name": "Lengtegraad"
+      },
+      "phone": {
+        "name": "Telefoon"
+      },
+      "website": {
+        "name": "Website"
+      },
+      "location": {
+        "name": "Locatie"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Probleem met gegevensophalen"
+      },
+      "has_price": {
+        "name": "Heeft prijs"
+      },
+      "has_car_wash": {
+        "name": "Autowasstraat"
+      },
+      "has_shop": {
+        "name": "Winkel"
+      },
+      "has_toilet": {
+        "name": "Toilet"
+      },
+      "has_atm": {
+        "name": "Geldautomaat"
+      },
+      "has_disabled_access": {
+        "name": "Rolstoeltoegankelijk"
+      },
+      "has_electric_charging": {
+        "name": "Laadpaal elektrisch"
+      },
+      "accepts_cash": {
+        "name": "Accepteert contant"
+      },
+      "accepts_cards": {
+        "name": "Accepteert kaarten"
+      },
+      "accepts_contactless": {
+        "name": "Accepteert contactloos"
       }
     }
   }

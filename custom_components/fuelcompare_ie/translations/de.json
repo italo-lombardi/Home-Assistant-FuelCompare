@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Letzter erfolgreicher Abruf"
+      },
+      "petrol": {
+        "name": "Benzin"
+      },
+      "kerosene": {
+        "name": "Kerosin"
+      },
+      "price_confidence": {
+        "name": "Preiszuverlässigkeit"
+      },
+      "opening_hours": {
+        "name": "Öffnungszeiten"
+      },
+      "address": {
+        "name": "Adresse"
+      },
+      "latitude": {
+        "name": "Breitengrad"
+      },
+      "longitude": {
+        "name": "Längengrad"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Webseite"
+      },
+      "location": {
+        "name": "Standort"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Datenabruf-Problem"
+      },
+      "has_price": {
+        "name": "Hat Preis"
+      },
+      "has_car_wash": {
+        "name": "Autowaschanlage"
+      },
+      "has_shop": {
+        "name": "Shop"
+      },
+      "has_toilet": {
+        "name": "Toilette"
+      },
+      "has_atm": {
+        "name": "Geldautomat"
+      },
+      "has_disabled_access": {
+        "name": "Behindertengerechter Zugang"
+      },
+      "has_electric_charging": {
+        "name": "Elektrofahrzeug-Ladestation"
+      },
+      "accepts_cash": {
+        "name": "Akzeptiert Bargeld"
+      },
+      "accepts_cards": {
+        "name": "Akzeptiert Karten"
+      },
+      "accepts_contactless": {
+        "name": "Akzeptiert kontaktlose Zahlung"
       }
     }
   }

@@ -649,3 +649,129 @@ async def test_working_hours_native_value_no_data() -> None:
     """StationWorkingHoursSensor native_value is None when coordinator.data is None."""
     sensor = _make_working_hours_sensor(None)
     assert sensor.native_value is None
+
+
+# ---------------------------------------------------------------------------
+# StationSimpleStrSensor
+# ---------------------------------------------------------------------------
+
+
+def _make_simple_str_sensor(data_key: str, data: dict | None):
+    from custom_components.fuelcompare_ie.sensor import StationSimpleStrSensor
+
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationSimpleStrSensor)
+    sensor._station_id = "12345"
+    sensor._data_key = data_key
+    sensor._attr_icon = "mdi:test"
+    sensor._attr_translation_key = data_key
+    sensor._attr_unique_id = f"fuelcompare_ie_12345_{data_key}"
+    sensor._attr_device_info = {}
+    object.__setattr__(sensor, "coordinator", coord)
+    return sensor
+
+
+def test_simple_str_sensor_native_value() -> None:
+    sensor = _make_simple_str_sensor("address", {"address": "Main St"})
+    assert sensor.native_value == "Main St"
+
+
+def test_simple_str_sensor_native_value_none_when_no_data() -> None:
+    sensor = _make_simple_str_sensor("address", None)
+    assert sensor.native_value is None
+
+
+def test_simple_str_sensor_native_value_empty_string_returns_none() -> None:
+    sensor = _make_simple_str_sensor("phone", {"phone": ""})
+    assert sensor.native_value is None
+
+
+def test_simple_str_sensor_available_true_with_data() -> None:
+    sensor = _make_simple_str_sensor("website", {"website": "http://test.ie"})
+    assert sensor.available is True
+
+
+def test_simple_str_sensor_available_false_without_data() -> None:
+    sensor = _make_simple_str_sensor("website", None)
+    assert sensor.available is False
+
+
+def test_simple_str_sensor_extra_state_attributes() -> None:
+    sensor = _make_simple_str_sensor("phone", {"phone": "+353-1-123"})
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# StationSimpleFloatSensor
+# ---------------------------------------------------------------------------
+
+
+def _make_simple_float_sensor(data_key: str, data: dict | None):
+    from custom_components.fuelcompare_ie.sensor import StationSimpleFloatSensor
+
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationSimpleFloatSensor)
+    sensor._station_id = "12345"
+    sensor._data_key = data_key
+    sensor._attr_icon = "mdi:test"
+    sensor._attr_translation_key = data_key
+    sensor._attr_unique_id = f"fuelcompare_ie_12345_{data_key}"
+    sensor._attr_device_info = {}
+    object.__setattr__(sensor, "coordinator", coord)
+    return sensor
+
+
+def test_simple_float_sensor_native_value() -> None:
+    sensor = _make_simple_float_sensor("latitude", {"latitude": 53.3498})
+    assert sensor.native_value == pytest.approx(53.3498)
+
+
+def test_simple_float_sensor_native_value_none_when_no_data() -> None:
+    sensor = _make_simple_float_sensor("longitude", None)
+    assert sensor.native_value is None
+
+
+def test_simple_float_sensor_rounds_to_6_decimals() -> None:
+    sensor = _make_simple_float_sensor("latitude", {"latitude": 53.349812345678})
+    assert sensor.native_value == pytest.approx(53.349812)
+
+
+# ---------------------------------------------------------------------------
+# StationOpeningHoursSensor
+# ---------------------------------------------------------------------------
+
+
+def _make_opening_hours_sensor(data: dict | None):
+    from custom_components.fuelcompare_ie.sensor import StationOpeningHoursSensor
+
+    coord = _make_coordinator(data)
+    sensor = object.__new__(StationOpeningHoursSensor)
+    sensor._station_id = "12345"
+    sensor._attr_unique_id = "fuelcompare_ie_12345_opening_hours"
+    sensor._attr_device_info = {}
+    object.__setattr__(sensor, "coordinator", coord)
+    return sensor
+
+
+def test_opening_hours_sensor_native_value() -> None:
+    sensor = _make_opening_hours_sensor({"opening_hours": "Mo-Su 07:00-23:00"})
+    assert sensor.native_value == "Mo-Su 07:00-23:00"
+
+
+def test_opening_hours_sensor_none_when_no_data() -> None:
+    sensor = _make_opening_hours_sensor(None)
+    assert sensor.native_value is None
+
+
+def test_opening_hours_sensor_none_when_empty() -> None:
+    sensor = _make_opening_hours_sensor({"opening_hours": ""})
+    assert sensor.native_value is None
+
+
+def test_opening_hours_sensor_extra_attrs_include_phone_website() -> None:
+    sensor = _make_opening_hours_sensor(
+        {"opening_hours": "24/7", "phone": "+353", "website": "http://bp.com"}
+    )
+    attrs = sensor.extra_state_attributes
+    assert attrs["phone"] == "+353"
+    assert attrs["website"] == "http://bp.com"

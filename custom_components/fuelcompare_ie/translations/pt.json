@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Última obtenção bem-sucedida"
+      },
+      "petrol": {
+        "name": "Gasolina"
+      },
+      "kerosene": {
+        "name": "Querosene"
+      },
+      "price_confidence": {
+        "name": "Confiança do preço"
+      },
+      "opening_hours": {
+        "name": "Horário de funcionamento"
+      },
+      "address": {
+        "name": "Endereço"
+      },
+      "latitude": {
+        "name": "Latitude"
+      },
+      "longitude": {
+        "name": "Longitude"
+      },
+      "phone": {
+        "name": "Telefone"
+      },
+      "website": {
+        "name": "Site"
+      },
+      "location": {
+        "name": "Localização"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problema na obtenção de dados"
+      },
+      "has_price": {
+        "name": "Tem preço"
+      },
+      "has_car_wash": {
+        "name": "Lavagem de carro"
+      },
+      "has_shop": {
+        "name": "Loja"
+      },
+      "has_toilet": {
+        "name": "Casa de banho"
+      },
+      "has_atm": {
+        "name": "Multibanco"
+      },
+      "has_disabled_access": {
+        "name": "Acesso para deficientes"
+      },
+      "has_electric_charging": {
+        "name": "Carregamento de veículos elétricos"
+      },
+      "accepts_cash": {
+        "name": "Aceita dinheiro"
+      },
+      "accepts_cards": {
+        "name": "Aceita cartões"
+      },
+      "accepts_contactless": {
+        "name": "Aceita pagamento contactless"
       }
     }
   }

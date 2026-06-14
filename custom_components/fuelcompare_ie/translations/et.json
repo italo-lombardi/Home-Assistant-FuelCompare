@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Viimane edukas pärimine"
+      },
+      "petrol": {
+        "name": "Bensiin"
+      },
+      "kerosene": {
+        "name": "Petrooleum"
+      },
+      "price_confidence": {
+        "name": "Hinna usaldusväärsus"
+      },
+      "opening_hours": {
+        "name": "Lahtiolekuajad"
+      },
+      "address": {
+        "name": "Aadress"
+      },
+      "latitude": {
+        "name": "Laiuskraad"
+      },
+      "longitude": {
+        "name": "Pikkuskraad"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Veebisait"
+      },
+      "location": {
+        "name": "Asukoht"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Andmete pärimise probleem"
+      },
+      "has_price": {
+        "name": "On hind"
+      },
+      "has_car_wash": {
+        "name": "Autopesla"
+      },
+      "has_shop": {
+        "name": "Pood"
+      },
+      "has_toilet": {
+        "name": "Tualett"
+      },
+      "has_atm": {
+        "name": "Pangaautomaati"
+      },
+      "has_disabled_access": {
+        "name": "Invaliididele ligipääs"
+      },
+      "has_electric_charging": {
+        "name": "Elektrisõidukite laadimine"
+      },
+      "accepts_cash": {
+        "name": "Aktsepteerib sularaha"
+      },
+      "accepts_cards": {
+        "name": "Aktsepteerib kaarte"
+      },
+      "accepts_contactless": {
+        "name": "Aktsepteerib kontaktivaba makset"
       }
     }
   }

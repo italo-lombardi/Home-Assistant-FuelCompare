@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Zadnji uspešni prenos"
+      },
+      "petrol": {
+        "name": "Bencin"
+      },
+      "kerosene": {
+        "name": "Kerozin"
+      },
+      "price_confidence": {
+        "name": "Zanesljivost cene"
+      },
+      "opening_hours": {
+        "name": "Delovni čas"
+      },
+      "address": {
+        "name": "Naslov"
+      },
+      "latitude": {
+        "name": "Zemljepisna širina"
+      },
+      "longitude": {
+        "name": "Zemljepisna dolžina"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Spletna stran"
+      },
+      "location": {
+        "name": "Lokacija"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Težava pri prenosu podatkov"
+      },
+      "has_price": {
+        "name": "Ima ceno"
+      },
+      "has_car_wash": {
+        "name": "Avtopralnica"
+      },
+      "has_shop": {
+        "name": "Trgovina"
+      },
+      "has_toilet": {
+        "name": "Stranišče"
+      },
+      "has_atm": {
+        "name": "Bankomat"
+      },
+      "has_disabled_access": {
+        "name": "Dostop za invalide"
+      },
+      "has_electric_charging": {
+        "name": "Polnjenje el. vozil"
+      },
+      "accepts_cash": {
+        "name": "Sprejema gotovino"
+      },
+      "accepts_cards": {
+        "name": "Sprejema kartice"
+      },
+      "accepts_contactless": {
+        "name": "Sprejema brezstično plačilo"
       }
     }
   }

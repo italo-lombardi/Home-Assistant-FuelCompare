@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Aisghabháil dheireanach rathúil"
+      },
+      "petrol": {
+        "name": "Peitreal"
+      },
+      "kerosene": {
+        "name": "Ceirisín"
+      },
+      "price_confidence": {
+        "name": "Iontaofacht praghas"
+      },
+      "opening_hours": {
+        "name": "Uaireanta oscailte"
+      },
+      "address": {
+        "name": "Seoladh"
+      },
+      "latitude": {
+        "name": "Domhanleithead"
+      },
+      "longitude": {
+        "name": "Domhanfhad"
+      },
+      "phone": {
+        "name": "Fón"
+      },
+      "website": {
+        "name": "Suíomh gréasáin"
+      },
+      "location": {
+        "name": "Suíomh"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Fadhb le sonraí a fháil"
+      },
+      "has_price": {
+        "name": "Tá praghas ann"
+      },
+      "has_car_wash": {
+        "name": "Níochán carr"
+      },
+      "has_shop": {
+        "name": "Siopa"
+      },
+      "has_toilet": {
+        "name": "Leithreas"
+      },
+      "has_atm": {
+        "name": "Meaisín airgid"
+      },
+      "has_disabled_access": {
+        "name": "Rochtain faoi mhíchumas"
+      },
+      "has_electric_charging": {
+        "name": "Luchtú feithiclí leictreacha"
+      },
+      "accepts_cash": {
+        "name": "Glacann le hairgead tirim"
+      },
+      "accepts_cards": {
+        "name": "Glacann le cártaí"
+      },
+      "accepts_contactless": {
+        "name": "Glacann le híocaíocht gan teagmháil"
       }
     }
   }
