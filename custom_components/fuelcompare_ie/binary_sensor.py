@@ -239,6 +239,7 @@ class StationIsOpenBinarySensor(
         return bool(
             self.coordinator.data.get("working_hours")
             or self.coordinator.data.get("opening_hours")
+            or self.coordinator.data.get("is_open") is not None
         )
 
     def _get_today_hours_str(self) -> str | None:
@@ -263,6 +264,9 @@ class StationIsOpenBinarySensor(
     @property
     def is_on(self) -> bool | None:
         """Return True if the station is currently open."""
+        direct = self.coordinator.data.get("is_open") if self.coordinator.data else None
+        if isinstance(direct, bool):
+            return direct
         today_hours = self._get_today_hours_str()
         if today_hours is None:
             return None

@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Pliivaba"
-      },
-      "diesel": {
-        "name": "Diisel"
-      },
-      "brand": {
-        "name": "Bränd"
-      },
-      "county": {
-        "name": "Maakond"
-      },
-      "working_hours": {
-        "name": "Lahtiolekuajad"
-      },
-      "accessibility": {
-        "name": "Ligipääsetavus"
-      },
-      "offerings": {
-        "name": "Teenused"
-      },
-      "amenities": {
-        "name": "Mugavused"
-      },
-      "payments": {
-        "name": "Maksed"
-      },
-      "price_last_updated": {
-        "name": "Hinna viimane uuendus"
-      },
-      "station_name": {
-        "name": "Jaama Nimi"
-      },
-      "last_successful_fetch": {
-        "name": "Viimane edukas pärimine"
-      },
-      "petrol": {
-        "name": "Bensiin"
-      },
-      "kerosene": {
-        "name": "Petrooleum"
-      },
-      "price_confidence": {
-        "name": "Hinna usaldusväärsus"
-      },
-      "opening_hours": {
-        "name": "Lahtiolekuajad"
-      },
-      "address": {
-        "name": "Aadress"
-      },
-      "latitude": {
-        "name": "Laiuskraad"
-      },
-      "longitude": {
-        "name": "Pikkuskraad"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Veebisait"
-      },
-      "location": {
-        "name": "Asukoht"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diisel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Petrooleum"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Bensiin"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Pliivaba"
+      },
+      "address": {
+        "name": "Aadress"
+      },
+      "brand": {
+        "name": "Bränd"
+      },
+      "county": {
+        "name": "Maakond"
+      },
+      "latitude": {
+        "name": "Laiuskraad"
+      },
+      "location": {
+        "name": "Asukoht"
+      },
+      "longitude": {
+        "name": "Pikkuskraad"
+      },
+      "station_name": {
+        "name": "Jaama Nimi"
+      },
+      "accessibility": {
+        "name": "Ligipääsetavus"
+      },
+      "amenities": {
+        "name": "Mugavused"
+      },
+      "last_successful_fetch": {
+        "name": "Viimane edukas pärimine"
+      },
+      "offerings": {
+        "name": "Teenused"
+      },
+      "opening_hours": {
+        "name": "Lahtiolekuajad"
+      },
+      "payments": {
+        "name": "Maksed"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Hinna usaldusväärsus"
+      },
+      "price_last_updated": {
+        "name": "Hinna viimane uuendus"
+      },
+      "website": {
+        "name": "Veebisait"
+      },
+      "working_hours": {
+        "name": "Lahtiolekuajad"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "On avatud"
-      },
       "data_fetch_problem": {
         "name": "Andmete pärimise probleem"
       },
       "has_price": {
         "name": "On hind"
       },
-      "has_car_wash": {
-        "name": "Autopesla"
-      },
-      "has_shop": {
-        "name": "Pood"
-      },
-      "has_toilet": {
-        "name": "Tualett"
+      "is_open": {
+        "name": "On avatud"
       },
       "has_atm": {
         "name": "Pangaautomaati"
+      },
+      "has_car_wash": {
+        "name": "Autopesla"
       },
       "has_disabled_access": {
         "name": "Invaliididele ligipääs"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Elektrisõidukite laadimine"
       },
-      "accepts_cash": {
-        "name": "Aktsepteerib sularaha"
+      "has_shop": {
+        "name": "Pood"
+      },
+      "has_toilet": {
+        "name": "Tualett"
       },
       "accepts_cards": {
         "name": "Aktsepteerib kaarte"
+      },
+      "accepts_cash": {
+        "name": "Aktsepteerib sularaha"
       },
       "accepts_contactless": {
         "name": "Aktsepteerib kontaktivaba makset"

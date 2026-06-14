@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Benzyna bezołowiowa"
-      },
-      "diesel": {
-        "name": "Olej napędowy"
-      },
-      "brand": {
-        "name": "Marka"
-      },
-      "county": {
-        "name": "Hrabstwo"
-      },
-      "working_hours": {
-        "name": "Godziny otwarcia"
-      },
-      "accessibility": {
-        "name": "Dostępność"
-      },
-      "offerings": {
-        "name": "Usługi"
-      },
-      "amenities": {
-        "name": "Udogodnienia"
-      },
-      "payments": {
-        "name": "Płatności"
-      },
-      "price_last_updated": {
-        "name": "Ostatnia aktualizacja ceny"
-      },
-      "station_name": {
-        "name": "Nazwa Stacji"
-      },
-      "last_successful_fetch": {
-        "name": "Ostatnie udane pobranie"
-      },
-      "petrol": {
-        "name": "Benzyna"
-      },
-      "kerosene": {
-        "name": "Nafta"
-      },
-      "price_confidence": {
-        "name": "Wiarygodność ceny"
-      },
-      "opening_hours": {
-        "name": "Godziny otwarcia"
-      },
-      "address": {
-        "name": "Adres"
-      },
-      "latitude": {
-        "name": "Szerokość geograficzna"
-      },
-      "longitude": {
-        "name": "Długość geograficzna"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Strona internetowa"
-      },
-      "location": {
-        "name": "Lokalizacja"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Olej napędowy"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Nafta"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzyna"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Benzyna bezołowiowa"
+      },
+      "address": {
+        "name": "Adres"
+      },
+      "brand": {
+        "name": "Marka"
+      },
+      "county": {
+        "name": "Hrabstwo"
+      },
+      "latitude": {
+        "name": "Szerokość geograficzna"
+      },
+      "location": {
+        "name": "Lokalizacja"
+      },
+      "longitude": {
+        "name": "Długość geograficzna"
+      },
+      "station_name": {
+        "name": "Nazwa Stacji"
+      },
+      "accessibility": {
+        "name": "Dostępność"
+      },
+      "amenities": {
+        "name": "Udogodnienia"
+      },
+      "last_successful_fetch": {
+        "name": "Ostatnie udane pobranie"
+      },
+      "offerings": {
+        "name": "Usługi"
+      },
+      "opening_hours": {
+        "name": "Godziny otwarcia"
+      },
+      "payments": {
+        "name": "Płatności"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Wiarygodność ceny"
+      },
+      "price_last_updated": {
+        "name": "Ostatnia aktualizacja ceny"
+      },
+      "website": {
+        "name": "Strona internetowa"
+      },
+      "working_hours": {
+        "name": "Godziny otwarcia"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Jest otwarty"
-      },
       "data_fetch_problem": {
         "name": "Problem z pobieraniem danych"
       },
       "has_price": {
         "name": "Ma cenę"
       },
-      "has_car_wash": {
-        "name": "Myjnia samochodowa"
-      },
-      "has_shop": {
-        "name": "Sklep"
-      },
-      "has_toilet": {
-        "name": "Toaleta"
+      "is_open": {
+        "name": "Jest otwarty"
       },
       "has_atm": {
         "name": "Bankomat"
+      },
+      "has_car_wash": {
+        "name": "Myjnia samochodowa"
       },
       "has_disabled_access": {
         "name": "Dostęp dla niepełnosprawnych"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Ładowanie pojazdów elektrycznych"
       },
-      "accepts_cash": {
-        "name": "Przyjmuje gotówkę"
+      "has_shop": {
+        "name": "Sklep"
+      },
+      "has_toilet": {
+        "name": "Toaleta"
       },
       "accepts_cards": {
         "name": "Przyjmuje karty"
+      },
+      "accepts_cash": {
+        "name": "Przyjmuje gotówkę"
       },
       "accepts_contactless": {
         "name": "Przyjmuje płatności zbliżeniowe"

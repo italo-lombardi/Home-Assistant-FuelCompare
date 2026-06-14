@@ -1,7 +1,9 @@
 {
   "domain": "fuelcompare_ie",
   "name": "Fuel Compare",
-  "codeowners": ["@italo-lombardi"],
+  "codeowners": [
+    "@italo-lombardi"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/italo-lombardi/Home-Assistant-FuelCompare",
@@ -9,6 +11,11 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues",
   "quality_scale": "custom",
-  "requirements": [],
-  "version": "0.7.0"
+  "requirements": [
+    "beautifulsoup4>=4.12",
+    "cryptography>=41.0.0",
+    "openpyxl>=3.1.0",
+    "tzdata>=2024.1"
+  ],
+  "version": "0.9.1"
 }

@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Fără plumb"
-      },
-      "diesel": {
-        "name": "Motorină"
-      },
-      "brand": {
-        "name": "Marcă"
-      },
-      "county": {
-        "name": "Județ"
-      },
-      "working_hours": {
-        "name": "Program de lucru"
-      },
-      "accessibility": {
-        "name": "Accesibilitate"
-      },
-      "offerings": {
-        "name": "Servicii"
-      },
-      "amenities": {
-        "name": "Facilități"
-      },
-      "payments": {
-        "name": "Plăți"
-      },
-      "price_last_updated": {
-        "name": "Ultima actualizare a prețului"
-      },
-      "station_name": {
-        "name": "Numele Stației"
-      },
-      "last_successful_fetch": {
-        "name": "Ultima preluare reușită"
-      },
-      "petrol": {
-        "name": "Benzină"
-      },
-      "kerosene": {
-        "name": "Kerosen"
-      },
-      "price_confidence": {
-        "name": "Fiabilitatea prețului"
-      },
-      "opening_hours": {
-        "name": "Program de lucru"
-      },
-      "address": {
-        "name": "Adresă"
-      },
-      "latitude": {
-        "name": "Latitudine"
-      },
-      "longitude": {
-        "name": "Longitudine"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Site web"
-      },
-      "location": {
-        "name": "Locație"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Motorină"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerosen"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzină"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Fără plumb"
+      },
+      "address": {
+        "name": "Adresă"
+      },
+      "brand": {
+        "name": "Marcă"
+      },
+      "county": {
+        "name": "Județ"
+      },
+      "latitude": {
+        "name": "Latitudine"
+      },
+      "location": {
+        "name": "Locație"
+      },
+      "longitude": {
+        "name": "Longitudine"
+      },
+      "station_name": {
+        "name": "Numele Stației"
+      },
+      "accessibility": {
+        "name": "Accesibilitate"
+      },
+      "amenities": {
+        "name": "Facilități"
+      },
+      "last_successful_fetch": {
+        "name": "Ultima preluare reușită"
+      },
+      "offerings": {
+        "name": "Servicii"
+      },
+      "opening_hours": {
+        "name": "Program de lucru"
+      },
+      "payments": {
+        "name": "Plăți"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Fiabilitatea prețului"
+      },
+      "price_last_updated": {
+        "name": "Ultima actualizare a prețului"
+      },
+      "website": {
+        "name": "Site web"
+      },
+      "working_hours": {
+        "name": "Program de lucru"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Este deschis"
-      },
       "data_fetch_problem": {
         "name": "Problemă la preluarea datelor"
       },
       "has_price": {
         "name": "Are preț"
       },
-      "has_car_wash": {
-        "name": "Spălătorie auto"
-      },
-      "has_shop": {
-        "name": "Magazin"
-      },
-      "has_toilet": {
-        "name": "Toaletă"
+      "is_open": {
+        "name": "Este deschis"
       },
       "has_atm": {
         "name": "Bancomat"
+      },
+      "has_car_wash": {
+        "name": "Spălătorie auto"
       },
       "has_disabled_access": {
         "name": "Acces persoane cu dizabilități"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Încărcare vehicule electrice"
       },
-      "accepts_cash": {
-        "name": "Acceptă numerar"
+      "has_shop": {
+        "name": "Magazin"
+      },
+      "has_toilet": {
+        "name": "Toaletă"
       },
       "accepts_cards": {
         "name": "Acceptă carduri"
+      },
+      "accepts_cash": {
+        "name": "Acceptă numerar"
       },
       "accepts_contactless": {
         "name": "Acceptă plată contactless"

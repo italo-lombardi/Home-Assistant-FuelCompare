@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Bezolovnatý"
-      },
-      "diesel": {
-        "name": "Nafta"
-      },
-      "brand": {
-        "name": "Značka"
-      },
-      "county": {
-        "name": "Okres"
-      },
-      "working_hours": {
-        "name": "Otváracie hodiny"
-      },
-      "accessibility": {
-        "name": "Prístupnosť"
-      },
-      "offerings": {
-        "name": "Služby"
-      },
-      "amenities": {
-        "name": "Vybavenie"
-      },
-      "payments": {
-        "name": "Platby"
-      },
-      "price_last_updated": {
-        "name": "Posledná aktualizácia ceny"
-      },
-      "station_name": {
-        "name": "Názov Stanice"
-      },
-      "last_successful_fetch": {
-        "name": "Posledné úspešné načítanie"
-      },
-      "petrol": {
-        "name": "Benzín"
-      },
-      "kerosene": {
-        "name": "Petrolej"
-      },
-      "price_confidence": {
-        "name": "Spoľahlivosť ceny"
-      },
-      "opening_hours": {
-        "name": "Otváracie hodiny"
-      },
-      "address": {
-        "name": "Adresa"
-      },
-      "latitude": {
-        "name": "Zemepisná šírka"
-      },
-      "longitude": {
-        "name": "Zemepisná dĺžka"
-      },
-      "phone": {
-        "name": "Telefón"
-      },
-      "website": {
-        "name": "Web"
-      },
-      "location": {
-        "name": "Poloha"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Nafta"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Petrolej"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzín"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Bezolovnatý"
+      },
+      "address": {
+        "name": "Adresa"
+      },
+      "brand": {
+        "name": "Značka"
+      },
+      "county": {
+        "name": "Okres"
+      },
+      "latitude": {
+        "name": "Zemepisná šírka"
+      },
+      "location": {
+        "name": "Poloha"
+      },
+      "longitude": {
+        "name": "Zemepisná dĺžka"
+      },
+      "station_name": {
+        "name": "Názov Stanice"
+      },
+      "accessibility": {
+        "name": "Prístupnosť"
+      },
+      "amenities": {
+        "name": "Vybavenie"
+      },
+      "last_successful_fetch": {
+        "name": "Posledné úspešné načítanie"
+      },
+      "offerings": {
+        "name": "Služby"
+      },
+      "opening_hours": {
+        "name": "Otváracie hodiny"
+      },
+      "payments": {
+        "name": "Platby"
+      },
+      "phone": {
+        "name": "Telefón"
+      },
+      "price_confidence": {
+        "name": "Spoľahlivosť ceny"
+      },
+      "price_last_updated": {
+        "name": "Posledná aktualizácia ceny"
+      },
+      "website": {
+        "name": "Web"
+      },
+      "working_hours": {
+        "name": "Otváracie hodiny"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Je otvorené"
-      },
       "data_fetch_problem": {
         "name": "Problém s načítaním dát"
       },
       "has_price": {
         "name": "Má cenu"
       },
-      "has_car_wash": {
-        "name": "Autoumyváreň"
-      },
-      "has_shop": {
-        "name": "Obchod"
-      },
-      "has_toilet": {
-        "name": "Toaleta"
+      "is_open": {
+        "name": "Je otvorené"
       },
       "has_atm": {
         "name": "Bankomat"
+      },
+      "has_car_wash": {
+        "name": "Autoumyváreň"
       },
       "has_disabled_access": {
         "name": "Bezbariérový prístup"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Nabíjanie elektromobilov"
       },
-      "accepts_cash": {
-        "name": "Prijíma hotovosť"
+      "has_shop": {
+        "name": "Obchod"
+      },
+      "has_toilet": {
+        "name": "Toaleta"
       },
       "accepts_cards": {
         "name": "Prijíma karty"
+      },
+      "accepts_cash": {
+        "name": "Prijíma hotovosť"
       },
       "accepts_contactless": {
         "name": "Prijíma bezkontaktné platby"

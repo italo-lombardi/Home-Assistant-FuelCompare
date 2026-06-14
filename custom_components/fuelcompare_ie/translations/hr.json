@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Bezolovni"
-      },
-      "diesel": {
-        "name": "Dizel"
-      },
-      "brand": {
-        "name": "Marka"
-      },
-      "county": {
-        "name": "Županija"
-      },
-      "working_hours": {
-        "name": "Radno vrijeme"
-      },
-      "accessibility": {
-        "name": "Pristupačnost"
-      },
-      "offerings": {
-        "name": "Usluge"
-      },
-      "amenities": {
-        "name": "Pogodnosti"
-      },
-      "payments": {
-        "name": "Plaćanja"
-      },
-      "price_last_updated": {
-        "name": "Zadnje ažuriranje cijene"
-      },
-      "station_name": {
-        "name": "Naziv Postaje"
-      },
-      "last_successful_fetch": {
-        "name": "Posljednje uspješno dohvaćanje"
-      },
-      "petrol": {
-        "name": "Benzin"
-      },
-      "kerosene": {
-        "name": "Kerozin"
-      },
-      "price_confidence": {
-        "name": "Pouzdanost cijene"
-      },
-      "opening_hours": {
-        "name": "Radno vrijeme"
-      },
-      "address": {
-        "name": "Adresa"
-      },
-      "latitude": {
-        "name": "Geografska širina"
-      },
-      "longitude": {
-        "name": "Geografska dužina"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Web stranica"
-      },
-      "location": {
-        "name": "Lokacija"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Dizel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerozin"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzin"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Bezolovni"
+      },
+      "address": {
+        "name": "Adresa"
+      },
+      "brand": {
+        "name": "Marka"
+      },
+      "county": {
+        "name": "Županija"
+      },
+      "latitude": {
+        "name": "Geografska širina"
+      },
+      "location": {
+        "name": "Lokacija"
+      },
+      "longitude": {
+        "name": "Geografska dužina"
+      },
+      "station_name": {
+        "name": "Naziv Postaje"
+      },
+      "accessibility": {
+        "name": "Pristupačnost"
+      },
+      "amenities": {
+        "name": "Pogodnosti"
+      },
+      "last_successful_fetch": {
+        "name": "Posljednje uspješno dohvaćanje"
+      },
+      "offerings": {
+        "name": "Usluge"
+      },
+      "opening_hours": {
+        "name": "Radno vrijeme"
+      },
+      "payments": {
+        "name": "Plaćanja"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Pouzdanost cijene"
+      },
+      "price_last_updated": {
+        "name": "Zadnje ažuriranje cijene"
+      },
+      "website": {
+        "name": "Web stranica"
+      },
+      "working_hours": {
+        "name": "Radno vrijeme"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Je otvoren"
-      },
       "data_fetch_problem": {
         "name": "Problem s dohvaćanjem podataka"
       },
       "has_price": {
         "name": "Ima cijenu"
       },
-      "has_car_wash": {
-        "name": "Auto-pranje"
-      },
-      "has_shop": {
-        "name": "Trgovina"
-      },
-      "has_toilet": {
-        "name": "Toalet"
+      "is_open": {
+        "name": "Je otvoren"
       },
       "has_atm": {
         "name": "Bankomat"
+      },
+      "has_car_wash": {
+        "name": "Auto-pranje"
       },
       "has_disabled_access": {
         "name": "Pristup za invalide"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Punjenje el. vozila"
       },
-      "accepts_cash": {
-        "name": "Prihvaća gotovinu"
+      "has_shop": {
+        "name": "Trgovina"
+      },
+      "has_toilet": {
+        "name": "Toalet"
       },
       "accepts_cards": {
         "name": "Prihvaća kartice"
+      },
+      "accepts_cash": {
+        "name": "Prihvaća gotovinu"
       },
       "accepts_contactless": {
         "name": "Prihvaća beskontaktno plaćanje"

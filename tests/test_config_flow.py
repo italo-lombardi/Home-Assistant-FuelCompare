@@ -10,6 +10,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.fuelcompare_ie.config_flow import _fetch_station_name
 from custom_components.fuelcompare_ie.const import (
+    CONF_API_KEY,
     CONF_COUNTRY,
     CONF_PROVIDER,
     CONF_STATION_ID,
@@ -181,28 +182,32 @@ async def _reach_station_step(hass, flow_id: str) -> dict:
 
 
 async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
-    """Non-integer station ID causes a form error."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    # Navigate through provider step if shown (multiple IE providers registered)
-    if result.get("step_id") == "user":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
-        )
-    if result.get("step_id") == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
-        )
-    assert result["step_id"] == "station"
+    """Non-integer station ID (e.g. a UUID or slug) is now accepted as valid."""
+    with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
+        mock_fetch.return_value = None
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input={CONF_STATION_ID: "abc"},
-    )
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        # Navigate through provider step if shown (multiple IE providers registered)
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
+        assert result["step_id"] == "station"
 
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_STATION_ID: "abc"},
+        )
+
+    # Non-integer IDs are now valid — flow should advance to the name step
     assert result["type"] == "form"
-    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+    assert result["step_id"] == "name"
 
 
 # ---------------------------------------------------------------------------
@@ -211,27 +216,31 @@ async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
 
 
 async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
-    """Negative station ID causes a form error."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    if result.get("step_id") == "user":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
-        )
-    if result.get("step_id") == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
-        )
-    assert result["step_id"] == "station"
+    """Negative string station ID (e.g. '-1') is now accepted as a valid non-empty string."""
+    with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
+        mock_fetch.return_value = None
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input={CONF_STATION_ID: "-1"},
-    )
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
+        assert result["step_id"] == "station"
 
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_STATION_ID: "-1"},
+        )
+
+    # Non-empty strings are now valid — flow should advance to the name step
     assert result["type"] == "form"
-    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+    assert result["step_id"] == "name"
 
 
 # ---------------------------------------------------------------------------
@@ -240,27 +249,31 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
 
 
 async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
-    """Zero station ID causes a form error."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    if result.get("step_id") == "user":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
-        )
-    if result.get("step_id") == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
-        )
-    assert result["step_id"] == "station"
+    """String '0' is now accepted as a valid non-empty station ID."""
+    with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
+        mock_fetch.return_value = None
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input={CONF_STATION_ID: "0"},
-    )
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
+        assert result["step_id"] == "station"
 
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_STATION_ID: "0"},
+        )
+
+    # Non-empty strings are now valid — flow should advance to the name step
     assert result["type"] == "form"
-    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+    assert result["step_id"] == "name"
 
 
 # ---------------------------------------------------------------------------
@@ -272,7 +285,7 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     """Submitting a station ID that already has a config entry aborts."""
     existing = MockConfigEntry(
         domain=DOMAIN,
-        unique_id=f"{DOMAIN}_123",
+        unique_id=f"{DOMAIN}_{DEFAULT_PROVIDER}_123",
         data={CONF_STATION_ID: "123"},
         title="Station 123",
     )
@@ -307,19 +320,15 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
 
 
 async def test_fetch_station_name_success(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns the name field when present."""
+    """_fetch_station_name returns the name from provider.async_fetch_station_name."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value={"name": "Circle K Mulhuddart", "tablename": "circle_k"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value="Circle K Mulhuddart",
         ),
     ):
         result = await _fetch_station_name(hass, "791")
@@ -328,45 +337,32 @@ async def test_fetch_station_name_success(hass: HomeAssistant) -> None:
 
 
 async def test_fetch_station_name_tablename_fallback(hass: HomeAssistant) -> None:
-    """_fetch_station_name falls back to formatted tablename when name field absent."""
+    """_fetch_station_name returns None when provider returns None (no special tablename logic)."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value={"tablename": "circle_k"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value=None,
         ),
     ):
         result = await _fetch_station_name(hass, "790")
 
-    assert result == "Circle K"
+    assert result is None
 
 
 async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) -> None:
-    """_fetch_station_name falls back to encrypted API when Next.js returns None."""
+    """_fetch_station_name returns provider result (IE provider uses fallback paths internally)."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value=None,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_encrypted_api",
-            new_callable=AsyncMock,
-            return_value={"name": "Applegreen Cookstown", "tablename": "applegreen"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value="Applegreen Cookstown",
         ),
     ):
         result = await _fetch_station_name(hass, "790")
@@ -375,19 +371,15 @@ async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) ->
 
 
 async def test_fetch_station_name_no_name_no_tablename(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns None when station data has neither name nor tablename."""
+    """_fetch_station_name returns None when provider returns None."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value={"county": "Dublin"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value=None,
         ),
     ):
         result = await _fetch_station_name(hass, "790")
@@ -399,12 +391,12 @@ async def test_fetch_station_name_exception_returns_none(hass: HomeAssistant) ->
     """_fetch_station_name returns None on any exception."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-            side_effect=Exception("network error"),
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
         ),
         patch(
-            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            side_effect=Exception("network error"),
         ),
     ):
         result = await _fetch_station_name(hass, "790")
@@ -481,6 +473,8 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
         PROVIDER_KEY = "ie_fake_location"
         LABEL = "Fake Location"
         CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
 
         def __init__(self, station_id: str) -> None:
             pass
@@ -489,13 +483,21 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
             return {}
 
         async def async_fetch_station_name(self, session, station_id):
-            return None
+            return "Dublin Fake Station"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("fake-station-001", "Dublin Fake Station")]
 
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
 
     PROVIDER_REGISTRY["ie_fake_location"] = _FakeLocationProvider
     try:
-        with _PATCH_FIRST_REFRESH:
+        with (
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+        ):
             result = await hass.config_entries.flow.async_init(
                 DOMAIN, context={"source": config_entries.SOURCE_USER}
             )
@@ -522,9 +524,20 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
                     CONF_RADIUS_KM: 5.0,
                 },
             )
+            # Location now routes to station_picker; pick the fake station
+            assert result["step_id"] == "station_picker"
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={CONF_STATION_ID: "fake-station-001"},
+            )
         assert result["step_id"] == "name"
 
-        with _PATCH_FIRST_REFRESH:
+        with (
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+        ):
             result = await hass.config_entries.flow.async_configure(
                 result["flow_id"],
                 user_input={"name": "Dublin Area"},
@@ -535,7 +548,7 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
         assert CONF_LATITUDE in result["data"]
         assert CONF_LONGITUDE in result["data"]
         assert CONF_RADIUS_KM in result["data"]
-        assert result["data"].get("station_id", "") == ""
+        assert result["data"].get("station_id", "") == "fake-station-001"
     finally:
         PROVIDER_REGISTRY.pop("ie_fake_location", None)
 
@@ -591,3 +604,194 @@ async def test_async_step_location_invalid_coords_returns_form_error(
     assert result["type"] == "form"
     assert result["step_id"] == "location"
     assert "base" in result["errors"]
+
+
+# ---------------------------------------------------------------------------
+# async_step_api_key tests
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_api_key_empty_key_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Submitting an empty API key re-shows the form with 'invalid_api_key' error."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    # Call the step with an empty string
+    result = await flow.async_step_api_key(user_input={CONF_API_KEY: ""})
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+    assert result["errors"].get(CONF_API_KEY) == "invalid_api_key"
+
+
+async def test_async_step_api_key_whitespace_only_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Submitting a whitespace-only API key re-shows the form with 'invalid_api_key' error."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    result = await flow.async_step_api_key(user_input={CONF_API_KEY: "   "})
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+    assert result["errors"].get(CONF_API_KEY) == "invalid_api_key"
+
+
+async def test_async_step_api_key_valid_key_stored_and_advances(
+    hass: HomeAssistant,
+) -> None:
+    """Submitting a valid API key stores it on the flow and advances past the step."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
+        DeTankerkoenigProvider,
+    )
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = DeTankerkoenigProvider.PROVIDER_KEY
+
+    result = await flow.async_step_api_key(user_input={CONF_API_KEY: "my-test-api-key"})
+
+    # The key must be stored
+    assert flow._api_key == "my-test-api-key"
+    # Step must have advanced (not still showing api_key form without error)
+    assert result.get("step_id") != "api_key" or result.get("errors") == {}
+
+
+async def test_async_step_api_key_initial_display_no_user_input(
+    hass: HomeAssistant,
+) -> None:
+    """Calling async_step_api_key with no user_input shows the empty form."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    result = await flow.async_step_api_key(user_input=None)
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+    assert result.get("errors", {}) == {}
+
+
+async def test_germany_provider_routes_through_api_key_step(
+    hass: HomeAssistant,
+) -> None:
+    """Selecting Germany / Tankerkoenig routes through the api_key step."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    # Country selection step
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: "DE"}
+        )
+
+    # Provider selection step (DE has only Tankerkoenig)
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_PROVIDER: "de_tankerkoenig"},
+        )
+
+    # Must land on api_key step
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
+
+
+async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
+    """api_key is persisted in the config entry options dict (not data) after successful setup."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
+        DeTankerkoenigProvider,
+    )
+
+    # Minimal mock that accepts api_key
+    class _FakeDEProvider(DeTankerkoenigProvider):
+        PROVIDER_KEY = "de_tankerkoenig_test_key"
+        COUNTRY = "DE"
+        REQUIRES_API_KEY = True
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
+
+        def __init__(self, station_id, api_key=None, **kwargs):
+            self._station_id = station_id
+            self._api_key = api_key
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return "Berlin Fake Station"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("de-fake-001", "Berlin Fake Station")]
+
+    PROVIDER_REGISTRY[_FakeDEProvider.PROVIDER_KEY] = _FakeDEProvider
+    try:
+        with (
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            if result.get("step_id") == "user":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_COUNTRY: "DE"}
+                )
+            if result.get("step_id") == "provider":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_PROVIDER: _FakeDEProvider.PROVIDER_KEY},
+                )
+            assert result["step_id"] == "api_key"
+
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={CONF_API_KEY: "secret-key-123"},
+            )
+            # After api_key advances to location step
+            if result.get("step_id") == "location":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={
+                        CONF_LATITUDE: 52.52,
+                        CONF_LONGITUDE: 13.405,
+                        CONF_RADIUS_KM: 5.0,
+                    },
+                )
+            # Location now routes to station_picker; pick the fake station
+            if result.get("step_id") == "station_picker":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_STATION_ID: "de-fake-001"},
+                )
+            if result.get("step_id") == "name":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={"name": "Berlin Station"},
+                )
+
+        assert result["type"] == "create_entry"
+        # api_key is now stored in entry.options, not entry.data
+        assert result["options"][CONF_API_KEY] == "secret-key-123"
+        assert CONF_API_KEY not in result["data"]
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeDEProvider.PROVIDER_KEY, None)

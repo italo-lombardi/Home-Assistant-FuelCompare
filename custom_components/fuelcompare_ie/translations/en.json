@@ -43,6 +43,13 @@
           "station_county": "County"
         }
       },
+      "api_key": {
+        "title": "API Key",
+        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "data": {
+          "api_key": "API Key"
+        }
+      },
       "station_picker": {
         "title": "Select Station",
         "description": "Select a fuel station. Prices shown are for diesel/petrol.",
@@ -54,61 +61,24 @@
     "error": {
       "invalid_station_id": "Station ID must be a positive integer.",
       "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "no_stations_found": "No stations found for this county. Try a different county.",
+      "invalid_api_key": "API key cannot be empty."
     },
     "abort": {
-      "already_configured": "This station is already configured."
+      "already_configured": "This station is already configured.",
+      "no_providers_for_country": "No data providers are available for this country."
     }
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Unleaded"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "price_last_updated": {
-        "name": "Price Last Updated"
-      },
-      "station_name": {
-        "name": "Station Name"
-      },
-      "brand": {
-        "name": "Brand"
-      },
-      "county": {
-        "name": "County"
-      },
-      "working_hours": {
-        "name": "Working Hours"
-      },
-      "accessibility": {
-        "name": "Accessibility"
-      },
-      "offerings": {
-        "name": "Offerings"
-      },
-      "amenities": {
-        "name": "Amenities"
-      },
-      "payments": {
-        "name": "Payments"
-      },
-      "last_successful_fetch": {
-        "name": "Last Successful Fetch"
-      },
-      "petrol": {
-        "name": "Petrol"
-      },
-      "kerosene": {
-        "name": "Kerosene"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -116,61 +86,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerosene"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Petrol"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
       },
-      "price_confidence": {
-        "name": "Price Confidence"
-      },
-      "opening_hours": {
-        "name": "Opening Hours"
+      "unleaded": {
+        "name": "Unleaded"
       },
       "address": {
         "name": "Address"
       },
+      "brand": {
+        "name": "Brand"
+      },
+      "county": {
+        "name": "County"
+      },
       "latitude": {
         "name": "Latitude"
+      },
+      "location": {
+        "name": "Location"
       },
       "longitude": {
         "name": "Longitude"
       },
+      "station_name": {
+        "name": "Station Name"
+      },
+      "accessibility": {
+        "name": "Accessibility"
+      },
+      "amenities": {
+        "name": "Amenities"
+      },
+      "last_successful_fetch": {
+        "name": "Last Successful Fetch"
+      },
+      "offerings": {
+        "name": "Offerings"
+      },
+      "opening_hours": {
+        "name": "Opening Hours"
+      },
+      "payments": {
+        "name": "Payments"
+      },
       "phone": {
         "name": "Phone"
+      },
+      "price_confidence": {
+        "name": "Price Confidence"
+      },
+      "price_last_updated": {
+        "name": "Price Last Updated"
       },
       "website": {
         "name": "Website"
       },
-      "location": {
-        "name": "Location"
+      "working_hours": {
+        "name": "Working Hours"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Is Open"
-      },
       "data_fetch_problem": {
         "name": "Data Fetch Problem"
       },
       "has_price": {
         "name": "Has Price"
       },
-      "has_car_wash": {
-        "name": "Car Wash"
-      },
-      "has_shop": {
-        "name": "Shop"
-      },
-      "has_toilet": {
-        "name": "Toilet"
+      "is_open": {
+        "name": "Is Open"
       },
       "has_atm": {
         "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "Car Wash"
       },
       "has_disabled_access": {
         "name": "Disabled Access"
@@ -178,11 +181,17 @@
       "has_electric_charging": {
         "name": "Electric Vehicle Charging"
       },
-      "accepts_cash": {
-        "name": "Accepts Cash"
+      "has_shop": {
+        "name": "Shop"
+      },
+      "has_toilet": {
+        "name": "Toilet"
       },
       "accepts_cards": {
         "name": "Accepts Cards"
+      },
+      "accepts_cash": {
+        "name": "Accepts Cash"
       },
       "accepts_contactless": {
         "name": "Accepts Contactless"

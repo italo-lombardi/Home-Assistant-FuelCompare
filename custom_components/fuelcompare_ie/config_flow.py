@@ -7,13 +7,22 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithConfigEntry,
+)
 from homeassistant.const import CONF_NAME
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
+    CONF_API_KEY,
     CONF_COUNTRY,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
     CONF_PROVIDER,
+    CONF_RADIUS_KM,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
     DEFAULT_COUNTRY,
@@ -21,12 +30,48 @@ from .const import (
     DEFAULT_RADIUS_KM,
     DOMAIN,
 )
-from .coordinator import FuelCompareIECoordinator
 from .providers import PROVIDER_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
 
-_COUNTRY_NAMES: dict[str, str] = {"IE": "Ireland", "HR": "Croatia"}
+_COUNTRY_NAMES: dict[str, str] = {
+    # Ireland — primary market
+    "IE": "Ireland",
+    # Europe — alphabetical by display name
+    "AL": "Albania",
+    "AT": "Austria",
+    "BA": "Bosnia and Herzegovina",
+    "BE": "Belgium",
+    "HR": "Croatia",
+    "CZ": "Czech Republic",
+    "DK": "Denmark",
+    "FI": "Finland",
+    "FR": "France",
+    "DE": "Germany",
+    "GR": "Greece",
+    "IS": "Iceland",
+    "IT": "Italy",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "MT": "Malta",
+    "MD": "Moldova",
+    "ME": "Montenegro",
+    "NL": "Netherlands",
+    "NO": "Norway",
+    "PL": "Poland",
+    "PT": "Portugal",
+    "SI": "Slovenia",
+    "ES": "Spain",
+    "SE": "Sweden",
+    "CH": "Switzerland",
+    "GB": "United Kingdom",
+    # Oceania
+    "AU": "Australia",
+    # Americas
+    "CA": "Canada",
+    # Cross-country / aggregated
+    "EU": "European Union (Oil Bulletin)",
+}
 
 
 def _countries_from_registry() -> list[tuple[str, str]]:
@@ -35,16 +80,20 @@ def _countries_from_registry() -> list[tuple[str, str]]:
     for cls in PROVIDER_REGISTRY.values():
         if cls.COUNTRY not in seen:
             seen[cls.COUNTRY] = cls.COUNTRY
-    return [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
+    pairs = [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
+    pairs.sort(key=lambda x: x[1])
+    return pairs
 
 
 def _providers_for_country(country: str) -> list[tuple[str, str]]:
     """Return (provider_key, label) pairs for a given country code."""
-    return [
+    pairs = [
         (cls.PROVIDER_KEY, cls.LABEL)
         for cls in PROVIDER_REGISTRY.values()
         if cls.COUNTRY == country
     ]
+    pairs.sort(key=lambda x: x[1])
+    return pairs
 
 
 # County lists per country — lowercase value stored in entry data, display label shown in UI
@@ -79,6 +128,26 @@ _IE_COUNTIES: dict[str, str] = {
 
 _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
     "IE": _IE_COUNTIES,
+    "AL": {
+        "albania": "Albania (all)",
+    },
+    "AT": {
+        "burgenland": "Burgenland",
+        "carinthia": "Carinthia (Kärnten)",
+        "lower_austria": "Lower Austria (Niederösterreich)",
+        "salzburg": "Salzburg",
+        "styria": "Styria (Steiermark)",
+        "tyrol": "Tyrol (Tirol)",
+        "upper_austria": "Upper Austria (Oberösterreich)",
+        "vienna": "Vienna (Wien)",
+        "vorarlberg": "Vorarlberg",
+    },
+    "BA": {
+        "bosnia": "Bosnia and Herzegovina (all)",
+    },
+    "BE": {
+        "belgium": "Belgium (all)",
+    },
     "HR": {
         "bjelovarsko-bilogorska": "Bjelovarsko-bilogorska",
         "brodsko-posavska": "Brodsko-posavska",
@@ -102,6 +171,166 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "zagrebačka": "Zagrebačka",
         "šibensko-kninska": "Šibensko-kninska",
     },
+    "CZ": {
+        "czech_republic": "Czech Republic (all)",
+    },
+    "DK": {
+        "denmark": "Denmark (all)",
+    },
+    "FI": {
+        "finland": "Finland (all)",
+    },
+    "FR": {
+        "auvergne_rhone_alpes": "Auvergne-Rhône-Alpes",
+        "bourgogne_franche_comte": "Bourgogne-Franche-Comté",
+        "bretagne": "Bretagne",
+        "centre_val_de_loire": "Centre-Val de Loire",
+        "corse": "Corse",
+        "grand_est": "Grand Est",
+        "hauts_de_france": "Hauts-de-France",
+        "ile_de_france": "Île-de-France",
+        "normandie": "Normandie",
+        "nouvelle_aquitaine": "Nouvelle-Aquitaine",
+        "occitanie": "Occitanie",
+        "pays_de_la_loire": "Pays de la Loire",
+        "provence_alpes_cote_d_azur": "Provence-Alpes-Côte d'Azur",
+    },
+    "DE": {
+        "berlin": "Berlin",
+        "bavaria": "Bavaria (Bayern)",
+        "north_rhine_westphalia": "North Rhine-Westphalia (Nordrhein-Westfalen)",
+        "baden_wurttemberg": "Baden-Württemberg",
+        "lower_saxony": "Lower Saxony (Niedersachsen)",
+        "hesse": "Hesse (Hessen)",
+        "saxony": "Saxony (Sachsen)",
+        "rhineland_palatinate": "Rhineland-Palatinate (Rheinland-Pfalz)",
+        "saxony_anhalt": "Saxony-Anhalt (Sachsen-Anhalt)",
+        "thuringia": "Thuringia (Thüringen)",
+        "brandenburg": "Brandenburg",
+        "mecklenburg_vorpommern": "Mecklenburg-Vorpommern",
+        "hamburg": "Hamburg",
+        "saarland": "Saarland",
+        "schleswig_holstein": "Schleswig-Holstein",
+        "bremen": "Bremen",
+    },
+    "GR": {
+        "greece": "Greece (all)",
+    },
+    "IS": {
+        "iceland": "Iceland (all)",
+    },
+    "IT": {
+        "abruzzo": "Abruzzo",
+        "basilicata": "Basilicata",
+        "calabria": "Calabria",
+        "campania": "Campania",
+        "emilia_romagna": "Emilia-Romagna",
+        "friuli_venezia_giulia": "Friuli-Venezia Giulia",
+        "lazio": "Lazio",
+        "liguria": "Liguria",
+        "lombardia": "Lombardia",
+        "marche": "Marche",
+        "molise": "Molise",
+        "piemonte": "Piemonte",
+        "puglia": "Puglia",
+        "sardegna": "Sardegna",
+        "sicilia": "Sicilia",
+        "toscana": "Toscana",
+        "trentino_alto_adige": "Trentino-Alto Adige",
+        "umbria": "Umbria",
+        "valle_d_aosta": "Valle d'Aosta",
+        "veneto": "Veneto",
+    },
+    "LT": {
+        "lithuania": "Lithuania (all)",
+    },
+    "LU": {
+        "luxembourg": "Luxembourg (all)",
+    },
+    "MT": {
+        "malta": "Malta (all)",
+    },
+    "MD": {
+        "moldova": "Moldova (all)",
+    },
+    "ME": {
+        "montenegro": "Montenegro (all)",
+    },
+    "NL": {
+        "netherlands": "Netherlands (all)",
+    },
+    "NO": {
+        "norway": "Norway (all)",
+    },
+    "PL": {
+        "poland": "Poland (all)",
+    },
+    "PT": {
+        "aveiro": "Aveiro",
+        "beja": "Beja",
+        "braga": "Braga",
+        "braganca": "Bragança",
+        "castelo_branco": "Castelo Branco",
+        "coimbra": "Coimbra",
+        "evora": "Évora",
+        "faro": "Faro",
+        "guarda": "Guarda",
+        "leiria": "Leiria",
+        "lisboa": "Lisboa",
+        "portalegre": "Portalegre",
+        "porto": "Porto",
+        "santarem": "Santarém",
+        "setubal": "Setúbal",
+        "viana_do_castelo": "Viana do Castelo",
+        "vila_real": "Vila Real",
+        "viseu": "Viseu",
+    },
+    "SI": {
+        "slovenia": "Slovenia (all)",
+    },
+    "ES": {
+        "andalucia": "Andalucía",
+        "aragon": "Aragón",
+        "asturias": "Asturias",
+        "balearic_islands": "Balearic Islands (Illes Balears)",
+        "basque_country": "Basque Country (País Vasco)",
+        "canary_islands": "Canary Islands (Canarias)",
+        "cantabria": "Cantabria",
+        "castilla_la_mancha": "Castilla-La Mancha",
+        "castilla_y_leon": "Castilla y León",
+        "catalonia": "Catalonia (Catalunya)",
+        "extremadura": "Extremadura",
+        "galicia": "Galicia",
+        "la_rioja": "La Rioja",
+        "madrid": "Community of Madrid",
+        "murcia": "Region of Murcia",
+        "navarre": "Navarre (Navarra)",
+        "valencian_community": "Valencian Community",
+    },
+    "SE": {
+        "sweden": "Sweden (all)",
+    },
+    "CH": {
+        "switzerland": "Switzerland (all)",
+    },
+    "GB": {
+        "england": "England",
+        "scotland": "Scotland",
+        "wales": "Wales",
+        "northern_ireland": "Northern Ireland",
+    },
+    "AU": {
+        "western_australia": "Western Australia",
+        "nsw_tasmania": "NSW + Tasmania",
+        "queensland": "Queensland",
+        "victoria": "Victoria",
+    },
+    "CA": {
+        "quebec": "Québec",
+    },
+    "EU": {
+        "eu": "European Union (all member states)",
+    },
 }
 
 
@@ -115,27 +344,16 @@ async def _fetch_station_name(
 ) -> str | None:
     """Resolve station display name via the selected provider.
 
-    Falls back to DEFAULT_PROVIDER if provider_key is not in the registry.
-    Module-level so tests can patch coordinator._fetch_* methods.
+    Calls provider.async_fetch_station_name() directly so all providers work,
+    not just the IE fuelcompare.ie provider.
     """
-    provider_cls = PROVIDER_REGISTRY.get(provider_key) or PROVIDER_REGISTRY.get(
-        DEFAULT_PROVIDER
-    )
+    provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
         return None
     try:
         session = async_get_clientsession(hass)
         provider = provider_cls(station_id)
-        coordinator = FuelCompareIECoordinator(hass, provider, station_id)
-        await coordinator._fetch_page_assets(session)
-        data = await coordinator._fetch_nextjs(session)
-        if data is None:
-            data = await coordinator._fetch_encrypted_api(session)
-        if data:
-            if data.get("name"):
-                return data["name"]
-            if data.get("tablename"):
-                return data["tablename"].replace("_", " ").title()
+        return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
     return None
@@ -146,16 +364,24 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Return the options flow handler for this config entry."""
+        return FuelCompareIEOptionsFlow(config_entry)
+
     def __init__(self) -> None:
         self._country: str = DEFAULT_COUNTRY
         self._provider_key: str = DEFAULT_PROVIDER
         self._station_id: str = ""
         self._station_county: str = ""  # stored for county_search providers
+        self._postal_code: str = ""  # for postal-code-centric providers (e.g. be_carbu)
         self._station_list: list[tuple[str, str]] = []  # for station picker
         self._latitude: float | None = None
         self._longitude: float | None = None
         self._radius_km: float = DEFAULT_RADIUS_KM
         self._suggested_name: str = ""
+        self._api_key: str = ""  # optional API key for providers that require it
 
     # ---- Step 1: country --------------------------------------------------------
 
@@ -190,7 +416,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         """Resolve provider, then dispatch to the correct config step for its mode."""
         providers = _providers_for_country(self._country)
         if not providers:
-            self._provider_key = DEFAULT_PROVIDER
+            return self.async_abort(reason="no_providers_for_country")
         elif len(providers) == 1:
             self._provider_key = providers[0][0]
         else:
@@ -203,10 +429,16 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
         if not provider_cls:
             return await self.async_step_station()
+        # Providers that require an API key get an extra step first
+        if getattr(provider_cls, "REQUIRES_API_KEY", False) and not self._api_key:
+            return await self.async_step_api_key()
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
-        if provider_cls.CONFIG_MODE == "location":
+        if (
+            getattr(provider_cls, "CONFIG_MODE", None) == "location"
+            or getattr(provider_cls, "STATION_LOOKUP_MODE", None) == "location_search"
+        ):
             return await self.async_step_location()
         return await self.async_step_station()
 
@@ -233,6 +465,35 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
     # ---- Step 3a: station ID (manual_id mode) -----------------------------------
 
+    async def async_step_api_key(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Collect an API key for providers that require authentication."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            api_key = (user_input.get(CONF_API_KEY) or "").strip()
+            if not api_key:
+                errors[CONF_API_KEY] = "invalid_api_key"
+            else:
+                self._api_key = api_key
+                return await self._dispatch_after_provider()
+
+        provider_cls_for_key = PROVIDER_REGISTRY.get(self._provider_key)
+        registration_url: str = getattr(
+            provider_cls_for_key,
+            "API_KEY_REGISTRATION_URL",
+            "https://onboarding.tankerkoenig.de/",
+        )
+        return self.async_show_form(
+            step_id="api_key",
+            data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}),
+            description_placeholders={"registration_url": registration_url},
+            errors=errors,
+        )
+
+    # ---- Step 3b: station ID (manual_id mode) -----------------------------------
+
     async def async_step_station(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -240,19 +501,15 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            station_id = user_input[CONF_STATION_ID]
+            station_id = user_input[CONF_STATION_ID].strip()
 
-            try:
-                station_id_int = int(station_id)
-                if station_id_int <= 0:
-                    errors[CONF_STATION_ID] = "invalid_station_id"
-                else:
-                    station_id = str(station_id_int)
-            except (ValueError, TypeError):
+            if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
 
             if not errors:
-                await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
+                await self.async_set_unique_id(
+                    f"{DOMAIN}_{self._provider_key}_{station_id}"
+                )
                 self._abort_if_unique_id_configured()
 
                 self._station_id = station_id
@@ -305,8 +562,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
             else:
-                await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
-                self._abort_if_unique_id_configured()
+                # Only set unique_id from station_id when not already set by
+                # async_step_location (location-search providers set a lat/lng uid).
+                if not self.unique_id:
+                    await self.async_set_unique_id(
+                        f"{DOMAIN}_{self._provider_key}_{station_id}"
+                    )
+                    self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key
@@ -320,9 +582,21 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         if provider_cls:
             try:
                 session = async_get_clientsession(self.hass)
-                provider_instance = provider_cls("")
+                # Build constructor kwargs so providers that require an api_key
+                # (e.g. Tankerkoenig) can authenticate the list call.
+                init_kwargs: dict[str, Any] = {}
+                if self._api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
+                    init_kwargs["api_key"] = self._api_key
+                provider_instance = provider_cls("", **init_kwargs)
+                list_kwargs: dict[str, Any] = {"county": self._station_county}
+                if self._latitude is not None:
+                    list_kwargs["lat"] = self._latitude
+                if self._longitude is not None:
+                    list_kwargs["lng"] = self._longitude
+                if self._radius_km is not None:
+                    list_kwargs["radius_km"] = self._radius_km
                 station_list = await provider_instance.async_list_stations(
-                    session, county=self._station_county
+                    session, **list_kwargs
                 )
             except Exception as err:  # noqa: BLE001
                 _LOGGER.debug("Failed to load station list: %s", err)
@@ -330,6 +604,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_list = station_list
 
         if not station_list:
+            # For location-based providers the unique_id is already set from
+            # lat/lng — we can proceed to the name step without a station pick.
+            if self.unique_id:
+                return await self.async_step_name()
             errors["base"] = "no_stations_found"
             return self.async_show_form(
                 step_id="station_picker",
@@ -355,10 +633,17 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Collect lat/lng and radius for location-based providers."""
-        from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
-
         default_lat = self.hass.config.latitude
         default_lon = self.hass.config.longitude
+
+        # Detect if the selected provider needs a postal code (e.g. be_carbu).
+        import inspect as _inspect
+
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+        needs_postal = (
+            provider_cls is not None
+            and "postal_code" in _inspect.signature(provider_cls.__init__).parameters
+        )
 
         if user_input is not None:
             errors: dict[str, str] = {}
@@ -374,39 +659,52 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     step_id="location",
                     data_schema=vol.Schema(
                         {
-                            vol.Required(
-                                CONF_LATITUDE, default=default_lat
-                            ): vol.Coerce(float),
-                            vol.Required(
-                                CONF_LONGITUDE, default=default_lon
-                            ): vol.Coerce(float),
+                            vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
+                                vol.Coerce(float), vol.Range(min=-90, max=90)
+                            ),
+                            vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
+                                vol.Coerce(float), vol.Range(min=-180, max=180)
+                            ),
                             vol.Optional(
                                 CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM
-                            ): vol.Coerce(float),
+                            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=500)),
+                            **(
+                                {vol.Optional("postal_code", default=""): str}
+                                if needs_postal
+                                else {}
+                            ),
                         }
                     ),
                     errors=errors,
                 )
+            if needs_postal:
+                self._postal_code = str(user_input.get("postal_code") or "").strip()
             self._station_id = ""
+            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
+            await self.async_set_unique_id(unique)
+            self._abort_if_unique_id_configured()
             self._suggested_name = (
                 f"{_COUNTRY_NAMES.get(self._country, self._country)} "
                 f"({self._latitude:.3f}, {self._longitude:.3f})"
             )
-            return await self.async_step_name()
+            return await self.async_step_station_picker()
 
+        schema_dict: dict = {
+            vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
+                vol.Coerce(float), vol.Range(min=-90, max=90)
+            ),
+            vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
+                vol.Coerce(float), vol.Range(min=-180, max=180)
+            ),
+            vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                vol.Coerce(float), vol.Range(min=0.1, max=500)
+            ),
+        }
+        if needs_postal:
+            schema_dict[vol.Optional("postal_code", default="")] = str
         return self.async_show_form(
             step_id="location",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
-                    vol.Required(CONF_LONGITUDE, default=default_lon): vol.Coerce(
-                        float
-                    ),
-                    vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.Coerce(
-                        float
-                    ),
-                }
-            ),
+            data_schema=vol.Schema(schema_dict),
             errors={},
         )
 
@@ -422,17 +720,20 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_COUNTRY: self._country,
                 CONF_PROVIDER: self._provider_key,
             }
+            options: dict[str, Any] = {}
+            if self._api_key:
+                options[CONF_API_KEY] = self._api_key
             if self._station_id:
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
                     data[CONF_STATION_COUNTY] = self._station_county
-            else:
-                from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
-
+            if self._postal_code:
+                data["postal_code"] = self._postal_code
+            if self._latitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
                 data[CONF_RADIUS_KM] = self._radius_km
-            return self.async_create_entry(title=title, data=data)
+            return self.async_create_entry(title=title, data=data, options=options)
 
         return self.async_show_form(
             step_id="name",
@@ -442,3 +743,50 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             ),
         )
+
+
+class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
+    """Handle options for Fuel Compare — preserves the API key across re-opens."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage options, pre-filling the existing API key and radius."""
+        is_location_entry = CONF_RADIUS_KM in self.config_entry.data
+        provider_key = self.config_entry.data.get("provider", DEFAULT_PROVIDER)
+        provider_cls = PROVIDER_REGISTRY.get(provider_key)
+        requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
+
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        existing_key = self.config_entry.options.get(CONF_API_KEY, "")
+
+        if is_location_entry:
+            current_radius = self.config_entry.options.get(
+                CONF_RADIUS_KM,
+                self.config_entry.data.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM),
+            )
+            schema = vol.Schema(
+                {
+                    **(
+                        {vol.Optional(CONF_API_KEY, default=existing_key): str}
+                        if requires_api_key
+                        else {}
+                    ),
+                    vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
+                        vol.Coerce(float), vol.Range(min=0.1, max=500)
+                    ),
+                }
+            )
+        else:
+            schema_dict: dict = {}
+            if requires_api_key:
+                schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            schema = (
+                vol.Schema(schema_dict)
+                if schema_dict
+                else vol.Schema({vol.Optional("_dummy"): str})
+            )
+
+        return self.async_show_form(step_id="init", data_schema=schema)

@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Sin plomo"
-      },
-      "diesel": {
-        "name": "Diésel"
-      },
-      "brand": {
-        "name": "Marca"
-      },
-      "county": {
-        "name": "Condado"
-      },
-      "working_hours": {
-        "name": "Horario de apertura"
-      },
-      "accessibility": {
-        "name": "Accesibilidad"
-      },
-      "offerings": {
-        "name": "Servicios"
-      },
-      "amenities": {
-        "name": "Comodidades"
-      },
-      "payments": {
-        "name": "Pagos"
-      },
-      "price_last_updated": {
-        "name": "Última actualización del precio"
-      },
-      "station_name": {
-        "name": "Nombre de la Estación"
-      },
-      "last_successful_fetch": {
-        "name": "Última obtención exitosa"
-      },
-      "petrol": {
-        "name": "Gasolina"
-      },
-      "kerosene": {
-        "name": "Queroseno"
-      },
-      "price_confidence": {
-        "name": "Confianza del precio"
-      },
-      "opening_hours": {
-        "name": "Horario"
-      },
-      "address": {
-        "name": "Dirección"
-      },
-      "latitude": {
-        "name": "Latitud"
-      },
-      "longitude": {
-        "name": "Longitud"
-      },
-      "phone": {
-        "name": "Teléfono"
-      },
-      "website": {
-        "name": "Sitio web"
-      },
-      "location": {
-        "name": "Ubicación"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diésel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Queroseno"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Gasolina"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Sin plomo"
+      },
+      "address": {
+        "name": "Dirección"
+      },
+      "brand": {
+        "name": "Marca"
+      },
+      "county": {
+        "name": "Condado"
+      },
+      "latitude": {
+        "name": "Latitud"
+      },
+      "location": {
+        "name": "Ubicación"
+      },
+      "longitude": {
+        "name": "Longitud"
+      },
+      "station_name": {
+        "name": "Nombre de la Estación"
+      },
+      "accessibility": {
+        "name": "Accesibilidad"
+      },
+      "amenities": {
+        "name": "Comodidades"
+      },
+      "last_successful_fetch": {
+        "name": "Última obtención exitosa"
+      },
+      "offerings": {
+        "name": "Servicios"
+      },
+      "opening_hours": {
+        "name": "Horario"
+      },
+      "payments": {
+        "name": "Pagos"
+      },
+      "phone": {
+        "name": "Teléfono"
+      },
+      "price_confidence": {
+        "name": "Confianza del precio"
+      },
+      "price_last_updated": {
+        "name": "Última actualización del precio"
+      },
+      "website": {
+        "name": "Sitio web"
+      },
+      "working_hours": {
+        "name": "Horario de apertura"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Está abierto"
-      },
       "data_fetch_problem": {
         "name": "Problema de obtención de datos"
       },
       "has_price": {
         "name": "Tiene precio"
       },
-      "has_car_wash": {
-        "name": "Lavado de autos"
-      },
-      "has_shop": {
-        "name": "Tienda"
-      },
-      "has_toilet": {
-        "name": "Baño"
+      "is_open": {
+        "name": "Está abierto"
       },
       "has_atm": {
         "name": "Cajero automático"
+      },
+      "has_car_wash": {
+        "name": "Lavado de autos"
       },
       "has_disabled_access": {
         "name": "Acceso para discapacitados"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Carga de vehículos eléctricos"
       },
-      "accepts_cash": {
-        "name": "Acepta efectivo"
+      "has_shop": {
+        "name": "Tienda"
+      },
+      "has_toilet": {
+        "name": "Baño"
       },
       "accepts_cards": {
         "name": "Acepta tarjetas"
+      },
+      "accepts_cash": {
+        "name": "Acepta efectivo"
       },
       "accepts_contactless": {
         "name": "Acepta pago sin contacto"

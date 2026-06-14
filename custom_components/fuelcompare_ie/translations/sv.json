@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Blyfri"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Märke"
-      },
-      "county": {
-        "name": "Län"
-      },
-      "working_hours": {
-        "name": "Öppettider"
-      },
-      "accessibility": {
-        "name": "Tillgänglighet"
-      },
-      "offerings": {
-        "name": "Tjänster"
-      },
-      "amenities": {
-        "name": "Bekvämligheter"
-      },
-      "payments": {
-        "name": "Betalningar"
-      },
-      "price_last_updated": {
-        "name": "Pris senast uppdaterat"
-      },
-      "station_name": {
-        "name": "Stationsnamn"
-      },
-      "last_successful_fetch": {
-        "name": "Senaste lyckade hämtning"
-      },
-      "petrol": {
-        "name": "Bensin"
-      },
-      "kerosene": {
-        "name": "Fotogen"
-      },
-      "price_confidence": {
-        "name": "Pristillförlitlighet"
-      },
-      "opening_hours": {
-        "name": "Öppettider"
-      },
-      "address": {
-        "name": "Adress"
-      },
-      "latitude": {
-        "name": "Latitud"
-      },
-      "longitude": {
-        "name": "Longitud"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Webbplats"
-      },
-      "location": {
-        "name": "Plats"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Fotogen"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Bensin"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Blyfri"
+      },
+      "address": {
+        "name": "Adress"
+      },
+      "brand": {
+        "name": "Märke"
+      },
+      "county": {
+        "name": "Län"
+      },
+      "latitude": {
+        "name": "Latitud"
+      },
+      "location": {
+        "name": "Plats"
+      },
+      "longitude": {
+        "name": "Longitud"
+      },
+      "station_name": {
+        "name": "Stationsnamn"
+      },
+      "accessibility": {
+        "name": "Tillgänglighet"
+      },
+      "amenities": {
+        "name": "Bekvämligheter"
+      },
+      "last_successful_fetch": {
+        "name": "Senaste lyckade hämtning"
+      },
+      "offerings": {
+        "name": "Tjänster"
+      },
+      "opening_hours": {
+        "name": "Öppettider"
+      },
+      "payments": {
+        "name": "Betalningar"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Pristillförlitlighet"
+      },
+      "price_last_updated": {
+        "name": "Pris senast uppdaterat"
+      },
+      "website": {
+        "name": "Webbplats"
+      },
+      "working_hours": {
+        "name": "Öppettider"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Är öppen"
-      },
       "data_fetch_problem": {
         "name": "Problem med datahämtning"
       },
       "has_price": {
         "name": "Har pris"
       },
-      "has_car_wash": {
-        "name": "Biltvätt"
-      },
-      "has_shop": {
-        "name": "Butik"
-      },
-      "has_toilet": {
-        "name": "Toalett"
+      "is_open": {
+        "name": "Är öppen"
       },
       "has_atm": {
         "name": "Bankomat"
+      },
+      "has_car_wash": {
+        "name": "Biltvätt"
       },
       "has_disabled_access": {
         "name": "Tillgång för rörelsehindrade"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Laddning av elfordon"
       },
-      "accepts_cash": {
-        "name": "Accepterar kontanter"
+      "has_shop": {
+        "name": "Butik"
+      },
+      "has_toilet": {
+        "name": "Toalett"
       },
       "accepts_cards": {
         "name": "Accepterar kort"
+      },
+      "accepts_cash": {
+        "name": "Accepterar kontanter"
       },
       "accepts_contactless": {
         "name": "Accepterar kontaktlös betalning"

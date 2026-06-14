@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-06-14
+
+### Added
+- **Multi-country provider support**: 36 providers across 27 countries — Albania, Austria, Australia (WA/NSW/QLD/VIC), Bosnia & Herzegovina, Belgium, Canada (Quebec), Croatia, Czech Republic, Denmark, Finland, France, Germany, Greece, Iceland, Ireland (3 providers), Italy, Lithuania, Luxembourg, Malta, Moldova, Montenegro, Netherlands, Norway, Poland, Portugal, Slovenia, Spain, Sweden, Switzerland, United Kingdom, European Union (Oil Bulletin)
+- **Plugin architecture**: `BaseProvider` ABC with `CAPABILITIES` frozenset, `StationData` TypedDict (total=False), `PROVIDER_REGISTRY` dict — adding a new country requires one file and one registry entry
+- **Station picker config flow**: county → picker for `county_search` providers; location → picker for `location_search` providers
+- **API key support**: `REQUIRES_API_KEY` / `API_KEY_REGISTRATION_URL` ClassVars; `async_step_api_key` in config flow
+- **Currency-aware price sensors**: `CURRENCY` ClassVar on `BaseProvider` (EUR default, GBP for GB, AUD for AU); `FuelPriceSensor` reads provider currency
+- **`haversine_km()` distance helper** in `base.py` for radius filtering
+- **Concurrent fuel-type fetching** via `asyncio.gather` for AT, DE, FR providers
+- **`FuelCompareIEOptionsFlow`**: radius change for location-based entries
+- **`CONTRIBUTING.md`**: 6-step guide for adding new providers
+
+### Changed
+- Config flow now shows country selector → provider selector → location/county/station steps
+- Entity IDs in all 26 translation files and `strings.json` sorted alphabetically within groups (fuel prices, station identity, status/info; facilities, payments)
+- Country list in config flow sorted fully alphabetically
+
+### Fixed
+- `async_step_location` now correctly routes to station picker for all location-search providers (was permanently skipping picker, leaving all ~30 location-search providers with empty `station_id`)
+- `StationIsOpenBinarySensor` supports boolean, JSON dict, and OSM `opening_hours` string formats
+- EUR currency hardcoded to provider-level `CURRENCY` ClassVar
+- AU providers: prices divided by 100 (cents → AUD/litre)
+- CodeQL: removed sensitive coordinate/API-key data from debug logs (de_tankerkoenig, lu_carbu, no_drivstoff)
+
 ## [0.8.0] - 2026-06-14
 
 ### Added

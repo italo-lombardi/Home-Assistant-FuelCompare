@@ -19,23 +19,55 @@
 
 ## Supported Data Sources
 
-| Provider | Country | Stations | Fuel types | Station lookup | Status |
-|----------|---------|----------|------------|----------------|--------|
-| **fuelcompare.ie** | Ireland | ~100 listed stations | Unleaded, Diesel | Numeric station ID from the fuelcompare.ie URL | Active (site closing June 2025) |
-| **FuelFinder.ie** | Ireland | ~1,000+ (OpenStreetMap + community) | Diesel, Petrol, Kerosene, CNG | County picker → station picker in config flow | Active |
+36 providers across 27 countries. Select a country in the config flow to see available providers.
 
-Both providers create a device per station with the same diagnostic entities (`last_successful_fetch`, `data_fetch_problem`) and the same stale-retention behaviour. Entity sets differ where the underlying data differs — see the entities tables below.
+| Provider | Country | Key Fuel Types | Lookup |
+|----------|---------|----------------|--------|
+| Albania National Average (cargopedia.net) | Albania | Unleaded, Diesel, LPG | Location + picker |
+| e-control (Austria) | Austria | Unleaded, Diesel, CNG | Location + picker |
+| Fuel Prices QLD (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker |
+| FuelCheck NSW (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker |
+| FuelWatch (Australia WA) | Australia | Unleaded, Diesel, E10, LPG | Location + picker |
+| Servo Saver VIC (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker |
+| cijenegoriva.ba (Bosnia and Herzegovina) | Bosnia & Herzegovina | Diesel, LPG | Location + picker |
+| Carbu.com (Belgium) | Belgium | Unleaded, Diesel, LPG, CNG | Location + picker |
+| Régie de l'énergie (Canada — QC) | Canada | Unleaded, Diesel, Premium | Location + picker |
+| TCS Benzinpreis-Radar (Switzerland) | Switzerland | Unleaded, Diesel, Premium | Location + picker |
+| MF ČR Price Caps (Czech Republic) | Czech Republic | Unleaded, Diesel | Location + picker |
+| Tankerkoenig (Germany) | Germany | Unleaded, Diesel, E10 | Location + picker (API key required) |
+| FuelFinder (Denmark) | Denmark | Unleaded, Diesel, Premium | Location + picker |
+| EC Weekly Oil Bulletin (EU) | European Union | Unleaded, Diesel, LPG, Kerosene | Location + picker |
+| MINETUR (Spain) | Spain | Unleaded, Diesel, Premium, LPG | Location + picker |
+| Statistics Finland — National Average | Finland | Unleaded, Diesel, E10, Kerosene | Location + picker |
+| Prix Carburants (France) | France | Unleaded, Diesel, E10, E85, LPG | Location + picker |
+| Fuel Finder (UK) | United Kingdom | Unleaded, Diesel, Premium | Location + picker |
+| Greek Ministry of Energy | Greece | Unleaded, Diesel, Premium, LPG | Location + picker |
+| MINGOR (Croatia) | Croatia | Unleaded, Diesel, LPG | County picker → station |
+| FuelFinder.ie | Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station |
+| fuelcompare.ie | Ireland | Unleaded, Diesel | Numeric station ID |
+| pumps.ie | Ireland | Unleaded, Diesel, Petrol | Location + picker |
+| Gasvaktin (Iceland) | Iceland | Unleaded, Diesel, Premium | Location + picker |
+| MIMIT/MASE (Italy) | Italy | Unleaded, Diesel, LPG, CNG | Location + picker |
+| Saurida (Lithuania) | Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker |
+| carbu.com Luxembourg | Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker |
+| ANRE (Moldova) | Moldova | Unleaded, Diesel | Location + picker |
+| Min. of Energy (Montenegro) | Montenegro | Unleaded, Diesel, Kerosene | Location + picker |
+| Malta | Malta | Unleaded, Diesel, LPG, Kerosene | Location + picker |
+| Netherlands (ANWB) | Netherlands | Diesel, E10, LPG, Kerosene | Location + picker |
+| Drivstoffpriser (Norway) | Norway | Unleaded, Diesel, Premium | Location + picker |
+| ORLEN Wholesale (Poland) | Poland | Unleaded, Diesel, E85, LPG, Kerosene | Location + picker |
+| DGEG (Portugal) | Portugal | Unleaded, Diesel, LPG | Location + picker |
+| Bensinpriser.nu (Sweden) | Sweden | Unleaded, Diesel, E85 | Location + picker |
+| goriva.si (Slovenia) | Slovenia | Unleaded, Diesel, Premium, LPG | Location + picker |
 
-### Switching or adding a provider
-
-You do not need to remove the existing integration to add a FuelFinder.ie station. Each config entry is independent:
+### Adding a station
 
 1. Go to **Settings → Devices & Services → Add Integration** and search for **Fuel Compare**.
-2. Select **Ireland** as the country.
-3. Select the data source: **fuelcompare.ie** or **FuelFinder.ie**.
-4. Follow the provider-specific steps (station ID for fuelcompare.ie; county + station picker for FuelFinder.ie).
+2. Select your country.
+3. Select the data source (if multiple providers are available for that country).
+4. Follow the provider-specific steps — location-based providers show a station picker sorted cheapest-first; Ireland county-search providers show a county dropdown then a station picker.
 
-To remove a provider, delete the relevant config entry from the Fuel Compare integration card. Existing entries are unaffected.
+Each config entry is independent — you can track stations from multiple countries simultaneously.
 
 ---
 
@@ -257,17 +289,14 @@ This project is a personal, community tool. It is **not** the official FuelCompa
 
 ## Roadmap
 
-fuelcompare.ie announced it is closing at end of June 2025. The integration was restructured with a provider abstraction layer (0.7.0) so alternative data sources can be added without breaking existing installations. FuelFinder.ie is available as a second Ireland provider from 0.8.0.
-
-**Done:**
+**Completed in 0.9.0:**
 - Provider abstraction layer (`BaseProvider` ABC, `providers/` module) — 0.7.0
-- FuelFinder.ie (Conjora) as an Ireland source (~1,000+ stations, diesel/petrol/kerosene/CNG) — 0.8.0
+- FuelFinder.ie (Ireland, ~1,000+ stations) — 0.8.0
+- Multi-country support: 36 providers, 27 countries, plugin architecture — 0.9.0
 
 **Planned:**
-- Explore fuelwatch.ie API access (1,800+ stations, API listed as coming soon)
-- Potentially expand to additional countries where government open-data fuel price APIs exist (e.g. Germany via Tankerkoenig, Spain via MINETUR, Portugal via DGEG)
-
-Existing users: your fuelcompare.ie installation continues to work as long as the site remains online. FuelFinder.ie stations can be added independently via the config flow at any time — no reinstallation required.
+- pumps.ie additional fuel types (kerosene, AdBlue)
+- Additional country providers as open-data APIs become available
 
 ## Sibling integrations
 

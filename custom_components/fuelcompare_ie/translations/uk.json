@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Бензин"
-      },
-      "diesel": {
-        "name": "Дизель"
-      },
-      "brand": {
-        "name": "Бренд"
-      },
-      "county": {
-        "name": "Округ"
-      },
-      "working_hours": {
-        "name": "Години роботи"
-      },
-      "accessibility": {
-        "name": "Доступність"
-      },
-      "offerings": {
-        "name": "Послуги"
-      },
-      "amenities": {
-        "name": "Зручності"
-      },
-      "payments": {
-        "name": "Оплата"
-      },
-      "price_last_updated": {
-        "name": "Останнє оновлення ціни"
-      },
-      "station_name": {
-        "name": "Назва Станції"
-      },
-      "last_successful_fetch": {
-        "name": "Останнє успішне завантаження"
-      },
-      "petrol": {
-        "name": "Бензин"
-      },
-      "kerosene": {
-        "name": "Гас"
-      },
-      "price_confidence": {
-        "name": "Надійність ціни"
-      },
-      "opening_hours": {
-        "name": "Години роботи"
-      },
-      "address": {
-        "name": "Адреса"
-      },
-      "latitude": {
-        "name": "Широта"
-      },
-      "longitude": {
-        "name": "Довгота"
-      },
-      "phone": {
-        "name": "Телефон"
-      },
-      "website": {
-        "name": "Веб-сайт"
-      },
-      "location": {
-        "name": "Розташування"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Дизель"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Гас"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Бензин"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Бензин"
+      },
+      "address": {
+        "name": "Адреса"
+      },
+      "brand": {
+        "name": "Бренд"
+      },
+      "county": {
+        "name": "Округ"
+      },
+      "latitude": {
+        "name": "Широта"
+      },
+      "location": {
+        "name": "Розташування"
+      },
+      "longitude": {
+        "name": "Довгота"
+      },
+      "station_name": {
+        "name": "Назва Станції"
+      },
+      "accessibility": {
+        "name": "Доступність"
+      },
+      "amenities": {
+        "name": "Зручності"
+      },
+      "last_successful_fetch": {
+        "name": "Останнє успішне завантаження"
+      },
+      "offerings": {
+        "name": "Послуги"
+      },
+      "opening_hours": {
+        "name": "Години роботи"
+      },
+      "payments": {
+        "name": "Оплата"
+      },
+      "phone": {
+        "name": "Телефон"
+      },
+      "price_confidence": {
+        "name": "Надійність ціни"
+      },
+      "price_last_updated": {
+        "name": "Останнє оновлення ціни"
+      },
+      "website": {
+        "name": "Веб-сайт"
+      },
+      "working_hours": {
+        "name": "Години роботи"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Відчинено"
-      },
       "data_fetch_problem": {
         "name": "Проблема із завантаженням даних"
       },
       "has_price": {
         "name": "Має ціну"
       },
-      "has_car_wash": {
-        "name": "Автомийка"
-      },
-      "has_shop": {
-        "name": "Магазин"
-      },
-      "has_toilet": {
-        "name": "Туалет"
+      "is_open": {
+        "name": "Відчинено"
       },
       "has_atm": {
         "name": "Банкомат"
+      },
+      "has_car_wash": {
+        "name": "Автомийка"
       },
       "has_disabled_access": {
         "name": "Доступ для людей з інвалідністю"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Зарядка електромобілів"
       },
-      "accepts_cash": {
-        "name": "Приймає готівку"
+      "has_shop": {
+        "name": "Магазин"
+      },
+      "has_toilet": {
+        "name": "Туалет"
       },
       "accepts_cards": {
         "name": "Приймає картки"
+      },
+      "accepts_cash": {
+        "name": "Приймає готівку"
       },
       "accepts_contactless": {
         "name": "Приймає безконтактний платіж"
