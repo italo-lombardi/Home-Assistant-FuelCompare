@@ -518,7 +518,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors[CONF_STATION_ID] = "invalid_station_id"
 
             if not errors:
-                await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
+                await self.async_set_unique_id(
+                    f"{DOMAIN}_{self._provider_key}_{station_id}"
+                )
                 self._abort_if_unique_id_configured()
 
                 self._station_id = station_id
@@ -571,8 +573,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
             else:
-                await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
-                self._abort_if_unique_id_configured()
+                # Only set unique_id from station_id when not already set by
+                # async_step_location (location-search providers set a lat/lng uid).
+                if not self.unique_id:
+                    await self.async_set_unique_id(
+                        f"{DOMAIN}_{self._provider_key}_{station_id}"
+                    )
+                    self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key

@@ -290,13 +290,17 @@ class EuOilBulletinProvider(BaseProvider):
         if sheet is None:
             raise ProviderError("EC Oil Bulletin Excel file has no active sheet.")
 
-        # Extract week date from cell A1 or B1 (the EC puts the reference week
-        # date in the header row).  Fall back to today's ISO date if absent.
+        # Extract week date: row 2 col A has the reference date string.
+        # Row 1 col A is the "in EUR" units header — skip it.
         week_label: str | None = None
         try:
-            header_val = sheet.cell(row=1, column=1).value
-            if header_val:
-                week_label = str(header_val).strip() or None
+            for row_idx, col_idx in ((2, 1), (1, 2)):
+                header_val = sheet.cell(row=row_idx, column=col_idx).value
+                if header_val:
+                    candidate = str(header_val).strip()
+                    if candidate and candidate.lower() != "in eur":
+                        week_label = candidate
+                        break
         except Exception:  # noqa: BLE001
             pass
         if not week_label:
@@ -526,13 +530,27 @@ def _resolve_country_code(country_name: str) -> str | None:
     """Return the ISO code for an EC country name string, or None.
 
     Args:
-        country_name: Raw string from the Excel country column.
+        country_name: Raw string from the Excel country column (may be
+                      multiline with language variants separated by newlines).
 
     Returns:
         ISO 3166-1 alpha-2 code, or None if not recognised.
     """
-    normalised = country_name.strip().lower()
-    return _COUNTRY_NAME_TO_CODE.get(normalised)
+    # The EC uses multiline cells for EU aggregates: e.g.
+    # "CE/EC/EG EUR27_2020 (IV)\nMoyenne pondérée\nWeighted average\n..."
+    # Try each line separately to catch these.
+    for line in country_name.replace("\r", "\n").split("\n"):
+        normalised = line.strip().lower()
+        if not normalised:
+            continue
+        result = _COUNTRY_NAME_TO_CODE.get(normalised)
+        if result:
+            return result
+        # Partial match for composite strings like "EUR27_2020 (IV)"
+        for key, code in _COUNTRY_NAME_TO_CODE.items():
+            if key in normalised or normalised in key:
+                return code
+    return None
 
 
 def _parse_sheet(sheet: object, header_rows: int) -> dict[str, dict]:

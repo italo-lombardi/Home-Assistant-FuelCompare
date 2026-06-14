@@ -20,20 +20,20 @@ from custom_components.fuelcompare_ie.providers.pl_benzyna import (
 
 # ORLEN confirmed live on 2026-06-13: Pb95=5228, Pb98=5739, ONEkodiesel=5597
 _WHOLESALE_PAYLOAD: list[dict] = [
-    {"productCode": "Pb95", "price": 5228, "date": "2026-06-13"},
-    {"productCode": "Pb98", "price": 5739, "date": "2026-06-13"},
-    {"productCode": "ONEkodiesel", "price": 5597, "date": "2026-06-13"},
-    {"productCode": "ONArctic2", "price": 5720, "date": "2026-06-13"},
-    {"productCode": "OnEkoterm", "price": 4100, "date": "2026-06-13"},
-    {"productCode": "BIO100", "price": 6200, "date": "2026-06-13"},
-    {"productCode": "JETA1", "price": 7100, "date": "2026-06-13"},
-    {"productCode": "AVGAS100LL", "price": 8900, "date": "2026-06-13"},
+    {"productName": "Pb95", "value": 5228, "effectiveDate": "2026-06-13"},
+    {"productName": "Pb98", "value": 5739, "effectiveDate": "2026-06-13"},
+    {"productName": "ONEkodiesel", "value": 5597, "effectiveDate": "2026-06-13"},
+    {"productName": "ONArctic2", "value": 5720, "effectiveDate": "2026-06-13"},
+    {"productName": "OnEkoterm", "value": 4100, "effectiveDate": "2026-06-13"},
+    {"productName": "BIO100", "value": 6200, "effectiveDate": "2026-06-13"},
+    {"productName": "JETA1", "value": 7100, "effectiveDate": "2026-06-13"},
+    {"productName": "AVGAS100LL", "value": 8900, "effectiveDate": "2026-06-13"},
 ]
 
 _AUTOGAS_PAYLOAD: list[dict] = [
-    {"voivodeship": "Mazowieckie", "price": 2800, "date": "2026-06-13"},
-    {"voivodeship": "Małopolskie", "price": 2750, "date": "2026-06-13"},
-    {"voivodeship": "Śląskie", "price": 2790, "date": "2026-06-13"},
+    {"voivodeship": "Mazowieckie", "value": 2.800, "effectiveDate": "2026-06-13"},
+    {"voivodeship": "Małopolskie", "value": 2.750, "effectiveDate": "2026-06-13"},
+    {"voivodeship": "Śląskie", "value": 2.790, "effectiveDate": "2026-06-13"},
 ]
 
 _LAT = 52.2297
@@ -298,8 +298,8 @@ def test_find_product_price_returns_none_for_empty_list() -> None:
 def test_find_product_price_returns_first_match() -> None:
     """_find_product_price returns the price from the first matching record."""
     data = [
-        {"productCode": "Pb95", "price": 5228},
-        {"productCode": "Pb95", "price": 9999},
+        {"productName": "Pb95", "value": 5228},
+        {"productName": "Pb95", "value": 9999},
     ]
     assert _find_product_price(data, "Pb95") == 5228
 
@@ -370,7 +370,7 @@ async def test_async_fetch_lpg_price_is_minimum_voivodeship() -> None:
     provider = _make_provider()
     data = await provider.async_fetch(session, "PL")
 
-    # Minimum from _AUTOGAS_PAYLOAD is 2750 PLN/1000L = 2.750 PLN/L
+    # Minimum from _AUTOGAS_PAYLOAD is 2.750 PLN/L
     assert data["lpg"] == pytest.approx(2.750, abs=1e-4)
 
 
@@ -403,8 +403,8 @@ async def test_async_fetch_e85_price() -> None:
 async def test_async_fetch_lastupdated_is_most_recent_date() -> None:
     """async_fetch sets lastupdated to the most recent date in the payload."""
     payload = [
-        {"productCode": "Pb95", "price": 5228, "date": "2026-06-10"},
-        {"productCode": "ONEkodiesel", "price": 5597, "date": "2026-06-13"},
+        {"productName": "Pb95", "value": 5228, "effectiveDate": "2026-06-10"},
+        {"productName": "ONEkodiesel", "value": 5597, "effectiveDate": "2026-06-13"},
     ]
     resp_wholesale = _make_mock_response(200, json_data=payload)
     resp_lpg = _make_mock_response(200, json_data=[])
@@ -739,7 +739,7 @@ async def test_async_fetch_prices_in_pln_per_litre_not_per_1000l() -> None:
 async def test_async_fetch_missing_products_return_none() -> None:
     """async_fetch returns None for products absent from the API response."""
     minimal_payload = [
-        {"productCode": "Pb95", "price": 5228, "date": "2026-06-13"},
+        {"productName": "Pb95", "value": 5228, "effectiveDate": "2026-06-13"},
     ]
     resp_wholesale = _make_mock_response(200, json_data=minimal_payload)
     resp_lpg = _make_mock_response(200, json_data=[])

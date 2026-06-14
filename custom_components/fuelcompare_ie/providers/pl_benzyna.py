@@ -129,6 +129,26 @@ def _parse_price_pln_1000l(raw: Any) -> float | None:
     return round(val * _PLN_PER_1000L_TO_PER_L, 4)
 
 
+def _parse_price_pln(raw: Any) -> float | None:
+    """Parse a PLN/litre price value.
+
+    Args:
+        raw: Raw price value from the API (int, float, str, or None).
+
+    Returns:
+        Price in PLN/litre rounded to 4 decimal places, or None if invalid.
+    """
+    if raw is None:
+        return None
+    try:
+        val = float(raw)
+    except (ValueError, TypeError):
+        return None
+    if val <= 0:
+        return None
+    return round(val, 4)
+
+
 class PlBenzynaProvider(BaseProvider):
     """Fetch Polish wholesale fuel prices from the ORLEN API.
 
@@ -391,8 +411,9 @@ class PlBenzynaProvider(BaseProvider):
 
         min_price: float | None = None
         for record in payload:
-            raw = record.get("price")
-            price = _parse_price_pln_1000l(raw)
+            raw = record.get("value")
+            # /autogasprices returns PLN/litre directly (not PLN/1000L)
+            price = _parse_price_pln(raw)
             if price is not None:
                 if min_price is None or price < min_price:
                     min_price = price
@@ -421,12 +442,12 @@ class PlBenzynaProvider(BaseProvider):
         latest_date: str | None = None
 
         for record in prices_data:
-            product_code: str = str(record.get("productCode") or "")
-            raw_price = record.get("price")
+            product_code: str = str(record.get("productName") or "")
+            raw_price = record.get("value")
             price = _parse_price_pln_1000l(raw_price)
 
             # Track the most recent date across all products
-            date_str: str | None = record.get("date") or None
+            date_str: str | None = record.get("effectiveDate") or None
             if date_str:
                 if latest_date is None or date_str > latest_date:
                     latest_date = date_str
@@ -491,6 +512,6 @@ def _find_product_price(
         The raw price value (int/float/None), or None if not found.
     """
     for record in prices_data:
-        if record.get("productCode") == product_code:
-            return record.get("price")
+        if record.get("productName") == product_code:
+            return record.get("value")
     return None

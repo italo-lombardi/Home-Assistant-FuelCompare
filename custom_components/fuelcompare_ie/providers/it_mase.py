@@ -67,7 +67,7 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
 
 # ── Field encodings ───────────────────────────────────────────────────────────
 
-_PRICE_ENCODING = "ascii"
+_PRICE_ENCODING = "latin-1"
 _META_ENCODING = "utf-8"
 
 # ── Fuel type mapping ─────────────────────────────────────────────────────────

@@ -178,7 +178,7 @@ class DeTankerkoenigProvider(BaseProvider):
     def __init__(
         self,
         station_id: str,
-        api_key: str,
+        api_key: str = "",
         county: str | None = None,
         latitude: float | None = None,
         longitude: float | None = None,

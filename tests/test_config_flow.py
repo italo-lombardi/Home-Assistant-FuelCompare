@@ -285,7 +285,7 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     """Submitting a station ID that already has a config entry aborts."""
     existing = MockConfigEntry(
         domain=DOMAIN,
-        unique_id=f"{DOMAIN}_123",
+        unique_id=f"{DOMAIN}_{DEFAULT_PROVIDER}_123",
         data={CONF_STATION_ID: "123"},
         title="Station 123",
     )
