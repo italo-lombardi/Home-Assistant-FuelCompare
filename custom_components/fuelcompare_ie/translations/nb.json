@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Siste vellykkede henting"
+      },
+      "petrol": {
+        "name": "Bensin"
+      },
+      "kerosene": {
+        "name": "Parafin"
+      },
+      "price_confidence": {
+        "name": "Prispålitelighet"
+      },
+      "opening_hours": {
+        "name": "Åpningstider"
+      },
+      "address": {
+        "name": "Adresse"
+      },
+      "latitude": {
+        "name": "Breddegrad"
+      },
+      "longitude": {
+        "name": "Lengdegrad"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Nettsted"
+      },
+      "location": {
+        "name": "Plassering"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problem med datahenting"
+      },
+      "has_price": {
+        "name": "Har pris"
+      },
+      "has_car_wash": {
+        "name": "Bilvask"
+      },
+      "has_shop": {
+        "name": "Butikk"
+      },
+      "has_toilet": {
+        "name": "Toalett"
+      },
+      "has_atm": {
+        "name": "Minibank"
+      },
+      "has_disabled_access": {
+        "name": "Tilgang for funksjonshemmede"
+      },
+      "has_electric_charging": {
+        "name": "Elbillading"
+      },
+      "accepts_cash": {
+        "name": "Godtar kontanter"
+      },
+      "accepts_cards": {
+        "name": "Godtar kort"
+      },
+      "accepts_contactless": {
+        "name": "Godtar kontaktløs betaling"
       }
     }
   }

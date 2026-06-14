@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Última obtención exitosa"
+      },
+      "petrol": {
+        "name": "Gasolina"
+      },
+      "kerosene": {
+        "name": "Queroseno"
+      },
+      "price_confidence": {
+        "name": "Confianza del precio"
+      },
+      "opening_hours": {
+        "name": "Horario"
+      },
+      "address": {
+        "name": "Dirección"
+      },
+      "latitude": {
+        "name": "Latitud"
+      },
+      "longitude": {
+        "name": "Longitud"
+      },
+      "phone": {
+        "name": "Teléfono"
+      },
+      "website": {
+        "name": "Sitio web"
+      },
+      "location": {
+        "name": "Ubicación"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problema de obtención de datos"
+      },
+      "has_price": {
+        "name": "Tiene precio"
+      },
+      "has_car_wash": {
+        "name": "Lavado de autos"
+      },
+      "has_shop": {
+        "name": "Tienda"
+      },
+      "has_toilet": {
+        "name": "Baño"
+      },
+      "has_atm": {
+        "name": "Cajero automático"
+      },
+      "has_disabled_access": {
+        "name": "Acceso para discapacitados"
+      },
+      "has_electric_charging": {
+        "name": "Carga de vehículos eléctricos"
+      },
+      "accepts_cash": {
+        "name": "Acepta efectivo"
+      },
+      "accepts_cards": {
+        "name": "Acepta tarjetas"
+      },
+      "accepts_contactless": {
+        "name": "Acepta pago sin contacto"
       }
     }
   }

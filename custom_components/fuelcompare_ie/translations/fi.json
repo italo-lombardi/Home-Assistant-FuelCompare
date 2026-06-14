@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Viimeisin onnistunut haku"
+      },
+      "petrol": {
+        "name": "Bensiini"
+      },
+      "kerosene": {
+        "name": "Kerosiini"
+      },
+      "price_confidence": {
+        "name": "Hinnan luotettavuus"
+      },
+      "opening_hours": {
+        "name": "Aukioloajat"
+      },
+      "address": {
+        "name": "Osoite"
+      },
+      "latitude": {
+        "name": "Leveysaste"
+      },
+      "longitude": {
+        "name": "Pituusaste"
+      },
+      "phone": {
+        "name": "Puhelin"
+      },
+      "website": {
+        "name": "Verkkosivusto"
+      },
+      "location": {
+        "name": "Sijainti"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Tietojen haun ongelma"
+      },
+      "has_price": {
+        "name": "On hinta"
+      },
+      "has_car_wash": {
+        "name": "Autopesula"
+      },
+      "has_shop": {
+        "name": "Kauppa"
+      },
+      "has_toilet": {
+        "name": "WC"
+      },
+      "has_atm": {
+        "name": "Pankkiautomaatti"
+      },
+      "has_disabled_access": {
+        "name": "Esteetön pääsy"
+      },
+      "has_electric_charging": {
+        "name": "Sähköautojen lataus"
+      },
+      "accepts_cash": {
+        "name": "Hyväksyy käteistä"
+      },
+      "accepts_cards": {
+        "name": "Hyväksyy kortteja"
+      },
+      "accepts_contactless": {
+        "name": "Hyväksyy lähimaksun"
       }
     }
   }

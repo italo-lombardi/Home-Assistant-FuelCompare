@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Последно успешно извличане"
+      },
+      "petrol": {
+        "name": "Бензин"
+      },
+      "kerosene": {
+        "name": "Керосин"
+      },
+      "price_confidence": {
+        "name": "Надеждност на цената"
+      },
+      "opening_hours": {
+        "name": "Работно време"
+      },
+      "address": {
+        "name": "Адрес"
+      },
+      "latitude": {
+        "name": "Ширина"
+      },
+      "longitude": {
+        "name": "Дължина"
+      },
+      "phone": {
+        "name": "Телефон"
+      },
+      "website": {
+        "name": "Уебсайт"
+      },
+      "location": {
+        "name": "Местоположение"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Проблем при извличане на данни"
+      },
+      "has_price": {
+        "name": "Има цена"
+      },
+      "has_car_wash": {
+        "name": "Автомивка"
+      },
+      "has_shop": {
+        "name": "Магазин"
+      },
+      "has_toilet": {
+        "name": "Тоалетна"
+      },
+      "has_atm": {
+        "name": "банкомат"
+      },
+      "has_disabled_access": {
+        "name": "Достъп за инвалиди"
+      },
+      "has_electric_charging": {
+        "name": "Зареждане на електромобили"
+      },
+      "accepts_cash": {
+        "name": "Приема в брой"
+      },
+      "accepts_cards": {
+        "name": "Приема карти"
+      },
+      "accepts_contactless": {
+        "name": "Приема безконтактно плащане"
       }
     }
   }

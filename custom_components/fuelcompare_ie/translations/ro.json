@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Ultima preluare reușită"
+      },
+      "petrol": {
+        "name": "Benzină"
+      },
+      "kerosene": {
+        "name": "Kerosen"
+      },
+      "price_confidence": {
+        "name": "Fiabilitatea prețului"
+      },
+      "opening_hours": {
+        "name": "Program de lucru"
+      },
+      "address": {
+        "name": "Adresă"
+      },
+      "latitude": {
+        "name": "Latitudine"
+      },
+      "longitude": {
+        "name": "Longitudine"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Site web"
+      },
+      "location": {
+        "name": "Locație"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problemă la preluarea datelor"
+      },
+      "has_price": {
+        "name": "Are preț"
+      },
+      "has_car_wash": {
+        "name": "Spălătorie auto"
+      },
+      "has_shop": {
+        "name": "Magazin"
+      },
+      "has_toilet": {
+        "name": "Toaletă"
+      },
+      "has_atm": {
+        "name": "Bancomat"
+      },
+      "has_disabled_access": {
+        "name": "Acces persoane cu dizabilități"
+      },
+      "has_electric_charging": {
+        "name": "Încărcare vehicule electrice"
+      },
+      "accepts_cash": {
+        "name": "Acceptă numerar"
+      },
+      "accepts_cards": {
+        "name": "Acceptă carduri"
+      },
+      "accepts_contactless": {
+        "name": "Acceptă plată contactless"
       }
     }
   }

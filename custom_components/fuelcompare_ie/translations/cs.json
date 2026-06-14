@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Poslední úspěšné načtení"
+      },
+      "petrol": {
+        "name": "Benzín"
+      },
+      "kerosene": {
+        "name": "Petrolej"
+      },
+      "price_confidence": {
+        "name": "Spolehlivost ceny"
+      },
+      "opening_hours": {
+        "name": "Otevírací doba"
+      },
+      "address": {
+        "name": "Adresa"
+      },
+      "latitude": {
+        "name": "Zeměpisná šířka"
+      },
+      "longitude": {
+        "name": "Zeměpisná délka"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Web"
+      },
+      "location": {
+        "name": "Poloha"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problém s načtením dat"
+      },
+      "has_price": {
+        "name": "Má cenu"
+      },
+      "has_car_wash": {
+        "name": "Myčka aut"
+      },
+      "has_shop": {
+        "name": "Obchod"
+      },
+      "has_toilet": {
+        "name": "Toaleta"
+      },
+      "has_atm": {
+        "name": "Bankomat"
+      },
+      "has_disabled_access": {
+        "name": "Bezbariérový přístup"
+      },
+      "has_electric_charging": {
+        "name": "Dobíjení elektromobilů"
+      },
+      "accepts_cash": {
+        "name": "Přijímá hotovost"
+      },
+      "accepts_cards": {
+        "name": "Přijímá karty"
+      },
+      "accepts_contactless": {
+        "name": "Přijímá bezkontaktní platby"
       }
     }
   }

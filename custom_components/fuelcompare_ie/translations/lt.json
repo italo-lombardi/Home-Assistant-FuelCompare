@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Paskutinis sėkmingas paėmimas"
+      },
+      "petrol": {
+        "name": "Benzinas"
+      },
+      "kerosene": {
+        "name": "Žibalas"
+      },
+      "price_confidence": {
+        "name": "Kainos patikimumas"
+      },
+      "opening_hours": {
+        "name": "Darbo laikas"
+      },
+      "address": {
+        "name": "Adresas"
+      },
+      "latitude": {
+        "name": "Platuma"
+      },
+      "longitude": {
+        "name": "Ilguma"
+      },
+      "phone": {
+        "name": "Telefonas"
+      },
+      "website": {
+        "name": "Svetainė"
+      },
+      "location": {
+        "name": "Vieta"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Duomenų gavimo problema"
+      },
+      "has_price": {
+        "name": "Turi kainą"
+      },
+      "has_car_wash": {
+        "name": "Automobilių plovykla"
+      },
+      "has_shop": {
+        "name": "Parduotuvė"
+      },
+      "has_toilet": {
+        "name": "Tualetas"
+      },
+      "has_atm": {
+        "name": "Bankomatas"
+      },
+      "has_disabled_access": {
+        "name": "Prieiga neįgaliesiems"
+      },
+      "has_electric_charging": {
+        "name": "Elektromobilių įkrovimas"
+      },
+      "accepts_cash": {
+        "name": "Priima grynuosius"
+      },
+      "accepts_cards": {
+        "name": "Priima korteles"
+      },
+      "accepts_contactless": {
+        "name": "Priima bekontaktį mokėjimą"
       }
     }
   }

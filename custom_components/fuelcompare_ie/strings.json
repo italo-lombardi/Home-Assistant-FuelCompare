@@ -85,6 +85,57 @@
       },
       "last_successful_fetch": {
         "name": "Last Successful Fetch"
+      },
+      "petrol": {
+        "name": "Petrol"
+      },
+      "kerosene": {
+        "name": "Kerosene"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "price_confidence": {
+        "name": "Price Confidence"
+      },
+      "opening_hours": {
+        "name": "Opening Hours"
+      },
+      "address": {
+        "name": "Address"
+      },
+      "latitude": {
+        "name": "Latitude"
+      },
+      "longitude": {
+        "name": "Longitude"
+      },
+      "phone": {
+        "name": "Phone"
+      },
+      "website": {
+        "name": "Website"
+      },
+      "location": {
+        "name": "Location"
       }
     },
     "binary_sensor": {
@@ -93,6 +144,36 @@
       },
       "data_fetch_problem": {
         "name": "Data Fetch Problem"
+      },
+      "has_price": {
+        "name": "Has Price"
+      },
+      "has_car_wash": {
+        "name": "Car Wash"
+      },
+      "has_shop": {
+        "name": "Shop"
+      },
+      "has_toilet": {
+        "name": "Toilet"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_disabled_access": {
+        "name": "Disabled Access"
+      },
+      "has_electric_charging": {
+        "name": "Electric Vehicle Charging"
+      },
+      "accepts_cash": {
+        "name": "Accepts Cash"
+      },
+      "accepts_cards": {
+        "name": "Accepts Cards"
+      },
+      "accepts_contactless": {
+        "name": "Accepts Contactless"
       }
     }
   }

@@ -62,6 +62,57 @@
       },
       "last_successful_fetch": {
         "name": "Senaste lyckade hämtning"
+      },
+      "petrol": {
+        "name": "Bensin"
+      },
+      "kerosene": {
+        "name": "Fotogen"
+      },
+      "price_confidence": {
+        "name": "Pristillförlitlighet"
+      },
+      "opening_hours": {
+        "name": "Öppettider"
+      },
+      "address": {
+        "name": "Adress"
+      },
+      "latitude": {
+        "name": "Latitud"
+      },
+      "longitude": {
+        "name": "Longitud"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "website": {
+        "name": "Webbplats"
+      },
+      "location": {
+        "name": "Plats"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "adblue": {
+        "name": "AdBlue"
       }
     },
     "binary_sensor": {
@@ -70,6 +121,36 @@
       },
       "data_fetch_problem": {
         "name": "Problem med datahämtning"
+      },
+      "has_price": {
+        "name": "Har pris"
+      },
+      "has_car_wash": {
+        "name": "Biltvätt"
+      },
+      "has_shop": {
+        "name": "Butik"
+      },
+      "has_toilet": {
+        "name": "Toalett"
+      },
+      "has_atm": {
+        "name": "Bankomat"
+      },
+      "has_disabled_access": {
+        "name": "Tillgång för rörelsehindrade"
+      },
+      "has_electric_charging": {
+        "name": "Laddning av elfordon"
+      },
+      "accepts_cash": {
+        "name": "Accepterar kontanter"
+      },
+      "accepts_cards": {
+        "name": "Accepterar kort"
+      },
+      "accepts_contactless": {
+        "name": "Accepterar kontaktlös betalning"
       }
     }
   }
