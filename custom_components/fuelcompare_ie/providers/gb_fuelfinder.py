@@ -70,14 +70,18 @@ from __future__ import annotations
 import csv
 import io
 import logging
-import math
 from datetime import datetime, timezone
 from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -378,19 +382,6 @@ def _safe_float(value: str | None) -> float | None:
         return float(value.strip())
     except (ValueError, TypeError):
         return None
-
-
-def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Return the great-circle distance in kilometres between two WGS84 points."""
-    r = 6371.0
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
-    a = (
-        math.sin(dphi / 2) ** 2
-        + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
-    )
-    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 def _parse_row(row: dict[str, str]) -> StationData:

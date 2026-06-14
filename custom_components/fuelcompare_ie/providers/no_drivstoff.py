@@ -377,15 +377,24 @@ class NoDrivstoffProvider(BaseProvider):
             List of (uuid, "Name — Brand — Diesel kr20.90 / Bensin kr21.50")
             tuples sorted nearest-first.  Empty list on any failure.
         """
-        lat = float(kwargs.get("lat", self._latitude or 0.0))
-        lng = float(kwargs.get("lng", self._longitude or 0.0))
-        radius_km = float(kwargs.get("radius_km", self._radius_km))
+        raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
+        raw_lng = (
+            kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude
+        )
 
-        if not lat and not lng:
+        if raw_lat is None or raw_lng is None:
             _LOGGER.debug(
                 "async_list_stations called with no coordinates; returning []"
             )
             return []
+
+        lat = float(raw_lat)
+        lng = float(raw_lng)
+        radius_km = float(
+            kwargs.get("radius_km")
+            if kwargs.get("radius_km") is not None
+            else self._radius_km
+        )
 
         try:
             stations = await self._fetch_stations(

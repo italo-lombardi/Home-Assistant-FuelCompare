@@ -372,11 +372,11 @@ class CaQcProvider(BaseProvider):
             sorted by haversine distance from the centre point.
             Empty list on any failure.
         """
-        lat = float(kwargs.get("lat") or self._latitude or 0.0)
-        lng = float(kwargs.get("lng") or self._longitude or 0.0)
+        lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
+        lng = kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude
         radius_km = float(kwargs.get("radius_km") or self._radius_km or 10.0)
 
-        if lat == 0.0 and lng == 0.0:
+        if lat is None or lng is None:
             _LOGGER.debug("async_list_stations: no coordinates provided")
             return []
 

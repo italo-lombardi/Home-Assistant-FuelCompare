@@ -79,7 +79,6 @@ endpoint family ever enforces the same limit.
 from __future__ import annotations
 
 import logging
-import math
 import re
 from datetime import datetime, timezone
 from typing import Any
@@ -87,7 +86,12 @@ from typing import Any
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -578,28 +582,3 @@ def _build_station_data_with_ts(
 
     data["lastupdated"] = _parse_lastupdated(best_ts)
     return data
-
-
-def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    """Return the great-circle distance between two WGS84 points in kilometres.
-
-    Uses the Haversine formula. Accurate to within ~0.3% for distances up
-    to ~2000 km, which is more than sufficient for station proximity search.
-
-    Args:
-        lat1, lng1: First point (degrees).
-        lat2, lng2: Second point (degrees).
-
-    Returns:
-        Distance in kilometres (float).
-    """
-    _R = 6371.0  # Earth radius in km
-    d_lat = math.radians(lat2 - lat1)
-    d_lng = math.radians(lng2 - lng1)
-    a = (
-        math.sin(d_lat / 2) ** 2
-        + math.cos(math.radians(lat1))
-        * math.cos(math.radians(lat2))
-        * math.sin(d_lng / 2) ** 2
-    )
-    return _R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))

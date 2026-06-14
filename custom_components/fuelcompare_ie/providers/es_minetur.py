@@ -47,13 +47,17 @@ will always be None.
 from __future__ import annotations
 
 import logging
-import math
 from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import (
+    BaseProvider,
+    ProviderError,
+    StationData,
+    haversine_km as _haversine_km,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -459,29 +463,3 @@ def _normalise_fecha(fecha: str | None) -> str | None:
     except (ValueError, TypeError):
         # Return raw string rather than None so lastupdated is still populated.
         return fecha
-
-
-def _haversine_km(
-    lat1: float,
-    lng1: float,
-    lat2: float,
-    lng2: float,
-) -> float:
-    """Return the great-circle distance in km between two WGS84 points.
-
-    Args:
-        lat1, lng1: Origin coordinates in decimal degrees.
-        lat2, lng2: Destination coordinates in decimal degrees.
-
-    Returns:
-        Distance in kilometres.
-    """
-    d_lat = math.radians(lat2 - lat1)
-    d_lng = math.radians(lng2 - lng1)
-    a = (
-        math.sin(d_lat / 2) ** 2
-        + math.cos(math.radians(lat1))
-        * math.cos(math.radians(lat2))
-        * math.sin(d_lng / 2) ** 2
-    )
-    return _EARTH_RADIUS_KM * 2 * math.asin(math.sqrt(a))

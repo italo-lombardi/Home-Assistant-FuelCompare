@@ -53,11 +53,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         kwargs["county"] = county
     if api_key and "api_key" in sig.parameters:
         kwargs["api_key"] = api_key
-    if latitude and "latitude" in sig.parameters:
+    if latitude is not None and "latitude" in sig.parameters:
         kwargs["latitude"] = latitude
-    if longitude and "longitude" in sig.parameters:
+    if longitude is not None and "longitude" in sig.parameters:
         kwargs["longitude"] = longitude
-    if radius_km and "radius_km" in sig.parameters:
+    if radius_km is not None and "radius_km" in sig.parameters:
         kwargs["radius_km"] = radius_km
     if kwargs:
         provider = provider_cls(station_id, **kwargs)
