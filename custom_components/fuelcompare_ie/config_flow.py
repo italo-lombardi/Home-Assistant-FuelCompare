@@ -12,6 +12,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
+    CONF_API_KEY,
     CONF_COUNTRY,
     CONF_PROVIDER,
     CONF_STATION_COUNTY,
@@ -26,7 +27,19 @@ from .providers import PROVIDER_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
 
-_COUNTRY_NAMES: dict[str, str] = {"IE": "Ireland", "HR": "Croatia"}
+_COUNTRY_NAMES: dict[str, str] = {
+    "IE": "Ireland",
+    "HR": "Croatia",
+    "DE": "Germany",
+    "FR": "France",
+    "ES": "Spain",
+    "PT": "Portugal",
+    "AT": "Austria",
+    "IT": "Italy",
+    "SI": "Slovenia",
+    "GB": "United Kingdom",
+    "AU": "Australia",
+}
 
 
 def _countries_from_registry() -> list[tuple[str, str]]:
@@ -102,6 +115,124 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "zagrebačka": "Zagrebačka",
         "šibensko-kninska": "Šibensko-kninska",
     },
+    "DE": {
+        "berlin": "Berlin",
+        "bavaria": "Bavaria (Bayern)",
+        "north_rhine_westphalia": "North Rhine-Westphalia (Nordrhein-Westfalen)",
+        "baden_wurttemberg": "Baden-Württemberg",
+        "lower_saxony": "Lower Saxony (Niedersachsen)",
+        "hesse": "Hesse (Hessen)",
+        "saxony": "Saxony (Sachsen)",
+        "rhineland_palatinate": "Rhineland-Palatinate (Rheinland-Pfalz)",
+        "saxony_anhalt": "Saxony-Anhalt (Sachsen-Anhalt)",
+        "thuringia": "Thuringia (Thüringen)",
+        "Brandenburg": "Brandenburg",
+        "mecklenburg_vorpommern": "Mecklenburg-Vorpommern",
+        "hamburg": "Hamburg",
+        "saarland": "Saarland",
+        "schleswig_holstein": "Schleswig-Holstein",
+        "bremen": "Bremen",
+    },
+    "FR": {
+        "auvergne_rhone_alpes": "Auvergne-Rhône-Alpes",
+        "bourgogne_franche_comte": "Bourgogne-Franche-Comté",
+        "bretagne": "Bretagne",
+        "centre_val_de_loire": "Centre-Val de Loire",
+        "corse": "Corse",
+        "grand_est": "Grand Est",
+        "hauts_de_france": "Hauts-de-France",
+        "ile_de_france": "Île-de-France",
+        "normandie": "Normandie",
+        "nouvelle_aquitaine": "Nouvelle-Aquitaine",
+        "occitanie": "Occitanie",
+        "pays_de_la_loire": "Pays de la Loire",
+        "provence_alpes_cote_d_azur": "Provence-Alpes-Côte d'Azur",
+    },
+    "ES": {
+        "andalucia": "Andalucía",
+        "aragon": "Aragón",
+        "asturias": "Asturias",
+        "balearic_islands": "Balearic Islands (Illes Balears)",
+        "basque_country": "Basque Country (País Vasco)",
+        "canary_islands": "Canary Islands (Canarias)",
+        "cantabria": "Cantabria",
+        "castilla_la_mancha": "Castilla-La Mancha",
+        "castilla_y_leon": "Castilla y León",
+        "catalonia": "Catalonia (Catalunya)",
+        "extremadura": "Extremadura",
+        "galicia": "Galicia",
+        "la_rioja": "La Rioja",
+        "madrid": "Community of Madrid",
+        "murcia": "Region of Murcia",
+        "navarre": "Navarre (Navarra)",
+        "valencian_community": "Valencian Community",
+    },
+    "PT": {
+        "aveiro": "Aveiro",
+        "beja": "Beja",
+        "braga": "Braga",
+        "braganca": "Bragança",
+        "castelo_branco": "Castelo Branco",
+        "coimbra": "Coimbra",
+        "evora": "Évora",
+        "faro": "Faro",
+        "guarda": "Guarda",
+        "leiria": "Leiria",
+        "lisboa": "Lisboa",
+        "portalegre": "Portalegre",
+        "porto": "Porto",
+        "santarem": "Santarém",
+        "setubal": "Setúbal",
+        "viana_do_castelo": "Viana do Castelo",
+        "vila_real": "Vila Real",
+        "viseu": "Viseu",
+    },
+    "AT": {
+        "burgenland": "Burgenland",
+        "carinthia": "Carinthia (Kärnten)",
+        "lower_austria": "Lower Austria (Niederösterreich)",
+        "salzburg": "Salzburg",
+        "styria": "Styria (Steiermark)",
+        "tyrol": "Tyrol (Tirol)",
+        "upper_austria": "Upper Austria (Oberösterreich)",
+        "vienna": "Vienna (Wien)",
+        "vorarlberg": "Vorarlberg",
+    },
+    "IT": {
+        "abruzzo": "Abruzzo",
+        "basilicata": "Basilicata",
+        "calabria": "Calabria",
+        "campania": "Campania",
+        "emilia_romagna": "Emilia-Romagna",
+        "friuli_venezia_giulia": "Friuli-Venezia Giulia",
+        "lazio": "Lazio",
+        "liguria": "Liguria",
+        "lombardia": "Lombardia",
+        "marche": "Marche",
+        "molise": "Molise",
+        "piemonte": "Piemonte",
+        "puglia": "Puglia",
+        "sardegna": "Sardegna",
+        "sicilia": "Sicilia",
+        "toscana": "Toscana",
+        "trentino_alto_adige": "Trentino-Alto Adige",
+        "umbria": "Umbria",
+        "valle_d_aosta": "Valle d'Aosta",
+        "veneto": "Veneto",
+    },
+    "SI": {
+        "slovenia": "Slovenia (all)",
+    },
+    "GB": {
+        "england": "England",
+        "scotland": "Scotland",
+        "wales": "Wales",
+        "northern_ireland": "Northern Ireland",
+    },
+    "AU": {
+        "western_australia": "Western Australia",
+        "nsw_tasmania": "NSW + Tasmania",
+    },
 }
 
 
@@ -156,6 +287,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._longitude: float | None = None
         self._radius_km: float = DEFAULT_RADIUS_KM
         self._suggested_name: str = ""
+        self._api_key: str = ""  # optional API key for providers that require it
 
     # ---- Step 1: country --------------------------------------------------------
 
@@ -203,6 +335,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
         if not provider_cls:
             return await self.async_step_station()
+        # Providers that require an API key get an extra step first
+        if getattr(provider_cls, "REQUIRES_API_KEY", False) and not self._api_key:
+            return await self.async_step_api_key()
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
@@ -232,6 +367,28 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     # ---- Step 3a: station ID (manual_id mode) -----------------------------------
+
+    async def async_step_api_key(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Collect an API key for providers that require authentication."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            api_key = (user_input.get(CONF_API_KEY) or "").strip()
+            if not api_key:
+                errors[CONF_API_KEY] = "invalid_api_key"
+            else:
+                self._api_key = api_key
+                return await self._dispatch_after_provider()
+
+        return self.async_show_form(
+            step_id="api_key",
+            data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}),
+            errors=errors,
+        )
+
+    # ---- Step 3b: station ID (manual_id mode) -----------------------------------
 
     async def async_step_station(
         self, user_input: dict[str, Any] | None = None
@@ -422,6 +579,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_COUNTRY: self._country,
                 CONF_PROVIDER: self._provider_key,
             }
+            if self._api_key:
+                data[CONF_API_KEY] = self._api_key
             if self._station_id:
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:

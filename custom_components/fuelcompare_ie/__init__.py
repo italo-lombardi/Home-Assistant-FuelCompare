@@ -7,6 +7,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .const import (
+    CONF_API_KEY,
     CONF_PROVIDER,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
@@ -31,13 +32,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         provider_cls = PROVIDER_REGISTRY[DEFAULT_PROVIDER]
 
     # Pass county to providers that support county_search mode.
-    # Use inspect to avoid TypeError on providers whose __init__ doesn't accept county.
+    # Pass api_key to providers that require authentication.
+    # Use inspect to avoid TypeError on providers whose __init__ doesn't accept these params.
     import inspect
 
     county = entry.data.get(CONF_STATION_COUNTY)
+    api_key = entry.data.get(CONF_API_KEY)
     sig = inspect.signature(provider_cls.__init__)
+    kwargs: dict = {}
     if county and "county" in sig.parameters:
-        provider = provider_cls(station_id, county=county)
+        kwargs["county"] = county
+    if api_key and "api_key" in sig.parameters:
+        kwargs["api_key"] = api_key
+    if kwargs:
+        provider = provider_cls(station_id, **kwargs)
     else:
         provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
