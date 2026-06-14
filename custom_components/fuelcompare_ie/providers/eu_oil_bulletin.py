@@ -72,6 +72,8 @@ Confidence score: 6/10
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import io
 import logging
 from datetime import UTC, datetime
@@ -270,10 +272,14 @@ class EuOilBulletinProvider(BaseProvider):
         country_code = (station_id or self._station_id).upper()
 
         try:
-            wb = openpyxl.load_workbook(
-                io.BytesIO(wb_bytes),
-                read_only=True,
-                data_only=True,
+            wb = await asyncio.get_running_loop().run_in_executor(
+                None,
+                functools.partial(
+                    openpyxl.load_workbook,
+                    io.BytesIO(wb_bytes),
+                    read_only=True,
+                    data_only=True,
+                ),
             )
         except Exception as err:
             raise ProviderError(
@@ -385,10 +391,14 @@ class EuOilBulletinProvider(BaseProvider):
             return []
 
         try:
-            wb = openpyxl.load_workbook(
-                io.BytesIO(wb_bytes),
-                read_only=True,
-                data_only=True,
+            wb = await asyncio.get_running_loop().run_in_executor(
+                None,
+                functools.partial(
+                    openpyxl.load_workbook,
+                    io.BytesIO(wb_bytes),
+                    read_only=True,
+                    data_only=True,
+                ),
             )
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug(

@@ -58,6 +58,7 @@ _COUNTRY_NAMES: dict[str, str] = {
     "MT": "Malta",
     "NL": "Netherlands",
     "PL": "Poland",
+    "EU": "European Union (Oil Bulletin)",
 }
 
 
@@ -310,6 +311,9 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
     },
     "PL": {
         "poland": "Poland (all)",
+    },
+    "EU": {
+        "eu": "European Union (all member states)",
     },
 }
 

@@ -34,12 +34,9 @@ from custom_components.fuelcompare_ie.providers.eu_oil_bulletin import (
 # Helpers for creating fake openpyxl workbooks
 # ---------------------------------------------------------------------------
 
-try:
-    import openpyxl
+openpyxl = pytest.importorskip("openpyxl")
 
-    _OPENPYXL_AVAILABLE = True
-except ImportError:
-    _OPENPYXL_AVAILABLE = False
+_OPENPYXL_AVAILABLE = True
 
 _skip_if_no_openpyxl = pytest.mark.skipif(
     not _OPENPYXL_AVAILABLE, reason="openpyxl not installed"

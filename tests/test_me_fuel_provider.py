@@ -6,10 +6,13 @@ import io
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from aiohttp import ClientError
 
-from custom_components.fuelcompare_ie.providers.base import ProviderError
-from custom_components.fuelcompare_ie.providers.me_fuel import (
+openpyxl = pytest.importorskip("openpyxl")
+
+from aiohttp import ClientError  # noqa: E402
+
+from custom_components.fuelcompare_ie.providers.base import ProviderError  # noqa: E402
+from custom_components.fuelcompare_ie.providers.me_fuel import (  # noqa: E402
     MeFuelProvider,
     _CKAN_SEARCH_URL,
     _COL_EURODIESEL,
@@ -106,8 +109,6 @@ def _make_xlsx_bytes(
     price values in columns D-G.  When ``num_rows < _PRICE_ROW`` the MP
     row is intentionally omitted so the short-sheet path can be tested.
     """
-    import openpyxl  # type: ignore[import]
-
     wb = openpyxl.Workbook()
     ws = wb.active
 
@@ -346,42 +347,47 @@ def test_parse_price_integer_input() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_parse_xlsx_success_all_four_fuel_types() -> None:
+@pytest.mark.asyncio
+async def test_parse_xlsx_success_all_four_fuel_types() -> None:
     """_parse_xlsx extracts all four fuel type prices from row 28."""
-    data = _parse_xlsx(_make_xlsx_bytes())
+    data = await _parse_xlsx(_make_xlsx_bytes())
     assert data["unleaded"] == pytest.approx(_PRICE_E95)
     assert data["premium_unleaded"] == pytest.approx(_PRICE_E98)
     assert data["diesel"] == pytest.approx(_PRICE_EDIESEL)
     assert data["kerosene"] == pytest.approx(_PRICE_LOZ)
 
 
-def test_parse_xlsx_returns_none_for_missing_cells() -> None:
+@pytest.mark.asyncio
+async def test_parse_xlsx_returns_none_for_missing_cells() -> None:
     """_parse_xlsx returns None for fuel types whose cells are blank."""
-    data = _parse_xlsx(_make_xlsx_bytes(e95=None, e98=None))
+    data = await _parse_xlsx(_make_xlsx_bytes(e95=None, e98=None))
     assert data["unleaded"] is None
     assert data["premium_unleaded"] is None
     assert data["diesel"] == pytest.approx(_PRICE_EDIESEL)
     assert data["kerosene"] == pytest.approx(_PRICE_LOZ)
 
 
-def test_parse_xlsx_raises_provider_error_for_invalid_bytes() -> None:
+@pytest.mark.asyncio
+async def test_parse_xlsx_raises_provider_error_for_invalid_bytes() -> None:
     """_parse_xlsx raises ProviderError when content is not a valid XLSX."""
     with pytest.raises(ProviderError, match="MeFuel"):
-        _parse_xlsx(b"this is not an xlsx file at all")
+        await _parse_xlsx(b"this is not an xlsx file at all")
 
 
-def test_parse_xlsx_short_sheet_returns_none_prices() -> None:
+@pytest.mark.asyncio
+async def test_parse_xlsx_short_sheet_returns_none_prices() -> None:
     """_parse_xlsx returns all-None prices when the sheet has < 28 rows."""
-    data = _parse_xlsx(_make_xlsx_bytes(num_rows=10))
+    data = await _parse_xlsx(_make_xlsx_bytes(num_rows=10))
     assert data["unleaded"] is None
     assert data["premium_unleaded"] is None
     assert data["diesel"] is None
     assert data["kerosene"] is None
 
 
-def test_parse_xlsx_all_capability_keys_present() -> None:
+@pytest.mark.asyncio
+async def test_parse_xlsx_all_capability_keys_present() -> None:
     """_parse_xlsx result contains exactly the four expected keys."""
-    data = _parse_xlsx(_make_xlsx_bytes())
+    data = await _parse_xlsx(_make_xlsx_bytes())
     assert set(data.keys()) == {"unleaded", "premium_unleaded", "diesel", "kerosene"}
 
 

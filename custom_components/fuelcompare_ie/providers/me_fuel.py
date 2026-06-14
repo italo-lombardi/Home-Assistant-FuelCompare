@@ -81,6 +81,8 @@ Error handling
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import io
 import logging
 from typing import Any
@@ -227,7 +229,7 @@ class MeFuelProvider(BaseProvider):
         """
         xlsx_url, modified = await self._fetch_xlsx_url(session)
         xlsx_bytes = await self._download_xlsx(session, xlsx_url)
-        prices = _parse_xlsx(xlsx_bytes)
+        prices = await _parse_xlsx(xlsx_bytes)
 
         data: StationData = {
             "unleaded": prices.get("unleaded"),
@@ -362,6 +364,9 @@ class MeFuelProvider(BaseProvider):
                 "The data.gov.me portal may have changed resource formats."
             )
 
+        if not xlsx_url.startswith("https://data.gov.me/"):
+            raise ProviderError(f"Refusing to download from untrusted host: {xlsx_url}")
+
         _LOGGER.debug("MeFuel: found XLSX URL: %s (modified=%s)", xlsx_url, modified)
         return xlsx_url, modified
 
@@ -425,7 +430,7 @@ def _parse_price(raw: Any) -> float | None:
     return round(val, 3)
 
 
-def _parse_xlsx(xlsx_bytes: bytes) -> dict[str, float | None]:
+async def _parse_xlsx(xlsx_bytes: bytes) -> dict[str, float | None]:
     """Parse the government XLSX workbook and return fuel prices.
 
     Locates row 28 (the ``MP`` row — Zaokružena maksimalna maloprodajna
@@ -448,10 +453,14 @@ def _parse_xlsx(xlsx_bytes: bytes) -> dict[str, float | None]:
     try:
         import openpyxl  # local import — openpyxl is not always installed  # noqa: PLC0415
 
-        wb = openpyxl.load_workbook(
-            filename=io.BytesIO(xlsx_bytes),
-            read_only=True,
-            data_only=True,
+        wb = await asyncio.get_running_loop().run_in_executor(
+            None,
+            functools.partial(
+                openpyxl.load_workbook,
+                io.BytesIO(xlsx_bytes),
+                read_only=True,
+                data_only=True,
+            ),
         )
         ws = wb.active
     except Exception as err:

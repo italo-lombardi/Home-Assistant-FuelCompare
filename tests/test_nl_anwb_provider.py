@@ -318,74 +318,84 @@ def test_extract_price_rejects_non_numeric_string() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_parse_bulletin_returns_e10_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_returns_e10_price() -> None:
     """_parse_bulletin returns correct EUR/L benzine (e10) price."""
     raw = _make_xlsx_bytes(nl_benzine=2255.94)
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data["e10"] == pytest.approx(2.25594, rel=1e-4)
 
 
-def test_parse_bulletin_returns_diesel_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_returns_diesel_price() -> None:
     """_parse_bulletin returns correct EUR/L diesel price."""
     raw = _make_xlsx_bytes(nl_diesel=2150.59)
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data["diesel"] == pytest.approx(2.15059, rel=1e-4)
 
 
-def test_parse_bulletin_returns_lpg_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_returns_lpg_price() -> None:
     """_parse_bulletin returns correct EUR/L LPG price."""
     raw = _make_xlsx_bytes(nl_lpg=900.0)
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data["lpg"] == pytest.approx(0.9, rel=1e-4)
 
 
-def test_parse_bulletin_returns_kerosene_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_returns_kerosene_price() -> None:
     """_parse_bulletin maps heating gas oil to the 'kerosene' key."""
     raw = _make_xlsx_bytes(nl_heating=1200.0)
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data["kerosene"] == pytest.approx(1.2, rel=1e-4)
 
 
-def test_parse_bulletin_sets_name() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_sets_name() -> None:
     """_parse_bulletin sets a non-empty 'name' field."""
     raw = _make_xlsx_bytes()
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data.get("name")
 
 
-def test_parse_bulletin_sets_source_station_id_to_nl() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_sets_source_station_id_to_nl() -> None:
     """_parse_bulletin sets source_station_id to 'NL'."""
     raw = _make_xlsx_bytes()
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data.get("source_station_id") == "NL"
 
 
-def test_parse_bulletin_sets_lastupdated() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_sets_lastupdated() -> None:
     """_parse_bulletin populates lastupdated from the date row."""
     raw = _make_xlsx_bytes(bulletin_date="2026-06-08")
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data.get("lastupdated") is not None
 
 
-def test_parse_bulletin_raises_when_nl_row_missing() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_raises_when_nl_row_missing() -> None:
     """_parse_bulletin raises ProviderError when Netherlands row is absent."""
     raw = _make_xlsx_bytes(include_nl=False)
     with pytest.raises(ProviderError, match="Netherlands"):
-        _parse_bulletin(raw)
+        await _parse_bulletin(raw)
 
 
-def test_parse_bulletin_handles_none_prices() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_handles_none_prices() -> None:
     """_parse_bulletin returns None for price cells that are None."""
     raw = _make_xlsx_bytes(nl_benzine=None, nl_diesel=None)
-    data = _parse_bulletin(raw)
+    data = await _parse_bulletin(raw)
     assert data["e10"] is None
     assert data["diesel"] is None
 
 
-def test_parse_bulletin_raises_on_invalid_bytes() -> None:
+@pytest.mark.asyncio
+async def test_parse_bulletin_raises_on_invalid_bytes() -> None:
     """_parse_bulletin raises ProviderError for non-XLSX bytes."""
     with pytest.raises(ProviderError):
-        _parse_bulletin(b"not an xlsx file at all")
+        await _parse_bulletin(b"not an xlsx file at all")
 
 
 # ---------------------------------------------------------------------------

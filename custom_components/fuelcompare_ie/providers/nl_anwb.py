@@ -49,6 +49,8 @@ provider.  The coordinator calls async_fetch(session, "NL") on each poll.
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import io
 import logging
 from typing import Any
@@ -190,7 +192,7 @@ class NlAnwbProvider(BaseProvider):
                            workbook cannot be parsed.
         """
         raw = await self._download_bulletin(session)
-        return _parse_bulletin(raw)
+        return await _parse_bulletin(raw)
 
     async def async_fetch_station_name(
         self,
@@ -292,7 +294,7 @@ class NlAnwbProvider(BaseProvider):
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
 
-def _parse_bulletin(raw: bytes) -> StationData:
+async def _parse_bulletin(raw: bytes) -> StationData:
     """Parse the EC Weekly Oil Bulletin XLSX and return NL StationData.
 
     Locates the Netherlands row (case-insensitive partial match on "Netherlands")
@@ -318,7 +320,15 @@ def _parse_bulletin(raw: bytes) -> StationData:
         ) from err
 
     try:
-        wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+        wb = await asyncio.get_running_loop().run_in_executor(
+            None,
+            functools.partial(
+                openpyxl.load_workbook,
+                io.BytesIO(raw),
+                read_only=True,
+                data_only=True,
+            ),
+        )
     except Exception as err:  # noqa: BLE001
         raise ProviderError(
             f"Failed to open EU Weekly Oil Bulletin as XLSX workbook: {err}"

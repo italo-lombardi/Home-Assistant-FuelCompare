@@ -250,9 +250,10 @@ def test_make_absolute_already_https() -> None:
 
 
 def test_make_absolute_already_http() -> None:
-    """_make_absolute leaves http:// URLs unchanged."""
+    """_make_absolute raises ProviderError for non-energy.ec.europa.eu http:// URLs."""
     url = "http://example.com/file.xlsx"
-    assert _make_absolute(url) == url
+    with pytest.raises(ProviderError, match="SSRF guard"):
+        _make_absolute(url)
 
 
 def test_make_absolute_protocol_relative() -> None:
@@ -280,39 +281,44 @@ def test_make_absolute_relative_path() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_parse_malta_row_returns_petrol_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_returns_petrol_price() -> None:
     """_parse_malta_row extracts petrol_95 from the Malta row."""
     xlsx = _malta_xlsx(petrol=1340.0)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is not None
     assert result["petrol_95"] == pytest.approx(1.340)
 
 
-def test_parse_malta_row_returns_diesel_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_returns_diesel_price() -> None:
     """_parse_malta_row extracts diesel from the Malta row."""
     xlsx = _malta_xlsx(diesel=1210.0)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is not None
     assert result["diesel"] == pytest.approx(1.210)
 
 
-def test_parse_malta_row_returns_lpg_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_returns_lpg_price() -> None:
     """_parse_malta_row extracts lpg from the Malta row."""
     xlsx = _malta_xlsx(lpg=1000.0)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is not None
     assert result["lpg"] == pytest.approx(1.000)
 
 
-def test_parse_malta_row_returns_heating_oil_price() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_returns_heating_oil_price() -> None:
     """_parse_malta_row extracts heating_oil from the Malta row."""
     xlsx = _malta_xlsx(heating_oil=980.0)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is not None
     assert result["heating_oil"] == pytest.approx(0.980)
 
 
-def test_parse_malta_row_returns_none_when_malta_absent() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_returns_none_when_malta_absent() -> None:
     """_parse_malta_row returns None when no Malta row is found."""
     rows = [
         ["Country", "Euro-super 95", "Diesel", "LPG", "Heating Oil"],
@@ -320,29 +326,31 @@ def test_parse_malta_row_returns_none_when_malta_absent() -> None:
         ["Netherlands", 1780.0, 1550.0, 890.0, 900.0],
     ]
     xlsx = _make_xlsx_bytes(rows)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is None
 
 
-def test_parse_malta_row_matches_malta_with_asterisk() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_matches_malta_with_asterisk() -> None:
     """_parse_malta_row matches 'Malta *' (footnote variant) as the Malta row."""
     rows = [
         ["Country", "Euro-super 95", "Diesel", "LPG", "Heating Oil"],
         ["Malta *", 1340.0, 1210.0, 1000.0, 980.0],
     ]
     xlsx = _make_xlsx_bytes(rows)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is not None
     assert result["petrol_95"] == pytest.approx(1.340)
 
 
-def test_parse_malta_row_handles_none_price_cells() -> None:
+@pytest.mark.asyncio
+async def test_parse_malta_row_handles_none_price_cells() -> None:
     """_parse_malta_row returns None prices when cells are empty."""
     rows = [
         ["Malta", None, None, None, None],
     ]
     xlsx = _make_xlsx_bytes(rows)
-    result = _parse_malta_row(xlsx)
+    result = await _parse_malta_row(xlsx)
     assert result is not None
     assert result["petrol_95"] is None
     assert result["diesel"] is None

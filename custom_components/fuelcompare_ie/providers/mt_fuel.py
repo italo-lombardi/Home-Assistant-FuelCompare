@@ -53,10 +53,13 @@ Currency: EUR/litre.
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import io
 import logging
 import re
 from typing import Any
+from urllib.parse import urlparse
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -211,7 +214,7 @@ class MtFuelProvider(BaseProvider):
             )
 
         try:
-            prices = _parse_malta_row(xlsx_bytes)
+            prices = await _parse_malta_row(xlsx_bytes)
         except Exception as err:  # noqa: BLE001
             raise ProviderError(
                 f"MtFuelProvider: failed to parse EU Oil Bulletin XLSX: {err}"
@@ -289,8 +292,6 @@ class MtFuelProvider(BaseProvider):
             [("MT", "Malta — national average (EU Oil Bulletin)")]
         """
         # is-not-None coord checks (not falsy — 0.0 is a valid coordinate)
-        (kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude)
-        (kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude)
 
         return [("MT", "Malta — national average (EU Oil Bulletin)")]
 
@@ -419,14 +420,24 @@ def _make_absolute(href: str) -> str:
 
     Returns:
         Absolute URL string.
+
+    Raises:
+        ProviderError: The resolved URL points to an unexpected host.
     """
     if href.startswith("http://") or href.startswith("https://"):
-        return href
-    if href.startswith("//"):
-        return "https:" + href
-    if href.startswith("/"):
-        return "https://energy.ec.europa.eu" + href
-    return "https://energy.ec.europa.eu/" + href
+        resolved_url = href
+    elif href.startswith("//"):
+        resolved_url = "https:" + href
+    elif href.startswith("/"):
+        resolved_url = "https://energy.ec.europa.eu" + href
+    else:
+        resolved_url = "https://energy.ec.europa.eu/" + href
+
+    expected_host = "energy.ec.europa.eu"
+    parsed = urlparse(resolved_url)
+    if parsed.netloc not in (expected_host, ""):
+        raise ProviderError(f"SSRF guard: unexpected download host {parsed.netloc}")
+    return resolved_url
 
 
 def _parse_price_cell(cell_value: Any) -> float | None:
@@ -453,7 +464,7 @@ def _parse_price_cell(cell_value: Any) -> float | None:
     return round(val / 1000.0, 4)
 
 
-def _parse_malta_row(xlsx_bytes: bytes) -> dict[str, float | None] | None:
+async def _parse_malta_row(xlsx_bytes: bytes) -> dict[str, float | None] | None:
     """Parse the EU Oil Bulletin XLSX and extract Malta's fuel prices.
 
     Opens the XLSX in read-only mode (no chart evaluation), iterates rows
@@ -486,10 +497,14 @@ def _parse_malta_row(xlsx_bytes: bytes) -> dict[str, float | None] | None:
         )
         raise
 
-    wb = openpyxl.load_workbook(
-        filename=io.BytesIO(xlsx_bytes),
-        read_only=True,
-        data_only=True,
+    wb = await asyncio.get_running_loop().run_in_executor(
+        None,
+        functools.partial(
+            openpyxl.load_workbook,
+            io.BytesIO(xlsx_bytes),
+            read_only=True,
+            data_only=True,
+        ),
     )
 
     # Use the first sheet; bulletins typically have one data sheet.

@@ -267,8 +267,6 @@ class BaFuelProvider(BaseProvider):
         city_slug: str = str(kwargs.get("city", _CITY_SLUGS[0]))
 
         # is-not-None coord checks (not falsy — 0.0 is a valid coordinate)
-        (kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude)  # type: ignore[assignment]
-        (kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude)  # type: ignore[assignment]
 
         try:
             html = await self._fetch_city_html(session, city_slug)
