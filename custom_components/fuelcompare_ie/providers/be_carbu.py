@@ -151,7 +151,7 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)  # scraping can be slow
 _FUEL_KEY_TO_SLUG: dict[str, str] = {
     "unleaded": "E10",  # Super 95 (E10)
     "premium_unleaded": "E5",  # Super 98 (E5)
-    "diesel": "D",  # Diesel (B7)
+    "diesel": "GO",  # Diesel (Gasoil) — carbu.com uses "GO" not "D"
     "lpg": "LPG",  # LPG / Autogas
     "cng": "CNG",  # Compressed Natural Gas
 }
@@ -169,7 +169,7 @@ _EXTRA_SLUG_TO_KEY: dict[str, str] = {
 _ALL_SLUGS: tuple[str, ...] = (
     "E10",
     "E5",
-    "D",
+    "GO",
     "LPG",
     "CNG",
     "B10",
@@ -181,7 +181,7 @@ _SLUG_TO_FUEL_KEY: dict[str, str] = {v: k for k, v in _FUEL_KEY_TO_SLUG.items()}
 _SLUG_TO_FUEL_KEY.update(_EXTRA_SLUG_TO_KEY)
 
 # Primary fan-out slugs for async_list_stations display (cheaper + faster)
-_DISPLAY_SLUGS: tuple[str, ...] = ("D", "E10")
+_DISPLAY_SLUGS: tuple[str, ...] = ("GO", "E10")
 
 
 # ---------------------------------------------------------------------------
@@ -232,15 +232,11 @@ def _extract_price_from_text(text: str) -> float | None:
 def _parse_station_html(html: str, fuel_key: str) -> list[dict[str, Any]]:
     """Parse the carbu.com station listing HTML.
 
-    Extracts station cards from the page.  carbu.com encodes station data
-    in ``<div class="station-content ...">`` elements (or similar container
-    divs) with ``data-id``, ``data-lat``, and ``data-lng`` attributes and
-    nested price/name/address spans.
+    carbu.com encodes station data as:
+      <div id="item_N" data-price="..." data-name="..." data-address="..."
+           data-lat="..." data-lng="..." data-id="...">
 
-    Uses a regex-based approach so there is no dependency on BeautifulSoup
-    or lxml.  Each station block is identified by finding the opening tag
-    that carries ``data-id``, then capturing the substring up to the next
-    station-bearing opening tag (or end of string).
+    Falls back to the legacy data-id tag approach for backward compatibility.
 
     Returns a list of station dicts with keys:
         station_id, name, brand, address, latitude, longitude, price,
@@ -248,31 +244,22 @@ def _parse_station_html(html: str, fuel_key: str) -> list[dict[str, Any]]:
     """
     stations: list[dict[str, Any]] = []
 
-    price_pattern = re.compile(
-        r'class="[^"]*prix[^"]*"[^>]*>([^<]+)<',
-        re.IGNORECASE,
-    )
-    name_pattern = re.compile(
-        r'class="[^"]*(?:station-name|nom)[^"]*"[^>]*>([^<]+)<',
-        re.IGNORECASE,
-    )
-    address_pattern = re.compile(
-        r'class="[^"]*(?:adresse|address|street)[^"]*"[^>]*>([^<]+)<',
-        re.IGNORECASE,
-    )
-
-    # Find all positions where a station opening tag starts (a tag that carries
-    # data-id).  We do NOT use a lookahead-split because that separates the
-    # opening tag from its children.  Instead we find each opening-tag
-    # boundary and slice the HTML between consecutive boundaries.
-
-    # Match any opening tag (<div ..., <article ..., etc.) that has data-id.
-    station_tag_pattern = re.compile(
-        r"<[a-zA-Z][^>]*\bdata-id=[\"'](\d+)[\"'][^>]*>",
+    # Primary: modern data-* attribute approach (div id="item_N")
+    item_pattern = re.compile(
+        r'<div\s+id=["\']item_(\d+)["\'][^>]*>',
         re.IGNORECASE | re.DOTALL,
     )
+    matches = list(item_pattern.finditer(html))
 
-    matches = list(station_tag_pattern.finditer(html))
+    # Fallback: any tag with data-id attribute (legacy layout)
+    if not matches:
+        matches = list(
+            re.compile(
+                r"<[a-zA-Z][^>]*\bdata-id=[\"'](\d+)[\"'][^>]*>",
+                re.IGNORECASE | re.DOTALL,
+            ).finditer(html)
+        )
+
     if not matches:
         return []
 
@@ -280,49 +267,65 @@ def _parse_station_html(html: str, fuel_key: str) -> list[dict[str, Any]]:
         station_id = match.group(1)
         block_start = match.start()
         block_end = matches[i + 1].start() if i + 1 < len(matches) else len(html)
+        # Use the opening tag for data attributes
+        tag_end = html.index(">", match.start()) + 1
+        tag_text = html[match.start() : tag_end]
         section = html[block_start:block_end]
 
-        # Extract data attributes from the opening tag (the matched tag itself)
-        tag_text = match.group(0)
-        lat_match = re.search(r'data-lat=["\']([^"\']+)["\']', tag_text, re.IGNORECASE)
-        lng_match = re.search(r'data-lng=["\']([^"\']+)["\']', tag_text, re.IGNORECASE)
+        def _attr(name: str, text: str = tag_text) -> str | None:
+            m = re.search(rf'data-{name}=["\']([^"\']*)["\']', text, re.IGNORECASE)
+            return m.group(1).strip() if m else None
+
+        # Extract from data attributes first (modern layout)
+        price_raw = _attr("price") or _attr("prix")
+        name_raw = _attr("name") or _attr("nom")
+        address_raw = _attr("address") or _attr("adresse")
+        lat_raw = _attr("lat")
+        lng_raw = _attr("lng") or _attr("lon")
+        id_raw = _attr("id") or station_id
+
+        # Price fallback: search block for class="prix" etc.
+        if not price_raw:
+            pm = re.search(
+                r'class="[^"]*prix[^"]*"[^>]*>([^<]+)<', section, re.IGNORECASE
+            )
+            price_raw = pm.group(1).strip() if pm else None
+
+        # Name fallback: search block for class="station-name"
+        if not name_raw:
+            nm = re.search(
+                r'class="[^"]*(?:station-name|nom)[^"]*"[^>]*>([^<]+)<',
+                section,
+                re.IGNORECASE,
+            )
+            name_raw = nm.group(1).strip() if nm else None
+
+        # Address fallback
+        if not address_raw:
+            am = re.search(
+                r'class="[^"]*(?:adresse|address)[^"]*"[^>]*>([^<]+)<',
+                section,
+                re.IGNORECASE,
+            )
+            address_raw = am.group(1).strip() if am else None
 
         try:
-            lat: float | None = float(lat_match.group(1)) if lat_match else None
+            lat: float | None = float(lat_raw) if lat_raw else None
         except (ValueError, TypeError):
             lat = None
         try:
-            lng: float | None = float(lng_match.group(1)) if lng_match else None
+            lng: float | None = float(lng_raw) if lng_raw else None
         except (ValueError, TypeError):
             lng = None
 
-        # Extract price, name, address from the whole block (tag + children)
-        price_match = price_pattern.search(section)
-        price: float | None = None
-        if price_match:
-            price = _extract_price_from_text(price_match.group(1))
-
-        name_match = name_pattern.search(section)
-        name: str | None = name_match.group(1).strip() if name_match else None
-        if name:
-            name = re.sub(r"&[a-zA-Z]+;", " ", name).strip()
-
-        addr_match = address_pattern.search(section)
-        address: str | None = addr_match.group(1).strip() if addr_match else None
-        if address:
-            address = re.sub(r"&[a-zA-Z]+;", " ", address).strip()
-
-        # Extract brand from logo img alt attribute
-        brand: str | None = None
-        brand_img = re.search(
-            r'<img[^>]*class="[^"]*(?:logo|brand)[^"]*"[^>]*alt="([^"]*)"',
-            section,
-            re.IGNORECASE,
+        price: float | None = _extract_price_from_text(price_raw) if price_raw else None
+        name: str | None = (
+            re.sub(r"&[a-zA-Z]+;", " ", name_raw).strip() if name_raw else None
         )
-        if brand_img:
-            brand = brand_img.group(1).strip() or None
+        address: str | None = (
+            re.sub(r"&[a-zA-Z]+;", " ", address_raw).strip() if address_raw else None
+        )
 
-        # Extract postal code from a data attribute if present
         postal_match = re.search(
             r'data-(?:cp|postalcode|postal)["\']?\s*=\s*["\']?(\d{4})',
             section,
@@ -332,9 +335,9 @@ def _parse_station_html(html: str, fuel_key: str) -> list[dict[str, Any]]:
 
         stations.append(
             {
-                "station_id": station_id,
+                "station_id": str(id_raw),
                 "name": name,
-                "brand": brand,
+                "brand": None,
                 "address": address,
                 "latitude": lat,
                 "longitude": lng,
@@ -742,15 +745,19 @@ class BeCarbuProvider(BaseProvider):
             )
 
         # Take the first result.  Prefer exact postal code match.
+        # API returns abbreviated keys: n=name, id=location_id, pc=postal_code
         entry = payload[0]
         for item in payload:
-            if str(item.get("postal_code", "")) == str(postal_code):
+            pc = str(item.get("pc") or item.get("postal_code", ""))
+            if pc == str(postal_code):
                 entry = item
                 break
 
-        town: str = str(entry.get("town") or entry.get("name") or postal_code)
+        town: str = str(
+            entry.get("n") or entry.get("town") or entry.get("name") or postal_code
+        )
         location_id: str = str(
-            entry.get("location_id") or entry.get("id") or postal_code
+            entry.get("id") or entry.get("location_id") or postal_code
         )
 
         # Normalise town for URL: lowercase, spaces to hyphens, strip accents

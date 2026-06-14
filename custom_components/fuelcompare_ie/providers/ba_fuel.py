@@ -98,16 +98,13 @@ _HEADER_TO_KEY: dict[str, str] = {
 
 # Well-known BiH city slugs (used for async_list_stations city picker).
 # The site uses the city name lowercased and hyphenated as the URL path.
+# Note: banja-luka, bijeljina, doboj, trebinje return HTTP 404 on the live site.
 _CITY_SLUGS: tuple[str, ...] = (
     "sarajevo",
-    "banja-luka",
     "tuzla",
     "mostar",
     "zenica",
-    "bijeljina",
     "brcko",
-    "doboj",
-    "trebinje",
     "livno",
 )
 
@@ -511,8 +508,79 @@ class _TableParser(HTMLParser):
                 self._current_cell.append(stripped)
 
 
+def _parse_stations_div(html: str) -> list[dict[str, Any]]:
+    """Parse cijenegoriva.ba Tailwind CSS card layout (modern site).
+
+    The site uses div cards, each containing:
+      - Station name in a span/div with class pattern like "font-bold" or "text-lg"
+      - Fuel prices in span elements with data attributes or structured spans
+      - Address in a span/div
+
+    Returns same format as the table parser for compatibility.
+    """
+    import re
+
+    stations: list[dict[str, Any]] = []
+
+    # Match station card blocks — look for recurring structural patterns
+    # cijenegoriva.ba cards are wrapped in div.flex or similar Tailwind containers
+    # Each card typically contains the station name, address, and price spans.
+    # Strategy: find price-containing blocks using fuel price patterns.
+
+    # Simpler approach: find all text spans and group by proximity
+    # Extract all text content between tags, filter by fuel price patterns
+    text_blocks = re.findall(r">([^<]{2,200})<", html)
+
+    prices_found: list[float] = []
+    current_block: dict[str, Any] = {}
+    price_count = 0
+
+    for text in text_blocks:
+        text = text.strip()
+        if not text:
+            continue
+
+        # Check if it's a price
+        price_match = re.match(r"^(\d+)[,\.](\d{3})$", text)
+        if price_match:
+            # Price like "1,234" or "1.234"
+            val_str = f"{price_match.group(1)}.{price_match.group(2)}"
+            try:
+                val = float(val_str)
+                if 0.3 <= val <= 5.0:
+                    prices_found.append(val)
+                    price_count += 1
+            except ValueError:
+                pass
+        elif len(text) > 5 and not re.match(r"^[\d\s,\.]+$", text):
+            # Likely a name or address
+            if not current_block.get("name"):
+                current_block["name"] = text
+            elif not current_block.get("address"):
+                current_block["address"] = text
+
+        # Flush block when we have collected enough data
+        if price_count >= 2 and current_block.get("name"):
+            station: dict[str, Any] = {
+                "name": current_block.get("name"),
+                "address": current_block.get("address"),
+                "diesel": prices_found[0] if len(prices_found) > 0 else None,
+                "super95": prices_found[1] if len(prices_found) > 1 else None,
+                "super98": prices_found[2] if len(prices_found) > 2 else None,
+                "lpg": prices_found[3] if len(prices_found) > 3 else None,
+            }
+            stations.append(station)
+            prices_found = []
+            current_block = {}
+            price_count = 0
+
+    return stations
+
+
 def _parse_station_table(html: str) -> list[dict[str, Any]]:
     """Parse the cijenegoriva.ba station table from a city page HTML.
+
+    Tries the modern div-card layout first; falls back to table-based parsing.
 
     Finds the first HTML table, reads the header row to identify column
     positions for name, address, and fuel prices, then converts each
@@ -533,6 +601,16 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
           super98 (float|None), lpg (float|None).
         Empty list if no table / no parseable data found.
     """
+    # Try modern div-card layout first (Tailwind CSS site)
+    if "<table" not in html.lower():
+        div_result = _parse_stations_div(html)
+        if div_result:
+            _LOGGER.debug(
+                "_parse_station_table: used div-card parser (%d stations)",
+                len(div_result),
+            )
+            return div_result
+
     parser = _TableParser()
     try:
         parser.feed(html)

@@ -295,8 +295,8 @@ def test_city_slugs_includes_sarajevo() -> None:
 
 
 def test_city_slugs_includes_major_cities() -> None:
-    """_CITY_SLUGS includes banja-luka, tuzla, and mostar."""
-    assert "banja-luka" in _CITY_SLUGS
+    """_CITY_SLUGS includes sarajevo, tuzla, and mostar (banja-luka removed — 404)."""
+    assert "sarajevo" in _CITY_SLUGS
     assert "tuzla" in _CITY_SLUGS
     assert "mostar" in _CITY_SLUGS
 

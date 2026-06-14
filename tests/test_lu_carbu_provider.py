@@ -227,14 +227,14 @@ def test_fuel_ids_has_five_fuels() -> None:
         assert key in _FUEL_IDS, f"Fuel key '{key}' missing from _FUEL_IDS"
 
 
-def test_fuel_ids_diesel_is_3() -> None:
-    """_FUEL_IDS maps 'diesel' to carbu.com ID 3."""
-    assert _FUEL_IDS["diesel"] == 3
+def test_fuel_ids_diesel_is_1() -> None:
+    """_FUEL_IDS maps 'diesel' to carbu.com ID 1 (Gasoil)."""
+    assert _FUEL_IDS["diesel"] == 1
 
 
-def test_fuel_ids_unleaded_is_1() -> None:
-    """_FUEL_IDS maps 'unleaded' (Super 95) to carbu.com ID 1."""
-    assert _FUEL_IDS["unleaded"] == 1
+def test_fuel_ids_unleaded_is_2() -> None:
+    """_FUEL_IDS maps 'unleaded' (Super 95) to carbu.com ID 2."""
+    assert _FUEL_IDS["unleaded"] == 2
 
 
 # ---------------------------------------------------------------------------

@@ -293,8 +293,8 @@ def test_json_headers_include_xhr_header() -> None:
 
 
 def test_fuel_key_to_slug_diesel() -> None:
-    """_FUEL_KEY_TO_SLUG maps diesel to 'D' (carbu.com Diesel B7 slug)."""
-    assert _FUEL_KEY_TO_SLUG["diesel"] == "D"
+    """_FUEL_KEY_TO_SLUG maps diesel to 'GO' (carbu.com Gasoil slug)."""
+    assert _FUEL_KEY_TO_SLUG["diesel"] == "GO"
 
 
 def test_fuel_key_to_slug_unleaded() -> None:

@@ -107,6 +107,9 @@ _LOGGER = logging.getLogger(__name__)
 
 _BASE_URL = "https://carbu.com/luxembourg/index.php/liste"
 
+# Alternative API endpoint — try if the primary returns 404
+_ALT_URL = "https://api.carbu.com/luxembourg/liste"
+
 _HEADERS: dict[str, str] = {
     "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
     "Accept": "application/json, text/javascript, */*",
@@ -116,12 +119,12 @@ _HEADERS: dict[str, str] = {
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 
-# carbu.com fuel type IDs for Luxembourg
+# carbu.com fuel type IDs for Luxembourg (data-fuelid from live site)
 _FUEL_IDS: dict[str, int] = {
-    "unleaded": 1,  # Super 95
-    "premium_unleaded": 2,  # Super 98
-    "diesel": 3,  # Diesel
-    "lpg": 6,  # LPG / Autogas
+    "diesel": 1,  # Diesel / Gasoil
+    "unleaded": 2,  # Super 95 (E10)
+    "premium_unleaded": 3,  # Super 98 (E5)
+    "lpg": 4,  # LPG / Autogas
     "cng": 9,  # CNG
 }
 
