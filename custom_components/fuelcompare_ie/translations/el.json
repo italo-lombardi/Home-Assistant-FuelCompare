@@ -1,9 +1,11 @@
 {
   "config": {
     "step": {
-      "user": {
-        "title": "Προσθήκη σταθμού FuelCompare.ie",
-        "description": "Εισάγετε το αναγνωριστικό σταθμού από το fuelcompare.ie (π.χ. 790 για Circle K Taney Dublin)",
+      "user": {},
+      "provider": {},
+      "station": {
+        "title": "Προσθήκη σταθμού Fuel Compare",
+        "description": "Εισάγετε το αναγνωριστικό σταθμού από τη διεύθυνση URL του σταθμού (π.χ. 790 για Circle K Taney Dublin)",
         "data": {
           "station_id": "Αναγνωριστικό Σταθμού"
         }

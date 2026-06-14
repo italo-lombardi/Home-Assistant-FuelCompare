@@ -1,9 +1,11 @@
 {
   "config": {
     "step": {
-      "user": {
-        "title": "FuelCompare.ie állomás hozzáadása",
-        "description": "Adja meg az állomás azonosítóját a fuelcompare.ie oldalról (pl. 790 a Circle K Taney Dublin esetén)",
+      "user": {},
+      "provider": {},
+      "station": {
+        "title": "Fuel Compare állomás hozzáadása",
+        "description": "Adja meg az állomás azonosítóját az állomás URL-jéről (pl. 790 a Circle K Taney Dublin esetén)",
         "data": {
           "station_id": "Állomás azonosító"
         }

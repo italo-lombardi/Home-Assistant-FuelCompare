@@ -1,4 +1,4 @@
-"""Sensor platform for FuelCompare.ie integration."""
+"""Sensor platform for Fuel Compare integration."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def _parse_lastupdated(raw: str | None) -> datetime | None:
-    """Parse fuelcompare.ie lastupdated string into an aware datetime, or None on failure."""
+    """Parse lastupdated string into an aware datetime, or None on failure."""
     if not raw or not isinstance(raw, str):
         return None
     value = raw.strip()
@@ -64,9 +64,9 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up FuelCompare.ie sensor based on a config entry."""
+    """Set up Fuel Compare sensor based on a config entry."""
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
-    station_id = entry.data[CONF_STATION_ID]
+    station_id = entry.data.get(CONF_STATION_ID, "")
     station_name = entry.title
 
     entities: list[SensorEntity] = []
@@ -129,12 +129,12 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-def _device_info(station_id: str, station_name: str) -> DeviceInfo:
+def _device_info(station_id: str, station_name: str, manufacturer: str) -> DeviceInfo:
     """Return shared device info for all sensors of a station."""
     return DeviceInfo(
         identifiers={(DOMAIN, station_id)},
         name=station_name,
-        manufacturer="FuelCompare.ie",
+        manufacturer=manufacturer,
         entry_type=DeviceEntryType.SERVICE,
     )
 
@@ -143,7 +143,7 @@ def _device_info(station_id: str, station_name: str) -> DeviceInfo:
 
 
 class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
-    """Representation of a FuelCompare.ie fuel price sensor."""
+    """Representation of a Fuel Compare fuel price sensor."""
 
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_state_class = SensorStateClass.TOTAL
@@ -168,7 +168,9 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
             "diesel": "mdi:gas-station-outline",
         }
         self._attr_icon = icon_map.get(fuel_type, "mdi:gas-station")
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> float | None:
@@ -200,7 +202,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         attrs: dict = {
             "station_id": self._station_id,
             "fuel_type": self._fuel_type,
-            "source": "fuelcompare.ie",
+            "source": self.coordinator._provider.LABEL,
         }
         if self.coordinator.data:
             if lastupdated := self.coordinator.data.get("lastupdated"):
@@ -214,7 +216,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
 class StationPriceLastUpdatedSensor(
     CoordinatorEntity[FuelCompareIECoordinator], SensorEntity
 ):
-    """Sensor exposing when fuel prices were last updated on fuelcompare.ie."""
+    """Sensor exposing when fuel prices were last updated on the data source."""
 
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_icon = "mdi:clock-check-outline"
@@ -231,11 +233,13 @@ class StationPriceLastUpdatedSensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_price_last_updated"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> datetime | None:
-        """Return the timestamp when prices were last updated on fuelcompare.ie."""
+        """Return the timestamp when prices were last updated on the data source."""
         if not self.coordinator.data:
             return None
         return _parse_lastupdated(self.coordinator.data.get("lastupdated"))
@@ -268,7 +272,9 @@ class StationNameSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntit
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_station_name"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -305,7 +311,9 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_brand"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -344,7 +352,9 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_county"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -383,7 +393,9 @@ class StationWorkingHoursSensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_working_hours"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:
@@ -447,7 +459,9 @@ class StationAboutCategorySensor(
         self._attr_icon = icon
         self._attr_unique_id = f"{DOMAIN}_{station_id}_about_{category.lower()}"
         self._attr_translation_key = translation_key
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     def _get_category_data(self) -> dict:
         """Return the parsed category dict, or empty dict on any failure."""
@@ -497,7 +511,7 @@ class LastSuccessfulFetchSensor(
 ):
     """Diagnostic sensor exposing when the integration last fetched data successfully.
 
-    Distinct from ``price_last_updated`` — that one reflects fuelcompare.ie's
+    Distinct from ``price_last_updated`` — that one reflects the data source's
     own server-side timestamp for the price record. This sensor reflects the
     integration's own poll cadence, so automations can detect "fetch loop
     has been failing for hours" independently of whether the site has refreshed
@@ -520,7 +534,9 @@ class LastSuccessfulFetchSensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_last_successful_fetch"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:

@@ -1,4 +1,4 @@
-"""Binary sensor platform for FuelCompare.ie integration."""
+"""Binary sensor platform for Fuel Compare integration."""
 
 from __future__ import annotations
 
@@ -68,9 +68,9 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up FuelCompare.ie binary sensor based on a config entry."""
+    """Set up Fuel Compare binary sensor based on a config entry."""
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
-    station_id = entry.data[CONF_STATION_ID]
+    station_id = entry.data.get(CONF_STATION_ID, "")
     station_name = entry.title
     async_add_entities(
         [
@@ -100,7 +100,9 @@ class StationIsOpenBinarySensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:
@@ -184,7 +186,9 @@ class DataFetchProblemBinarySensor(
         super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_data_fetch_problem"
-        self._attr_device_info = _device_info(station_id, station_name)
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
 
     @property
     def available(self) -> bool:

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-06-14
+
+### Context
+fuelcompare.ie announced closure at end of June 2025. This release restructures the integration to decouple data-fetching from the coordinator so alternative sources (FuelFinder.ie, future countries) can be added without breaking existing installs. The fuelcompare.ie scraper continues to work as before until a replacement source is integrated.
+
+### Changed (BREAKING)
+- **Integration display name** changed from `"FuelCompare.ie"` to `"Fuel Compare"`. The internal domain (`fuelcompare_ie`), entity IDs, device registry entries, and all existing config entries are unchanged — no migration required for existing users.
+- `manufacturer` field in the HA device registry now comes from the active provider's `LABEL` attribute instead of being hardcoded to `"FuelCompare.ie"`.
+- `source` extra state attribute on fuel price sensors now comes from the provider's `LABEL` instead of the hardcoded string `"fuelcompare.ie"`.
+
+### Added
+- **Provider abstraction layer** (`providers/`): all data-fetching logic moved to `providers/ie_fuelcompare.py` (`IEFuelCompareProvider`), implementing a `BaseProvider` ABC. Adding a new data source requires only a new provider file and one registry entry — no changes to sensors, binary sensors, or the coordinator.
+- `BaseProvider.CONFIG_MODE` — `"station_id"` (default, current behaviour) or `"location"` (lat/lng + radius, for government open-data APIs). The config flow routes to the appropriate step automatically.
+- `providers/base.py`: `ProviderError` exception class — providers raise this; the coordinator catches it and converts to `UpdateFailed`.
+- Config flow: country selector step + provider selector step. Both auto-skip when only one option is available — setup experience is identical to previous versions for existing Ireland users.
+- Config flow: `async_step_location` — collects latitude, longitude, and search radius for location-based providers; defaults to the HA home location.
+- `CONF_COUNTRY`, `CONF_PROVIDER`, `CONF_LATITUDE`, `CONF_LONGITUDE`, `CONF_RADIUS_KM` stored in config entry data. Existing entries without these keys default to `IE` / `ie_fuelcompare`.
+- `requirements_test.txt`: updated `pytest-homeassistant-custom-component` to `>=0.13.338,<0.13.339`.
+- 25 translation files: added `"station"`, `"provider"`, `"location"` step keys; corrected 24 non-EN station-step descriptions that were truncated after a previous edit removed the `fuelcompare.ie` URL.
+
+### Fixed
+- All 24 non-EN translation descriptions for the station-ID setup step were grammatically truncated (missing "from the station URL" equivalent). Now repaired per locale.
+- `hu.json`: fixed double-article grammatical error (`"a az állomás"` → `"az állomás"`).
+
 ## [0.6.0] - 2026-06-08
 
 ### Added

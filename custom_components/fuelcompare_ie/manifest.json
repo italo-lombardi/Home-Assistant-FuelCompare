@@ -1,6 +1,6 @@
 {
   "domain": "fuelcompare_ie",
-  "name": "FuelCompare.ie",
+  "name": "Fuel Compare",
   "codeowners": ["@italo-lombardi"],
   "config_flow": true,
   "dependencies": [],
@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues",
   "quality_scale": "custom",
   "requirements": [],
-  "version": "0.6.0"
+  "version": "0.7.0"
 }

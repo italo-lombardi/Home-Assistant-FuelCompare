@@ -1,4 +1,4 @@
-"""Tests for FuelCompare.ie config flow."""
+"""Tests for Fuel Compare config flow."""
 
 from __future__ import annotations
 
@@ -9,7 +9,14 @@ from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.fuelcompare_ie.config_flow import _fetch_station_name
-from custom_components.fuelcompare_ie.const import CONF_STATION_ID, DOMAIN
+from custom_components.fuelcompare_ie.const import (
+    CONF_COUNTRY,
+    CONF_PROVIDER,
+    CONF_STATION_ID,
+    DEFAULT_COUNTRY,
+    DEFAULT_PROVIDER,
+    DOMAIN,
+)
 
 _PATCH_FETCH_NAME = patch(
     "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
@@ -31,11 +38,13 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
         mock_fetch.return_value = "Circle K"
 
+        # Step 1: user (country) — auto-advances since only IE is available
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        # Single country auto-skips to station step
         assert result["type"] == "form"
-        assert result["step_id"] == "user"
+        assert result["step_id"] == "station"
 
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -44,7 +53,6 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
 
     assert result["type"] == "form"
     assert result["step_id"] == "name"
-    # Pre-populated with fetched name
     assert result["data_schema"]({}) == {"name": "Circle K"}
 
     with _PATCH_FIRST_REFRESH:
@@ -54,7 +62,9 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
         )
 
     assert result["type"] == "create_entry"
-    assert result["data"] == {CONF_STATION_ID: "123"}
+    assert result["data"][CONF_STATION_ID] == "123"
+    assert result["data"][CONF_COUNTRY] == DEFAULT_COUNTRY
+    assert result["data"][CONF_PROVIDER] == DEFAULT_PROVIDER
     assert result["title"] == "Circle K"
 
 
@@ -71,6 +81,7 @@ async def test_config_flow_custom_name(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        assert result["step_id"] == "station"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             user_input={CONF_STATION_ID: "123"},
@@ -103,6 +114,7 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        assert result["step_id"] == "station"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             user_input={CONF_STATION_ID: "456"},
@@ -131,6 +143,7 @@ async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -151,6 +164,7 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -171,6 +185,7 @@ async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -199,6 +214,7 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    assert result["step_id"] == "station"
 
     with _PATCH_FETCH_NAME:
         result = await hass.config_entries.flow.async_configure(
@@ -319,3 +335,180 @@ async def test_fetch_station_name_exception_returns_none(hass: HomeAssistant) ->
         result = await _fetch_station_name(hass, "790")
 
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# test_unknown_provider_fallback
+# ---------------------------------------------------------------------------
+
+
+async def test_unknown_provider_key_falls_back_to_default(
+    hass: HomeAssistant,
+) -> None:
+    """Entry with unknown provider key loads using the default provider."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_999",
+        data={CONF_STATION_ID: "999", CONF_PROVIDER: "nonexistent_provider"},
+        title="Station 999",
+    )
+    entry.add_to_hass(hass)
+
+    with _PATCH_FIRST_REFRESH:
+        assert await hass.config_entries.async_setup(entry.entry_id)
+
+    # Entry loaded without error — default provider was used as fallback
+    from custom_components.fuelcompare_ie.const import DOMAIN as _DOMAIN
+
+    coordinator = hass.data[_DOMAIN][entry.entry_id]
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    assert isinstance(coordinator._provider, IEFuelCompareProvider)
+
+
+# ---------------------------------------------------------------------------
+# test_coordinator_2arg_compat
+# ---------------------------------------------------------------------------
+
+
+async def test_coordinator_2arg_compat(hass: HomeAssistant) -> None:
+    """FuelCompareIECoordinator(hass, station_id_str) creates IEFuelCompareProvider."""
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    coordinator = FuelCompareIECoordinator(hass, "42")
+    assert coordinator.station_id == "42"
+    assert isinstance(coordinator._provider, IEFuelCompareProvider)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_location
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
+    """Location step stores lat/lng/radius and omits station_id from entry data."""
+
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    # Create a minimal location-mode provider and register it temporarily
+    class _FakeLocationProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "ie_fake_location"
+        LABEL = "Fake Location"
+        CONFIG_MODE = "location"
+
+        def __init__(self, station_id: str) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+
+    PROVIDER_REGISTRY["ie_fake_location"] = _FakeLocationProvider
+    try:
+        with _PATCH_FIRST_REFRESH:
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            # With 2 IE providers, provider step is shown
+            assert result["step_id"] in ("provider", "location", "station")
+
+            # Drive to location step directly
+            if result["step_id"] == "provider":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_PROVIDER: "ie_fake_location"},
+                )
+            assert result["step_id"] == "location"
+
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={
+                    CONF_LATITUDE: 53.3498,
+                    CONF_LONGITUDE: -6.2603,
+                    CONF_RADIUS_KM: 5.0,
+                },
+            )
+        assert result["step_id"] == "name"
+
+        with _PATCH_FIRST_REFRESH:
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={"name": "Dublin Area"},
+            )
+
+        assert result["type"] == "create_entry"
+        assert result["title"] == "Dublin Area"
+        assert CONF_LATITUDE in result["data"]
+        assert CONF_LONGITUDE in result["data"]
+        assert CONF_RADIUS_KM in result["data"]
+        assert result["data"].get("station_id", "") == ""
+    finally:
+        PROVIDER_REGISTRY.pop("ie_fake_location", None)
+
+
+async def test_location_entry_loads_without_station_id_keyerror(
+    hass: HomeAssistant,
+) -> None:
+    """Entry with location data (no station_id key) loads without KeyError."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_loc_53.35_-6.26",
+        data={
+            CONF_PROVIDER: DEFAULT_PROVIDER,
+            CONF_LATITUDE: 53.3498,
+            CONF_LONGITUDE: -6.2603,
+            CONF_RADIUS_KM: 5.0,
+        },
+        title="Dublin Area",
+    )
+    entry.add_to_hass(hass)
+
+    with _PATCH_FIRST_REFRESH:
+        # Must not raise KeyError on missing CONF_STATION_ID
+        assert await hass.config_entries.async_setup(entry.entry_id)
+
+
+async def test_async_step_location_invalid_coords_returns_form_error(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_location re-shows form with error when float conversion fails."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_LATITUDE, CONF_LONGITUDE
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+
+    # Call the step directly, bypassing HA's schema validation,
+    # with a value that passes isinstance checks but fails float()
+    class _Bad:
+        def __float__(self):
+            raise ValueError("not a number")
+
+    result = await flow.async_step_location(
+        user_input={CONF_LATITUDE: _Bad(), CONF_LONGITUDE: _Bad()}
+    )
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "location"
+    assert "base" in result["errors"]

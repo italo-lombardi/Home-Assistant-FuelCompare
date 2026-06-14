@@ -1,9 +1,11 @@
 {
   "config": {
     "step": {
-      "user": {
-        "title": "Tilføj FuelCompare.ie-station",
-        "description": "Indtast stations-ID fra fuelcompare.ie (f.eks. 790 for Circle K Taney Dublin)",
+      "user": {},
+      "provider": {},
+      "station": {
+        "title": "Tilføj Fuel Compare-station",
+        "description": "Indtast stations-ID fra stationens URL (f.eks. 790 for Circle K Taney Dublin)",
         "data": {
           "station_id": "Stations-ID"
         }
