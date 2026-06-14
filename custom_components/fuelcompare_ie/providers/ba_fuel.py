@@ -536,10 +536,9 @@ def _parse_stations_div(html: str) -> list[dict[str, Any]]:
         if not text:
             continue
 
-        # Check if it's a price
-        price_match = re.match(r"^(\d+)[,\.](\d{3})$", text)
+        # Check if it's a price (2-3 decimal digits: "2,75" or "1,234")
+        price_match = re.match(r"^(\d+)[,\.](\d{2,3})$", text)
         if price_match:
-            # Price like "1,234" or "1.234"
             val_str = f"{price_match.group(1)}.{price_match.group(2).ljust(3, '0')}"
             try:
                 val = float(val_str)

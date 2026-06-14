@@ -239,6 +239,12 @@ class CaQcProvider(BaseProvider):
     CURRENCY: ClassVar[str] = "CAD/L"
     # hourly polling is sufficient and respectful of the CDN.
 
+    # Class-level GeoJSON cache — shared across all instances so async_fetch
+    # and async_list_stations within the same poll cycle share one download.
+    _geojson_cache: ClassVar[list | None] = None
+    _geojson_cache_ts: ClassVar[float] = 0
+    _GEOJSON_CACHE_TTL: ClassVar[int] = 3600
+
     REQUIRES_API_KEY = False
 
     CAPABILITIES: frozenset[str] = frozenset(
@@ -471,6 +477,16 @@ class CaQcProvider(BaseProvider):
             aiohttp.ClientResponseError: On HTTP 4xx/5xx.
             aiohttp.ClientError: On network failure.
         """
+        import time
+
+        now = time.monotonic()
+        if (
+            CaQcProvider._geojson_cache is not None
+            and (now - CaQcProvider._geojson_cache_ts) < CaQcProvider._GEOJSON_CACHE_TTL
+        ):
+            _LOGGER.debug("Régie Essence Québec: serving GeoJSON from cache")
+            return CaQcProvider._geojson_cache
+
         _LOGGER.debug("Fetching Régie Essence Québec GeoJSON feed")
         async with session.get(
             _GEOJSON_URL,
@@ -484,4 +500,6 @@ class CaQcProvider(BaseProvider):
         _LOGGER.debug(
             "Régie Essence Québec: received %d station features", len(features)
         )
+        CaQcProvider._geojson_cache = features
+        CaQcProvider._geojson_cache_ts = now
         return features

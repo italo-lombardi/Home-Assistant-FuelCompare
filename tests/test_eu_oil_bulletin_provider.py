@@ -814,6 +814,16 @@ async def test_async_list_stations_returns_empty_on_http_error() -> None:
     assert result == []
 
 
+@pytest.fixture(autouse=True)
+def reset_eu_oil_bulletin_cache():
+    """Reset class-level workbook cache between tests."""
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+    yield
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+
 @_skip_if_no_openpyxl
 async def test_async_list_stations_returns_empty_on_empty_response() -> None:
     """async_list_stations returns [] when the server returns an empty body."""

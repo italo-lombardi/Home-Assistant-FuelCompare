@@ -978,3 +978,15 @@ def test_provider_registered_in_registry() -> None:
 
     assert "ca_qc" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["ca_qc"] is CaQcProvider
+
+
+@pytest.fixture(autouse=True)
+def reset_ca_qc_cache():
+    """Reset class-level GeoJSON cache between tests."""
+    from custom_components.fuelcompare_ie.providers.ca_qc import CaQcProvider
+
+    CaQcProvider._geojson_cache = None
+    CaQcProvider._geojson_cache_ts = 0
+    yield
+    CaQcProvider._geojson_cache = None
+    CaQcProvider._geojson_cache_ts = 0

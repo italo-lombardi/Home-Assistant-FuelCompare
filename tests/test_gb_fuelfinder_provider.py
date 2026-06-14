@@ -880,8 +880,8 @@ def test_pence_to_gbp_rounds_to_4_places() -> None:
     """_pence_to_gbp rounds to 4 decimal places."""
     result = _pence_to_gbp(169.9)
     assert result == pytest.approx(1.699, abs=1e-4)
-    # Check that it is stored with at most 4 decimal places
-    assert round(result, 4) == result
+    # Verify precision: 169.9 / 100 = 1.699 exactly representable
+    assert result == 1.699
 
 
 def test_pence_to_gbp_zero() -> None:

@@ -78,6 +78,7 @@ import io
 import logging
 import re
 from datetime import UTC, datetime
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -186,6 +187,11 @@ class EuOilBulletinProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = _POLL_INTERVAL
     REQUIRES_API_KEY = False
 
+    # Class-level workbook cache — shared across all instances so N configured
+    # EU-country entries only download the weekly XLSX once per week.
+    _cached_workbook_bytes: ClassVar[bytes | None] = None
+    _cached_fetch_time: ClassVar[datetime | None] = None
+
     CAPABILITIES: frozenset[str] = frozenset(
         {
             # Fuel prices
@@ -232,10 +238,6 @@ class EuOilBulletinProvider(BaseProvider):
         self._latitude = latitude
         self._longitude = longitude
         self._radius_km = radius_km
-        # Cache: (raw_bytes, fetch_timestamp) — avoids re-downloading if HA
-        # calls async_fetch multiple times within the same poll cycle.
-        self._cached_workbook_bytes: bytes | None = None
-        self._cached_fetch_time: datetime | None = None
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -465,12 +467,12 @@ class EuOilBulletinProvider(BaseProvider):
         # (coordinator already enforces the weekly poll; this guard prevents
         # re-downloads if async_fetch is called more than once per cycle).
         if (
-            self._cached_workbook_bytes is not None
-            and self._cached_fetch_time is not None
-            and (now - self._cached_fetch_time).total_seconds() < 86400
+            EuOilBulletinProvider._cached_workbook_bytes is not None
+            and EuOilBulletinProvider._cached_fetch_time is not None
+            and (now - EuOilBulletinProvider._cached_fetch_time).total_seconds() < 86400
         ):
             _LOGGER.debug("EU Oil Bulletin: using cached Excel bytes.")
-            return self._cached_workbook_bytes
+            return EuOilBulletinProvider._cached_workbook_bytes
 
         _LOGGER.debug("EU Oil Bulletin: downloading Excel from %s", _DOWNLOAD_URL)
         try:
@@ -501,8 +503,8 @@ class EuOilBulletinProvider(BaseProvider):
             content_type,
         )
 
-        self._cached_workbook_bytes = data
-        self._cached_fetch_time = now
+        EuOilBulletinProvider._cached_workbook_bytes = data
+        EuOilBulletinProvider._cached_fetch_time = now
         return data
 
 
