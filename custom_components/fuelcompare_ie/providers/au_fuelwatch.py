@@ -365,7 +365,7 @@ def _make_station_id(item: dict[str, str | None]) -> str | None:
     """
     lat = item.get("latitude")
     lng = item.get("longitude")
-    if lat and lng:
+    if lat is not None and lng is not None:
         return f"{lat},{lng}"
     return None
 

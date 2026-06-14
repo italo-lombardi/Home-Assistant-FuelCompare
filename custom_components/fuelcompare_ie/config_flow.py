@@ -43,6 +43,21 @@ _COUNTRY_NAMES: dict[str, str] = {
     "DK": "Denmark",
     "SE": "Sweden",
     "CA": "Canada",
+    "AL": "Albania",
+    "BA": "Bosnia and Herzegovina",
+    "BE": "Belgium",
+    "CH": "Switzerland",
+    "CZ": "Czech Republic",
+    "FI": "Finland",
+    "GR": "Greece",
+    "IS": "Iceland",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "MD": "Moldova",
+    "ME": "Montenegro",
+    "MT": "Malta",
+    "NL": "Netherlands",
+    "PL": "Poland",
 }
 
 
@@ -250,6 +265,51 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
     },
     "CA": {
         "quebec": "Québec",
+    },
+    "AL": {
+        "albania": "Albania (all)",
+    },
+    "BA": {
+        "bosnia": "Bosnia and Herzegovina (all)",
+    },
+    "BE": {
+        "belgium": "Belgium (all)",
+    },
+    "CH": {
+        "switzerland": "Switzerland (all)",
+    },
+    "CZ": {
+        "czech_republic": "Czech Republic (all)",
+    },
+    "FI": {
+        "finland": "Finland (all)",
+    },
+    "GR": {
+        "greece": "Greece (all)",
+    },
+    "IS": {
+        "iceland": "Iceland (all)",
+    },
+    "LT": {
+        "lithuania": "Lithuania (all)",
+    },
+    "LU": {
+        "luxembourg": "Luxembourg (all)",
+    },
+    "MD": {
+        "moldova": "Moldova (all)",
+    },
+    "ME": {
+        "montenegro": "Montenegro (all)",
+    },
+    "MT": {
+        "malta": "Malta (all)",
+    },
+    "NL": {
+        "netherlands": "Netherlands (all)",
+    },
+    "PL": {
+        "poland": "Poland (all)",
     },
 }
 

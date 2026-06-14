@@ -468,13 +468,16 @@ class ItMaseProvider(BaseProvider):
             List of (station_id, display_label) tuples, cheapest first.
             Empty list on any failure.
         """
-        lat: float = float(kwargs.get("lat", self._latitude or 0.0))
-        lng: float = float(kwargs.get("lng", self._longitude or 0.0))
-        radius_km: float = float(kwargs.get("radius_km", self._radius_km))
-
-        if not lat and not lng:
+        raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
+        raw_lng = (
+            kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude
+        )
+        if raw_lat is None or raw_lng is None:
             _LOGGER.warning("async_list_stations called without coordinates")
             return []
+        lat: float = float(raw_lat)
+        lng: float = float(raw_lng)
+        radius_km: float = float(kwargs.get("radius_km", self._radius_km))
 
         try:
             price_data, meta_data = await self._fetch_both_csvs(session)

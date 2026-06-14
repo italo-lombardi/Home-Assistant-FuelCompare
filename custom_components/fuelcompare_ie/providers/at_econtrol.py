@@ -161,12 +161,15 @@ class AtEcontrolProvider(BaseProvider):
             lng (float): Longitude.
             radius_km (float): Search radius in km (informational; API ignores it).
         """
-        lat = float(kwargs.get("lat") or self._latitude or 0.0)
-        lng = float(kwargs.get("lng") or self._longitude or 0.0)
-
-        if lat == 0.0 and lng == 0.0:
+        raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
+        raw_lng = (
+            kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude
+        )
+        if raw_lat is None or raw_lng is None:
             _LOGGER.debug("async_list_stations: no coordinates provided")
             return []
+        lat = float(raw_lat)
+        lng = float(raw_lng)
 
         try:
             merged = await self._fetch_all_fuel_types(session, lat, lng)

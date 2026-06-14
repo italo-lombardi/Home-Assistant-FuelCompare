@@ -415,18 +415,18 @@ class NoDrivstoffProvider(BaseProvider):
 
             # Client-side distance filter using haversine for accuracy
             loc = station.get("location") or {}
+            raw_s_lat = loc.get("lat")
+            raw_s_lng = loc.get("lng")
+            if raw_s_lat is None or raw_s_lng is None:
+                continue  # skip stations with no GPS
             try:
-                s_lat = float(loc.get("lat", 0))
-                s_lng = float(loc.get("lng", 0))
+                s_lat = float(raw_s_lat)
+                s_lng = float(raw_s_lng)
             except (ValueError, TypeError):
-                s_lat, s_lng = 0.0, 0.0
-
-            if s_lat is not None and s_lng is not None:
-                dist_km = haversine_km(lat, lng, s_lat, s_lng)
-                if dist_km > radius_km:
-                    continue
-            else:
-                dist_km = 9999.0
+                continue
+            dist_km = haversine_km(lat, lng, s_lat, s_lng)
+            if dist_km > radius_km:
+                continue
 
             name = _display_name(station)
             prices = _extract_prices(station.get("prices") or [])
