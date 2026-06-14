@@ -1578,3 +1578,17 @@ def test_api_url_targets_onegov_nsw() -> None:
     assert "onegov.nsw.gov.au" in _API_URL
     assert _API_URL.startswith("https://")
     assert "FuelCheckApp" in _API_URL
+
+
+# ---------------------------------------------------------------------------
+# au_nsw.py line 518 — _normalise_price returns price when <= 10
+# ---------------------------------------------------------------------------
+
+
+def test_normalise_price_small_value_returned_as_is() -> None:
+    """_normalise_price returns value unchanged when price <= 10 (already AUD/L)."""
+    from custom_components.fuelcompare_ie.providers.au_nsw import _normalise_price
+
+    assert _normalise_price(1.899) == pytest.approx(1.899)
+    assert _normalise_price(0.001) == pytest.approx(0.001)
+    assert _normalise_price(10.0) == pytest.approx(10.0)

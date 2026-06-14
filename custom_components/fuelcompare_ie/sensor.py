@@ -256,7 +256,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
     """Representation of a Fuel Compare fuel price sensor."""
 
     _attr_device_class = SensorDeviceClass.MONETARY
-    _attr_state_class = SensorStateClass.TOTAL
+    _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_has_entity_name = True
 
     def __init__(

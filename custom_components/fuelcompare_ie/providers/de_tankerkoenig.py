@@ -249,6 +249,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 f"Tankerkoenig API returned no station data for station '{station_id}'"
             )
 
+        _LOGGER.debug("Tankerkoenig detail fetched for station %s", station_id)
         return _parse_station(station)
 
     async def async_fetch_station_name(
@@ -348,7 +349,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 resp.raise_for_status()
                 payload: dict[str, Any] = await resp.json()
         except Exception as err:  # noqa: BLE001
-            _LOGGER.debug("async_list_stations HTTP error: %s", err)
+            _LOGGER.debug("async_list_stations HTTP error: %s", type(err).__name__)
             return []
 
         if not payload.get("ok"):

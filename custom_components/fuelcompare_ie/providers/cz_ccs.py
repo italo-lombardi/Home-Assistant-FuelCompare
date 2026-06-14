@@ -69,6 +69,7 @@ data_fetch_problem is raised after the configured stale-retention window.
 from __future__ import annotations
 
 import logging
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -118,6 +119,7 @@ class CzCcsProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
+    CURRENCY: ClassVar[str] = "CZK/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

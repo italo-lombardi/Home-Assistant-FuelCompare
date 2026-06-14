@@ -293,6 +293,24 @@ class BaseProvider(ABC):
     to guide the user to the correct registration page.
     """
 
+    CURRENCY: ClassVar[str] = "EUR/L"
+    """ISO currency code with unit for fuel price sensors.
+
+    Displayed as the unit_of_measurement on all FuelPriceSensor entities for
+    this provider. Override in subclasses for non-EUR providers:
+      GBP/L  — United Kingdom
+      AUD/L  — Australia
+      NOK/L  — Norway
+      DKK/L  — Denmark
+      SEK/L  — Sweden
+      CHF/L  — Switzerland
+      CZK/L  — Czech Republic
+      PLN/L  — Poland
+      ISK/L  — Iceland
+      CAD/L  — Canada
+      BAM/L  — Bosnia and Herzegovina
+    """
+
     # ── Enforcement ──────────────────────────────────────────────────────────
 
     def __init_subclass__(cls, **kwargs: Any) -> None:

@@ -116,6 +116,7 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal, InvalidOperation
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -211,6 +212,7 @@ class NoDrivstoffProvider(BaseProvider):
     API_KEY_REGISTRATION_URL = "https://github.com/drivstoffpriser"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour
+    CURRENCY: ClassVar[str] = "NOK/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

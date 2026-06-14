@@ -153,6 +153,7 @@ class GbFuelfinderProvider(BaseProvider):
 
     # Updated approximately twice daily; 6-hour poll matches the source refresh cadence.
     POLL_INTERVAL_SECONDS = 21600
+    CURRENCY: ClassVar[str] = "GBP/L"
 
     # Class-level CSV cache shared across all instances (avoids re-downloading 7.7 MB).
     _csv_cache: ClassVar[str | None] = None
@@ -171,6 +172,7 @@ class GbFuelfinderProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
+            "is_open",
             "last_successful_fetch",
             "data_fetch_problem",
         }
@@ -474,5 +476,6 @@ def _parse_row(row: dict[str, str]) -> StationData:
         "address": address,
         "latitude": lat,
         "longitude": lng,
+        "is_open": True,  # default open; async_fetch overrides for closures
         "source_station_id": node_id,
     }

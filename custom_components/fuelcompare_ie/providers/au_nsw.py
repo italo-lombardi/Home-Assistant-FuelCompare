@@ -82,7 +82,7 @@ from __future__ import annotations
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
 from aiohttp import ClientSession, ClientTimeout
@@ -140,6 +140,7 @@ class AuNswProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = (
         3600  # hourly — matches source update cadence; see module docstring
     )
+    CURRENCY: ClassVar[str] = "AUD/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

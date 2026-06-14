@@ -101,7 +101,7 @@ any HTTP/network failure so the config flow does not crash.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -162,6 +162,7 @@ class AuQldProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — matches FPPS update cadence
+    CURRENCY: ClassVar[str] = "AUD/L"
 
     REQUIRES_API_KEY = True
     API_KEY_REGISTRATION_URL = "https://www.fuelpricesqld.com.au/"

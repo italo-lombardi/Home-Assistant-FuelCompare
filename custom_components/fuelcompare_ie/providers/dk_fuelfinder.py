@@ -85,7 +85,7 @@ from __future__ import annotations
 
 import logging
 from html.parser import HTMLParser
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -305,6 +305,7 @@ class DkFuelFinderProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour; WAF is strict; data changes ~daily
+    CURRENCY: ClassVar[str] = "DKK/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

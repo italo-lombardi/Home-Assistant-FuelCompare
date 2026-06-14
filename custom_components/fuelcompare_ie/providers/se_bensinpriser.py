@@ -67,7 +67,7 @@ POLL_INTERVAL_SECONDS = 3600 (1 hour) as specified.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -173,6 +173,7 @@ class SEBensinpriserProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour as specified
+    CURRENCY: ClassVar[str] = "SEK/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

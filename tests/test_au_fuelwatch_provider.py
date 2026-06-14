@@ -1355,3 +1355,70 @@ async def test_async_list_stations_stations_without_price_go_last() -> None:
     # Station with unleaded price comes first
     assert "Priced Station" in result[0][1]
     assert "Diesel Only" in result[1][1]
+
+
+# ---------------------------------------------------------------------------
+# au_fuelwatch.py line 266 — _make_station_id returns None → skip item
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_all_products_skips_item_with_no_coords() -> None:
+    """Items without lat/lng coords are skipped (_make_station_id returns None)."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        AuFuelwatchProvider,
+    )
+    from unittest.mock import AsyncMock, MagicMock
+
+    # RSS with one valid item (has coords) and one missing coords
+    rss_mixed = b"""<?xml version="1.0" encoding="utf-8"?>
+<rss><channel>
+<item>
+<trading-name>Valid Station</trading-name>
+<price>179.9</price>
+<latitude>-31.9523</latitude>
+<longitude>115.8614</longitude>
+<address>1 Test St</address>
+</item>
+<item>
+<trading-name>No Coords Station</trading-name>
+<price>175.0</price>
+<address>2 Test St</address>
+</item>
+</channel></rss>"""
+
+    resp = AsyncMock()
+    resp.status = 200
+    resp.read = AsyncMock(return_value=rss_mixed)
+    resp.raise_for_status = MagicMock()
+    resp.__aenter__ = AsyncMock(return_value=resp)
+    resp.__aexit__ = AsyncMock(return_value=False)
+
+    session = MagicMock()
+    session.get = MagicMock(return_value=resp)
+
+    provider = AuFuelwatchProvider("test123")
+    result = await provider._fetch_all_products(session, None)
+    # Only the valid station (with coords) should be in the result
+    assert len(result) == 1
+
+
+# ---------------------------------------------------------------------------
+# au_fuelwatch.py line 482 — _build_display_label identity=brand fallback
+# ---------------------------------------------------------------------------
+
+
+def test_build_display_label_brand_only() -> None:
+    """_build_display_label uses brand when name is absent."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_display_label,
+    )
+
+    data = {
+        "brand": "BP",
+        "name": None,
+        "address": "10 Main St",
+        "unleaded": 1.799,
+        "diesel": None,
+    }
+    label = _build_display_label(data)
+    assert "BP" in label

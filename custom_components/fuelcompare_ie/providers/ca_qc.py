@@ -54,7 +54,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -237,6 +237,7 @@ class CaQcProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — data refreshes ~every minute but
+    CURRENCY: ClassVar[str] = "CAD/L"
     # hourly polling is sufficient and respectful of the CDN.
 
     REQUIRES_API_KEY = False

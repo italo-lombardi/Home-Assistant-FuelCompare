@@ -1027,3 +1027,131 @@ async def test_last_successful_fetch_unchanged_on_failure(
             await coordinator._async_update_data()
 
     assert coordinator.last_successful_fetch is None
+
+
+# ---------------------------------------------------------------------------
+# Coordinator delegation to provider methods (lines 83, 88, 94)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_nextjs_delegates_to_provider(hass: HomeAssistant) -> None:
+    """_fetch_nextjs returns provider._fetch_nextjs() result when method exists."""
+    provider = MagicMock()
+    provider._fetch_nextjs = AsyncMock(return_value={"key": "val"})
+    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
+    coord._provider = provider
+    result = await coord._fetch_nextjs(MagicMock())
+    assert result == {"key": "val"}
+
+
+async def test_fetch_nextjs_returns_none_without_provider_method(
+    hass: HomeAssistant,
+) -> None:
+    """_fetch_nextjs returns None when provider lacks _fetch_nextjs."""
+
+    class _NoMethod:
+        pass
+
+    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
+    coord._provider = _NoMethod()
+    result = await coord._fetch_nextjs(MagicMock())
+    assert result is None
+
+
+async def test_fetch_encrypted_api_delegates_to_provider(hass: HomeAssistant) -> None:
+    """_fetch_encrypted_api returns provider._fetch_encrypted_api() result."""
+    provider = MagicMock()
+    provider._fetch_encrypted_api = AsyncMock(return_value={"enc": "val"})
+    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
+    coord._provider = provider
+    result = await coord._fetch_encrypted_api(MagicMock())
+    assert result == {"enc": "val"}
+
+
+def test_parse_station_delegates_to_provider(hass: HomeAssistant) -> None:
+    """_parse_station returns provider._parse_station() result when method exists."""
+    provider = MagicMock()
+    provider._parse_station = MagicMock(return_value={"parsed": True})
+    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
+    coord._provider = provider
+    result = coord._parse_station({"raw": True})
+    assert result == {"parsed": True}
+
+
+# ---------------------------------------------------------------------------
+# providers/__init__.py — get_provider_or_default RuntimeError (lines 95-100)
+# ---------------------------------------------------------------------------
+
+
+def test_get_provider_or_default_raises_when_both_missing() -> None:
+    """get_provider_or_default raises RuntimeError when both keys are absent."""
+    from custom_components.fuelcompare_ie.providers import get_provider_or_default
+
+    with pytest.raises(RuntimeError, match="No provider found"):
+        get_provider_or_default("nonexistent_key_xyz", "also_nonexistent_xyz")
+
+
+# ---------------------------------------------------------------------------
+# base.py — __init_subclass__ enforcement (lines 303, 312) and
+#           async_list_stations default (line 372)
+# ---------------------------------------------------------------------------
+
+
+def test_base_provider_subclass_missing_attr_raises() -> None:
+    """Defining a concrete BaseProvider without COUNTRY raises TypeError."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    with pytest.raises(TypeError, match="must define class attribute"):
+
+        class _BadProvider(BaseProvider):
+            # Missing COUNTRY, PROVIDER_KEY, LABEL
+            CAPABILITIES: frozenset = frozenset()
+
+            async def async_fetch(self, session, station_id):
+                return {}
+
+            async def async_fetch_station_name(self, session, station_id):
+                return None
+
+
+def test_base_provider_unknown_capability_raises() -> None:
+    """Defining a BaseProvider with unknown CAPABILITIES key raises TypeError."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    with pytest.raises(TypeError, match="unknown keys"):
+
+        class _BadCapProvider(BaseProvider):
+            COUNTRY = "XX"
+            PROVIDER_KEY = "xx_bad_cap"
+            LABEL = "Bad Cap Test"
+            CAPABILITIES: frozenset = frozenset({"nonexistent_capability_xyz_abc"})
+
+            async def async_fetch(self, session, station_id):
+                return {}
+
+            async def async_fetch_station_name(self, session, station_id):
+                return None
+
+
+async def test_base_provider_async_list_stations_default_returns_empty() -> None:
+    """Default async_list_stations implementation returns []."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _MinimalProvider(BaseProvider):
+        COUNTRY = "XX"
+        PROVIDER_KEY = "xx_minimal_test"
+        LABEL = "Minimal Test"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(self, station_id: str) -> None:
+            self._station_id = station_id
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    provider = _MinimalProvider("123")
+    result = await provider.async_list_stations(MagicMock())
+    assert result == []

@@ -25,7 +25,7 @@ STATION_LOOKUP_MODE = 'location_search' (browse stations by Region code).
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 from xml.etree import ElementTree as ET
 
 from aiohttp import ClientSession, ClientTimeout
@@ -80,6 +80,7 @@ class AuFuelwatchProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     # WA tomorrow-prices published at 14:30 AWST; poll once daily at 14:45 AWST.
     POLL_INTERVAL_SECONDS = 86400
+    CURRENCY: ClassVar[str] = "AUD/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

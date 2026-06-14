@@ -77,7 +77,7 @@ POLL_INTERVAL_SECONDS = 900 (15 minutes) to match the upstream commit cadence.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -221,6 +221,7 @@ class IsFuelProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
 
     POLL_INTERVAL_SECONDS = 900  # 15 minutes — matches upstream commit cadence
+    CURRENCY: ClassVar[str] = "ISK/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

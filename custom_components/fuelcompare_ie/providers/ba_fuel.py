@@ -63,7 +63,7 @@ from __future__ import annotations
 import logging
 import re
 from html.parser import HTMLParser
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -135,6 +135,7 @@ class BaFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # site updates daily
+    CURRENCY: ClassVar[str] = "BAM/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

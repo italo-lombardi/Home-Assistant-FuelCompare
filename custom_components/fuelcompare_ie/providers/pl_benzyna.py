@@ -66,7 +66,7 @@ POLL_INTERVAL_SECONDS = 86400 (daily) since prices update at most once per day.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -153,6 +153,7 @@ class PlBenzynaProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
+    CURRENCY: ClassVar[str] = "PLN/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

@@ -92,7 +92,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -141,6 +141,7 @@ class AuVicProvider(BaseProvider):
 
     # Data is delayed ~24h from retailer submission; poll once daily.
     POLL_INTERVAL_SECONDS = 86400
+    CURRENCY: ClassVar[str] = "AUD/L"
 
     # Consumer ID is a registered UUID — equivalent to an API key.
     REQUIRES_API_KEY = True

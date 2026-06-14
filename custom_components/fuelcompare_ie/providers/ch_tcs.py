@@ -80,7 +80,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -178,6 +178,7 @@ class ChTcsProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # crowd-sourced data; 1 hour cadence is adequate
+    CURRENCY: ClassVar[str] = "CHF/L"
     REQUIRES_API_KEY = False
 
     CAPABILITIES: frozenset[str] = frozenset(
@@ -500,12 +501,12 @@ class ChTcsProvider(BaseProvider):
             )
             return None
 
-        data = payload.get("data") or []
+        data = payload if isinstance(payload, list) else (payload.get("data") or [])
         if not isinstance(data, list):
             return []
 
-        # Filter out cluster records — only return individual stations
-        return [s for s in data if s.get("cluster") is None]
+        # Filter out cluster records — cluster field is a bool; False = real station
+        return [s for s in data if not s.get("cluster")]
 
 
 # ── Module-level helpers ──────────────────────────────────────────────────────
