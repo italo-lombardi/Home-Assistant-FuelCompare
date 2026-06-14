@@ -506,18 +506,18 @@ def test_parse_is_open_with_lowercase_open() -> None:
 
 
 def test_parse_is_open_no_schedule_text() -> None:
-    """_parse_is_open returns None when no schedule text is present."""
-    assert _parse_is_open("Fuel Cards EFTPOS ATM") is None
+    """_parse_is_open returns False when no schedule text is present."""
+    assert _parse_is_open("Fuel Cards EFTPOS ATM") is False
 
 
 def test_parse_is_open_none_input() -> None:
     """_parse_is_open returns None for None input."""
-    assert _parse_is_open(None) is None
+    assert _parse_is_open(None) is False
 
 
 def test_parse_is_open_empty_string() -> None:
     """_parse_is_open returns None for empty string."""
-    assert _parse_is_open("") is None
+    assert _parse_is_open("") is False
 
 
 # ---------------------------------------------------------------------------
@@ -597,7 +597,7 @@ def test_parse_station_base_is_open_none_when_no_schedule() -> None:
         "longitude": "115.83773700",
     }
     data = _parse_station_base(item, _STATION_ID)
-    assert data["is_open"] is None
+    assert data["is_open"] is False
 
 
 def test_parse_station_base_lastupdated_from_date() -> None:
@@ -844,7 +844,7 @@ async def test_async_fetch_success_is_open_none() -> None:
     provider = AuFuelwatchProvider(_STATION_ID)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["is_open"] is None
+    assert data["is_open"] is False
 
 
 async def test_async_fetch_uses_region_code_in_request() -> None:

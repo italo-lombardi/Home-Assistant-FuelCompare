@@ -1395,7 +1395,7 @@ async def test_fetch_all_stations_single_page() -> None:
     session = _make_session(page1)
 
     provider = _default_provider()
-    stations = await provider._fetch_all_stations(session)
+    stations, _ = await provider._fetch_all_stations(session)
 
     assert len(stations) == 2
     pks = [s["pk"] for s in stations]
@@ -1417,7 +1417,7 @@ async def test_fetch_all_stations_multi_page() -> None:
     session = _make_session(page1, page2)
 
     provider = _default_provider()
-    stations = await provider._fetch_all_stations(session)
+    stations, _ = await provider._fetch_all_stations(session)
 
     assert len(stations) == 2
 
@@ -1450,7 +1450,7 @@ async def test_fetch_all_stations_stops_gracefully_on_later_page_error() -> None
     session = _make_session(page1, page2_err)
 
     provider = _default_provider()
-    stations = await provider._fetch_all_stations(session)
+    stations, _ = await provider._fetch_all_stations(session)
 
     assert len(stations) == 1
     assert stations[0]["pk"] == _STATION_PK
@@ -1467,7 +1467,7 @@ async def test_fetch_all_stations_stops_on_404() -> None:
     session = _make_session(page1, page2_404)
 
     provider = _default_provider()
-    stations = await provider._fetch_all_stations(session)
+    stations, _ = await provider._fetch_all_stations(session)
 
     assert len(stations) == 1
 
@@ -1482,6 +1482,6 @@ async def test_fetch_all_stations_empty_results_key() -> None:
     session = _make_session(page1)
 
     provider = _default_provider()
-    stations = await provider._fetch_all_stations(session)
+    stations, _ = await provider._fetch_all_stations(session)
 
     assert stations == []

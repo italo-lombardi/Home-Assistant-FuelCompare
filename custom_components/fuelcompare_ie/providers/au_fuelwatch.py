@@ -416,12 +416,12 @@ def _parse_is_open(site_features: str | None) -> bool | None:
     does not publish a real-time open/closed status.
     """
     if not site_features:
-        return None
+        return False  # no schedule info → assume closed (unknown)
     # If there is any "Open" schedule text, treat the station as potentially
     # open (we cannot determine real-time status from a daily-updated feed).
     if "Open" in site_features or "open" in site_features:
         return True
-    return None
+    return False
 
 
 def _parse_station_base(

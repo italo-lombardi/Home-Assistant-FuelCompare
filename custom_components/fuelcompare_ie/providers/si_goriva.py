@@ -327,22 +327,27 @@ class SiGorivaProvider(BaseProvider):
             )
             return self._station_cache
 
-        stations = await self._fetch_all_stations(session)
-        self._station_cache = stations
-        self._cache_timestamp = now
+        stations, complete = await self._fetch_all_stations(session)
+        if complete:
+            self._station_cache = stations
+            self._cache_timestamp = now
         return stations
 
-    async def _fetch_all_stations(self, session: ClientSession) -> list[dict[str, Any]]:
+    async def _fetch_all_stations(
+        self, session: ClientSession
+    ) -> tuple[list[dict[str, Any]], bool]:
         """Fetch all paginated stations from the goriva.si search endpoint.
 
         Iterates pages starting at 1 until ``next`` is null or an HTTP 404
         is returned (which the API sends for out-of-range page numbers).
 
         Returns:
-            Flat list of all station dicts across all pages.
+            Tuple of (stations, complete) where complete=True only when all
+            pages were successfully fetched (safe to cache).
         """
         stations: list[dict[str, Any]] = []
         page = 1
+        complete = False
 
         while True:
             params: dict[str, Any] = {"page": page}
@@ -356,6 +361,7 @@ class SiGorivaProvider(BaseProvider):
                 ) as resp:
                     if resp.status == 404:
                         # Past the last page — normal termination.
+                        complete = True
                         break
                     resp.raise_for_status()
                     payload: dict[str, Any] = await resp.json()
@@ -376,6 +382,7 @@ class SiGorivaProvider(BaseProvider):
 
             if not payload.get("next"):
                 # Last page reached.
+                complete = True
                 break
 
             page += 1
@@ -386,8 +393,12 @@ class SiGorivaProvider(BaseProvider):
                 )
                 break
 
-        _LOGGER.debug("goriva.si: fetched %d stations total", len(stations))
-        return stations
+        _LOGGER.debug(
+            "goriva.si: fetched %d stations total (complete=%s)",
+            len(stations),
+            complete,
+        )
+        return stations, complete
 
     async def _ensure_franchise_cache(self, session: ClientSession) -> dict[int, str]:
         """Fetch and return the franchise (brand) map, using in-memory cache.
