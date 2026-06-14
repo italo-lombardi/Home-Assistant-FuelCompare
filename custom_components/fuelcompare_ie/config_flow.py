@@ -33,36 +33,41 @@ from .providers import PROVIDER_REGISTRY
 _LOGGER = logging.getLogger(__name__)
 
 _COUNTRY_NAMES: dict[str, str] = {
+    # Ireland — primary market
     "IE": "Ireland",
-    "HR": "Croatia",
-    "DE": "Germany",
-    "FR": "France",
-    "ES": "Spain",
-    "PT": "Portugal",
-    "AT": "Austria",
-    "IT": "Italy",
-    "SI": "Slovenia",
-    "GB": "United Kingdom",
-    "AU": "Australia",
-    "NO": "Norway",
-    "DK": "Denmark",
-    "SE": "Sweden",
-    "CA": "Canada",
+    # Europe — alphabetical by display name
     "AL": "Albania",
+    "AT": "Austria",
     "BA": "Bosnia and Herzegovina",
     "BE": "Belgium",
-    "CH": "Switzerland",
+    "HR": "Croatia",
     "CZ": "Czech Republic",
+    "DK": "Denmark",
     "FI": "Finland",
+    "FR": "France",
+    "DE": "Germany",
     "GR": "Greece",
     "IS": "Iceland",
+    "IT": "Italy",
     "LT": "Lithuania",
     "LU": "Luxembourg",
+    "MT": "Malta",
     "MD": "Moldova",
     "ME": "Montenegro",
-    "MT": "Malta",
     "NL": "Netherlands",
+    "NO": "Norway",
     "PL": "Poland",
+    "PT": "Portugal",
+    "SI": "Slovenia",
+    "ES": "Spain",
+    "SE": "Sweden",
+    "CH": "Switzerland",
+    "GB": "United Kingdom",
+    # Oceania
+    "AU": "Australia",
+    # Americas
+    "CA": "Canada",
+    # Cross-country / aggregated
     "EU": "European Union (Oil Bulletin)",
 }
 
@@ -73,16 +78,21 @@ def _countries_from_registry() -> list[tuple[str, str]]:
     for cls in PROVIDER_REGISTRY.values():
         if cls.COUNTRY not in seen:
             seen[cls.COUNTRY] = cls.COUNTRY
-    return [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
+    pairs = [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
+    # Ireland first, then alphabetical by display name
+    pairs.sort(key=lambda x: "" if x[0] == "IE" else x[1])
+    return pairs
 
 
 def _providers_for_country(country: str) -> list[tuple[str, str]]:
     """Return (provider_key, label) pairs for a given country code."""
-    return [
+    pairs = [
         (cls.PROVIDER_KEY, cls.LABEL)
         for cls in PROVIDER_REGISTRY.values()
         if cls.COUNTRY == country
     ]
+    pairs.sort(key=lambda x: x[1])
+    return pairs
 
 
 # County lists per country — lowercase value stored in entry data, display label shown in UI
@@ -117,6 +127,26 @@ _IE_COUNTIES: dict[str, str] = {
 
 _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
     "IE": _IE_COUNTIES,
+    "AL": {
+        "albania": "Albania (all)",
+    },
+    "AT": {
+        "burgenland": "Burgenland",
+        "carinthia": "Carinthia (Kärnten)",
+        "lower_austria": "Lower Austria (Niederösterreich)",
+        "salzburg": "Salzburg",
+        "styria": "Styria (Steiermark)",
+        "tyrol": "Tyrol (Tirol)",
+        "upper_austria": "Upper Austria (Oberösterreich)",
+        "vienna": "Vienna (Wien)",
+        "vorarlberg": "Vorarlberg",
+    },
+    "BA": {
+        "bosnia": "Bosnia and Herzegovina (all)",
+    },
+    "BE": {
+        "belgium": "Belgium (all)",
+    },
     "HR": {
         "bjelovarsko-bilogorska": "Bjelovarsko-bilogorska",
         "brodsko-posavska": "Brodsko-posavska",
@@ -140,6 +170,30 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "zagrebačka": "Zagrebačka",
         "šibensko-kninska": "Šibensko-kninska",
     },
+    "CZ": {
+        "czech_republic": "Czech Republic (all)",
+    },
+    "DK": {
+        "denmark": "Denmark (all)",
+    },
+    "FI": {
+        "finland": "Finland (all)",
+    },
+    "FR": {
+        "auvergne_rhone_alpes": "Auvergne-Rhône-Alpes",
+        "bourgogne_franche_comte": "Bourgogne-Franche-Comté",
+        "bretagne": "Bretagne",
+        "centre_val_de_loire": "Centre-Val de Loire",
+        "corse": "Corse",
+        "grand_est": "Grand Est",
+        "hauts_de_france": "Hauts-de-France",
+        "ile_de_france": "Île-de-France",
+        "normandie": "Normandie",
+        "nouvelle_aquitaine": "Nouvelle-Aquitaine",
+        "occitanie": "Occitanie",
+        "pays_de_la_loire": "Pays de la Loire",
+        "provence_alpes_cote_d_azur": "Provence-Alpes-Côte d'Azur",
+    },
     "DE": {
         "berlin": "Berlin",
         "bavaria": "Bavaria (Bayern)",
@@ -158,70 +212,11 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "schleswig_holstein": "Schleswig-Holstein",
         "bremen": "Bremen",
     },
-    "FR": {
-        "auvergne_rhone_alpes": "Auvergne-Rhône-Alpes",
-        "bourgogne_franche_comte": "Bourgogne-Franche-Comté",
-        "bretagne": "Bretagne",
-        "centre_val_de_loire": "Centre-Val de Loire",
-        "corse": "Corse",
-        "grand_est": "Grand Est",
-        "hauts_de_france": "Hauts-de-France",
-        "ile_de_france": "Île-de-France",
-        "normandie": "Normandie",
-        "nouvelle_aquitaine": "Nouvelle-Aquitaine",
-        "occitanie": "Occitanie",
-        "pays_de_la_loire": "Pays de la Loire",
-        "provence_alpes_cote_d_azur": "Provence-Alpes-Côte d'Azur",
+    "GR": {
+        "greece": "Greece (all)",
     },
-    "ES": {
-        "andalucia": "Andalucía",
-        "aragon": "Aragón",
-        "asturias": "Asturias",
-        "balearic_islands": "Balearic Islands (Illes Balears)",
-        "basque_country": "Basque Country (País Vasco)",
-        "canary_islands": "Canary Islands (Canarias)",
-        "cantabria": "Cantabria",
-        "castilla_la_mancha": "Castilla-La Mancha",
-        "castilla_y_leon": "Castilla y León",
-        "catalonia": "Catalonia (Catalunya)",
-        "extremadura": "Extremadura",
-        "galicia": "Galicia",
-        "la_rioja": "La Rioja",
-        "madrid": "Community of Madrid",
-        "murcia": "Region of Murcia",
-        "navarre": "Navarre (Navarra)",
-        "valencian_community": "Valencian Community",
-    },
-    "PT": {
-        "aveiro": "Aveiro",
-        "beja": "Beja",
-        "braga": "Braga",
-        "braganca": "Bragança",
-        "castelo_branco": "Castelo Branco",
-        "coimbra": "Coimbra",
-        "evora": "Évora",
-        "faro": "Faro",
-        "guarda": "Guarda",
-        "leiria": "Leiria",
-        "lisboa": "Lisboa",
-        "portalegre": "Portalegre",
-        "porto": "Porto",
-        "santarem": "Santarém",
-        "setubal": "Setúbal",
-        "viana_do_castelo": "Viana do Castelo",
-        "vila_real": "Vila Real",
-        "viseu": "Viseu",
-    },
-    "AT": {
-        "burgenland": "Burgenland",
-        "carinthia": "Carinthia (Kärnten)",
-        "lower_austria": "Lower Austria (Niederösterreich)",
-        "salzburg": "Salzburg",
-        "styria": "Styria (Steiermark)",
-        "tyrol": "Tyrol (Tirol)",
-        "upper_austria": "Upper Austria (Oberösterreich)",
-        "vienna": "Vienna (Wien)",
-        "vorarlberg": "Vorarlberg",
+    "IS": {
+        "iceland": "Iceland (all)",
     },
     "IT": {
         "abruzzo": "Abruzzo",
@@ -245,8 +240,77 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "valle_d_aosta": "Valle d'Aosta",
         "veneto": "Veneto",
     },
+    "LT": {
+        "lithuania": "Lithuania (all)",
+    },
+    "LU": {
+        "luxembourg": "Luxembourg (all)",
+    },
+    "MT": {
+        "malta": "Malta (all)",
+    },
+    "MD": {
+        "moldova": "Moldova (all)",
+    },
+    "ME": {
+        "montenegro": "Montenegro (all)",
+    },
+    "NL": {
+        "netherlands": "Netherlands (all)",
+    },
+    "NO": {
+        "norway": "Norway (all)",
+    },
+    "PL": {
+        "poland": "Poland (all)",
+    },
+    "PT": {
+        "aveiro": "Aveiro",
+        "beja": "Beja",
+        "braga": "Braga",
+        "braganca": "Bragança",
+        "castelo_branco": "Castelo Branco",
+        "coimbra": "Coimbra",
+        "evora": "Évora",
+        "faro": "Faro",
+        "guarda": "Guarda",
+        "leiria": "Leiria",
+        "lisboa": "Lisboa",
+        "portalegre": "Portalegre",
+        "porto": "Porto",
+        "santarem": "Santarém",
+        "setubal": "Setúbal",
+        "viana_do_castelo": "Viana do Castelo",
+        "vila_real": "Vila Real",
+        "viseu": "Viseu",
+    },
     "SI": {
         "slovenia": "Slovenia (all)",
+    },
+    "ES": {
+        "andalucia": "Andalucía",
+        "aragon": "Aragón",
+        "asturias": "Asturias",
+        "balearic_islands": "Balearic Islands (Illes Balears)",
+        "basque_country": "Basque Country (País Vasco)",
+        "canary_islands": "Canary Islands (Canarias)",
+        "cantabria": "Cantabria",
+        "castilla_la_mancha": "Castilla-La Mancha",
+        "castilla_y_leon": "Castilla y León",
+        "catalonia": "Catalonia (Catalunya)",
+        "extremadura": "Extremadura",
+        "galicia": "Galicia",
+        "la_rioja": "La Rioja",
+        "madrid": "Community of Madrid",
+        "murcia": "Region of Murcia",
+        "navarre": "Navarre (Navarra)",
+        "valencian_community": "Valencian Community",
+    },
+    "SE": {
+        "sweden": "Sweden (all)",
+    },
+    "CH": {
+        "switzerland": "Switzerland (all)",
     },
     "GB": {
         "england": "England",
@@ -260,62 +324,8 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "queensland": "Queensland",
         "victoria": "Victoria",
     },
-    "NO": {
-        "norway": "Norway (all)",
-    },
-    "DK": {
-        "denmark": "Denmark (all)",
-    },
-    "SE": {
-        "sweden": "Sweden (all)",
-    },
     "CA": {
         "quebec": "Québec",
-    },
-    "AL": {
-        "albania": "Albania (all)",
-    },
-    "BA": {
-        "bosnia": "Bosnia and Herzegovina (all)",
-    },
-    "BE": {
-        "belgium": "Belgium (all)",
-    },
-    "CH": {
-        "switzerland": "Switzerland (all)",
-    },
-    "CZ": {
-        "czech_republic": "Czech Republic (all)",
-    },
-    "FI": {
-        "finland": "Finland (all)",
-    },
-    "GR": {
-        "greece": "Greece (all)",
-    },
-    "IS": {
-        "iceland": "Iceland (all)",
-    },
-    "LT": {
-        "lithuania": "Lithuania (all)",
-    },
-    "LU": {
-        "luxembourg": "Luxembourg (all)",
-    },
-    "MD": {
-        "moldova": "Moldova (all)",
-    },
-    "ME": {
-        "montenegro": "Montenegro (all)",
-    },
-    "MT": {
-        "malta": "Malta (all)",
-    },
-    "NL": {
-        "netherlands": "Netherlands (all)",
-    },
-    "PL": {
-        "poland": "Poland (all)",
     },
     "EU": {
         "eu": "European Union (all member states)",
