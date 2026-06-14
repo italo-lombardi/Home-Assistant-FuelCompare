@@ -625,7 +625,7 @@ class IEFuelFinderProvider(BaseProvider):
         data["logo_url"] = logo_url  # type: ignore[typeddict-unknown-key]
         data["has_price"] = has_price  # type: ignore[typeddict-unknown-key]
         data["kerosene"] = _price("kerosene")
-        data["cng"] = _price("cng")  # type: ignore[typeddict-unknown-key]
+        data["cng"] = _price("cng")
         # lat/lng passthrough for tests that check raw field names
         data["lat"] = lat  # type: ignore[typeddict-unknown-key]
         data["lng"] = lng  # type: ignore[typeddict-unknown-key]
@@ -637,7 +637,7 @@ class IEFuelFinderProvider(BaseProvider):
             data.get("diesel"),
             data.get("unleaded"),
             data.get("kerosene"),
-            data.get("cng"),  # type: ignore[call-overload]
+            data.get("cng"),
             confidence,
             updated_at,
         )
