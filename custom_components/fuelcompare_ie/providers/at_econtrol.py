@@ -10,14 +10,15 @@ API quirks:
   - Must make 3 separate calls (one per fuelType: DIE, SUP, GAS) and merge
     results by station integer `id`.
   - prices[] array may be empty for a given fuel type even when queried for it.
-  - Fuel type codes: DIE=diesel, SUP=Super 95 (unleaded), GAS=CNG (not LPG).
-    The integration maps GAS → lpg key for UI consistency per spec.
+  - Fuel type codes: DIE=diesel, SUP=Super 95 (unleaded), GAS=CNG (compressed
+    natural gas).  The integration maps GAS → cng key.
   - OPEN field is a boolean at the station top level.
   - Distance is in km (float).
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -39,7 +40,7 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _FUEL_CODES: list[tuple[str, str]] = [
     ("DIE", "diesel"),
     ("SUP", "unleaded"),
-    ("GAS", "lpg"),  # GAS = CNG per API, mapped to lpg per spec
+    ("GAS", "cng"),  # GAS = CNG (compressed natural gas) per API
 ]
 
 POLL_INTERVAL = 900  # 15 minutes
@@ -62,18 +63,18 @@ class AtEcontrolProvider(BaseProvider):
 
     CAPABILITIES: frozenset[str] = frozenset(
         {
-            "diesel",
-            "unleaded",
-            "lpg",
-            "lastupdated",
-            "name",
-            "county",
             "address",
-            "latitude",
-            "longitude",
+            "cng",
+            "county",
+            "data_fetch_problem",
+            "diesel",
             "is_open",
             "last_successful_fetch",
-            "data_fetch_problem",
+            "lastupdated",
+            "latitude",
+            "longitude",
+            "name",
+            "unleaded",
         }
     )
 
@@ -192,8 +193,8 @@ class AtEcontrolProvider(BaseProvider):
                 price_strs.append(f"Diesel €{prices['diesel']:.3f}")
             if prices.get("unleaded") is not None:
                 price_strs.append(f"Super 95 €{prices['unleaded']:.3f}")
-            if prices.get("lpg") is not None:
-                price_strs.append(f"CNG €{prices['lpg']:.3f}")
+            if prices.get("cng") is not None:
+                price_strs.append(f"CNG €{prices['cng']:.3f}")
 
             if price_strs:
                 label_parts.append(" / ".join(price_strs))
@@ -223,10 +224,14 @@ class AtEcontrolProvider(BaseProvider):
         Returns a dict keyed by station id (str) where each value is a raw
         station dict with a combined 'prices' list from all fuel type queries.
         """
-        merged: dict[str, dict[str, Any]] = {}
+        results = await asyncio.gather(
+            self._fetch_fuel_type(session, lat, lng, "DIE"),
+            self._fetch_fuel_type(session, lat, lng, "SUP"),
+            self._fetch_fuel_type(session, lat, lng, "GAS"),
+        )
 
-        for fuel_code, _fuel_key in _FUEL_CODES:
-            stations = await self._fetch_fuel_type(session, lat, lng, fuel_code)
+        merged: dict[str, dict[str, Any]] = {}
+        for stations in results:
             for station in stations:
                 sid = str(station.get("id", ""))
                 if not sid:
@@ -287,7 +292,7 @@ def _extract_prices(prices_list: list[dict[str, Any]]) -> dict[str, float | None
     fuel_code_map = {
         "DIE": "diesel",
         "SUP": "unleaded",
-        "GAS": "lpg",
+        "GAS": "cng",
     }
     result: dict[str, float | None] = {}
     for entry in prices_list or []:
@@ -355,7 +360,7 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
     return {
         "diesel": prices.get("diesel"),
         "unleaded": prices.get("unleaded"),
-        "lpg": prices.get("lpg"),
+        "cng": prices.get("cng"),
         "name": raw.get("name") or None,
         "county": location.get("city") or None,
         "address": address or None,

@@ -41,6 +41,7 @@ pagination may change without notice.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
@@ -144,6 +145,10 @@ class SiGorivaProvider(BaseProvider):
         # Keyed by franchise pk (int) → brand name (str).
         self._franchise_cache: dict[int, str] = {}
 
+        # In-memory cache for the full station list with TTL (seconds).
+        self._station_cache: list[dict[str, Any]] | None = None
+        self._cache_timestamp: float = 0
+
     # ── Public interface ──────────────────────────────────────────────────────
 
     async def async_fetch(
@@ -171,8 +176,16 @@ class SiGorivaProvider(BaseProvider):
         Raises:
             ProviderError: Station not found in the full dataset.
         """
+        target_pk: int
+        try:
+            target_pk = int(station_id)
+        except (ValueError, TypeError):
+            raise ProviderError(
+                f"Invalid goriva.si station ID '{station_id}': must be an integer pk."
+            )
         franchise_map = await self._ensure_franchise_cache(session)
-        station = await self._find_station_by_pk(session, station_id)
+        all_stations = await self._get_all_stations_cached(session)
+        station = next((s for s in all_stations if s.get("pk") == target_pk), None)
         if station is None:
             raise ProviderError(
                 f"Station pk '{station_id}' not found in goriva.si dataset. "
@@ -226,7 +239,7 @@ class SiGorivaProvider(BaseProvider):
 
         try:
             franchise_map = await self._ensure_franchise_cache(session)
-            all_stations = await self._fetch_all_stations(session)
+            all_stations = await self._get_all_stations_cached(session)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
@@ -285,6 +298,35 @@ class SiGorivaProvider(BaseProvider):
         return [(sid, label) for sid, label, _ in result]
 
     # ── Internal helpers ──────────────────────────────────────────────────────
+
+    _STATION_CACHE_TTL = 3600  # seconds
+
+    async def _get_all_stations_cached(
+        self, session: ClientSession
+    ) -> list[dict[str, Any]]:
+        """Return all stations, using the instance cache when still fresh.
+
+        The cache TTL matches POLL_INTERVAL_SECONDS (3600 s).  A full
+        re-fetch (23 HTTP requests) happens at most once per hour.
+
+        Returns:
+            Flat list of all station dicts.
+        """
+        now = time.monotonic()
+        if (
+            self._station_cache is not None
+            and (now - self._cache_timestamp) < self._STATION_CACHE_TTL
+        ):
+            _LOGGER.debug(
+                "goriva.si: using cached station list (%d stations)",
+                len(self._station_cache),
+            )
+            return self._station_cache
+
+        stations = await self._fetch_all_stations(session)
+        self._station_cache = stations
+        self._cache_timestamp = now
+        return stations
 
     async def _fetch_all_stations(self, session: ClientSession) -> list[dict[str, Any]]:
         """Fetch all paginated stations from the goriva.si search endpoint.

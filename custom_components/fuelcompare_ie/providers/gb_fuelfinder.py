@@ -208,6 +208,8 @@ class GbFuelfinderProvider(BaseProvider):
                 f"Station node_id '{station_id}' not found in UK Fuel Finder CSV. "
                 "The station may have been removed from the dataset."
             )
+        if row.get("forecourts.permanent_closure", "").strip().lower() == "true":
+            raise ProviderError(f"Station {station_id} is permanently closed")
         return _parse_row(row)
 
     async def async_fetch_station_name(

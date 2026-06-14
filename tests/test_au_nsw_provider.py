@@ -206,66 +206,70 @@ async def test_async_fetch_success_returns_station_data() -> None:
 
 
 async def test_async_fetch_success_unleaded_price() -> None:
-    """async_fetch returns raw cents/litre for unleaded (U91 → unleaded)."""
+    """async_fetch returns AUD/litre after /100 conversion for unleaded (U91 → unleaded)."""
     resp = _make_mock_response(200, json_data=_RAW_RESPONSE)
     session = _make_session(resp)
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    # Raw value is cents (e.g. 179.9) — coordinator applies >10 /100 rule
-    assert data["unleaded"] == pytest.approx(179.9)
+    # 179.9 cents/litre → 1.799 AUD/litre after >10 /100 conversion
+    assert data["unleaded"] == pytest.approx(1.799)
 
 
 async def test_async_fetch_success_e10_price() -> None:
-    """async_fetch returns raw cents/litre for e10 (E10 → e10)."""
+    """async_fetch returns AUD/litre after /100 conversion for e10 (E10 → e10)."""
     resp = _make_mock_response(200, json_data=_RAW_RESPONSE)
     session = _make_session(resp)
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["e10"] == pytest.approx(169.9)
+    # 169.9 cents/litre → 1.699 AUD/litre after >10 /100 conversion
+    assert data["e10"] == pytest.approx(1.699)
 
 
 async def test_async_fetch_success_premium_unleaded_price() -> None:
-    """async_fetch returns raw cents/litre for premium_unleaded (P95 → premium_unleaded)."""
+    """async_fetch returns AUD/litre after /100 conversion for premium_unleaded (P95 → premium_unleaded)."""
     resp = _make_mock_response(200, json_data=_RAW_RESPONSE)
     session = _make_session(resp)
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["premium_unleaded"] == pytest.approx(189.9)
+    # 189.9 cents/litre → 1.899 AUD/litre after >10 /100 conversion
+    assert data["premium_unleaded"] == pytest.approx(1.899)
 
 
 async def test_async_fetch_success_diesel_price() -> None:
-    """async_fetch returns raw cents/litre for diesel (DL → diesel)."""
+    """async_fetch returns AUD/litre after /100 conversion for diesel (DL → diesel)."""
     resp = _make_mock_response(200, json_data=_RAW_RESPONSE)
     session = _make_session(resp)
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["diesel"] == pytest.approx(175.9)
+    # 175.9 cents/litre → 1.759 AUD/litre after >10 /100 conversion
+    assert data["diesel"] == pytest.approx(1.759)
 
 
 async def test_async_fetch_success_premium_diesel_price() -> None:
-    """async_fetch returns raw cents/litre for premium_diesel (PDL → premium_diesel)."""
+    """async_fetch returns AUD/litre after /100 conversion for premium_diesel (PDL → premium_diesel)."""
     resp = _make_mock_response(200, json_data=_RAW_RESPONSE)
     session = _make_session(resp)
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["premium_diesel"] == pytest.approx(195.9)
+    # 195.9 cents/litre → 1.959 AUD/litre after >10 /100 conversion
+    assert data["premium_diesel"] == pytest.approx(1.959)
 
 
 async def test_async_fetch_price_values_are_cents_not_dollars() -> None:
-    """async_fetch returns raw cent values (>10) so coordinator /100 rule applies."""
+    """async_fetch returns AUD/litre values (< 10) after the >10 /100 conversion."""
     resp = _make_mock_response(200, json_data=_RAW_RESPONSE)
     session = _make_session(resp)
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    # All prices must be >10 (raw cents) — coordinator will divide by 100
-    assert data["unleaded"] > 10.0
-    assert data["diesel"] > 10.0
+    # All prices must be < 10 (AUD/litre) — the >10 /100 conversion was applied
+    assert data["unleaded"] < 10.0
+    assert data["diesel"] < 10.0
 
 
 # ---------------------------------------------------------------------------
@@ -340,8 +344,8 @@ async def test_async_fetch_lastupdated_is_iso8601() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    # Most recent price entry is 02:00:00 on 13/06/2026
-    assert data["lastupdated"] == "2026-06-13T02:00:00+00:00"
+    # Most recent price entry is 02:00:00 on 13/06/2026 (Australia/Sydney AEST = +10:00)
+    assert data["lastupdated"] == "2026-06-13T02:00:00+10:00"
 
 
 async def test_async_fetch_source_station_id_field() -> None:
@@ -387,8 +391,8 @@ async def test_async_fetch_p98_maps_to_premium_unleaded() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    # P95=189.9 wins over P98=199.9 (lower price kept)
-    assert data["premium_unleaded"] == pytest.approx(189.9)
+    # P95=189.9 wins over P98=199.9 (lower price kept); 189.9 → 1.899 AUD/litre
+    assert data["premium_unleaded"] == pytest.approx(1.899)
 
 
 async def test_async_fetch_p98_only_when_no_p95() -> None:
@@ -407,7 +411,7 @@ async def test_async_fetch_p98_only_when_no_p95() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["premium_unleaded"] == pytest.approx(199.9)
+    assert data["premium_unleaded"] == pytest.approx(1.999)
 
 
 # ---------------------------------------------------------------------------
@@ -432,8 +436,8 @@ async def test_async_fetch_b20_not_in_result() -> None:
     data = await provider.async_fetch(session, _STATION_CODE)
 
     # B20 has no StationData mapping — must not appear as a key
-    # (no crash, result is still valid)
-    assert data["unleaded"] == pytest.approx(179.9)
+    # (no crash, result is still valid); 179.9 cents → 1.799 AUD/litre
+    assert data["unleaded"] == pytest.approx(1.799)
 
 
 async def test_async_fetch_ev_not_in_result() -> None:
@@ -452,7 +456,7 @@ async def test_async_fetch_ev_not_in_result() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["diesel"] == pytest.approx(175.9)
+    assert data["diesel"] == pytest.approx(1.759)
 
 
 # ---------------------------------------------------------------------------
@@ -476,7 +480,7 @@ async def test_async_fetch_e85_mapped_when_present() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data.get("e85") == pytest.approx(125.9)
+    assert data.get("e85") == pytest.approx(1.259)
 
 
 async def test_async_fetch_lpg_mapped_when_present() -> None:
@@ -495,7 +499,7 @@ async def test_async_fetch_lpg_mapped_when_present() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data.get("lpg") == pytest.approx(95.9)
+    assert data.get("lpg") == pytest.approx(0.959)
 
 
 async def test_async_fetch_missing_prices_are_none() -> None:
@@ -598,7 +602,7 @@ async def test_async_fetch_handles_nested_data_wrapper() -> None:
     provider = AuNswProvider(_STATION_CODE)
     data = await provider.async_fetch(session, _STATION_CODE)
 
-    assert data["unleaded"] == pytest.approx(179.9)
+    assert data["unleaded"] == pytest.approx(1.799)
 
 
 async def test_async_fetch_raises_provider_error_when_data_wrapper_missing_stations() -> (
@@ -1300,8 +1304,8 @@ def test_build_station_data_with_ts_resolves_most_recent_timestamp() -> None:
         _BASE_STATION, prices, _BASE_PRICES, _STATION_CODE
     )
 
-    # E10 entry has the latest ts: "13/06/2026 02:00:00"
-    assert data["lastupdated"] == "2026-06-13T02:00:00+00:00"
+    # E10 entry has the latest ts: "13/06/2026 02:00:00" (Australia/Sydney AEST = +10:00)
+    assert data["lastupdated"] == "2026-06-13T02:00:00+10:00"
 
 
 def test_build_station_data_with_ts_returns_none_when_no_matching_entries() -> None:
@@ -1341,8 +1345,8 @@ def test_build_station_data_with_ts_skips_bad_timestamp_entries() -> None:
         },
     ]
     data = _build_station_data_with_ts(_BASE_STATION, {}, bad_prices, _STATION_CODE)
-    # Should still resolve from the valid entry
-    assert data["lastupdated"] == "2026-06-13T01:35:20+00:00"
+    # Should still resolve from the valid entry (Australia/Sydney AEST = +10:00)
+    assert data["lastupdated"] == "2026-06-13T01:35:20+10:00"
 
 
 def test_build_station_data_with_ts_skips_null_lastupdated_entries() -> None:
@@ -1364,8 +1368,8 @@ def test_build_station_data_with_ts_skips_null_lastupdated_entries() -> None:
     data = _build_station_data_with_ts(
         _BASE_STATION, {}, prices_with_null_ts, _STATION_CODE
     )
-    # Should still resolve the valid DL entry
-    assert data["lastupdated"] == "2026-06-13T01:35:20+00:00"
+    # Should still resolve the valid DL entry (Australia/Sydney AEST = +10:00)
+    assert data["lastupdated"] == "2026-06-13T01:35:20+10:00"
 
 
 # ---------------------------------------------------------------------------
@@ -1374,15 +1378,15 @@ def test_build_station_data_with_ts_skips_null_lastupdated_entries() -> None:
 
 
 def test_parse_lastupdated_valid_format() -> None:
-    """_parse_lastupdated converts DD/MM/YYYY HH:MM:SS to ISO 8601."""
+    """_parse_lastupdated converts DD/MM/YYYY HH:MM:SS to ISO 8601 with Australia/Sydney offset."""
     result = _parse_lastupdated("13/06/2026 01:35:20")
-    assert result == "2026-06-13T01:35:20+00:00"
+    assert result == "2026-06-13T01:35:20+10:00"
 
 
 def test_parse_lastupdated_with_leading_whitespace() -> None:
     """_parse_lastupdated handles leading/trailing whitespace."""
     result = _parse_lastupdated("  13/06/2026 01:35:20  ")
-    assert result == "2026-06-13T01:35:20+00:00"
+    assert result == "2026-06-13T01:35:20+10:00"
 
 
 def test_parse_lastupdated_returns_none_for_empty_string() -> None:
@@ -1405,7 +1409,8 @@ def test_parse_lastupdated_returns_none_for_bad_format() -> None:
 def test_parse_lastupdated_midnight() -> None:
     """_parse_lastupdated handles midnight timestamps correctly."""
     result = _parse_lastupdated("01/01/2026 00:00:00")
-    assert result == "2026-01-01T00:00:00+00:00"
+    # January is Australian summer: Australia/Sydney is AEDT (+11:00)
+    assert result == "2026-01-01T00:00:00+11:00"
 
 
 # ---------------------------------------------------------------------------

@@ -49,8 +49,9 @@ Join key: prices[].stationcode == stations[].code
 Price unit: CENTS per litre (float). The StationData normalisation rule
 (values >10 divided by 100) converts these automatically to dollars/litre.
 
-lastupdated format: "DD/MM/YYYY HH:MM:SS" (Australian day-first format).
-Parsed with strptime("%d/%m/%Y %H:%M:%S") and stored as ISO 8601 string.
+lastupdated format: "DD/MM/YYYY HH:MM:SS" (Australian day-first format, local Sydney time).
+Parsed with strptime("%d/%m/%Y %H:%M:%S") and stored as ISO 8601 string with
+Australia/Sydney offset (e.g. "2026-06-13T01:35:20+10:00").
 
 Fuel type mapping (live API fueltype values → StationData keys):
   E10  → e10               (E10 ethanol blend)
@@ -82,6 +83,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -443,23 +445,31 @@ def _build_index(
     return station_map, prices_map
 
 
-def _parse_lastupdated(raw_ts: str | None) -> str | None:
-    """Convert "DD/MM/YYYY HH:MM:SS" → ISO 8601 UTC string, or None.
+_SYDNEY_TZ = ZoneInfo("Australia/Sydney")
 
-    The FuelCheck API returns timestamps in Australian day-first format
-    without timezone info (assumed UTC/local but stored as-is).
+
+def _parse_lastupdated(raw_ts: str | None) -> str | None:
+    """Convert "DD/MM/YYYY HH:MM:SS" → ISO 8601 string with Sydney offset, or None.
+
+    The FuelCheck API returns timestamps in Australian day-first format in
+    local Sydney time (AEST UTC+10 or AEDT UTC+11 depending on DST). The
+    value is NOT UTC — tagging it as UTC would misrepresent the time by 10-11
+    hours. We attach the correct Australia/Sydney timezone so the offset in
+    the ISO string (e.g. "+10:00" or "+11:00") is accurate.
 
     Args:
         raw_ts: Raw timestamp string from the API (e.g. "13/06/2026 01:35:20").
 
     Returns:
-        ISO 8601 string e.g. "2026-06-13T01:35:20+00:00", or None on failure.
+        ISO 8601 string e.g. "2026-06-13T01:35:20+10:00", or None on failure.
     """
     if not raw_ts:
         return None
     try:
         dt = datetime.strptime(raw_ts.strip(), _LASTUPDATED_FMT)
-        return dt.replace(tzinfo=timezone.utc).isoformat()
+        # Localise to Australia/Sydney (AEST+10 / AEDT+11) — the API returns
+        # local Sydney wall-clock time, not UTC.
+        return dt.replace(tzinfo=_SYDNEY_TZ).isoformat()
     except ValueError:
         _LOGGER.debug("Could not parse lastupdated timestamp: %r", raw_ts)
         return None
@@ -485,6 +495,27 @@ def _extract_county(address: str | None) -> str | None:
     return None
 
 
+def _normalise_price(price: float | None) -> float | None:
+    """Convert a cents/litre value to AUD/litre using the >10 → /100 rule.
+
+    The NSW FuelCheck API returns prices in cents/litre (e.g. 189.9).
+    Dividing by 100 gives AUD/litre (e.g. 1.899), consistent with the
+    pattern used by other providers in this package (e.g. ie_fuelcompare,
+    be_carbu, at_econtrol).
+
+    Args:
+        price: Raw price value from the API (cents/litre) or None.
+
+    Returns:
+        Price in AUD/litre, or None if the input is None.
+    """
+    if price is None:
+        return None
+    if price > 10:
+        return price / 100
+    return price
+
+
 def _build_station_data(
     station: dict[str, Any],
     prices: dict[str, float],
@@ -496,8 +527,9 @@ def _build_station_data(
         prices:  Dict of {StationData_key: price_in_cents} for this station.
 
     Returns:
-        Populated StationData dict with all relevant CAPABILITIES keys set
-        (values are None when not available from the source).
+        Populated StationData dict with all relevant CAPABILITIES keys set.
+        Price values are AUD/litre after the >10 → /100 cents conversion.
+        Non-price values are None when not available from the source.
     """
     name: str | None = station.get("name") or None
     brand: str | None = station.get("brand") or None
@@ -525,13 +557,13 @@ def _build_station_data(
     lastupdated: str | None = None
 
     return {
-        "e10": prices.get("e10"),
-        "unleaded": prices.get("unleaded"),
-        "premium_unleaded": prices.get("premium_unleaded"),
-        "diesel": prices.get("diesel"),
-        "premium_diesel": prices.get("premium_diesel"),
-        "e85": prices.get("e85"),
-        "lpg": prices.get("lpg"),
+        "e10": _normalise_price(prices.get("e10")),
+        "unleaded": _normalise_price(prices.get("unleaded")),
+        "premium_unleaded": _normalise_price(prices.get("premium_unleaded")),
+        "diesel": _normalise_price(prices.get("diesel")),
+        "premium_diesel": _normalise_price(prices.get("premium_diesel")),
+        "e85": _normalise_price(prices.get("e85")),
+        "lpg": _normalise_price(prices.get("lpg")),
         "name": name,
         "brand": brand,
         "address": address,

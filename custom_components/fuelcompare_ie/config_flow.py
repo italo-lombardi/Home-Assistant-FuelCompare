@@ -7,8 +7,13 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithConfigEntry,
+)
 from homeassistant.const import CONF_NAME
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
@@ -146,7 +151,7 @@ _COUNTY_OPTIONS_BY_COUNTRY: dict[str, dict[str, str]] = {
         "rhineland_palatinate": "Rhineland-Palatinate (Rheinland-Pfalz)",
         "saxony_anhalt": "Saxony-Anhalt (Sachsen-Anhalt)",
         "thuringia": "Thuringia (Thüringen)",
-        "Brandenburg": "Brandenburg",
+        "brandenburg": "Brandenburg",
         "mecklenburg_vorpommern": "Mecklenburg-Vorpommern",
         "hamburg": "Hamburg",
         "saarland": "Saarland",
@@ -359,6 +364,12 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Return the options flow handler for this config entry."""
+        return FuelCompareIEOptionsFlow(config_entry)
+
     def __init__(self) -> None:
         self._country: str = DEFAULT_COUNTRY
         self._provider_key: str = DEFAULT_PROVIDER
@@ -489,15 +500,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            station_id = user_input[CONF_STATION_ID]
+            station_id = user_input[CONF_STATION_ID].strip()
 
-            try:
-                station_id_int = int(station_id)
-                if station_id_int <= 0:
-                    errors[CONF_STATION_ID] = "invalid_station_id"
-                else:
-                    station_id = str(station_id_int)
-            except (ValueError, TypeError):
+            if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
 
             if not errors:
@@ -705,6 +710,26 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Optional(CONF_NAME, default=self._suggested_name): str,
+                }
+            ),
+        )
+
+
+class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
+    """Handle options for Fuel Compare — preserves the API key across re-opens."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage options, pre-filling the existing API key."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+        existing_key = self.config_entry.options.get(CONF_API_KEY, "")
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_API_KEY, default=existing_key): str,
                 }
             ),
         )

@@ -29,6 +29,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Fuel Compare from a config entry."""
     station_id = entry.data.get(CONF_STATION_ID, "")
 
+    # Location-mode providers (DE, FR, ES, PT, AT, IT, SI, GB, AU) have no
+    # station picker in config_flow, so station_id is always "".  An empty
+    # station_id produces an invalid HA entity unique_id.  Generate a stable
+    # substitute from the rounded lat/lng stored in entry.data so the device
+    # registry entry is stable across restarts.
+    if not station_id:
+        _lat = entry.data.get(CONF_LATITUDE)
+        _lng = entry.data.get(CONF_LONGITUDE)
+        if _lat is not None and _lng is not None:
+            station_id = f"{round(_lat, 4)}_{round(_lng, 4)}"
+
     # Existing entries have no CONF_PROVIDER key — default to ie_fuelcompare
     # so they continue working without any migration.
     provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)

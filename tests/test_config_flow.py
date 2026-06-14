@@ -182,28 +182,32 @@ async def _reach_station_step(hass, flow_id: str) -> dict:
 
 
 async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
-    """Non-integer station ID causes a form error."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    # Navigate through provider step if shown (multiple IE providers registered)
-    if result.get("step_id") == "user":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
-        )
-    if result.get("step_id") == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
-        )
-    assert result["step_id"] == "station"
+    """Non-integer station ID (e.g. a UUID or slug) is now accepted as valid."""
+    with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
+        mock_fetch.return_value = None
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input={CONF_STATION_ID: "abc"},
-    )
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        # Navigate through provider step if shown (multiple IE providers registered)
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
+        assert result["step_id"] == "station"
 
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_STATION_ID: "abc"},
+        )
+
+    # Non-integer IDs are now valid — flow should advance to the name step
     assert result["type"] == "form"
-    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+    assert result["step_id"] == "name"
 
 
 # ---------------------------------------------------------------------------
@@ -212,27 +216,31 @@ async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
 
 
 async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
-    """Negative station ID causes a form error."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    if result.get("step_id") == "user":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
-        )
-    if result.get("step_id") == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
-        )
-    assert result["step_id"] == "station"
+    """Negative string station ID (e.g. '-1') is now accepted as a valid non-empty string."""
+    with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
+        mock_fetch.return_value = None
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input={CONF_STATION_ID: "-1"},
-    )
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
+        assert result["step_id"] == "station"
 
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_STATION_ID: "-1"},
+        )
+
+    # Non-empty strings are now valid — flow should advance to the name step
     assert result["type"] == "form"
-    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+    assert result["step_id"] == "name"
 
 
 # ---------------------------------------------------------------------------
@@ -241,27 +249,31 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
 
 
 async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
-    """Zero station ID causes a form error."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    if result.get("step_id") == "user":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
-        )
-    if result.get("step_id") == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
-        )
-    assert result["step_id"] == "station"
+    """String '0' is now accepted as a valid non-empty station ID."""
+    with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
+        mock_fetch.return_value = None
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input={CONF_STATION_ID: "0"},
-    )
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
+        assert result["step_id"] == "station"
 
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_STATION_ID: "0"},
+        )
+
+    # Non-empty strings are now valid — flow should advance to the name step
     assert result["type"] == "form"
-    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+    assert result["step_id"] == "name"
 
 
 # ---------------------------------------------------------------------------

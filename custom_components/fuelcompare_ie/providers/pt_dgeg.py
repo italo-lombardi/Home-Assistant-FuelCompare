@@ -7,12 +7,6 @@ Endpoint: GET https://precoscombustiveis.dgeg.gov.pt/api/PrecoComb/GetDadosPosto
 
 All stations (discovery): GET PesquisarPostos with district filter.
 
-NOTE: SSL certificate verification is attempted with the system/certifi bundle
-first.  If the server certificate cannot be verified (e.g. Cloudflare SNI
-mismatch or an expired intermediate), the request is retried with verification
-disabled and a WARNING is logged so the operator knows the connection is not
-fully authenticated.
-
 Fuel type mapping (TipoCombustivel field):
   'Gasóleo simples'    → diesel
   'Gasóleo especial'   → premium_diesel   (not in CAPABILITIES, ignored)
@@ -27,7 +21,6 @@ ToS: Personal/home-automation use acceptable; commercial use prohibited.
 from __future__ import annotations
 
 import logging
-import ssl
 from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
@@ -50,13 +43,6 @@ _DISTRICTS_URL = f"{_BASE_URL}/GetDistritos"
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
 
-# Fallback SSL context used only when the server certificate cannot be
-# verified with the normal bundle.  check_hostname must be False before
-# CERT_NONE can be set.
-_SSL_FALLBACK: ssl.SSLContext = ssl.create_default_context()
-_SSL_FALLBACK.check_hostname = False
-_SSL_FALLBACK.verify_mode = ssl.CERT_NONE
-
 
 async def _get_json(
     session: ClientSession,
@@ -65,31 +51,11 @@ async def _get_json(
 ) -> dict[str, Any]:
     """GET *url* and return the parsed JSON body.
 
-    SSL verification is attempted with the default context first.  If the
-    server certificate cannot be verified an ``ssl.SSLError`` is caught, a
-    WARNING is logged, and the request is retried with verification disabled
-    so that deployments on networks where the DGEG cert chain is valid still
-    benefit from full certificate checking.
-
     Raises:
-        Exception: propagated to the caller on non-SSL errors or when the
-            fallback request also fails.
+        aiohttp.ClientError: propagated to the caller on any network or SSL
+            error; the coordinator will handle it as UpdateFailed.
     """
-    try:
-        async with session.get(url, params=params, timeout=_TIMEOUT) as resp:
-            resp.raise_for_status()
-            return await resp.json(content_type=None)
-    except ssl.SSLError as ssl_err:
-        _LOGGER.warning(
-            "DGEG: SSL certificate verification failed (%s); retrying without "
-            "verification.  Connection is not fully authenticated — consider "
-            "updating your CA bundle.",
-            ssl_err,
-        )
-    # Fallback: retry with verification disabled
-    async with session.get(
-        url, params=params, timeout=_TIMEOUT, ssl=_SSL_FALLBACK
-    ) as resp:
+    async with session.get(url, params=params, timeout=_TIMEOUT) as resp:
         resp.raise_for_status()
         return await resp.json(content_type=None)
 

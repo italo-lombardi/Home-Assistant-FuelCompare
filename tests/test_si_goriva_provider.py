@@ -714,26 +714,28 @@ async def test_async_fetch_lastupdated_is_none() -> None:
 
 
 # ---------------------------------------------------------------------------
-# async_fetch — early-exit pagination
+# async_fetch — station-list cache
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_async_fetch_stops_early_when_station_found_on_page1() -> None:
-    """async_fetch does not fetch page 2 when station found on page 1."""
+async def test_async_fetch_uses_station_cache_on_second_call() -> None:
+    """Second async_fetch call reuses the station-list cache; no extra page fetches."""
     franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
     page1 = _make_mock_response(
         200,
-        json_data=_search_page([_BASE_STATION], has_next=True),
+        json_data=_search_page([_BASE_STATION], has_next=False),
     )
+    # Only one page response provided — cache means page is fetched once only.
     session = _make_session(franchise_resp, page1)
-    # No page2 response provided — if fetched, iterator would raise StopIteration
 
     provider = _default_provider()
-    data = await provider.async_fetch(session, _STATION_ID)
+    data1 = await provider.async_fetch(session, _STATION_ID)
+    data2 = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["diesel"] == pytest.approx(1.465)
-    # Only 2 calls: franchise + page1
+    assert data1["diesel"] == pytest.approx(1.465)
+    assert data2["diesel"] == pytest.approx(1.465)
+    # Only 2 calls: franchise(1) + page1(1); second async_fetch uses cache
     assert session.get.call_count == 2
 
 
@@ -766,19 +768,18 @@ async def test_async_fetch_continues_to_next_page_when_not_found() -> None:
 
 @pytest.mark.asyncio
 async def test_async_fetch_uses_cached_franchise_on_second_call() -> None:
-    """Second async_fetch call reuses franchise cache without re-fetching."""
+    """Second async_fetch call reuses both franchise and station-list caches."""
     franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
-    page1_first = _make_mock_response(200, json_data=_search_page([_BASE_STATION]))
-    page1_second = _make_mock_response(200, json_data=_search_page([_BASE_STATION]))
-    # Only 1 franchise response — if fetched twice, iterator would raise StopIteration
-    session = _make_session(franchise_resp, page1_first, page1_second)
+    page1 = _make_mock_response(200, json_data=_search_page([_BASE_STATION]))
+    # Only 1 franchise response and 1 page response — both caches prevent re-fetching.
+    session = _make_session(franchise_resp, page1)
 
     provider = _default_provider()
     await provider.async_fetch(session, _STATION_ID)
     await provider.async_fetch(session, _STATION_ID)
 
-    # Total calls: franchise(1) + page1(1) + page1(1) = 3
-    assert session.get.call_count == 3
+    # Total calls: franchise(1) + page1(1); second call uses both caches
+    assert session.get.call_count == 2
 
 
 @pytest.mark.asyncio

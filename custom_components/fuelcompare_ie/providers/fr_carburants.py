@@ -46,7 +46,14 @@ from __future__ import annotations
 
 import io
 import logging
+import time
 import zipfile
+
+# xml.etree.ElementTree is protected against billion-laughs since Python 3.8
+# (https://docs.python.org/3/library/xml.etree.elementtree.html#xml-vulnerabilities).
+# Home Assistant requires Python 3.12+, so that protection is always active.
+# A 50 MB size check is added as defence-in-depth to prevent any amplification
+# from an unexpectedly large or malicious response reaching the parser.
 import xml.etree.ElementTree as ET
 from typing import Any
 
@@ -73,6 +80,11 @@ _HEADERS: dict[str, str] = {
 # Larger timeout: the ZIP is ~1 MB; on slow connections this can take a few
 # seconds. API_TIMEOUT * 3 mirrors the approach used in hr_mzoe.
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
+
+# Parsed-XML cache TTL — matches POLL_INTERVAL_SECONDS so a second call within
+# the same coordinator cycle (e.g. async_fetch + async_list_stations) reuses
+# the already-parsed root element without re-downloading or re-parsing.
+_XML_CACHE_TTL = 600
 
 # Mapping from XML ``nom`` attribute to StationData key
 _NOM_TO_KEY: dict[str, str] = {
@@ -284,6 +296,8 @@ class FrCarburantsProvider(BaseProvider):
         self._latitude = latitude
         self._longitude = longitude
         self._radius_km = radius_km if radius_km is not None else 10.0
+        self._xml_cache: ET.Element | None = None
+        self._xml_cache_ts: float = 0
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -304,8 +318,8 @@ class FrCarburantsProvider(BaseProvider):
         Raises:
             ProviderError: Station not found in the national dataset.
         """
-        raw_xml = await self._fetch_xml(session)
-        raw_station = _find_station_in_xml(raw_xml, station_id)
+        root = await self._fetch_and_parse_xml(session)
+        raw_station = _find_station_in_root(root, station_id)
         if raw_station is None:
             raise ProviderError(
                 f"Station ID '{station_id}' not found in the Prix Carburants "
@@ -333,8 +347,8 @@ class FrCarburantsProvider(BaseProvider):
             Human-readable station name string, or None on failure.
         """
         try:
-            raw_xml = await self._fetch_xml(session)
-            raw_station = _find_station_in_xml(raw_xml, station_id)
+            root = await self._fetch_and_parse_xml(session)
+            raw_station = _find_station_in_root(root, station_id)
             if raw_station:
                 return raw_station.get("name") or None
         except Exception as err:  # noqa: BLE001
@@ -372,14 +386,13 @@ class FrCarburantsProvider(BaseProvider):
             return []
 
         try:
-            raw_xml = await self._fetch_xml(session)
+            root = await self._fetch_and_parse_xml(session)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed to fetch XML: %s", err)
             return []
 
         result: list[tuple[str, str, float]] = []
 
-        root = ET.fromstring(raw_xml)
         for pdv in root.iter("pdv"):
             raw = _parse_pdv(pdv)
             slat = raw.get("latitude")
@@ -423,6 +436,39 @@ class FrCarburantsProvider(BaseProvider):
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
+    async def _fetch_and_parse_xml(self, session: ClientSession) -> ET.Element:
+        """Return the parsed XML root element, using a TTL cache.
+
+        The cache is keyed per-instance with a TTL of ``_XML_CACHE_TTL`` seconds
+        (600 s, matching ``POLL_INTERVAL_SECONDS``).  Within a single coordinator
+        cycle both ``async_fetch`` and ``async_list_stations`` call this method;
+        only the first call downloads and parses the ~12 MB XML — the second call
+        returns the cached root element immediately.
+
+        Returns:
+            The ``<pdv_liste>`` root ``ET.Element``.
+
+        Raises:
+            ProviderError: XML could not be fetched or parsed.
+        """
+        now = time.monotonic()
+        if self._xml_cache is not None and (now - self._xml_cache_ts) < _XML_CACHE_TTL:
+            _LOGGER.debug(
+                "Prix Carburants XML cache hit (age %.1fs)", now - self._xml_cache_ts
+            )
+            return self._xml_cache
+
+        xml_bytes = await self._fetch_xml(session)
+        try:
+            root = ET.fromstring(xml_bytes)
+        except ET.ParseError as err:
+            raise ProviderError(f"Failed to parse Prix Carburants XML: {err}") from err
+
+        self._xml_cache = root
+        self._xml_cache_ts = now
+        _LOGGER.debug("Prix Carburants XML parsed and cached")
+        return root
+
     async def _fetch_xml(self, session: ClientSession) -> bytes:
         """Download the ZIP from roulez-eco.fr and return the XML bytes.
 
@@ -458,10 +504,29 @@ class FrCarburantsProvider(BaseProvider):
                 f"Prix Carburants response is not a valid ZIP archive: {err}"
             ) from err
 
+        if len(xml_bytes) > 50_000_000:  # 50 MB limit
+            raise ProviderError("FR carburants XML response exceeds size limit")
+
         return xml_bytes
 
 
 # ── Module-level helpers ──────────────────────────────────────────────────────
+
+
+def _find_station_in_root(root: ET.Element, station_id: str) -> dict[str, Any] | None:
+    """Search an already-parsed XML root for station_id and return its raw dict.
+
+    Args:
+        root:       Parsed ``<pdv_liste>`` root element.
+        station_id: Target station ID string.
+
+    Returns:
+        Parsed station dict (from ``_parse_pdv``), or None if not found.
+    """
+    for pdv in root.iter("pdv"):
+        if pdv.attrib.get("id") == station_id:
+            return _parse_pdv(pdv)
+    return None
 
 
 def _find_station_in_xml(xml_bytes: bytes, station_id: str) -> dict[str, Any] | None:

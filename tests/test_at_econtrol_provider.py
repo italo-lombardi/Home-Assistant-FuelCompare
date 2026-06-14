@@ -182,8 +182,8 @@ def test_capabilities_include_unleaded() -> None:
     assert "unleaded" in AtEcontrolProvider.CAPABILITIES
 
 
-def test_capabilities_include_lpg() -> None:
-    assert "lpg" in AtEcontrolProvider.CAPABILITIES
+def test_capabilities_include_cng() -> None:
+    assert "cng" in AtEcontrolProvider.CAPABILITIES
 
 
 def test_capabilities_include_name() -> None:
@@ -260,10 +260,10 @@ def test_fuel_codes_map_sup_to_unleaded() -> None:
     assert mapping["SUP"] == "unleaded"
 
 
-def test_fuel_codes_map_gas_to_lpg() -> None:
-    """_FUEL_CODES must map GAS → lpg (CNG exposed as lpg per spec)."""
+def test_fuel_codes_map_gas_to_cng() -> None:
+    """_FUEL_CODES must map GAS → cng (GAS is CNG per e-control API)."""
     mapping = dict(_FUEL_CODES)
-    assert mapping["GAS"] == "lpg"
+    assert mapping["GAS"] == "cng"
 
 
 def test_fuel_codes_has_exactly_three_entries() -> None:
@@ -376,15 +376,15 @@ async def test_async_fetch_returns_unleaded_price() -> None:
     assert data["unleaded"] == pytest.approx(1.679)
 
 
-async def test_async_fetch_returns_lpg_price() -> None:
-    """async_fetch returns lpg price from GAS call (GAS→lpg mapping)."""
+async def test_async_fetch_returns_cng_price() -> None:
+    """async_fetch returns cng price from GAS call (GAS→cng mapping)."""
     die_resp, sup_resp, gas_resp = _three_fuel_responses()
     session = _make_session(die_resp, sup_resp, gas_resp)
 
     p = _provider()
     data = await p.async_fetch(session, _STATION_ID)
 
-    assert data["lpg"] == pytest.approx(1.299)
+    assert data["cng"] == pytest.approx(1.299)
 
 
 async def test_async_fetch_returns_station_name() -> None:
@@ -754,11 +754,10 @@ async def test_async_fetch_price_none_when_no_price_entry() -> None:
 
     assert data["diesel"] is None
     assert data["unleaded"] is None
-    assert data["lpg"] is None
+    assert data["cng"] is None
 
 
 async def test_async_fetch_price_none_when_amount_missing() -> None:
-    """Fuel type price is None when the prices entry has no 'amount' field."""
     station = {
         **_BASE_STATION_RAW,
         "prices": [{"fuelType": "DIE"}],  # no amount
@@ -840,7 +839,7 @@ async def test_async_fetch_merges_prices_from_all_three_calls() -> None:
 
     assert data["diesel"] is not None
     assert data["unleaded"] is not None
-    assert data["lpg"] is not None
+    assert data["cng"] is not None
 
 
 async def test_async_fetch_station_id_str_match() -> None:
@@ -990,8 +989,8 @@ async def test_async_list_stations_label_contains_super95_price() -> None:
     assert "1.679" in label
 
 
-async def test_async_list_stations_label_contains_cng_price_as_lpg_key() -> None:
-    """Each label includes a CNG price string (GAS→lpg mapped, displayed as 'CNG')."""
+async def test_async_list_stations_label_contains_cng_price() -> None:
+    """Each label includes a CNG price string (GAS→cng mapped, displayed as 'CNG')."""
     die_resp, sup_resp, gas_resp = _three_fuel_responses()
     session = _make_session(die_resp, sup_resp, gas_resp)
 
@@ -1167,10 +1166,10 @@ def test_extract_prices_sup_mapped_to_unleaded() -> None:
     assert prices.get("unleaded") == pytest.approx(1.679)
 
 
-def test_extract_prices_gas_mapped_to_lpg() -> None:
-    """_extract_prices maps GAS fuelType to 'lpg' key."""
+def test_extract_prices_gas_mapped_to_cng() -> None:
+    """_extract_prices maps GAS fuelType to 'cng' key."""
     prices = _extract_prices([{"fuelType": "GAS", "amount": 1.299}])
-    assert prices.get("lpg") == pytest.approx(1.299)
+    assert prices.get("cng") == pytest.approx(1.299)
 
 
 def test_extract_prices_empty_list_returns_empty_dict() -> None:
@@ -1244,7 +1243,7 @@ def test_extract_prices_multiple_fuel_types_in_one_call() -> None:
     )
     assert prices.get("diesel") == pytest.approx(1.599)
     assert prices.get("unleaded") == pytest.approx(1.679)
-    assert prices.get("lpg") == pytest.approx(1.299)
+    assert prices.get("cng") == pytest.approx(1.299)
 
 
 def test_extract_prices_rounds_to_4_decimal_places() -> None:
@@ -1313,7 +1312,7 @@ def test_build_station_data_returns_all_capability_keys() -> None:
     required_keys = {
         "diesel",
         "unleaded",
-        "lpg",
+        "cng",
         "name",
         "county",
         "address",
@@ -1338,10 +1337,10 @@ def test_build_station_data_unleaded_price() -> None:
     assert result["unleaded"] == pytest.approx(1.679)
 
 
-def test_build_station_data_lpg_price() -> None:
-    """_build_station_data correctly extracts lpg price (GAS→lpg)."""
+def test_build_station_data_cng_price() -> None:
+    """_build_station_data correctly extracts cng price (GAS→cng)."""
     result = _build_station_data(_BASE_STATION_RAW)
-    assert result["lpg"] == pytest.approx(1.299)
+    assert result["cng"] == pytest.approx(1.299)
 
 
 def test_build_station_data_name() -> None:
@@ -1436,7 +1435,7 @@ def test_build_station_data_empty_prices_all_none() -> None:
     result = _build_station_data(station)
     assert result["diesel"] is None
     assert result["unleaded"] is None
-    assert result["lpg"] is None
+    assert result["cng"] is None
 
 
 def test_build_station_data_no_location_field() -> None:
@@ -1459,7 +1458,7 @@ async def test_async_fetch_station_populated_when_only_two_fuel_calls_return_dat
 ):
     """Station is still returned when only 2 of 3 fuel-type calls return the station.
 
-    If GAS (lpg) returns an empty list, diesel and unleaded prices should still
+    If GAS (cng) returns an empty list, diesel and unleaded prices should still
     be populated and the station should be retrievable.
     """
     die_station = {
@@ -1482,14 +1481,14 @@ async def test_async_fetch_station_populated_when_only_two_fuel_calls_return_dat
     assert data is not None
     assert data["diesel"] == pytest.approx(1.599)
     assert data["unleaded"] == pytest.approx(1.679)
-    # lpg is None because GAS call returned nothing
-    assert data["lpg"] is None
+    # cng is None because GAS call returned nothing
+    assert data["cng"] is None
 
 
 async def test_async_fetch_station_populated_when_first_fuel_call_empty() -> None:
     """Station is still returned when the first (DIE) fuel-type call returns empty.
 
-    SUP and GAS results still populate unleaded and lpg prices.
+    SUP and GAS results still populate unleaded and cng prices.
     """
     sup_station = {
         **_BASE_STATION_RAW,
@@ -1510,7 +1509,7 @@ async def test_async_fetch_station_populated_when_first_fuel_call_empty() -> Non
     assert data is not None
     assert data["diesel"] is None
     assert data["unleaded"] == pytest.approx(1.679)
-    assert data["lpg"] == pytest.approx(1.299)
+    assert data["cng"] == pytest.approx(1.299)
 
 
 async def test_async_list_stations_partial_fuel_calls_still_returns_station() -> None:

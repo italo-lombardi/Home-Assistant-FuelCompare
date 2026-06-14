@@ -215,15 +215,15 @@ def test_skip_banner_preserves_subsequent_lines() -> None:
 def test_parse_price_csv_returns_station_entry() -> None:
     """_parse_price_csv returns an entry for station 3464."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    assert "3464" in result
+    prices, _timestamps = _parse_price_csv(text)
+    assert "3464" in prices
 
 
 def test_parse_price_csv_unleaded_collects_both_variants() -> None:
     """_parse_price_csv collects both attended and self-service unleaded prices."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    unleaded_prices = result["3464"]["unleaded"]
+    prices, _timestamps = _parse_price_csv(text)
+    unleaded_prices = prices["3464"]["unleaded"]
     assert len(unleaded_prices) == 2
     assert 1.899 in unleaded_prices
     assert 1.829 in unleaded_prices
@@ -232,8 +232,8 @@ def test_parse_price_csv_unleaded_collects_both_variants() -> None:
 def test_parse_price_csv_diesel_collects_both_variants() -> None:
     """_parse_price_csv collects both attended and self-service diesel prices."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    diesel_prices = result["3464"]["diesel"]
+    prices, _timestamps = _parse_price_csv(text)
+    diesel_prices = prices["3464"]["diesel"]
     assert len(diesel_prices) == 2
     assert 1.789 in diesel_prices
     assert 1.699 in diesel_prices
@@ -242,25 +242,25 @@ def test_parse_price_csv_diesel_collects_both_variants() -> None:
 def test_parse_price_csv_lpg_collected() -> None:
     """_parse_price_csv maps 'GPL' to 'lpg'."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    assert "lpg" in result["3464"]
-    assert pytest.approx(0.899) in result["3464"]["lpg"]
+    prices, _timestamps = _parse_price_csv(text)
+    assert "lpg" in prices["3464"]
+    assert pytest.approx(0.899) in prices["3464"]["lpg"]
 
 
 def test_parse_price_csv_cng_collected() -> None:
     """_parse_price_csv maps 'Metano' to 'cng'."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    assert "cng" in result["3464"]
-    assert pytest.approx(1.299) in result["3464"]["cng"]
+    prices, _timestamps = _parse_price_csv(text)
+    assert "cng" in prices["3464"]
+    assert pytest.approx(1.299) in prices["3464"]["cng"]
 
 
 def test_parse_price_csv_premium_unleaded_collected() -> None:
     """_parse_price_csv maps 'Benzina Super' to 'premium_unleaded'."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    assert "premium_unleaded" in result["3464"]
-    assert pytest.approx(2.099) in result["3464"]["premium_unleaded"]
+    prices, _timestamps = _parse_price_csv(text)
+    assert "premium_unleaded" in prices["3464"]
+    assert pytest.approx(2.099) in prices["3464"]["premium_unleaded"]
 
 
 def test_parse_price_csv_skips_unknown_fuel_type() -> None:
@@ -272,9 +272,9 @@ def test_parse_price_csv_skips_unknown_fuel_type() -> None:
         "3464|Benzina|1.829|1|13/06/2026 08:00:00\n"
     )
     text = _skip_banner(csv)
-    result = _parse_price_csv(text)
-    assert "GasolioBlu+" not in str(result.get("3464", {}).keys())
-    assert "unleaded" in result["3464"]
+    prices, _timestamps = _parse_price_csv(text)
+    assert "GasolioBlu+" not in str(prices.get("3464", {}).keys())
+    assert "unleaded" in prices["3464"]
 
 
 def test_parse_price_csv_skips_zero_price() -> None:
@@ -286,9 +286,9 @@ def test_parse_price_csv_skips_zero_price() -> None:
         "3464|Benzina|1.829|0|13/06/2026 08:00:00\n"
     )
     text = _skip_banner(csv)
-    result = _parse_price_csv(text)
+    prices, _timestamps = _parse_price_csv(text)
     # Only the valid price should be stored
-    assert result["3464"]["unleaded"] == [1.829]
+    assert prices["3464"]["unleaded"] == [1.829]
 
 
 def test_parse_price_csv_skips_negative_price() -> None:
@@ -300,8 +300,8 @@ def test_parse_price_csv_skips_negative_price() -> None:
         "3464|Benzina|1.829|0|13/06/2026 08:00:00\n"
     )
     text = _skip_banner(csv)
-    result = _parse_price_csv(text)
-    assert result["3464"]["unleaded"] == [1.829]
+    prices, _timestamps = _parse_price_csv(text)
+    assert prices["3464"]["unleaded"] == [1.829]
 
 
 def test_parse_price_csv_skips_invalid_price_string() -> None:
@@ -313,8 +313,8 @@ def test_parse_price_csv_skips_invalid_price_string() -> None:
         "3464|Benzina|1.829|0|13/06/2026 08:00:00\n"
     )
     text = _skip_banner(csv)
-    result = _parse_price_csv(text)
-    assert result["3464"]["unleaded"] == [1.829]
+    prices, _timestamps = _parse_price_csv(text)
+    assert prices["3464"]["unleaded"] == [1.829]
 
 
 def test_parse_price_csv_skips_short_rows() -> None:
@@ -326,10 +326,10 @@ def test_parse_price_csv_skips_short_rows() -> None:
         "3464|Gasolio|1.699|0|13/06/2026 08:00:00\n"
     )
     text = _skip_banner(csv)
-    result = _parse_price_csv(text)
-    assert "3464" in result
-    assert "unleaded" not in result.get("3464", {})
-    assert "diesel" in result["3464"]
+    prices, _timestamps = _parse_price_csv(text)
+    assert "3464" in prices
+    assert "unleaded" not in prices.get("3464", {})
+    assert "diesel" in prices["3464"]
 
 
 def test_parse_price_csv_skips_blank_lines() -> None:
@@ -342,16 +342,36 @@ def test_parse_price_csv_skips_blank_lines() -> None:
         "\n"
     )
     text = _skip_banner(csv)
-    result = _parse_price_csv(text)
-    assert "3464" in result
+    prices, _timestamps = _parse_price_csv(text)
+    assert "3464" in prices
 
 
 def test_parse_price_csv_multiple_stations() -> None:
     """_parse_price_csv returns entries for all stations in the file."""
     text = _skip_banner(_PRICE_CSV)
-    result = _parse_price_csv(text)
-    assert "3464" in result
-    assert "9999" in result
+    prices, _timestamps = _parse_price_csv(text)
+    assert "3464" in prices
+    assert "9999" in prices
+
+
+def test_parse_price_csv_timestamps_populated() -> None:
+    """_parse_price_csv returns ISO timestamps for stations that have dtComu."""
+    text = _skip_banner(_PRICE_CSV)
+    _prices, timestamps = _parse_price_csv(text)
+    assert timestamps.get("3464") == "2026-06-13T08:00:00"
+    assert timestamps.get("9999") == "2026-06-13T08:00:00"
+
+
+def test_parse_price_csv_timestamp_missing_when_no_field5() -> None:
+    """_parse_price_csv stores no timestamp when dtComu field is absent."""
+    csv = (
+        "Estrazione del 2026-06-13\n"
+        "idImpianto|descCarburante|prezzo|isSelf|dtComu\n"
+        "3464|Benzina|1.829|0\n"
+    )
+    text = _skip_banner(csv)
+    _prices, timestamps = _parse_price_csv(text)
+    assert timestamps.get("3464") is None
 
 
 # ---------------------------------------------------------------------------
@@ -866,11 +886,18 @@ def test_provider_init_none_radius_defaults_to_10() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_extract_latest_timestamp_always_returns_none() -> None:
-    """_extract_latest_timestamp always returns None (bounded-memory design)."""
+def test_extract_latest_timestamp_returns_iso_when_present() -> None:
+    """_extract_latest_timestamp returns the ISO timestamp from timestamps_data."""
     provider = ItMaseProvider("3464")
-    price_data = {"3464": {"unleaded": [1.829]}}
-    result = provider._extract_latest_timestamp(price_data, "3464")
+    timestamps_data = {"3464": "2026-06-13T08:00:00"}
+    result = provider._extract_latest_timestamp(timestamps_data, "3464")
+    assert result == "2026-06-13T08:00:00"
+
+
+def test_extract_latest_timestamp_returns_none_when_absent() -> None:
+    """_extract_latest_timestamp returns None when station_id not in timestamps_data."""
+    provider = ItMaseProvider("3464")
+    result = provider._extract_latest_timestamp({}, "3464")
     assert result is None
 
 
@@ -972,12 +999,12 @@ async def test_async_fetch_latitude_longitude() -> None:
     assert data["longitude"] == pytest.approx(12.4964, abs=0.001)
 
 
-async def test_async_fetch_lastupdated_is_none() -> None:
-    """async_fetch lastupdated is None (timestamps not retained in aggregated parse)."""
+async def test_async_fetch_lastupdated_iso_from_dtcomu() -> None:
+    """async_fetch lastupdated is the ISO 8601 string parsed from dtComu."""
     session = _make_session_with_csvs()
     provider = ItMaseProvider("3464")
     data = await provider.async_fetch(session, "3464")
-    assert data["lastupdated"] is None
+    assert data["lastupdated"] == "2026-06-13T08:00:00"
 
 
 async def test_async_fetch_source_station_id() -> None:

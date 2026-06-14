@@ -104,10 +104,14 @@ def _skip_banner(text: str) -> str:
     return text[idx + 1 :]
 
 
-def _parse_price_csv(text: str) -> dict[str, dict[str, list[float]]]:
-    """Parse the price CSV and return a mapping of station → fuel → [prices].
+def _parse_price_csv(
+    text: str,
+) -> tuple[dict[str, dict[str, list[float]]], dict[str, str | None]]:
+    """Parse the price CSV and return prices and per-station timestamps.
 
-    The returned dict has the form::
+    The returned tuple contains two dicts:
+
+    1. prices — station → fuel → [prices]::
 
         {
           "3464": {
@@ -118,17 +122,24 @@ def _parse_price_csv(text: str) -> dict[str, dict[str, list[float]]]:
           ...
         }
 
+    2. timestamps — station → latest ISO 8601 dtComu string (or None)::
+
+        {"3464": "2026-06-13T08:00:00", ...}
+
     Multiple price rows exist per (station, fuel) pair because attended ("0")
     and self-service ("1") prices are reported on separate rows.  Both are
-    collected; the caller selects the cheapest.
+    collected; the caller selects the cheapest.  The *latest* dtComu seen for
+    each station is stored; rows are typically all identical for a given station
+    but the maximum is taken to be safe.
 
     Args:
         text: Decoded price CSV text (banner already stripped).
 
     Returns:
-        Nested dict: station_id → fuel_key → list of float prices.
+        Tuple of (prices dict, timestamps dict).
     """
-    result: dict[str, dict[str, list[float]]] = {}
+    prices: dict[str, dict[str, list[float]]] = {}
+    timestamps: dict[str, str | None] = {}
     lines = text.splitlines()
     # Skip the header row (first line after banner strip)
     for line in lines[1:]:
@@ -142,9 +153,18 @@ def _parse_price_csv(text: str) -> dict[str, dict[str, list[float]]]:
         desc = parts[1].strip()
         price_str = parts[2].strip()
 
+        # Extract dtComu timestamp from index 4 when present
+        dtcomu_raw = parts[4].strip() if len(parts) >= 5 else ""
+        iso_ts = _parse_dtcomu(dtcomu_raw) if dtcomu_raw else None
+
         fuel_key = _DESC_TO_KEY.get(desc)
         if fuel_key is None:
-            continue  # unmapped fuel type — skip gracefully
+            # Still record the timestamp even if fuel type is unmapped
+            if iso_ts is not None:
+                existing = timestamps.get(station_id)
+                if existing is None or iso_ts > existing:
+                    timestamps[station_id] = iso_ts
+            continue  # unmapped fuel type — skip price
 
         try:
             price = float(price_str)
@@ -153,10 +173,16 @@ def _parse_price_csv(text: str) -> dict[str, dict[str, list[float]]]:
         if price <= 0:
             continue
 
-        station_prices = result.setdefault(station_id, {})
+        station_prices = prices.setdefault(station_id, {})
         station_prices.setdefault(fuel_key, []).append(price)
 
-    return result
+        # Keep the latest timestamp seen for this station
+        if iso_ts is not None:
+            existing = timestamps.get(station_id)
+            if existing is None or iso_ts > existing:
+                timestamps[station_id] = iso_ts
+
+    return prices, timestamps
 
 
 def _parse_meta_csv(text: str) -> dict[str, dict[str, Any]]:
@@ -396,7 +422,7 @@ class ItMaseProvider(BaseProvider):
             ProviderError: Station not found in the national dataset or the
                            CSV data is structurally invalid.
         """
-        price_data, meta_data = await self._fetch_both_csvs(session)
+        price_data, timestamps_data, meta_data = await self._fetch_both_csvs(session)
 
         prices = price_data.get(station_id)
         if prices is None:
@@ -412,7 +438,7 @@ class ItMaseProvider(BaseProvider):
                 "The station may have been decommissioned."
             )
 
-        last_updated = self._extract_latest_timestamp(price_data, station_id)
+        last_updated = self._extract_latest_timestamp(timestamps_data, station_id)
         return _build_station_data(station_id, meta, prices, last_updated)
 
     async def async_fetch_station_name(
@@ -434,7 +460,7 @@ class ItMaseProvider(BaseProvider):
             Station name string, or None on failure.
         """
         try:
-            _, meta_data = await self._fetch_both_csvs(session)
+            _, _timestamps, meta_data = await self._fetch_both_csvs(session)
             meta = meta_data.get(station_id)
             if meta:
                 nome = meta.get("nome")
@@ -480,7 +506,7 @@ class ItMaseProvider(BaseProvider):
         radius_km: float = float(kwargs.get("radius_km", self._radius_km))
 
         try:
-            price_data, meta_data = await self._fetch_both_csvs(session)
+            price_data, _timestamps, meta_data = await self._fetch_both_csvs(session)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed to fetch CSVs: %s", err)
             return []
@@ -542,11 +568,15 @@ class ItMaseProvider(BaseProvider):
     async def _fetch_both_csvs(
         self,
         session: ClientSession,
-    ) -> tuple[dict[str, dict[str, list[float]]], dict[str, dict[str, Any]]]:
+    ) -> tuple[
+        dict[str, dict[str, list[float]]],
+        dict[str, str | None],
+        dict[str, dict[str, Any]],
+    ]:
         """Fetch and parse both MIMIT CSV files concurrently.
 
         Returns:
-            Tuple of (price_data, meta_data).
+            Tuple of (price_data, timestamps_data, meta_data).
 
         Raises:
             ProviderError: On HTTP error or structurally invalid response.
@@ -558,7 +588,7 @@ class ItMaseProvider(BaseProvider):
 
         price_text, meta_text = await asyncio.gather(price_task, meta_task)
 
-        price_data = _parse_price_csv(_skip_banner(price_text))
+        price_data, timestamps_data = _parse_price_csv(_skip_banner(price_text))
         meta_data = _parse_meta_csv(_skip_banner(meta_text))
 
         if not price_data:
@@ -570,7 +600,7 @@ class ItMaseProvider(BaseProvider):
                 "MIMIT metadata CSV parsed to empty dataset — possible format change."
             )
 
-        return price_data, meta_data
+        return price_data, timestamps_data, meta_data
 
     async def _fetch_csv(
         self,
@@ -609,23 +639,17 @@ class ItMaseProvider(BaseProvider):
 
     def _extract_latest_timestamp(
         self,
-        price_data: dict[str, dict[str, list[float]]],
+        timestamps_data: dict[str, str | None],
         station_id: str,
     ) -> str | None:
-        """Extract the most recent dtComu timestamp for a station.
+        """Return the most recent dtComu timestamp for a station, or None.
 
-        The full price CSV is already parsed into price lists by this point.
-        This method cannot recover per-row timestamps from the aggregated
-        structure.  To keep memory usage bounded the raw CSV is not retained.
-        We return None here; callers that need per-station timestamps should
-        extend the parse logic to store dtComu alongside each price entry.
-
-        The coordinator stores last_successful_fetch independently.
+        Args:
+            timestamps_data: station_id → ISO 8601 timestamp dict from
+                             _parse_price_csv.
+            station_id:      MIMIT idImpianto string to look up.
 
         Returns:
-            None (timestamp not available from aggregated parse).
+            ISO 8601 timestamp string, or None if not present.
         """
-        # The current parse aggregates prices into lists for efficiency.
-        # Per-row timestamps are not retained to keep memory bounded.
-        # The coordinator's last_successful_fetch sensor fills this role.
-        return None
+        return timestamps_data.get(station_id)
