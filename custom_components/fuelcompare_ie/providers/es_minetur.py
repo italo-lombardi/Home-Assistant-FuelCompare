@@ -84,7 +84,6 @@ _PRICE_FIELDS: dict[str, str] = {
 }
 
 # Earth radius in km (WGS84 mean radius)
-_EARTH_RADIUS_KM = 6371.0
 
 
 class EsMineturProvider(BaseProvider):

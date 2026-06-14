@@ -58,7 +58,7 @@ from typing import Any
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km  # noqa: F401
+from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -344,8 +344,8 @@ async def _parse_bulletin(raw: bytes) -> StationData:
 
         for row_idx, row in enumerate(ws.iter_rows(values_only=True)):
             if row_idx == 0:
-                # Row 1: date serial — capture as string for lastupdated
-                date_val = row[1] if len(row) > 1 else None
+                # Row 1: date is in column A (index 0), not column B (index 1)
+                date_val = row[0] if len(row) > 0 else None
                 if date_val is not None:
                     bulletin_date = str(date_val)
                 continue

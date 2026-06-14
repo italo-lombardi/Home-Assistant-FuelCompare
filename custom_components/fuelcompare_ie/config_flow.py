@@ -30,7 +30,6 @@ from .const import (
     DEFAULT_RADIUS_KM,
     DOMAIN,
 )
-from .coordinator import FuelCompareIECoordinator
 from .providers import PROVIDER_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
@@ -345,27 +344,16 @@ async def _fetch_station_name(
 ) -> str | None:
     """Resolve station display name via the selected provider.
 
-    Falls back to DEFAULT_PROVIDER if provider_key is not in the registry.
-    Module-level so tests can patch coordinator._fetch_* methods.
+    Calls provider.async_fetch_station_name() directly so all providers work,
+    not just the IE fuelcompare.ie provider.
     """
-    provider_cls = PROVIDER_REGISTRY.get(provider_key) or PROVIDER_REGISTRY.get(
-        DEFAULT_PROVIDER
-    )
+    provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
         return None
     try:
         session = async_get_clientsession(hass)
         provider = provider_cls(station_id)
-        coordinator = FuelCompareIECoordinator(hass, provider, station_id)
-        await coordinator._fetch_page_assets(session)
-        data = await coordinator._fetch_nextjs(session)
-        if data is None:
-            data = await coordinator._fetch_encrypted_api(session)
-        if data:
-            if data.get("name"):
-                return data["name"]
-            if data.get("tablename"):
-                return data["tablename"].replace("_", " ").title()
+        return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
     return None

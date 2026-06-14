@@ -320,19 +320,15 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
 
 
 async def test_fetch_station_name_success(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns the name field when present."""
+    """_fetch_station_name returns the name from provider.async_fetch_station_name."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value={"name": "Circle K Mulhuddart", "tablename": "circle_k"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value="Circle K Mulhuddart",
         ),
     ):
         result = await _fetch_station_name(hass, "791")
@@ -341,45 +337,32 @@ async def test_fetch_station_name_success(hass: HomeAssistant) -> None:
 
 
 async def test_fetch_station_name_tablename_fallback(hass: HomeAssistant) -> None:
-    """_fetch_station_name falls back to formatted tablename when name field absent."""
+    """_fetch_station_name returns None when provider returns None (no special tablename logic)."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value={"tablename": "circle_k"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value=None,
         ),
     ):
         result = await _fetch_station_name(hass, "790")
 
-    assert result == "Circle K"
+    assert result is None
 
 
 async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) -> None:
-    """_fetch_station_name falls back to encrypted API when Next.js returns None."""
+    """_fetch_station_name returns provider result (IE provider uses fallback paths internally)."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value=None,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_encrypted_api",
-            new_callable=AsyncMock,
-            return_value={"name": "Applegreen Cookstown", "tablename": "applegreen"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value="Applegreen Cookstown",
         ),
     ):
         result = await _fetch_station_name(hass, "790")
@@ -388,19 +371,15 @@ async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) ->
 
 
 async def test_fetch_station_name_no_name_no_tablename(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns None when station data has neither name nor tablename."""
+    """_fetch_station_name returns None when provider returns None."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_nextjs",
-            new_callable=AsyncMock,
-            return_value={"county": "Dublin"},
-        ),
-        patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            return_value=None,
         ),
     ):
         result = await _fetch_station_name(hass, "790")
@@ -412,12 +391,12 @@ async def test_fetch_station_name_exception_returns_none(hass: HomeAssistant) ->
     """_fetch_station_name returns None on any exception."""
     with (
         patch(
-            "custom_components.fuelcompare_ie.config_flow.FuelCompareIECoordinator._fetch_page_assets",
-            new_callable=AsyncMock,
-            side_effect=Exception("network error"),
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
         ),
         patch(
-            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
+            new_callable=AsyncMock,
+            side_effect=Exception("network error"),
         ),
     ):
         result = await _fetch_station_name(hass, "790")

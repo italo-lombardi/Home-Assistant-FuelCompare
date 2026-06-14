@@ -44,8 +44,8 @@ def _make_xlsx_bytes(
     wb = openpyxl.Workbook()
     ws = wb.active
 
-    # Row 1 — date row
-    ws.append(["", bulletin_date, "", "", "", ""])
+    # Row 1 — date row (date in col A)
+    ws.append([bulletin_date, "", "", "", "", ""])
     # Row 2 — units
     ws.append(
         ["Country", "Euro/1000L", "Euro/1000L", "Euro/1000L", "change", "Euro/1000L"]
