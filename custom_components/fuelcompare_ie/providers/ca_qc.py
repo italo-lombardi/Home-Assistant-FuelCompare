@@ -201,7 +201,6 @@ def _build_station_data(feature: dict[str, Any], station_id: str) -> StationData
         "diesel": prices["diesel"],
         "name": name,
         "brand": brand,
-        "tablename": brand,
         "address": full_address,
         "county": region,
         "latitude": latitude,
@@ -441,8 +440,7 @@ class CaQcProvider(BaseProvider):
             display_name = f"{brand} {name}".strip() if brand else name
             if price_parts:
                 label = f"{display_name} — {' / '.join(price_parts)} ({dist:.1f} km)"
-                # Sort key: cheapest regular unleaded, then distance
-                sort_key = dist
+                sort_key = dist  # sort by distance
             else:
                 label = f"{display_name} ({dist:.1f} km)"
                 sort_key = radius_km + dist  # push no-price stations to end

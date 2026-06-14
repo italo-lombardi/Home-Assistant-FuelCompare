@@ -235,8 +235,12 @@ class SiGorivaProvider(BaseProvider):
             List of ("pk_string", "Name — Brand — Diesel €x.xxx") tuples,
             or an empty list on any failure.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs.get("lng") or self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        )
+        lng: float | None = (
+            kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        )
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         try:

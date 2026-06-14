@@ -86,6 +86,8 @@ lat/lng is supplied.  When a postal_code kwarg is present it is used directly.
 
 from __future__ import annotations
 
+import asyncio
+
 import logging
 import re
 from typing import Any
@@ -530,7 +532,7 @@ class BeCarbuProvider(BaseProvider):
         try:
             town, location_id = await self._resolve_location(session, postal_code)
             stations = await self._fetch_station_listing(
-                session, "D", town, postal_code, location_id
+                session, _FUEL_KEY_TO_SLUG["diesel"], town, postal_code, location_id
             )
             for s in stations:
                 if s.get("station_id") == station_id:
@@ -599,12 +601,10 @@ class BeCarbuProvider(BaseProvider):
             return []
 
         # Fetch diesel and E10 listings concurrently
-        import asyncio
-
         try:
             diesel_result, e10_result = await asyncio.gather(
                 self._fetch_station_listing(
-                    session, "D", town, postal_code, location_id
+                    session, _FUEL_KEY_TO_SLUG["diesel"], town, postal_code, location_id
                 ),
                 self._fetch_station_listing(
                     session, "E10", town, postal_code, location_id

@@ -42,10 +42,8 @@ Currency
 Prices are in KM/L (Bosnian Convertible Mark per litre).
 1 KM ≈ 0.51 EUR (fixed peg: 1 EUR = 1.95583 KM).
 Prices are stored as KM/L without conversion; the sensor platform
-renders them as-is.  The currency label "KM" is not stored in
-StationData — the HA front-end reads the unit_of_measurement from
-the sensor, which is set to "KM/L" in sensor.py via the provider's
-CURRENCY_CODE class attribute.
+renders them as-is.  The currency label is set via the provider's
+CURRENCY class attribute (CURRENCY = "BAM/L").
 
 Robots / ToS
 ------------
@@ -518,8 +516,6 @@ def _parse_stations_div(html: str) -> list[dict[str, Any]]:
 
     Returns same format as the table parser for compatibility.
     """
-    import re
-
     stations: list[dict[str, Any]] = []
 
     # Match station card blocks — look for recurring structural patterns
@@ -544,7 +540,7 @@ def _parse_stations_div(html: str) -> list[dict[str, Any]]:
         price_match = re.match(r"^(\d+)[,\.](\d{3})$", text)
         if price_match:
             # Price like "1,234" or "1.234"
-            val_str = f"{price_match.group(1)}.{price_match.group(2)}"
+            val_str = f"{price_match.group(1)}.{price_match.group(2).ljust(3, '0')}"
             try:
                 val = float(val_str)
                 if 0.3 <= val <= 5.0:
@@ -601,8 +597,11 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
           super98 (float|None), lpg (float|None).
         Empty list if no table / no parseable data found.
     """
-    # Try modern div-card layout first (Tailwind CSS site)
-    if "<table" not in html.lower():
+    # Use div-card parser when the modern Tailwind CSS layout is detected
+    # (presence of id="item_N" divs); fall back to table parser otherwise.
+    import re as _re
+
+    if _re.search(r'id=["\']item_\d+["\']', html):
         div_result = _parse_stations_div(html)
         if div_result:
             _LOGGER.debug(
@@ -611,6 +610,7 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
             )
             return div_result
 
+    # Fall back to table-based parser
     parser = _TableParser()
     try:
         parser.feed(html)

@@ -107,8 +107,6 @@ _LOGGER = logging.getLogger(__name__)
 
 _BASE_URL = "https://carbu.com/luxembourg/index.php/liste"
 
-# Alternative API endpoint — try if the primary returns 404
-_ALT_URL = "https://api.carbu.com/luxembourg/liste"
 
 _HEADERS: dict[str, str] = {
     "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
@@ -272,6 +270,8 @@ class LuCarbuProvider(BaseProvider):
         # Use stored lat/lng if available; otherwise fall back to Luxembourg centre
         search_lat = self._latitude if self._latitude is not None else _LU_CENTRE_LAT
         search_lng = self._longitude if self._longitude is not None else _LU_CENTRE_LNG
+        # Luxembourg is ~50 km diagonal; use at least _NATIONAL_RADIUS_KM to ensure
+        # the station is reachable regardless of user-configured radius.
         search_radius = max(self._radius_km, _NATIONAL_RADIUS_KM)
 
         tasks = [

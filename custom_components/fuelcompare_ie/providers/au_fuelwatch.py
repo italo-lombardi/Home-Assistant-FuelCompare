@@ -405,15 +405,15 @@ def _parse_lat_lng(raw: str | None) -> float | None:
         return None
 
 
-def _parse_is_open(site_features: str | None) -> bool | None:
+def _parse_is_open(site_features: str | None) -> bool:
     """Infer is_open from site-features opening hours text.
 
     The <site-features> field may contain structured text like:
       'Fuel Cards ATM EFTPOS Air Water Ice, Open Mon: 04:00-23:00, ...'
 
-    If no opening hours information is present (or the field is absent),
-    returns None (unknown).  This is a best-effort heuristic; FuelWatch
-    does not publish a real-time open/closed status.
+    Returns False when no schedule information is present (unknown/closed).
+    Returns True when an "Open" schedule string is detected.
+    Best-effort heuristic; FuelWatch does not publish a real-time status.
     """
     if not site_features:
         return False  # no schedule info → assume closed (unknown)
