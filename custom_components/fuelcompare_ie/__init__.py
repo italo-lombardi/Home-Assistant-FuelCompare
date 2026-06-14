@@ -6,7 +6,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_PROVIDER, CONF_STATION_ID, DEFAULT_PROVIDER, DOMAIN
+from .const import (
+    CONF_PROVIDER,
+    CONF_STATION_COUNTY,
+    CONF_STATION_ID,
+    DEFAULT_PROVIDER,
+    DOMAIN,
+)
 from .coordinator import FuelCompareIECoordinator
 from .providers import PROVIDER_REGISTRY
 
@@ -24,7 +30,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if provider_cls is None:
         provider_cls = PROVIDER_REGISTRY[DEFAULT_PROVIDER]
 
-    provider = provider_cls(station_id)
+    # Pass county to providers that support county_search mode.
+    # Use inspect to avoid TypeError on providers whose __init__ doesn't accept county.
+    import inspect
+
+    county = entry.data.get(CONF_STATION_COUNTY)
+    sig = inspect.signature(provider_cls.__init__)
+    if county and "county" in sig.parameters:
+        provider = provider_cls(station_id, county=county)
+    else:
+        provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
 
     await coordinator.async_config_entry_first_refresh()

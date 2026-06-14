@@ -189,20 +189,25 @@ class IEFuelFinderProvider(BaseProvider):
         "?city=ireland&fuel=diesel endpoint to look up your station."
     )
 
+    STATION_LOOKUP_MODE = "county_search"
+
     POLL_INTERVAL_SECONDS = 1800  # 30 minutes; /init is cached at s-maxage=300
 
-    def __init__(self, station_id: str) -> None:
+    def __init__(self, station_id: str, county: str | None = None) -> None:
         """Initialise the provider with the station UUID.
 
         Args:
             station_id: FuelFinder internal UUID for the target station
                         (e.g. ``7ec0dd4f-4322-4b4f-9de1-c8894a684626``).
+            county:     Lowercase county name pre-seeded from config entry data
+                        (e.g. ``'dublin'``).  When supplied, the first poll uses
+                        this county-scoped query instead of a national search.
         """
         self._station_id = station_id
         # Cached county name (lowercase, as required by the /stations API).
-        # Populated after the first successful fetch; None forces a national
-        # search on the first poll.
-        self._cached_county: str | None = None
+        # Pre-seeded from config entry data when available; otherwise populated
+        # after the first successful fetch.
+        self._cached_county: str | None = county.lower() if county else None
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -334,6 +339,86 @@ class IEFuelFinderProvider(BaseProvider):
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
+
+    async def async_list_stations(
+        self,
+        session: ClientSession,
+        **kwargs: object,
+    ) -> list[tuple[str, str]]:
+        """Return (station_uuid, display_label) pairs for the station picker.
+
+        Called by the config flow county_search step.  Fetches stations for the
+        supplied county for diesel AND petrol, merges results, de-dupes by UUID,
+        and returns a list sorted cheapest-first (stations with no price last).
+
+        Args:
+            session: aiohttp ClientSession.
+            county:  Lowercase county name (e.g. 'dublin').
+
+        Returns:
+            List of (uuid, "Station Name — Diesel €1.83 / Petrol €1.85") tuples.
+            Empty list on any failure.
+        """
+        county: str = str(kwargs.get("county", "ireland")).lower()
+        try:
+            diesel_resp, petrol_resp = await asyncio.gather(
+                self._fetch_stations(session, city=county, fuel="diesel"),
+                self._fetch_stations(session, city=county, fuel="petrol"),
+                return_exceptions=True,
+            )
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.debug("async_list_stations failed for county %s: %s", county, err)
+            return []
+
+        # Merge per-fuel results into one dict keyed by UUID
+        merged: dict[str, dict] = {}
+        diesel_prices: dict[str, float | None] = {}
+        petrol_prices: dict[str, float | None] = {}
+
+        if isinstance(diesel_resp, list):
+            for s in diesel_resp:
+                uid = s.get("id")
+                if uid:
+                    merged[uid] = s
+                    diesel_prices[uid] = s.get("price")
+
+        if isinstance(petrol_resp, list):
+            for s in petrol_resp:
+                uid = s.get("id")
+                if uid:
+                    if uid not in merged:
+                        merged[uid] = s
+                    petrol_prices[uid] = s.get("price")
+
+        if not merged:
+            return []
+
+        result: list[tuple[str, str, float]] = []
+        for uid, station in merged.items():
+            name = station.get("name") or "Unknown"
+            brand = station.get("brand") or ""
+            display_name = f"{brand} {name}".strip() if brand else name
+
+            d_price = diesel_prices.get(uid)
+            p_price = petrol_prices.get(uid)
+
+            price_parts = []
+            if d_price is not None:
+                price_parts.append(f"Diesel €{d_price:.3f}")
+            if p_price is not None:
+                price_parts.append(f"Petrol €{p_price:.3f}")
+
+            if price_parts:
+                label = f"{display_name} — {' / '.join(price_parts)}"
+                sort_key = min(filter(None, [d_price, p_price]))
+            else:
+                label = f"{display_name}"
+                sort_key = 9999.0  # stations with no price go to end
+
+            result.append((uid, label, sort_key))
+
+        result.sort(key=lambda x: x[2])
+        return [(uid, label) for uid, label, _ in result]
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

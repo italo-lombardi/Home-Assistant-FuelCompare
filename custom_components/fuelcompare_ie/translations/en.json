@@ -35,11 +35,26 @@
         "data": {
           "name": "Name"
         }
+      },
+      "county": {
+        "title": "Select County",
+        "description": "Select your county to find nearby stations.",
+        "data": {
+          "station_county": "County"
+        }
+      },
+      "station_picker": {
+        "title": "Select Station",
+        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "data": {
+          "station_id": "Station"
+        }
       }
     },
     "error": {
       "invalid_station_id": "Station ID must be a positive integer.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values."
+      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
+      "no_stations_found": "No stations found for this county. Try a different county."
     },
     "abort": {
       "already_configured": "This station is already configured."

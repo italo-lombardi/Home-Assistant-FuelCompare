@@ -41,6 +41,12 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        # Navigate through country step if shown (now shown since >1 country registered)
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        # Navigate through provider step if shown (>1 IE provider registered)
         if result.get("step_id") == "provider":
             result = await hass.config_entries.flow.async_configure(
                 result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -83,6 +89,12 @@ async def test_config_flow_custom_name(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        # Navigate through country step if shown (now shown since >1 country registered)
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        # Navigate through provider step if shown (>1 IE provider registered)
         if result.get("step_id") == "provider":
             result = await hass.config_entries.flow.async_configure(
                 result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -120,6 +132,12 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        # Navigate through country step if shown (now shown since >1 country registered)
+        if result.get("step_id") == "user":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+            )
+        # Navigate through provider step if shown (>1 IE provider registered)
         if result.get("step_id") == "provider":
             result = await hass.config_entries.flow.async_configure(
                 result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -168,6 +186,10 @@ async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
     # Navigate through provider step if shown (multiple IE providers registered)
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+        )
     if result.get("step_id") == "provider":
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -193,6 +215,10 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+        )
     if result.get("step_id") == "provider":
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -218,6 +244,10 @@ async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+        )
     if result.get("step_id") == "provider":
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -251,6 +281,10 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+        )
     if result.get("step_id") == "provider":
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
@@ -465,7 +499,11 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
             result = await hass.config_entries.flow.async_init(
                 DOMAIN, context={"source": config_entries.SOURCE_USER}
             )
-            # With 2 IE providers, provider step is shown
+            # Navigate through country step if shown
+            if result.get("step_id") == "user":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_COUNTRY: DEFAULT_COUNTRY}
+                )
             assert result["step_id"] in ("provider", "location", "station")
 
             # Drive to location step directly

@@ -233,6 +233,7 @@ class BaseProvider(ABC):
 
     Override to give provider-specific guidance e.g.:
     'For fuelfinder.ie/station/123, enter 123.'
+    Only used when STATION_LOOKUP_MODE='manual_id'.
     """
 
     POLL_INTERVAL_SECONDS: ClassVar[int] = 1800
@@ -241,6 +242,16 @@ class BaseProvider(ABC):
     Override to set a provider-appropriate cadence. Government open-data
     APIs that update every 30 min should use 1800. Real-time APIs can use
     600. Daily (FuelWatch WA) should use 86400.
+    """
+
+    STATION_LOOKUP_MODE: ClassVar[
+        Literal["manual_id", "county_search", "location_search"]
+    ] = "manual_id"
+    """How the config flow helps the user identify their station.
+
+    'manual_id'      — user types a station ID directly (default, fuelcompare.ie).
+    'county_search'  — user picks a county then selects from a live station list.
+    'location_search'— user enters lat/lng + radius, then selects from a live list.
     """
 
     # ── Enforcement ──────────────────────────────────────────────────────────
@@ -300,3 +311,23 @@ class BaseProvider(ABC):
         For CONFIG_MODE='location' providers, returning None is correct;
         the config flow uses the auto-generated 'Country (lat, lon)' title.
         """
+
+    async def async_list_stations(
+        self,
+        session: ClientSession,
+        **kwargs: Any,
+    ) -> list[tuple[str, str]]:
+        """Return a list of (station_id, display_label) tuples for the station picker.
+
+        Called by the config flow when STATION_LOOKUP_MODE is 'county_search' or
+        'location_search'. The config flow passes appropriate keyword arguments:
+          - county_search:   county='dublin'
+          - location_search: lat=53.3498, lng=-6.2603, radius_km=10
+
+        Returns an ordered list suitable for a vol.In dropdown:
+          [("uuid-1", "Circle K Taney — Diesel €1.83/L"), ...]
+
+        Providers that set STATION_LOOKUP_MODE != 'manual_id' must override this
+        method. The default implementation returns an empty list (safe fallback).
+        """
+        return []

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from .base import BaseProvider, ProviderError, StationData
+from .hr_mzoe import HRMzoeProvider
 from .ie_fuelcompare import IEFuelCompareProvider
 from .ie_fuelfinder import IEFuelFinderProvider
 
 PROVIDER_REGISTRY: dict[str, type[BaseProvider]] = {
     IEFuelCompareProvider.PROVIDER_KEY: IEFuelCompareProvider,
     IEFuelFinderProvider.PROVIDER_KEY: IEFuelFinderProvider,
+    HRMzoeProvider.PROVIDER_KEY: HRMzoeProvider,
 }
 
 
