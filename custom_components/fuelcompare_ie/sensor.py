@@ -255,7 +255,6 @@ def _device_info(station_id: str, station_name: str, manufacturer: str) -> Devic
 class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
     """Representation of a Fuel Compare fuel price sensor."""
 
-    _attr_device_class = SensorDeviceClass.MONETARY
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_has_entity_name = True
 
