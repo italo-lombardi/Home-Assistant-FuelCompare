@@ -96,12 +96,13 @@ def _make_csv_text(*rows: dict[str, str]) -> str:
 def _make_mock_response(
     status: int = 200,
     body: bytes | None = None,
-) -> AsyncMock:
+) -> MagicMock:
     """Build a mock aiohttp response that works as an async context manager."""
-    mock_resp = AsyncMock()
+    mock_resp = MagicMock()
     mock_resp.status = status
     mock_resp.read = AsyncMock(return_value=body if body is not None else b"")
     mock_resp.raise_for_status = MagicMock()
+    mock_resp.headers = {}
     mock_resp.__aenter__ = AsyncMock(return_value=mock_resp)
     mock_resp.__aexit__ = AsyncMock(return_value=False)
     return mock_resp
@@ -1355,3 +1356,46 @@ def test_parse_row_ignores_invalid_iso_timestamp_in_price_submission() -> None:
     assert isinstance(result, dict)
     # lastupdated should still be set from one of the other valid timestamps.
     assert result["lastupdated"] is not None
+
+
+# ---------------------------------------------------------------------------
+# ETag storage and conditional GET (lines 345, 360)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_fetch_csv_stores_etag_from_200_response() -> None:
+    """_fetch_csv stores ETag from a 200 response for subsequent conditional GETs (lines 360)."""
+    GbFuelfinderProvider._csv_etag = None
+    csv_text = _make_csv_text(_BASE_ROW)
+
+    resp = _make_mock_response(200, csv_text.encode("utf-8"))
+    resp.headers = {"ETag": '"abc123"'}
+    session = _make_session(resp)
+
+    provider = GbFuelfinderProvider(_NODE_ID)
+    await provider._fetch_csv(session)
+
+    assert GbFuelfinderProvider._csv_etag == '"abc123"'
+
+
+@pytest.mark.asyncio
+async def test_fetch_csv_sends_if_none_match_when_etag_cached() -> None:
+    """_fetch_csv includes If-None-Match header when ETag is stored (line 345)."""
+    GbFuelfinderProvider._csv_etag = '"cached-etag"'
+    GbFuelfinderProvider._csv_cache = None
+    GbFuelfinderProvider._csv_cache_ts = 0.0
+
+    csv_text = _make_csv_text(_BASE_ROW)
+    resp = _make_mock_response(200, csv_text.encode("utf-8"))
+    resp.headers = {}
+    session = _make_session(resp)
+
+    await GbFuelfinderProvider(_NODE_ID)._fetch_csv(session)
+
+    call_kwargs = session.get.call_args
+    headers_sent = call_kwargs[1].get(
+        "headers", call_kwargs[0][1] if len(call_kwargs[0]) > 1 else {}
+    )
+    assert "If-None-Match" in headers_sent
+    assert headers_sent["If-None-Match"] == '"cached-etag"'
