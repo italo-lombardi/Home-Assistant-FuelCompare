@@ -159,6 +159,9 @@ class GbFuelfinderProvider(BaseProvider):
     # Class-level CSV cache shared across all instances (avoids re-downloading 7.7 MB).
     _csv_cache: ClassVar[str | None] = None
     _csv_cache_ts: ClassVar[float] = 0.0
+    _csv_etag: ClassVar[str | None] = (
+        None  # ETag for conditional GET (304 Not Modified)
+    )
     _CSV_CACHE_TTL: ClassVar[int] = 21600
 
     CAPABILITIES: frozenset[str] = frozenset(
@@ -337,16 +340,28 @@ class GbFuelfinderProvider(BaseProvider):
             text = GbFuelfinderProvider._csv_cache
         else:
             _LOGGER.debug("Fetching UK Fuel Finder CSV from %s", _CSV_URL)
+            req_headers = dict(_HEADERS)
+            if GbFuelfinderProvider._csv_etag:
+                req_headers["If-None-Match"] = GbFuelfinderProvider._csv_etag
             async with session.get(
-                _CSV_URL, headers=_HEADERS, timeout=_TIMEOUT
+                _CSV_URL, headers=req_headers, timeout=_TIMEOUT
             ) as resp:
-                resp.raise_for_status()
-                raw_bytes = await resp.read()
-
-            # Decode; GitHub raw CDN serves UTF-8 text.
-            text = raw_bytes.decode("utf-8", errors="replace")
-            GbFuelfinderProvider._csv_cache = text
-            GbFuelfinderProvider._csv_cache_ts = now
+                if resp.status == 304 and GbFuelfinderProvider._csv_cache is not None:
+                    _LOGGER.debug(
+                        "UK Fuel Finder CSV: 304 Not Modified — using cached version"
+                    )
+                    text = GbFuelfinderProvider._csv_cache
+                    GbFuelfinderProvider._csv_cache_ts = now
+                else:
+                    resp.raise_for_status()
+                    raw_bytes = await resp.read()
+                    etag = resp.headers.get("ETag")
+                    if etag:
+                        GbFuelfinderProvider._csv_etag = etag
+                    # Decode; GitHub raw CDN serves UTF-8 text.
+                    text = raw_bytes.decode("utf-8", errors="replace")
+                    GbFuelfinderProvider._csv_cache = text
+                    GbFuelfinderProvider._csv_cache_ts = now
 
         def _parse():
             return list(csv.DictReader(io.StringIO(text)))

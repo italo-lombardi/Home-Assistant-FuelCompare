@@ -162,7 +162,7 @@ _FUEL_KEY_TO_SLUG: dict[str, str] = {
 _EXTRA_SLUG_TO_KEY: dict[str, str] = {
     "B10": "diesel_b10",  # Diesel B10
     "HVO": "diesel_hvo",  # Diesel XTL/HVO
-    "LNG": "lng",  # Liquefied Natural Gas
+    "LNG": "lng_fuel",  # Liquefied Natural Gas (renamed from "lng" to avoid confusion with longitude)
     "H2": "hydrogen",  # Hydrogen
     "ELEC": "electric",  # Electric charging
 }

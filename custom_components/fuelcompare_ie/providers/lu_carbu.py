@@ -270,9 +270,8 @@ class LuCarbuProvider(BaseProvider):
         # Use stored lat/lng if available; otherwise fall back to Luxembourg centre
         search_lat = self._latitude if self._latitude is not None else _LU_CENTRE_LAT
         search_lng = self._longitude if self._longitude is not None else _LU_CENTRE_LNG
-        # Luxembourg is ~50 km diagonal; use at least _NATIONAL_RADIUS_KM to ensure
-        # the station is reachable regardless of user-configured radius.
-        search_radius = max(self._radius_km, _NATIONAL_RADIUS_KM)
+        # Use the user-configured radius; default to the national radius if unset.
+        search_radius = self._radius_km if self._radius_km else _NATIONAL_RADIUS_KM
 
         tasks = [
             self._fetch_fuel_stations(
