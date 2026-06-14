@@ -591,10 +591,11 @@ def test_provider_unique_id_uses_uuid_not_osm_id() -> None:
 def test_parse_station_returns_all_required_keys() -> None:
     """_parse_station returns a dict with all 15 normalised data keys."""
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=_BASE_STATION,
-        fuel_prices={"diesel": 1.828, "petrol": 1.849, "kerosene": None, "cng": None},
-    )
+    prices_by_fuel = {
+        "diesel": {**_BASE_STATION, "price": 1.828},
+        "petrol": {**_BASE_STATION, "price": 1.849},
+    }
+    result = provider._build_station_data(_STATION_UUID, _BASE_STATION, prices_by_fuel)
 
     required_keys = {
         "diesel",
@@ -624,10 +625,11 @@ def test_parse_station_returns_all_required_keys() -> None:
 def test_parse_station_price_not_divided() -> None:
     """_parse_station stores float prices as-is (no /100 conversion)."""
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=_BASE_STATION,
-        fuel_prices={"diesel": 1.828, "petrol": 1.849, "kerosene": None, "cng": None},
-    )
+    prices_by_fuel = {
+        "diesel": {**_BASE_STATION, "price": 1.828},
+        "petrol": {**_BASE_STATION, "price": 1.849},
+    }
+    result = provider._build_station_data(_STATION_UUID, _BASE_STATION, prices_by_fuel)
     assert result["diesel"] == pytest.approx(1.828)
     assert result["petrol"] == pytest.approx(1.849)
 
@@ -635,10 +637,8 @@ def test_parse_station_price_not_divided() -> None:
 def test_parse_station_kerosene_none() -> None:
     """_parse_station stores kerosene=None when no kerosene price available."""
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=_BASE_STATION,
-        fuel_prices={"diesel": 1.828, "petrol": None, "kerosene": None, "cng": None},
-    )
+    prices_by_fuel = {"diesel": {**_BASE_STATION, "price": 1.828}}
+    result = provider._build_station_data(_STATION_UUID, _BASE_STATION, prices_by_fuel)
     assert result["kerosene"] is None
 
 
@@ -646,27 +646,18 @@ def test_parse_station_brand_empty_string_becomes_none() -> None:
     """_parse_station normalises empty string brand to None."""
     station = {**_BASE_STATION, "brand": ""}
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=station,
-        fuel_prices={"diesel": 1.828, "petrol": None, "kerosene": None, "cng": None},
-    )
+    prices_by_fuel = {"diesel": {**station, "price": 1.828}}
+    result = provider._build_station_data(_STATION_UUID, station, prices_by_fuel)
     assert result["brand"] is None
 
 
 def test_parse_station_confidence_preserved() -> None:
-    """_parse_station passes confidence through unchanged."""
+    """_build_station_data passes confidence through unchanged."""
     for confidence_val in ("fresh", "likely", "outdated", None):
         station = {**_BASE_STATION, "confidence": confidence_val}
         provider = IEFuelFinderProvider(_STATION_UUID)
-        result = provider._parse_station(
-            station=station,
-            fuel_prices={
-                "diesel": 1.828,
-                "petrol": None,
-                "kerosene": None,
-                "cng": None,
-            },
-        )
+        prices_by_fuel = {"diesel": {**station, "price": 1.828}}
+        result = provider._build_station_data(_STATION_UUID, station, prices_by_fuel)
         assert result["confidence"] == confidence_val
 
 
@@ -674,10 +665,7 @@ def test_parse_station_has_price_false() -> None:
     """_parse_station propagates has_price=False correctly."""
     station = {**_BASE_STATION, "has_price": False, "price": None, "confidence": None}
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=station,
-        fuel_prices={"diesel": None, "petrol": None, "kerosene": None, "cng": None},
-    )
+    result = provider._build_station_data(_STATION_UUID, station, {})
     assert result["has_price"] is False
 
 
@@ -685,10 +673,8 @@ def test_parse_station_lat_lng_none_for_user_submitted() -> None:
     """_parse_station handles null lat/lng for user-submitted stations."""
     station = {**_BASE_STATION, "lat": None, "lng": None}
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=station,
-        fuel_prices={"diesel": 1.828, "petrol": None, "kerosene": None, "cng": None},
-    )
+    prices_by_fuel = {"diesel": {**station, "price": 1.828}}
+    result = provider._build_station_data(_STATION_UUID, station, prices_by_fuel)
     assert result["latitude"] is None
     assert result["lng"] is None
 
@@ -696,10 +682,8 @@ def test_parse_station_lat_lng_none_for_user_submitted() -> None:
 def test_parse_station_updated_at_mirrored_to_lastupdated() -> None:
     """_parse_station sets lastupdated equal to updated_at for sensor compat."""
     provider = IEFuelFinderProvider(_STATION_UUID)
-    result = provider._parse_station(
-        station=_BASE_STATION,
-        fuel_prices={"diesel": 1.828, "petrol": None, "kerosene": None, "cng": None},
-    )
+    prices_by_fuel = {"diesel": {**_BASE_STATION, "price": 1.828}}
+    result = provider._build_station_data(_STATION_UUID, _BASE_STATION, prices_by_fuel)
     assert result["lastupdated"] == result["lastupdated"]
     assert result["lastupdated"] == "2026-06-13T16:04:01.754194+00:00"
 
@@ -885,6 +869,51 @@ async def test_async_fetch_uses_county_in_stations_request() -> None:
         assert params.get("city") == "cork", (
             f"Expected city=cork in params but got: {params}"
         )
+
+
+async def test_async_fetch_county_stale_falls_back_to_national() -> None:
+    """When cached county returns no match, falls back to national and updates county cache."""
+    # County-scoped requests return empty lists; national returns the station
+    empty_county_resp = _make_mock_response(
+        200, json_data={"stations": [], "total": 0, "city": "cork", "fuel": "diesel"}
+    )
+    national_diesel = _make_mock_response(
+        200,
+        json_data=_stations_response(
+            station={**_BASE_STATION, "county": "Dublin"}, fuel="diesel"
+        ),
+    )
+    national_petrol = _make_mock_response(
+        200, json_data={"stations": [], "total": 0, "city": "ireland", "fuel": "petrol"}
+    )
+    national_kerosene = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "ireland", "fuel": "kerosene"},
+    )
+    national_cng = _make_mock_response(
+        200, json_data={"stations": [], "total": 0, "city": "ireland", "fuel": "cng"}
+    )
+    # 4 cork requests return empty, then 4 national requests for the retry
+    session = _make_session(
+        empty_county_resp,
+        empty_county_resp,
+        empty_county_resp,
+        empty_county_resp,
+        national_diesel,
+        national_petrol,
+        national_kerosene,
+        national_cng,
+    )
+
+    provider = IEFuelFinderProvider(_STATION_UUID)
+    provider._cached_county = "cork"  # stale county
+
+    data = await provider.async_fetch(session, _STATION_UUID)
+
+    # ProviderError should NOT be raised — found via national fallback
+    assert data["diesel"] == pytest.approx(1.828)
+    # County cache updated to actual station county
+    assert provider._cached_county == "dublin"
 
 
 # ---------------------------------------------------------------------------

@@ -333,3 +333,101 @@ async def test_is_open_extra_attributes_no_data() -> None:
     """StationIsOpenBinarySensor extra_state_attributes returns base when data is None."""
     sensor = _make_binary_sensor(None)
     assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# FacilityBinarySensor
+# ---------------------------------------------------------------------------
+
+
+def _make_facility_sensor(cap_key: str, data: dict | None):
+    from custom_components.fuelcompare_ie.binary_sensor import FacilityBinarySensor
+    from tests.test_sensor import _make_coordinator
+
+    coord = _make_coordinator(data)
+    sensor = object.__new__(FacilityBinarySensor)
+    sensor._station_id = "12345"
+    sensor._cap_key = cap_key
+    sensor._attr_icon = "mdi:test"
+    sensor._attr_translation_key = cap_key
+    sensor._attr_device_class = None
+    sensor._attr_unique_id = f"fuelcompare_ie_12345_{cap_key}"
+    sensor._attr_device_info = {}
+    object.__setattr__(sensor, "coordinator", coord)
+    return sensor
+
+
+def test_facility_sensor_is_on_true() -> None:
+    sensor = _make_facility_sensor("has_car_wash", {"has_car_wash": True})
+    assert sensor.is_on is True
+
+
+def test_facility_sensor_is_on_false() -> None:
+    sensor = _make_facility_sensor("has_shop", {"has_shop": False})
+    assert sensor.is_on is False
+
+
+def test_facility_sensor_is_on_none_when_key_absent() -> None:
+    sensor = _make_facility_sensor("has_toilet", {})
+    assert sensor.is_on is None
+
+
+def test_facility_sensor_is_on_none_when_no_data() -> None:
+    sensor = _make_facility_sensor("accepts_cash", None)
+    assert sensor.is_on is None
+
+
+def test_facility_sensor_available_true_when_key_present_and_not_none() -> None:
+    sensor = _make_facility_sensor("has_atm", {"has_atm": True})
+    assert sensor.available is True
+
+
+def test_facility_sensor_available_false_when_key_absent() -> None:
+    sensor = _make_facility_sensor("has_atm", {})
+    assert sensor.available is False
+
+
+def test_facility_sensor_available_false_when_no_data() -> None:
+    sensor = _make_facility_sensor("accepts_cards", None)
+    assert sensor.available is False
+
+
+def test_facility_sensor_extra_state_attributes() -> None:
+    sensor = _make_facility_sensor("has_car_wash", {"has_car_wash": True})
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# OSM opening_hours parsing (_is_open_osm / _is_open)
+# ---------------------------------------------------------------------------
+
+
+def test_is_open_osm_standard_range() -> None:
+    """'Mo-Su 07:00-23:00' correctly identifies open/closed state."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
+    from unittest.mock import patch
+    import homeassistant.util.dt as _dt
+
+    # Simulate Monday 10:00 (open)
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = __import__("datetime").time(10, 0)
+        assert _is_open("Mo-Su 07:00-23:00") is True
+
+    # Simulate Monday 06:00 (before opening)
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = __import__("datetime").time(6, 0)
+        assert _is_open("Mo-Su 07:00-23:00") is False
+
+
+def test_is_open_osm_247() -> None:
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
+
+    assert _is_open("24/7") is True
+
+
+def test_is_open_legacy_24_hours() -> None:
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
+
+    assert _is_open("Open 24 hours") is True

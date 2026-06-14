@@ -160,7 +160,6 @@ class IEFuelFinderProvider(BaseProvider):
             # Station identity
             "name",
             "brand",
-            "tablename",
             "address",
             "county",
             "latitude",
@@ -174,11 +173,10 @@ class IEFuelFinderProvider(BaseProvider):
             # FuelFinder-specific
             "price_confidence",
             "has_price",
+            "is_open",
             # Diagnostic / coordinator-managed
             "last_successful_fetch",
             "data_fetch_problem",
-            # Passthrough identity for templates
-            "source_station_id",
         }
     )
 
@@ -248,9 +246,7 @@ class IEFuelFinderProvider(BaseProvider):
         tasks = [
             self._fetch_stations(session, city=city, fuel=fuel) for fuel in _FUEL_TYPES
         ]
-        results: list[list[dict] | None] = list(
-            await asyncio.gather(*tasks, return_exceptions=False)
-        )
+        results: list[list[dict] | None] = list(await asyncio.gather(*tasks))
 
         # If the cached county returned no match (station moved county or
         # cache went stale), retry with a national search.
@@ -278,7 +274,7 @@ class IEFuelFinderProvider(BaseProvider):
                 for fuel in _FUEL_TYPES
             ]
             retry_results: list[list[dict] | None] = list(
-                await asyncio.gather(*retry_tasks, return_exceptions=False)
+                await asyncio.gather(*retry_tasks)
             )
             for fuel, stations in zip(_FUEL_TYPES, retry_results):
                 if not stations:
@@ -646,28 +642,6 @@ class IEFuelFinderProvider(BaseProvider):
         )
 
         return data
-
-    def _parse_station(
-        self,
-        station: dict,
-        fuel_prices: dict[str, float | None],
-    ) -> dict:
-        """Test-facing wrapper: build station data from station dict + price dict.
-
-        Args:
-            station:     Raw station dict from the /stations API.
-            fuel_prices: Dict of {fuel_type: price_float_or_none}.
-
-        Returns:
-            StationData dict (same format as _build_station_data output).
-        """
-        # Convert the flat price dict into the prices_by_fuel format expected
-        # by _build_station_data: {fuel: station_dict_with_that_price}.
-        prices_by_fuel: dict[str, dict] = {}
-        for fuel, price in fuel_prices.items():
-            if price is not None:
-                prices_by_fuel[fuel] = {**station, "price": price}
-        return self._build_station_data(self._station_id, station, prices_by_fuel)
 
 
 # ── Module-level helpers ──────────────────────────────────────────────────────

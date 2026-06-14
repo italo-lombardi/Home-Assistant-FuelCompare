@@ -24,6 +24,16 @@ from .sensor import _device_info
 
 _LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
+_OSM_TIME_RE = re.compile(r"(\d{1,2}):(\d{2})")
+_OSM_DAY_MAP = {
+    "mo": 0,
+    "tu": 1,
+    "we": 2,
+    "th": 3,
+    "fr": 4,
+    "sa": 5,
+    "su": 6,
+}
 
 # ── Facility binary sensor registry ──────────────────────────────────────────
 #
@@ -68,14 +78,26 @@ def _parse_time(s: str) -> dt_time | None:
 
 
 def _is_open(hours_str: str) -> bool | None:
-    """Return True if currently open, False if closed, None if unparseable."""
+    """Return True if currently open, False if closed, None if unparseable.
+
+    Handles two formats:
+    - fuelcompare.ie: '6a.m.-10p.m.' (am/pm style)
+    - FuelFinder.ie / OSM: 'Mo-Su 07:00-23:00' or '24/7'
+    """
     if not hours_str:
         return None
     s = hours_str.strip().lower()
-    if "24" in s:
+    if "24/7" in s or ("24" in s and ("7" in s or "hour" in s)):
         return True
     if "closed" in s:
         return False
+
+    # Try OSM format first: 'Mo-Su 07:00-23:00', 'Mo-Fr 08:00-20:00; Sa 09:00-18:00'
+    osm_result = _is_open_osm(s)
+    if osm_result is not None:
+        return osm_result
+
+    # Fall back to am/pm format
     times = _TIME_RE.findall(s)
     if len(times) < 2:
         return None
@@ -89,6 +111,59 @@ def _is_open(hours_str: str) -> bool | None:
     return open_time <= now < close_time
 
 
+def _is_open_osm(hours_str: str) -> bool | None:
+    """Parse OSM opening_hours string and return open/closed status, or None."""
+    # OSM format: 'mo-su 07:00-23:00' or 'mo-fr 08:00-20:00; sa 09:00-18:00'
+    if not _OSM_TIME_RE.search(hours_str):
+        return None
+
+    now = dt_util.now()
+    today_idx = now.weekday()  # 0=Monday ... 6=Sunday
+
+    for rule in hours_str.split(";"):
+        rule = rule.strip()
+        # Extract time range
+        times = _OSM_TIME_RE.findall(rule)
+        if len(times) < 2:
+            continue
+        try:
+            open_time = dt_time(int(times[0][0]), int(times[0][1]))
+            close_time = dt_time(int(times[1][0]), int(times[1][1]))
+        except ValueError:
+            continue
+
+        # Check if today is covered by this rule's day range
+        day_part = rule.split()[0] if rule.split() else ""
+        if _day_matches(day_part, today_idx):
+            now_time = now.time()
+            if close_time <= open_time:  # crosses midnight
+                return now_time >= open_time or now_time < close_time
+            return open_time <= now_time < close_time
+
+    return None
+
+
+def _day_matches(day_spec: str, today_idx: int) -> bool:
+    """Return True if today_idx (0=Mon..6=Sun) is in the OSM day spec."""
+    if not day_spec:
+        return True  # no day spec → applies all days
+    # Handle ranges like 'mo-su', 'mo-fr', single days 'sa'
+    parts = day_spec.lower().split("-")
+    if len(parts) == 2:
+        start = _OSM_DAY_MAP.get(parts[0][:2])
+        end = _OSM_DAY_MAP.get(parts[1][:2])
+        if start is not None and end is not None:
+            if start <= end:
+                return start <= today_idx <= end
+            # wraps: e.g. 'fr-mo'
+            return today_idx >= start or today_idx <= end
+    elif len(parts) == 1:
+        day = _OSM_DAY_MAP.get(parts[0][:2])
+        if day is not None:
+            return today_idx == day
+    return True  # unparseable day spec → assume applies
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -100,11 +175,15 @@ async def async_setup_entry(
     station_name = entry.title
     caps = coordinator._provider.CAPABILITIES
 
-    # is_open and data_fetch_problem are always created
+    # is_open: created only when provider declares "is_open" capability.
+    # data_fetch_problem: always created (coordinator-managed).
     entities: list[BinarySensorEntity] = [
-        StationIsOpenBinarySensor(coordinator, station_id, station_name),
         DataFetchProblemBinarySensor(coordinator, station_id, station_name),
     ]
+    if "is_open" in caps:
+        entities.insert(
+            0, StationIsOpenBinarySensor(coordinator, station_id, station_name)
+        )
 
     # Facility binary sensors — one per capability key in registry
     for cap_key, (
@@ -154,54 +233,49 @@ class StationIsOpenBinarySensor(
 
     @property
     def available(self) -> bool:
-        """Stay available with last known data even when last fetch failed.
-
-        Drops the ``coordinator.last_update_success`` gate so the open/closed
-        state survives transient site outages — see data_fetch_problem binary sensor for
-        live fetch health.
-        """
-        return self.coordinator.data is not None and bool(
+        """Available when coordinator has data and any hours field is populated."""
+        if not self.coordinator.data:
+            return False
+        return bool(
             self.coordinator.data.get("working_hours")
+            or self.coordinator.data.get("opening_hours")
         )
 
-    @property
-    def is_on(self) -> bool | None:
-        """Return True if the station is currently open."""
+    def _get_today_hours_str(self) -> str | None:
+        """Return today's hours string from whichever format the provider uses."""
         if not self.coordinator.data:
             return None
+        # Try OSM opening_hours first (plain string, e.g. "Mo-Su 07:00-23:00")
+        osm = self.coordinator.data.get("opening_hours")
+        if osm and isinstance(osm, str):
+            return osm
+        # Fall back to fuelcompare.ie working_hours (JSON dict)
         raw = self.coordinator.data.get("working_hours")
         if not raw:
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = dt_util.now().strftime("%A")
-            today_hours = hours.get(today)
-            if today_hours is None:
-                _LOGGER.debug("No working hours entry for %s", today)
-                return None
-            return _is_open(today_hours)
+            return hours.get(dt_util.now().strftime("%A"))
         except (ValueError, TypeError) as err:
-            _LOGGER.debug("Failed to parse working_hours for is_on: %s", err)
+            _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return True if the station is currently open."""
+        today_hours = self._get_today_hours_str()
+        if today_hours is None:
+            return None
+        return _is_open(today_hours)
 
     @property
     def extra_state_attributes(self) -> dict:
         """Return today's hours and station_id as attributes."""
         base = {"station_id": self._station_id}
-        if not self.coordinator.data:
-            return base
-        raw = self.coordinator.data.get("working_hours")
-        if not raw:
-            return base
-        try:
-            hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = dt_util.now().strftime("%A")
-            return {**base, "today_hours": hours.get(today)}
-        except (ValueError, TypeError) as err:
-            _LOGGER.debug(
-                "Failed to parse working_hours for extra_state_attributes: %s", err
-            )
-            return base
+        today_hours = self._get_today_hours_str()
+        if today_hours is not None:
+            base["today_hours"] = today_hours
+        return base
 
 
 class DataFetchProblemBinarySensor(
