@@ -25,11 +25,11 @@ carbu.com exposes a JSON search API at:
     lng=<longitude>
     dist=<radius_km>
 
-Fuel ID mapping (confirmed from carbu.com/luxembourg page source):
-  Super 95  → 1
-  Super 98  → 2
-  Diesel    → 3
-  LPG       → 6
+Fuel ID mapping (data-fuelid from live carbu.com/luxembourg site):
+  Diesel    → 1
+  Super 95  → 2
+  Super 98  → 3
+  LPG       → 4
   CNG       → 9
 
 Response format (JSON array of station objects):

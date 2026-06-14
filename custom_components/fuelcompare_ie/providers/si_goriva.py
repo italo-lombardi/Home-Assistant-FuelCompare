@@ -68,6 +68,9 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 2)
 
 MAX_PAGES = 100
 
+# Franchise (brand) cache TTL — matches station cache
+_FRANCHISE_CACHE_TTL = 3600
+
 # Mapping from goriva.si price dict keys to StationData keys.
 # IMPORTANT: Diesel is "dizel" (Slovenian), not "diesel".
 _PRICE_KEY_MAP: dict[str, str] = {
@@ -146,6 +149,7 @@ class SiGorivaProvider(BaseProvider):
         # In-memory cache for franchise (brand) names, populated on first use.
         # Keyed by franchise pk (int) → brand name (str).
         self._franchise_cache: dict[int, str] = {}
+        self._franchise_cache_ts: float = 0
 
         # In-memory cache for the full station list with TTL (seconds).
         self._station_cache: list[dict[str, Any]] | None = None
@@ -415,7 +419,11 @@ class SiGorivaProvider(BaseProvider):
             Dict mapping franchise pk (int) → brand name (str).
             Returns an empty dict on failure (brand will be absent from data).
         """
-        if self._franchise_cache:
+        now = time.monotonic()
+        if (
+            self._franchise_cache
+            and (now - self._franchise_cache_ts) < _FRANCHISE_CACHE_TTL
+        ):
             return self._franchise_cache
 
         try:
@@ -441,6 +449,7 @@ class SiGorivaProvider(BaseProvider):
                 cache[int(pk)] = str(name)
 
         self._franchise_cache = cache
+        self._franchise_cache_ts = time.monotonic()
         _LOGGER.debug("goriva.si: loaded %d franchise entries", len(cache))
         return cache
 

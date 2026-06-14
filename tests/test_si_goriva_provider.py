@@ -1372,6 +1372,9 @@ async def test_ensure_franchise_cache_not_refetched_when_populated() -> None:
     provider = _default_provider()
     # Pre-populate the cache
     provider._franchise_cache = {99: "Cached Brand"}
+    import time
+
+    provider._franchise_cache_ts = time.monotonic()  # mark cache as fresh
 
     cache = await provider._ensure_franchise_cache(session)
 
