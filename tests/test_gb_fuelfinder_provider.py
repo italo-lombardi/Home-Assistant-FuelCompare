@@ -1308,9 +1308,12 @@ async def test_fetch_csv_serves_from_in_process_cache_within_ttl() -> None:
 async def test_fetch_csv_304_not_modified_uses_cached_text_and_refreshes_ts() -> None:
     """_fetch_csv on HTTP 304 reuses cached CSV and updates _csv_cache_ts."""
     csv_text = _make_csv_text(_BASE_ROW)
-    # Cache has content but expired timestamp so HTTP request is made.
+    # Set cache with an expired timestamp (older than _CSV_CACHE_TTL) so the
+    # code proceeds to make an HTTP request rather than serving from cache.
     GbFuelfinderProvider._csv_cache = csv_text
-    GbFuelfinderProvider._csv_cache_ts = 0.0
+    GbFuelfinderProvider._csv_cache_ts = _time.monotonic() - (
+        GbFuelfinderProvider._CSV_CACHE_TTL + 1
+    )
 
     resp = _make_mock_response(304, b"")
     session = _make_session(resp)
