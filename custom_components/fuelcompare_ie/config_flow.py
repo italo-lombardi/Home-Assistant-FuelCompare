@@ -427,7 +427,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         """Resolve provider, then dispatch to the correct config step for its mode."""
         providers = _providers_for_country(self._country)
         if not providers:
-            self._provider_key = DEFAULT_PROVIDER
+            return self.async_abort(reason="no_providers_for_country")
         elif len(providers) == 1:
             self._provider_key = providers[0][0]
         else:

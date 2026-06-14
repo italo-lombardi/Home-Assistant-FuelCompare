@@ -65,7 +65,8 @@
       "invalid_api_key": "API key cannot be empty."
     },
     "abort": {
-      "already_configured": "This station is already configured."
+      "already_configured": "This station is already configured.",
+      "no_providers_for_country": "No data providers are available for this country."
     }
   },
   "entity": {

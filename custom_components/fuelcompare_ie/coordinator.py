@@ -103,8 +103,14 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict]):
             self.last_successful_fetch = dt_util.utcnow()
             return data
         except ClientError as err:
-            _LOGGER.debug("HTTP error fetching station %s: %s", self.station_id, err)
-            raise UpdateFailed(f"Error communicating with API: {err}") from err
+            _LOGGER.debug(
+                "HTTP error fetching station %s: %s",
+                self.station_id,
+                type(err).__name__,
+            )
+            raise UpdateFailed(
+                f"Error communicating with API: {type(err).__name__}"
+            ) from err
         except ProviderError as err:
             _LOGGER.debug("Provider error for station %s: %s", self.station_id, err)
             raise UpdateFailed(str(err)) from err

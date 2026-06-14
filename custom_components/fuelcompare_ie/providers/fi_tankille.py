@@ -44,8 +44,8 @@ Response format: JSON-stat 2.0
 
 Price normalisation
 -------------------
-Statistics Finland returns prices in EUR/litre (e.g. 1.712).  No cents
-conversion is applied.  No > 10 guard is needed.
+Statistics Finland returns prices in cents/litre (e.g. 193 = 1.93 EUR/L).
+The > 10 → /100 conversion in _parse_price converts to EUR/litre.
 
 StationData mapping
 -------------------
@@ -143,7 +143,8 @@ def _parse_price(raw: Any) -> float | None:
     """Parse a PxWeb price value to a rounded float EUR/litre, or None.
 
     Statistics Finland returns null for missing values (no data for a period).
-    Prices are already in EUR/litre — no cents conversion applied.
+    Prices are in cents/litre (e.g. 193); the > 10 guard divides by 100 to
+    convert to EUR/litre.
 
     Args:
         raw: Raw value from the json-stat2 values array (float, int, or None).

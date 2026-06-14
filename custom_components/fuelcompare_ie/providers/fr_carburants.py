@@ -57,7 +57,7 @@ import zipfile
 # A 50 MB size check is added as defence-in-depth to prevent any amplification
 # from an unexpectedly large or malicious response reaching the parser.
 import xml.etree.ElementTree as ET
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -249,6 +249,11 @@ class FrCarburantsProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 600  # data refreshed every ~10 minutes
 
+    # Class-level XML cache — shared across all instances to avoid re-downloading
+    # the ~12 MB ZIP on every coordinator refresh when multiple FR stations track.
+    _xml_cache: ClassVar[ET.Element | None] = None
+    _xml_cache_ts: ClassVar[float] = 0
+
     CAPABILITIES: frozenset[str] = frozenset(
         {
             "diesel",
@@ -298,8 +303,6 @@ class FrCarburantsProvider(BaseProvider):
         self._latitude = latitude
         self._longitude = longitude
         self._radius_km = radius_km if radius_km is not None else 10.0
-        self._xml_cache: ET.Element | None = None
-        self._xml_cache_ts: float = 0
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -462,11 +465,15 @@ class FrCarburantsProvider(BaseProvider):
             ProviderError: XML could not be fetched or parsed.
         """
         now = time.monotonic()
-        if self._xml_cache is not None and (now - self._xml_cache_ts) < _XML_CACHE_TTL:
+        if (
+            FrCarburantsProvider._xml_cache is not None
+            and (now - FrCarburantsProvider._xml_cache_ts) < _XML_CACHE_TTL
+        ):
             _LOGGER.debug(
-                "Prix Carburants XML cache hit (age %.1fs)", now - self._xml_cache_ts
+                "Prix Carburants XML cache hit (age %.1fs)",
+                now - FrCarburantsProvider._xml_cache_ts,
             )
-            return self._xml_cache
+            return FrCarburantsProvider._xml_cache
 
         xml_bytes = await self._fetch_xml(session)
         try:
@@ -477,8 +484,8 @@ class FrCarburantsProvider(BaseProvider):
         except ET.ParseError as err:
             raise ProviderError(f"Failed to parse Prix Carburants XML: {err}") from err
 
-        self._xml_cache = root
-        self._xml_cache_ts = now
+        FrCarburantsProvider._xml_cache = root
+        FrCarburantsProvider._xml_cache_ts = now
         _LOGGER.debug("Prix Carburants XML parsed and cached")
         return root
 

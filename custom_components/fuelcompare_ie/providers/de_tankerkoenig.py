@@ -46,7 +46,7 @@ set to 1800 (30 minutes), which is safe and aligns with other providers.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -155,8 +155,8 @@ class DeTankerkoenigProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 1800
-    REQUIRES_API_KEY: bool = True
-    API_KEY_REGISTRATION_URL: str = "https://onboarding.tankerkoenig.de/"
+    REQUIRES_API_KEY: ClassVar[bool] = True
+    API_KEY_REGISTRATION_URL: ClassVar[str] = "https://onboarding.tankerkoenig.de/"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

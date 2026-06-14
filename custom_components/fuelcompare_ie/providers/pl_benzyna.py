@@ -19,14 +19,14 @@ Endpoints used
 --------------
 GET https://tool.orlen.pl/api/wholesalefuelprices
     Returns a JSON array of current wholesale price records.  Each record has:
-      productCode   — str, e.g. "Pb95", "ONEkodiesel"
-      price         — numeric, PLN per 1000 litres
-      date          — str, ISO date of last update (e.g. "2026-06-13")
+      productName   — str, e.g. "Pb95", "ONEkodiesel"
+      value         — numeric, PLN per 1000 litres
+      effectiveDate — str, ISO date of last update (e.g. "2026-06-13")
     No authentication, no query parameters required.
 
 GET https://tool.orlen.pl/api/autogasprices
     Returns LPG prices broken down by voivodeship (region).  Each record has:
-      price         — numeric, PLN per 1000 litres
+      value         — numeric, PLN per 1000 litres
       date          — str, ISO date
       voivodeship   — str, e.g. "Mazowieckie"
     This provider uses the national minimum LPG price across all voivodeships.

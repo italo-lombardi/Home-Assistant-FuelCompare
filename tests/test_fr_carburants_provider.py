@@ -25,6 +25,16 @@ from custom_components.fuelcompare_ie.providers.fr_carburants import (
 )
 
 
+@pytest.fixture(autouse=True)
+def reset_fr_xml_cache():
+    """Reset the class-level XML cache between tests to prevent contamination."""
+    FrCarburantsProvider._xml_cache = None
+    FrCarburantsProvider._xml_cache_ts = 0
+    yield
+    FrCarburantsProvider._xml_cache = None
+    FrCarburantsProvider._xml_cache_ts = 0
+
+
 # ---------------------------------------------------------------------------
 # Test XML / ZIP builder helpers
 # ---------------------------------------------------------------------------
