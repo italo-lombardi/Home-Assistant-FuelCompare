@@ -753,6 +753,9 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
     ) -> ConfigFlowResult:
         """Manage options, pre-filling the existing API key and radius."""
         is_location_entry = CONF_RADIUS_KM in self.config_entry.data
+        provider_key = self.config_entry.data.get("provider", DEFAULT_PROVIDER)
+        provider_cls = PROVIDER_REGISTRY.get(provider_key)
+        requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
 
         if user_input is not None:
             return self.async_create_entry(data=user_input)
@@ -766,17 +769,24 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
             )
             schema = vol.Schema(
                 {
-                    vol.Optional(CONF_API_KEY, default=existing_key): str,
+                    **(
+                        {vol.Optional(CONF_API_KEY, default=existing_key): str}
+                        if requires_api_key
+                        else {}
+                    ),
                     vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
                         vol.Coerce(float), vol.Range(min=0.1, max=500)
                     ),
                 }
             )
         else:
-            schema = vol.Schema(
-                {
-                    vol.Optional(CONF_API_KEY, default=existing_key): str,
-                }
+            schema_dict: dict = {}
+            if requires_api_key:
+                schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            schema = (
+                vol.Schema(schema_dict)
+                if schema_dict
+                else vol.Schema({vol.Optional("_dummy"): str})
             )
 
         return self.async_show_form(step_id="init", data_schema=schema)
