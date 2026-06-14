@@ -19,7 +19,10 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import (
     CONF_API_KEY,
     CONF_COUNTRY,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
     CONF_PROVIDER,
+    CONF_RADIUS_KM,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
     DEFAULT_COUNTRY,
@@ -631,8 +634,6 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Collect lat/lng and radius for location-based providers."""
-        from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
-
         default_lat = self.hass.config.latitude
         default_lon = self.hass.config.longitude
 
@@ -671,7 +672,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 f"{_COUNTRY_NAMES.get(self._country, self._country)} "
                 f"({self._latitude:.3f}, {self._longitude:.3f})"
             )
-            return await self.async_step_name()
+            return await self.async_step_station_picker()
 
         return self.async_show_form(
             step_id="location",
@@ -711,8 +712,6 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 if self._station_county:
                     data[CONF_STATION_COUNTY] = self._station_county
             if self._latitude is not None:
-                from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
-
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
                 data[CONF_RADIUS_KM] = self._radius_km
@@ -734,15 +733,32 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Manage options, pre-filling the existing API key."""
+        """Manage options, pre-filling the existing API key and radius."""
+        is_location_entry = CONF_RADIUS_KM in self.config_entry.data
+
         if user_input is not None:
             return self.async_create_entry(data=user_input)
+
         existing_key = self.config_entry.options.get(CONF_API_KEY, "")
-        return self.async_show_form(
-            step_id="init",
-            data_schema=vol.Schema(
+
+        if is_location_entry:
+            current_radius = self.config_entry.options.get(
+                CONF_RADIUS_KM,
+                self.config_entry.data.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM),
+            )
+            schema = vol.Schema(
+                {
+                    vol.Optional(CONF_API_KEY, default=existing_key): str,
+                    vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
+                        vol.Coerce(float), vol.Range(min=0.1, max=500)
+                    ),
+                }
+            )
+        else:
+            schema = vol.Schema(
                 {
                     vol.Optional(CONF_API_KEY, default=existing_key): str,
                 }
-            ),
-        )
+            )
+
+        return self.async_show_form(step_id="init", data_schema=schema)

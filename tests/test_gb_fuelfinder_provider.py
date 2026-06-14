@@ -71,6 +71,18 @@ _BASE_ROW: dict[str, str] = {
 _CSV_HEADER = ",".join(_BASE_ROW.keys())
 
 
+@pytest.fixture(autouse=True)
+def _reset_csv_cache() -> None:
+    """Reset GbFuelfinderProvider class-level CSV cache before each test.
+
+    The cache is a class variable shared across all instances; without this
+    fixture, tests that mock the network would receive stale cached CSV text
+    from a previous test instead of the mock's response body.
+    """
+    GbFuelfinderProvider._csv_cache = None
+    GbFuelfinderProvider._csv_cache_ts = 0.0
+
+
 def _make_csv_text(*rows: dict[str, str]) -> str:
     """Build a minimal CSV string with the full header and the given rows."""
     header = _CSV_HEADER
@@ -143,8 +155,8 @@ def test_provider_requires_no_api_key() -> None:
 
 
 def test_provider_poll_interval() -> None:
-    """Default poll interval is 3600 seconds (1 hour)."""
-    assert GbFuelfinderProvider.POLL_INTERVAL_SECONDS == 3600
+    """Default poll interval is 21600 seconds (6 hours) to match the source refresh cadence."""
+    assert GbFuelfinderProvider.POLL_INTERVAL_SECONDS == 21600
 
 
 # ---------------------------------------------------------------------------

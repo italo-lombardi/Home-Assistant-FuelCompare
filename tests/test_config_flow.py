@@ -494,6 +494,8 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
         PROVIDER_KEY = "ie_fake_location"
         LABEL = "Fake Location"
         CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
 
         def __init__(self, station_id: str) -> None:
             pass
@@ -502,13 +504,21 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
             return {}
 
         async def async_fetch_station_name(self, session, station_id):
-            return None
+            return "Dublin Fake Station"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("fake-station-001", "Dublin Fake Station")]
 
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
 
     PROVIDER_REGISTRY["ie_fake_location"] = _FakeLocationProvider
     try:
-        with _PATCH_FIRST_REFRESH:
+        with (
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+        ):
             result = await hass.config_entries.flow.async_init(
                 DOMAIN, context={"source": config_entries.SOURCE_USER}
             )
@@ -535,9 +545,20 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
                     CONF_RADIUS_KM: 5.0,
                 },
             )
+            # Location now routes to station_picker; pick the fake station
+            assert result["step_id"] == "station_picker"
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={CONF_STATION_ID: "fake-station-001"},
+            )
         assert result["step_id"] == "name"
 
-        with _PATCH_FIRST_REFRESH:
+        with (
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+        ):
             result = await hass.config_entries.flow.async_configure(
                 result["flow_id"],
                 user_input={"name": "Dublin Area"},
@@ -548,7 +569,7 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
         assert CONF_LATITUDE in result["data"]
         assert CONF_LONGITUDE in result["data"]
         assert CONF_RADIUS_KM in result["data"]
-        assert result["data"].get("station_id", "") == ""
+        assert result["data"].get("station_id", "") == "fake-station-001"
     finally:
         PROVIDER_REGISTRY.pop("ie_fake_location", None)
 
@@ -726,6 +747,7 @@ async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
         REQUIRES_API_KEY = True
         CONFIG_MODE = "location"
         STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
 
         def __init__(self, station_id, api_key=None, **kwargs):
             self._station_id = station_id
@@ -735,11 +757,19 @@ async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
             return {}
 
         async def async_fetch_station_name(self, session, station_id):
-            return None
+            return "Berlin Fake Station"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("de-fake-001", "Berlin Fake Station")]
 
     PROVIDER_REGISTRY[_FakeDEProvider.PROVIDER_KEY] = _FakeDEProvider
     try:
-        with _PATCH_FIRST_REFRESH:
+        with (
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+        ):
             result = await hass.config_entries.flow.async_init(
                 DOMAIN, context={"source": config_entries.SOURCE_USER}
             )
@@ -767,6 +797,12 @@ async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
                         CONF_LONGITUDE: 13.405,
                         CONF_RADIUS_KM: 5.0,
                     },
+                )
+            # Location now routes to station_picker; pick the fake station
+            if result.get("step_id") == "station_picker":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_STATION_ID: "de-fake-001"},
                 )
             if result.get("step_id") == "name":
                 result = await hass.config_entries.flow.async_configure(

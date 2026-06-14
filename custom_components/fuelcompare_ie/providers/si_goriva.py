@@ -389,67 +389,6 @@ class SiGorivaProvider(BaseProvider):
         _LOGGER.debug("goriva.si: fetched %d stations total", len(stations))
         return stations
 
-    async def _find_station_by_pk(
-        self,
-        session: ClientSession,
-        station_id: str,
-    ) -> dict[str, Any] | None:
-        """Iterate pages until the station with the given pk is found.
-
-        Stops early as soon as the station is located rather than fetching
-        all pages, which reduces latency for the common single-station case.
-
-        Args:
-            session:    aiohttp ClientSession.
-            station_id: Station pk as a string.
-
-        Returns:
-            Station dict if found, else None.
-        """
-        target_pk: int
-        try:
-            target_pk = int(station_id)
-        except (ValueError, TypeError):
-            raise ProviderError(
-                f"Invalid goriva.si station ID '{station_id}': must be an integer pk."
-            )
-
-        page = 1
-        while True:
-            params: dict[str, Any] = {"page": page}
-            try:
-                async with session.get(
-                    _SEARCH_URL,
-                    params=params,
-                    headers=_HEADERS,
-                    timeout=_TIMEOUT,
-                ) as resp:
-                    if resp.status == 404:
-                        break
-                    resp.raise_for_status()
-                    payload: dict[str, Any] = await resp.json()
-            except Exception as err:
-                if page == 1:
-                    raise
-                _LOGGER.warning(
-                    "goriva.si: error fetching page %d while looking up pk %d: %s",
-                    page,
-                    target_pk,
-                    err,
-                )
-                break
-
-            for station in payload.get("results") or []:
-                if station.get("pk") == target_pk:
-                    return station
-
-            if not payload.get("next"):
-                break
-
-            page += 1
-
-        return None
-
     async def _ensure_franchise_cache(self, session: ClientSession) -> dict[int, str]:
         """Fetch and return the franchise (brand) map, using in-memory cache.
 

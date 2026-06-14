@@ -224,9 +224,7 @@ class AtEcontrolProvider(BaseProvider):
         station dict with a combined 'prices' list from all fuel type queries.
         """
         results = await asyncio.gather(
-            self._fetch_fuel_type(session, lat, lng, "DIE"),
-            self._fetch_fuel_type(session, lat, lng, "SUP"),
-            self._fetch_fuel_type(session, lat, lng, "GAS"),
+            *[self._fetch_fuel_type(session, lat, lng, code) for code, _ in _FUEL_CODES]
         )
 
         merged: dict[str, dict[str, Any]] = {}

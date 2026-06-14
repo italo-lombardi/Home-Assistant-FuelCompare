@@ -163,7 +163,6 @@ class DeTankerkoenigProvider(BaseProvider):
             "unleaded",
             "diesel",
             "e10",
-            "lastupdated",
             "name",
             "brand",
             "county",
@@ -364,7 +363,7 @@ class DeTankerkoenigProvider(BaseProvider):
 
         result: list[tuple[str, str, float]] = []
         for station in stations:
-            uid: str = str(station.get("id", ""))
+            uid: str = str(station["id"]) if station.get("id") is not None else ""
             if not uid:
                 continue
 

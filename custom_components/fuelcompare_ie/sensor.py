@@ -14,7 +14,6 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CURRENCY_EURO
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
@@ -258,7 +257,6 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
 
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_state_class = SensorStateClass.TOTAL
-    _attr_native_unit_of_measurement = CURRENCY_EURO
     _attr_has_entity_name = True
 
     def __init__(
@@ -272,6 +270,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self._attr_native_unit_of_measurement = coordinator._provider.CURRENCY
         self._station_id = station_id
         self._fuel_type = fuel_type
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{fuel_type}"

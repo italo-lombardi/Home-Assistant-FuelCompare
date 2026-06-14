@@ -148,6 +148,8 @@ class AuNswProvider(BaseProvider):
             "premium_unleaded",
             "diesel",
             "premium_diesel",
+            "e85",
+            "lpg",
             "lastupdated",
             "name",
             "brand",

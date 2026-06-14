@@ -710,14 +710,14 @@ async def test_async_list_stations_no_price_shows_name_only() -> None:
 
 def test_build_index_builds_site_map() -> None:
     """_build_index returns site_map keyed by SiteId string."""
-    site_map, _ = _build_index([_BASE_SITE], [])
+    site_map, _, _ts = _build_index([_BASE_SITE], [])
     assert _SITE_ID in site_map
     assert site_map[_SITE_ID]["N"] == "BP Brisbane CBD"
 
 
 def test_build_index_builds_prices_map() -> None:
     """_build_index returns prices_map with StationData keys."""
-    _, prices_map = _build_index([], _BASE_PRICES)
+    _, prices_map, _ts = _build_index([], _BASE_PRICES)
     assert _SITE_ID in prices_map
     assert "unleaded" in prices_map[_SITE_ID]
     assert "diesel" in prices_map[_SITE_ID]
@@ -725,7 +725,7 @@ def test_build_index_builds_prices_map() -> None:
 
 def test_build_index_price_converted_from_tenths_of_cent() -> None:
     """_build_index divides Price by 10 then by 100 to get AUD/L."""
-    _, prices_map = _build_index(
+    _, prices_map, _ts = _build_index(
         [], [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": 1799}]
     )
     # 1799 / 10 = 179.9 c/L → / 100 = 1.799 AUD/L
@@ -734,13 +734,13 @@ def test_build_index_price_converted_from_tenths_of_cent() -> None:
 
 def test_build_index_skips_missing_site_id() -> None:
     """_build_index skips price entries with no SiteId."""
-    _, prices_map = _build_index([], [{"FuelId": 2, "Price": 1799}])
+    _, prices_map, _ts = _build_index([], [{"FuelId": 2, "Price": 1799}])
     assert prices_map == {}
 
 
 def test_build_index_skips_unknown_fuel_id() -> None:
     """_build_index silently skips unknown FuelId values."""
-    _, prices_map = _build_index(
+    _, prices_map, _ts = _build_index(
         [], [{"SiteId": int(_SITE_ID), "FuelId": 999, "Price": 1799}]
     )
     assert _SITE_ID not in prices_map
@@ -752,14 +752,14 @@ def test_build_index_skips_zero_and_negative_prices() -> None:
         {"SiteId": int(_SITE_ID), "FuelId": 2, "Price": 0},
         {"SiteId": int(_SITE_ID), "FuelId": 3, "Price": -100},
     ]
-    _, prices_map = _build_index([], entries)
+    _, prices_map, _ts = _build_index([], entries)
     assert _SITE_ID not in prices_map or "unleaded" not in prices_map.get(_SITE_ID, {})
 
 
 def test_build_index_skips_null_prices() -> None:
     """_build_index discards entries where Price is None."""
     entries = [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": None}]
-    _, prices_map = _build_index([], entries)
+    _, prices_map, _ts = _build_index([], entries)
     station_prices = prices_map.get(_SITE_ID, {})
     assert "unleaded" not in station_prices
 
@@ -767,7 +767,7 @@ def test_build_index_skips_null_prices() -> None:
 def test_build_index_skips_unparseable_prices() -> None:
     """_build_index discards entries where Price cannot be cast to float."""
     entries = [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": "N/A"}]
-    _, prices_map = _build_index([], entries)
+    _, prices_map, _ts = _build_index([], entries)
     station_prices = prices_map.get(_SITE_ID, {})
     assert "unleaded" not in station_prices
 
@@ -778,7 +778,7 @@ def test_build_index_keeps_lower_price_for_same_key() -> None:
         {"SiteId": int(_SITE_ID), "FuelId": 5, "Price": 1890},  # 189.0 c/L
         {"SiteId": int(_SITE_ID), "FuelId": 8, "Price": 1990},  # 199.0 c/L
     ]
-    _, prices_map = _build_index([], entries)
+    _, prices_map, _ts = _build_index([], entries)
     assert prices_map[_SITE_ID]["premium_unleaded"] == pytest.approx(1.890)
 
 
@@ -788,20 +788,20 @@ def test_build_index_keeps_lower_price_when_second_is_cheaper() -> None:
         {"SiteId": int(_SITE_ID), "FuelId": 5, "Price": 1990},  # 199.0 c/L
         {"SiteId": int(_SITE_ID), "FuelId": 8, "Price": 1870},  # 187.0 c/L — cheaper
     ]
-    _, prices_map = _build_index([], entries)
+    _, prices_map, _ts = _build_index([], entries)
     assert prices_map[_SITE_ID]["premium_unleaded"] == pytest.approx(1.870)
 
 
 def test_build_index_handles_empty_input() -> None:
     """_build_index handles completely empty input gracefully."""
-    site_map, prices_map = _build_index([], [])
+    site_map, prices_map, _ts = _build_index([], [])
     assert site_map == {}
     assert prices_map == {}
 
 
 def test_build_index_site_id_coerced_to_string() -> None:
     """_build_index coerces integer SiteId keys to strings."""
-    site_map, prices_map = _build_index(
+    site_map, prices_map, _ts = _build_index(
         [_BASE_SITE],
         [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": 1799}],
     )
@@ -816,7 +816,7 @@ def test_build_index_site_id_coerced_to_string() -> None:
 
 def test_build_station_data_returns_expected_keys() -> None:
     """_build_station_data returns a dict with all key StationData fields."""
-    _, prices_map = _build_index([], _BASE_PRICES)
+    _, prices_map, _ts = _build_index([], _BASE_PRICES)
     prices = prices_map.get(_SITE_ID, {})
     data = _build_station_data(_BASE_SITE, prices, _SITE_ID)
 

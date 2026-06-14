@@ -243,6 +243,7 @@ class AuFuelwatchProvider(BaseProvider):
             Dict mapping composite station_id → merged StationData.
         """
         merged: dict[str, StationData] = {}
+        failed = 0
         for fuel_key in _PRIMARY_PRODUCTS:
             product_code = _PRODUCT_CODES[fuel_key]
             try:
@@ -256,6 +257,7 @@ class AuFuelwatchProvider(BaseProvider):
                     product_code,
                     err,
                 )
+                failed += 1
                 continue
 
             for item in items:
@@ -269,6 +271,9 @@ class AuFuelwatchProvider(BaseProvider):
                 # Add or overwrite the fuel price for this product
                 price = _parse_price(item.get("price"))
                 merged[station_id][fuel_key] = price  # type: ignore[literal-required]
+
+        if failed == len(_PRIMARY_PRODUCTS):
+            raise ProviderError("FuelWatch feed unavailable")
 
         return merged
 
@@ -441,17 +446,17 @@ def _parse_station_base(
     # Derive a human-friendly name: prefer trading name, fall back to brand
     name: str | None = trading_name or brand or None
 
-    return StationData(
-        name=name,
-        brand=brand,
-        address=item.get("address"),
-        latitude=_parse_lat_lng(item.get("latitude")),
-        longitude=_parse_lat_lng(item.get("longitude")),
-        phone=item.get("phone"),
-        lastupdated=date_str,
-        is_open=_parse_is_open(site_features),
-        source_station_id=station_id,
-    )
+    return {
+        "name": name,
+        "brand": brand,
+        "address": item.get("address"),
+        "latitude": _parse_lat_lng(item.get("latitude")),
+        "longitude": _parse_lat_lng(item.get("longitude")),
+        "phone": item.get("phone"),
+        "lastupdated": date_str,
+        "is_open": _parse_is_open(site_features),
+        "source_station_id": station_id,
+    }
 
 
 def _build_display_label(data: StationData) -> str:

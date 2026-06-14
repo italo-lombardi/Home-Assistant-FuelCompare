@@ -57,7 +57,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api_key = entry.options.get(CONF_API_KEY) or entry.data.get(CONF_API_KEY)
     latitude = entry.data.get(CONF_LATITUDE)
     longitude = entry.data.get(CONF_LONGITUDE)
-    radius_km = entry.data.get(CONF_RADIUS_KM)
+    radius_km = entry.options.get(CONF_RADIUS_KM) or entry.data.get(CONF_RADIUS_KM)
     sig = inspect.signature(provider_cls.__init__)
     kwargs: dict = {}
     if county and "county" in sig.parameters:

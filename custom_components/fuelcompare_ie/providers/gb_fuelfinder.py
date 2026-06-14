@@ -70,8 +70,9 @@ from __future__ import annotations
 import csv
 import io
 import logging
+import time as _time
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -150,8 +151,13 @@ class GbFuelfinderProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
 
-    # Updated approximately twice daily; 1-hour poll is conservative and safe.
-    POLL_INTERVAL_SECONDS = 3600
+    # Updated approximately twice daily; 6-hour poll matches the source refresh cadence.
+    POLL_INTERVAL_SECONDS = 21600
+
+    # Class-level CSV cache shared across all instances (avoids re-downloading 7.7 MB).
+    _csv_cache: ClassVar[str | None] = None
+    _csv_cache_ts: ClassVar[float] = 0.0
+    _CSV_CACHE_TTL: ClassVar[int] = 21600
 
     CAPABILITIES: frozenset[str] = frozenset(
         {
@@ -210,7 +216,11 @@ class GbFuelfinderProvider(BaseProvider):
             )
         if row.get("forecourts.permanent_closure", "").strip().lower() == "true":
             raise ProviderError(f"Station {station_id} is permanently closed")
-        return _parse_row(row)
+        data = _parse_row(row)
+        if row.get("forecourts.temporary_closure", "").strip().lower() == "true":
+            _LOGGER.warning("GB station %s is temporarily closed", station_id)
+            data["is_open"] = False
+        return data
 
     async def async_fetch_station_name(
         self,
@@ -308,17 +318,33 @@ class GbFuelfinderProvider(BaseProvider):
     async def _fetch_csv(self, session: ClientSession) -> list[dict[str, str]]:
         """Fetch the CSV from the GitHub mirror and parse it into a list of dicts.
 
-        Returns a list of row dicts keyed by CSV column name.
+        Returns a list of row dicts keyed by CSV column name.  Results are cached
+        in-process for _CSV_CACHE_TTL seconds to avoid re-downloading the 7.7 MB
+        file on every coordinator refresh.
         Raises aiohttp ClientError on network failure (coordinator converts to
         UpdateFailed).
         """
-        _LOGGER.debug("Fetching UK Fuel Finder CSV from %s", _CSV_URL)
-        async with session.get(_CSV_URL, headers=_HEADERS, timeout=_TIMEOUT) as resp:
-            resp.raise_for_status()
-            raw_bytes = await resp.read()
+        now = _time.monotonic()
+        if (
+            GbFuelfinderProvider._csv_cache is not None
+            and (now - GbFuelfinderProvider._csv_cache_ts)
+            < GbFuelfinderProvider._CSV_CACHE_TTL
+        ):
+            _LOGGER.debug("UK Fuel Finder CSV: serving from in-process cache")
+            text = GbFuelfinderProvider._csv_cache
+        else:
+            _LOGGER.debug("Fetching UK Fuel Finder CSV from %s", _CSV_URL)
+            async with session.get(
+                _CSV_URL, headers=_HEADERS, timeout=_TIMEOUT
+            ) as resp:
+                resp.raise_for_status()
+                raw_bytes = await resp.read()
 
-        # Decode; GitHub raw CDN serves UTF-8 text.
-        text = raw_bytes.decode("utf-8", errors="replace")
+            # Decode; GitHub raw CDN serves UTF-8 text.
+            text = raw_bytes.decode("utf-8", errors="replace")
+            GbFuelfinderProvider._csv_cache = text
+            GbFuelfinderProvider._csv_cache_ts = now
+
         reader = csv.DictReader(io.StringIO(text))
         rows = list(reader)
         _LOGGER.debug("UK Fuel Finder CSV: %d station rows loaded", len(rows))

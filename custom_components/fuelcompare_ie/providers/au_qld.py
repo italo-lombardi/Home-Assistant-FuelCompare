@@ -247,7 +247,7 @@ class AuQldProvider(BaseProvider):
                            invalid, or the response structure is unexpected.
         """
         sites_raw, prices_raw = await self._fetch_raw(session)
-        site_map, prices_map = _build_index(sites_raw, prices_raw)
+        site_map, prices_map, timestamps_map = _build_index(sites_raw, prices_raw)
 
         site = site_map.get(station_id)
         if site is None:
@@ -257,7 +257,8 @@ class AuQldProvider(BaseProvider):
             )
 
         prices = prices_map.get(station_id, {})
-        return _build_station_data(site, prices, station_id)
+        lastupdated = timestamps_map.get(station_id)
+        return _build_station_data(site, prices, station_id, lastupdated)
 
     async def async_fetch_station_name(
         self,
@@ -275,7 +276,7 @@ class AuQldProvider(BaseProvider):
         """
         try:
             sites_raw, _ = await self._fetch_raw(session)
-            site_map, _ = _build_index(sites_raw, [])
+            site_map, _, _ts = _build_index(sites_raw, [])
             site = site_map.get(station_id)
             if site:
                 return site.get("N") or None
@@ -324,7 +325,7 @@ class AuQldProvider(BaseProvider):
             _LOGGER.debug("AuQldProvider: async_list_stations fetch failed: %s", err)
             return []
 
-        site_map, prices_map = _build_index(sites_raw, prices_raw)
+        site_map, prices_map, _ts = _build_index(sites_raw, prices_raw)
 
         result: list[tuple[str, str, float]] = []
         for site_id_str, site in site_map.items():
@@ -456,7 +457,7 @@ class AuQldProvider(BaseProvider):
 def _build_index(
     sites_list: list[dict],
     prices_list: list[dict],
-) -> tuple[dict[str, dict], dict[str, dict[str, float]]]:
+) -> tuple[dict[str, dict], dict[str, dict[str, float]], dict[str, str]]:
     """Build lookup dicts from raw API response lists.
 
     Args:
@@ -479,11 +480,18 @@ def _build_index(
             site_map[str(raw_id)] = site
 
     prices_map: dict[str, dict[str, float]] = {}
+    timestamps_map: dict[str, str] = {}
     for entry in prices_list:
         raw_site_id = entry.get("SiteId")
         if raw_site_id is None:
             continue
         site_id_str = str(raw_site_id)
+
+        # Capture the first available timestamp for this station.
+        if site_id_str not in timestamps_map:
+            tx = entry.get("TransactionDateutc") or entry.get("LastConfirmedDate")
+            if tx:
+                timestamps_map[site_id_str] = tx
 
         fuel_id = entry.get("FuelId")
         if fuel_id is None:
@@ -514,13 +522,14 @@ def _build_index(
         if existing is None or price_aud < existing:
             station_prices[data_key] = price_aud
 
-    return site_map, prices_map
+    return site_map, prices_map, timestamps_map
 
 
 def _build_station_data(
     site: dict[str, Any],
     prices: dict[str, float],
     station_id: str,
+    lastupdated: str | None = None,
 ) -> StationData:
     """Assemble a StationData dict from a site record and its price map.
 
@@ -579,6 +588,6 @@ def _build_station_data(
         "county": county,
         "latitude": latitude,
         "longitude": longitude,
-        "lastupdated": None,  # FPPS price timestamps are per-entry; not surfaced here
+        "lastupdated": lastupdated,
         "source_station_id": station_id,
     }
