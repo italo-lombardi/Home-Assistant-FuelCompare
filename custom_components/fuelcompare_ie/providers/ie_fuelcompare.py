@@ -29,6 +29,31 @@ class IEFuelCompareProvider(BaseProvider):
     COUNTRY = "IE"
     PROVIDER_KEY = "ie_fuelcompare"
     LABEL = "fuelcompare.ie"
+    POLL_INTERVAL_SECONDS = 1800
+
+    CAPABILITIES: frozenset[str] = frozenset(
+        {
+            "unleaded",
+            "diesel",
+            "lastupdated",
+            "name",
+            "brand",
+            "county",
+            "working_hours",
+            "accessibility",
+            "offerings",
+            "amenities",
+            "payments",
+            "last_successful_fetch",
+            "is_open",
+            "data_fetch_problem",
+        }
+    )
+
+    STATION_ID_HINT = (
+        "Enter the station ID from the fuelcompare.ie URL "
+        "(e.g. for fuelcompare.ie/station/790, enter 790)."
+    )
 
     def __init__(self, station_id: str) -> None:
         self._station_id = station_id

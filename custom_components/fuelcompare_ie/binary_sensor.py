@@ -25,6 +25,32 @@ from .sensor import _device_info
 _LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
 
+# ── Facility binary sensor registry ──────────────────────────────────────────
+#
+# Maps StationData capability key → (translation_key, icon, device_class|None).
+# async_setup_entry creates a FacilityBinarySensor for every key present in
+# coordinator._provider.CAPABILITIES. is_open and data_fetch_problem are
+# always created regardless of CAPABILITIES (coordinator-managed).
+
+_FACILITY_BINARY_SENSOR_REGISTRY: dict[
+    str, tuple[str, str, BinarySensorDeviceClass | None]
+] = {
+    "has_price": ("has_price", "mdi:currency-eur", None),
+    "has_car_wash": ("has_car_wash", "mdi:car-wash", None),
+    "has_shop": ("has_shop", "mdi:shopping", None),
+    "has_toilet": ("has_toilet", "mdi:toilet", None),
+    "has_atm": ("has_atm", "mdi:atm", None),
+    "has_disabled_access": (
+        "has_disabled_access",
+        "mdi:wheelchair-accessibility",
+        None,
+    ),
+    "has_electric_charging": ("has_electric_charging", "mdi:ev-station", None),
+    "accepts_cash": ("accepts_cash", "mdi:cash", None),
+    "accepts_cards": ("accepts_cards", "mdi:credit-card", None),
+    "accepts_contactless": ("accepts_contactless", "mdi:contactless-payment", None),
+}
+
 
 def _parse_time(s: str) -> dt_time | None:
     """Parse a time string like '6a.m.' or '10:30p.m.' into a time object."""
@@ -72,12 +98,34 @@ async def async_setup_entry(
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = entry.data.get(CONF_STATION_ID, "")
     station_name = entry.title
-    async_add_entities(
-        [
-            StationIsOpenBinarySensor(coordinator, station_id, station_name),
-            DataFetchProblemBinarySensor(coordinator, station_id, station_name),
-        ]
-    )
+    caps = coordinator._provider.CAPABILITIES
+
+    # is_open and data_fetch_problem are always created
+    entities: list[BinarySensorEntity] = [
+        StationIsOpenBinarySensor(coordinator, station_id, station_name),
+        DataFetchProblemBinarySensor(coordinator, station_id, station_name),
+    ]
+
+    # Facility binary sensors — one per capability key in registry
+    for cap_key, (
+        trans_key,
+        icon,
+        device_class,
+    ) in _FACILITY_BINARY_SENSOR_REGISTRY.items():
+        if cap_key in caps:
+            entities.append(
+                FacilityBinarySensor(
+                    coordinator,
+                    station_id,
+                    station_name,
+                    cap_key,
+                    trans_key,
+                    icon,
+                    device_class,
+                )
+            )
+
+    async_add_entities(entities)
 
 
 class StationIsOpenBinarySensor(
@@ -211,3 +259,61 @@ class DataFetchProblemBinarySensor(
             "last_exception": str(last_exc) if last_exc else None,
             "last_successful_fetch": last_success.isoformat() if last_success else None,
         }
+
+
+# ── Facility binary sensors ───────────────────────────────────────────────────
+
+
+class FacilityBinarySensor(
+    CoordinatorEntity[FuelCompareIECoordinator], BinarySensorEntity
+):
+    """Generic binary sensor for flat boolean facility capabilities.
+
+    Reads one StationData key (e.g. 'has_car_wash') and exposes it as a
+    binary sensor. Created only when the key is present in the provider's
+    CAPABILITIES frozenset.
+    """
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: FuelCompareIECoordinator,
+        station_id: str,
+        station_name: str,
+        cap_key: str,
+        translation_key: str,
+        icon: str,
+        device_class: BinarySensorDeviceClass | None,
+    ) -> None:
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._cap_key = cap_key
+        self._attr_icon = icon
+        self._attr_translation_key = translation_key
+        self._attr_device_class = device_class
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_{cap_key}"
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator._provider.LABEL
+        )
+
+    @property
+    def available(self) -> bool:
+        """Available when coordinator has data and key is present and non-None."""
+        return (
+            self.coordinator.data is not None
+            and self.coordinator.data.get(self._cap_key) is not None
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        if not self.coordinator.data:
+            return None
+        val = self.coordinator.data.get(self._cap_key)
+        if val is None:
+            return None
+        return bool(val)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"station_id": self._station_id}

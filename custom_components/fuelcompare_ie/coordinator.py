@@ -41,8 +41,12 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict]):
         super().__init__(
             hass,
             _LOGGER,
-            name=f"Fuel Compare Station {_station_id}",
-            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+            name=f"Fuel Compare [{provider.PROVIDER_KEY}] Station {_station_id}",
+            update_interval=timedelta(
+                seconds=getattr(
+                    provider, "POLL_INTERVAL_SECONDS", DEFAULT_SCAN_INTERVAL
+                )
+            ),
         )
         self.station_id = _station_id
         self._provider = provider

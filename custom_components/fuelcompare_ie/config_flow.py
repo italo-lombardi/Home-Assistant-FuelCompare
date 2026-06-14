@@ -190,9 +190,12 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
 
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+        hint = provider_cls.STATION_ID_HINT if provider_cls else "Enter the station ID."
         return self.async_show_form(
             step_id="station",
             data_schema=vol.Schema({vol.Required(CONF_STATION_ID): str}),
+            description_placeholders={"hint": hint},
             errors=errors,
         )
 

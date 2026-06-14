@@ -24,12 +24,9 @@
       },
       "station": {
         "title": "Add Station",
-        "description": "Enter the station ID from the station URL (e.g. for station/790, enter 790).",
+        "description": "{hint}",
         "data": {
           "station_id": "Station ID"
-        },
-        "data_description": {
-          "station_id": "The number at the end of the station URL."
         }
       },
       "name": {
