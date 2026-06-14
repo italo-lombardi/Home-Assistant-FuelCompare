@@ -1105,3 +1105,44 @@ def test_provider_registered_in_registry() -> None:
 
     assert "no_drivstoff" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["no_drivstoff"] is NoDrivstoffProvider
+
+
+async def test_async_list_stations_includes_zero_coordinate_station() -> None:
+    """Stations at lat=0.0, lng=0.0 must not be silently dropped by falsy coord check."""
+    from custom_components.fuelcompare_ie.providers.no_drivstoff import (
+        NoDrivstoffProvider,
+    )
+
+    station_at_null_island = {
+        "id": "zero-island",
+        "name": "Station at Null Island",
+        "brand": "Test",
+        "location": {"lat": 0.0, "lng": 0.0},
+        "fuel_prices": [{"fuel_name": "Bensin 95", "price": 1.85}],
+        "updated_at": "2026-06-14T12:00:00Z",
+    }
+
+    from unittest.mock import AsyncMock, MagicMock
+
+    mock_resp = AsyncMock()
+    mock_resp.status = 200
+    mock_resp.json = AsyncMock(return_value={"stations": [station_at_null_island]})
+    mock_resp.raise_for_status = MagicMock()
+    mock_resp.__aenter__ = AsyncMock(return_value=mock_resp)
+    mock_resp.__aexit__ = AsyncMock(return_value=False)
+    session = MagicMock()
+    session.get = MagicMock(return_value=mock_resp)
+
+    provider = NoDrivstoffProvider("")
+    provider._latitude = 0.0
+    provider._longitude = 0.0
+    provider._radius_km = 100.0
+
+    # Station is exactly at our query point — haversine distance = 0 — must be included
+    stations = await provider.async_list_stations(
+        session, lat=0.0, lng=0.0, radius_km=100.0
+    )
+    uids = [uid for uid, _ in stations]
+    assert "zero-island" in uids, (
+        "Station at lat=0.0/lng=0.0 must not be dropped by falsy check"
+    )

@@ -421,7 +421,7 @@ class NoDrivstoffProvider(BaseProvider):
             except (ValueError, TypeError):
                 s_lat, s_lng = 0.0, 0.0
 
-            if s_lat and s_lng:
+            if s_lat is not None and s_lng is not None:
                 dist_km = haversine_km(lat, lng, s_lat, s_lng)
                 if dist_km > radius_km:
                     continue
