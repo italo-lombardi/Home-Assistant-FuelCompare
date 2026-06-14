@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Bešvinis"
-      },
-      "diesel": {
-        "name": "Dyzelinas"
-      },
-      "brand": {
-        "name": "Prekės ženklas"
-      },
-      "county": {
-        "name": "Apskritis"
-      },
-      "working_hours": {
-        "name": "Darbo laikas"
-      },
-      "accessibility": {
-        "name": "Prieinamumas"
-      },
-      "offerings": {
-        "name": "Paslaugos"
-      },
-      "amenities": {
-        "name": "Patogumai"
-      },
-      "payments": {
-        "name": "Mokėjimai"
-      },
-      "price_last_updated": {
-        "name": "Paskutinis kainos atnaujinimas"
-      },
-      "station_name": {
-        "name": "Stoties Pavadinimas"
-      },
-      "last_successful_fetch": {
-        "name": "Paskutinis sėkmingas paėmimas"
-      },
-      "petrol": {
-        "name": "Benzinas"
-      },
-      "kerosene": {
-        "name": "Žibalas"
-      },
-      "price_confidence": {
-        "name": "Kainos patikimumas"
-      },
-      "opening_hours": {
-        "name": "Darbo laikas"
-      },
-      "address": {
-        "name": "Adresas"
-      },
-      "latitude": {
-        "name": "Platuma"
-      },
-      "longitude": {
-        "name": "Ilguma"
-      },
-      "phone": {
-        "name": "Telefonas"
-      },
-      "website": {
-        "name": "Svetainė"
-      },
-      "location": {
-        "name": "Vieta"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Dyzelinas"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Žibalas"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzinas"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Bešvinis"
+      },
+      "address": {
+        "name": "Adresas"
+      },
+      "brand": {
+        "name": "Prekės ženklas"
+      },
+      "county": {
+        "name": "Apskritis"
+      },
+      "latitude": {
+        "name": "Platuma"
+      },
+      "location": {
+        "name": "Vieta"
+      },
+      "longitude": {
+        "name": "Ilguma"
+      },
+      "station_name": {
+        "name": "Stoties Pavadinimas"
+      },
+      "accessibility": {
+        "name": "Prieinamumas"
+      },
+      "amenities": {
+        "name": "Patogumai"
+      },
+      "last_successful_fetch": {
+        "name": "Paskutinis sėkmingas paėmimas"
+      },
+      "offerings": {
+        "name": "Paslaugos"
+      },
+      "opening_hours": {
+        "name": "Darbo laikas"
+      },
+      "payments": {
+        "name": "Mokėjimai"
+      },
+      "phone": {
+        "name": "Telefonas"
+      },
+      "price_confidence": {
+        "name": "Kainos patikimumas"
+      },
+      "price_last_updated": {
+        "name": "Paskutinis kainos atnaujinimas"
+      },
+      "website": {
+        "name": "Svetainė"
+      },
+      "working_hours": {
+        "name": "Darbo laikas"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Atidaryta"
-      },
       "data_fetch_problem": {
         "name": "Duomenų gavimo problema"
       },
       "has_price": {
         "name": "Turi kainą"
       },
-      "has_car_wash": {
-        "name": "Automobilių plovykla"
-      },
-      "has_shop": {
-        "name": "Parduotuvė"
-      },
-      "has_toilet": {
-        "name": "Tualetas"
+      "is_open": {
+        "name": "Atidaryta"
       },
       "has_atm": {
         "name": "Bankomatas"
+      },
+      "has_car_wash": {
+        "name": "Automobilių plovykla"
       },
       "has_disabled_access": {
         "name": "Prieiga neįgaliesiems"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Elektromobilių įkrovimas"
       },
-      "accepts_cash": {
-        "name": "Priima grynuosius"
+      "has_shop": {
+        "name": "Parduotuvė"
+      },
+      "has_toilet": {
+        "name": "Tualetas"
       },
       "accepts_cards": {
         "name": "Priima korteles"
+      },
+      "accepts_cash": {
+        "name": "Priima grynuosius"
       },
       "accepts_contactless": {
         "name": "Priima bekontaktį mokėjimą"

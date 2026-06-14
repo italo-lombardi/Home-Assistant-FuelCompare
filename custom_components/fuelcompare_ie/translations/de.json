@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Bleifrei"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Marke"
-      },
-      "county": {
-        "name": "Bezirk"
-      },
-      "working_hours": {
-        "name": "Öffnungszeiten"
-      },
-      "accessibility": {
-        "name": "Barrierefreiheit"
-      },
-      "offerings": {
-        "name": "Angebote"
-      },
-      "amenities": {
-        "name": "Ausstattung"
-      },
-      "payments": {
-        "name": "Zahlungsmethoden"
-      },
-      "price_last_updated": {
-        "name": "Letzte Preisaktualisierung"
-      },
-      "station_name": {
-        "name": "Stationsname"
-      },
-      "last_successful_fetch": {
-        "name": "Letzter erfolgreicher Abruf"
-      },
-      "petrol": {
-        "name": "Benzin"
-      },
-      "kerosene": {
-        "name": "Kerosin"
-      },
-      "price_confidence": {
-        "name": "Preiszuverlässigkeit"
-      },
-      "opening_hours": {
-        "name": "Öffnungszeiten"
-      },
-      "address": {
-        "name": "Adresse"
-      },
-      "latitude": {
-        "name": "Breitengrad"
-      },
-      "longitude": {
-        "name": "Längengrad"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Webseite"
-      },
-      "location": {
-        "name": "Standort"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerosin"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzin"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Bleifrei"
+      },
+      "address": {
+        "name": "Adresse"
+      },
+      "brand": {
+        "name": "Marke"
+      },
+      "county": {
+        "name": "Bezirk"
+      },
+      "latitude": {
+        "name": "Breitengrad"
+      },
+      "location": {
+        "name": "Standort"
+      },
+      "longitude": {
+        "name": "Längengrad"
+      },
+      "station_name": {
+        "name": "Stationsname"
+      },
+      "accessibility": {
+        "name": "Barrierefreiheit"
+      },
+      "amenities": {
+        "name": "Ausstattung"
+      },
+      "last_successful_fetch": {
+        "name": "Letzter erfolgreicher Abruf"
+      },
+      "offerings": {
+        "name": "Angebote"
+      },
+      "opening_hours": {
+        "name": "Öffnungszeiten"
+      },
+      "payments": {
+        "name": "Zahlungsmethoden"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Preiszuverlässigkeit"
+      },
+      "price_last_updated": {
+        "name": "Letzte Preisaktualisierung"
+      },
+      "website": {
+        "name": "Webseite"
+      },
+      "working_hours": {
+        "name": "Öffnungszeiten"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Ist geöffnet"
-      },
       "data_fetch_problem": {
         "name": "Datenabruf-Problem"
       },
       "has_price": {
         "name": "Hat Preis"
       },
-      "has_car_wash": {
-        "name": "Autowaschanlage"
-      },
-      "has_shop": {
-        "name": "Shop"
-      },
-      "has_toilet": {
-        "name": "Toilette"
+      "is_open": {
+        "name": "Ist geöffnet"
       },
       "has_atm": {
         "name": "Geldautomat"
+      },
+      "has_car_wash": {
+        "name": "Autowaschanlage"
       },
       "has_disabled_access": {
         "name": "Behindertengerechter Zugang"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Elektrofahrzeug-Ladestation"
       },
-      "accepts_cash": {
-        "name": "Akzeptiert Bargeld"
+      "has_shop": {
+        "name": "Shop"
+      },
+      "has_toilet": {
+        "name": "Toilette"
       },
       "accepts_cards": {
         "name": "Akzeptiert Karten"
+      },
+      "accepts_cash": {
+        "name": "Akzeptiert Bargeld"
       },
       "accepts_contactless": {
         "name": "Akzeptiert kontaktlose Zahlung"

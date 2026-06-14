@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Sem Chumbo"
-      },
-      "diesel": {
-        "name": "Gasóleo"
-      },
-      "brand": {
-        "name": "Marca"
-      },
-      "county": {
-        "name": "Condado"
-      },
-      "working_hours": {
-        "name": "Horário de Funcionamento"
-      },
-      "accessibility": {
-        "name": "Acessibilidade"
-      },
-      "offerings": {
-        "name": "Serviços"
-      },
-      "amenities": {
-        "name": "Comodidades"
-      },
-      "payments": {
-        "name": "Pagamentos"
-      },
-      "price_last_updated": {
-        "name": "Última Atualização do Preço"
-      },
-      "station_name": {
-        "name": "Nome da Estação"
-      },
-      "last_successful_fetch": {
-        "name": "Última obtenção bem-sucedida"
-      },
-      "petrol": {
-        "name": "Gasolina"
-      },
-      "kerosene": {
-        "name": "Querosene"
-      },
-      "price_confidence": {
-        "name": "Confiança do preço"
-      },
-      "opening_hours": {
-        "name": "Horário de funcionamento"
-      },
-      "address": {
-        "name": "Endereço"
-      },
-      "latitude": {
-        "name": "Latitude"
-      },
-      "longitude": {
-        "name": "Longitude"
-      },
-      "phone": {
-        "name": "Telefone"
-      },
-      "website": {
-        "name": "Site"
-      },
-      "location": {
-        "name": "Localização"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Gasóleo"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Querosene"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Gasolina"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Sem Chumbo"
+      },
+      "address": {
+        "name": "Endereço"
+      },
+      "brand": {
+        "name": "Marca"
+      },
+      "county": {
+        "name": "Condado"
+      },
+      "latitude": {
+        "name": "Latitude"
+      },
+      "location": {
+        "name": "Localização"
+      },
+      "longitude": {
+        "name": "Longitude"
+      },
+      "station_name": {
+        "name": "Nome da Estação"
+      },
+      "accessibility": {
+        "name": "Acessibilidade"
+      },
+      "amenities": {
+        "name": "Comodidades"
+      },
+      "last_successful_fetch": {
+        "name": "Última obtenção bem-sucedida"
+      },
+      "offerings": {
+        "name": "Serviços"
+      },
+      "opening_hours": {
+        "name": "Horário de funcionamento"
+      },
+      "payments": {
+        "name": "Pagamentos"
+      },
+      "phone": {
+        "name": "Telefone"
+      },
+      "price_confidence": {
+        "name": "Confiança do preço"
+      },
+      "price_last_updated": {
+        "name": "Última Atualização do Preço"
+      },
+      "website": {
+        "name": "Site"
+      },
+      "working_hours": {
+        "name": "Horário de Funcionamento"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Está Aberto"
-      },
       "data_fetch_problem": {
         "name": "Problema na obtenção de dados"
       },
       "has_price": {
         "name": "Tem preço"
       },
-      "has_car_wash": {
-        "name": "Lavagem de carro"
-      },
-      "has_shop": {
-        "name": "Loja"
-      },
-      "has_toilet": {
-        "name": "Casa de banho"
+      "is_open": {
+        "name": "Está Aberto"
       },
       "has_atm": {
         "name": "Multibanco"
+      },
+      "has_car_wash": {
+        "name": "Lavagem de carro"
       },
       "has_disabled_access": {
         "name": "Acesso para deficientes"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Carregamento de veículos elétricos"
       },
-      "accepts_cash": {
-        "name": "Aceita dinheiro"
+      "has_shop": {
+        "name": "Loja"
+      },
+      "has_toilet": {
+        "name": "Casa de banho"
       },
       "accepts_cards": {
         "name": "Aceita cartões"
+      },
+      "accepts_cash": {
+        "name": "Aceita dinheiro"
       },
       "accepts_contactless": {
         "name": "Aceita pagamento contactless"

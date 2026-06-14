@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Bezsvina"
-      },
-      "diesel": {
-        "name": "Dīzeļdegviela"
-      },
-      "brand": {
-        "name": "Zīmols"
-      },
-      "county": {
-        "name": "Apgabals"
-      },
-      "working_hours": {
-        "name": "Darba laiks"
-      },
-      "accessibility": {
-        "name": "Pieejamība"
-      },
-      "offerings": {
-        "name": "Pakalpojumi"
-      },
-      "amenities": {
-        "name": "Ērtības"
-      },
-      "payments": {
-        "name": "Maksājumi"
-      },
-      "price_last_updated": {
-        "name": "Cenas pēdējā atjaunināšana"
-      },
-      "station_name": {
-        "name": "Stacijas Nosaukums"
-      },
-      "last_successful_fetch": {
-        "name": "Pēdējā veiksmīgā ielāde"
-      },
-      "petrol": {
-        "name": "Benzīns"
-      },
-      "kerosene": {
-        "name": "Petroleja"
-      },
-      "price_confidence": {
-        "name": "Cenas uzticamība"
-      },
-      "opening_hours": {
-        "name": "Darba laiks"
-      },
-      "address": {
-        "name": "Adrese"
-      },
-      "latitude": {
-        "name": "Platums"
-      },
-      "longitude": {
-        "name": "Garums"
-      },
-      "phone": {
-        "name": "Telefons"
-      },
-      "website": {
-        "name": "Tīmekļa vietne"
-      },
-      "location": {
-        "name": "Atrašanās vieta"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Dīzeļdegviela"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Petroleja"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzīns"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Bezsvina"
+      },
+      "address": {
+        "name": "Adrese"
+      },
+      "brand": {
+        "name": "Zīmols"
+      },
+      "county": {
+        "name": "Apgabals"
+      },
+      "latitude": {
+        "name": "Platums"
+      },
+      "location": {
+        "name": "Atrašanās vieta"
+      },
+      "longitude": {
+        "name": "Garums"
+      },
+      "station_name": {
+        "name": "Stacijas Nosaukums"
+      },
+      "accessibility": {
+        "name": "Pieejamība"
+      },
+      "amenities": {
+        "name": "Ērtības"
+      },
+      "last_successful_fetch": {
+        "name": "Pēdējā veiksmīgā ielāde"
+      },
+      "offerings": {
+        "name": "Pakalpojumi"
+      },
+      "opening_hours": {
+        "name": "Darba laiks"
+      },
+      "payments": {
+        "name": "Maksājumi"
+      },
+      "phone": {
+        "name": "Telefons"
+      },
+      "price_confidence": {
+        "name": "Cenas uzticamība"
+      },
+      "price_last_updated": {
+        "name": "Cenas pēdējā atjaunināšana"
+      },
+      "website": {
+        "name": "Tīmekļa vietne"
+      },
+      "working_hours": {
+        "name": "Darba laiks"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Ir atvērts"
-      },
       "data_fetch_problem": {
         "name": "Datu ielādes problēma"
       },
       "has_price": {
         "name": "Ir cena"
       },
-      "has_car_wash": {
-        "name": "Automazgātava"
-      },
-      "has_shop": {
-        "name": "Veikals"
-      },
-      "has_toilet": {
-        "name": "Tualete"
+      "is_open": {
+        "name": "Ir atvērts"
       },
       "has_atm": {
         "name": "Bankomāts"
+      },
+      "has_car_wash": {
+        "name": "Automazgātava"
       },
       "has_disabled_access": {
         "name": "Pieeja invalīdiem"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Elektromobiļu uzlāde"
       },
-      "accepts_cash": {
-        "name": "Pieņem skaidru naudu"
+      "has_shop": {
+        "name": "Veikals"
+      },
+      "has_toilet": {
+        "name": "Tualete"
       },
       "accepts_cards": {
         "name": "Pieņem kartes"
+      },
+      "accepts_cash": {
+        "name": "Pieņem skaidru naudu"
       },
       "accepts_contactless": {
         "name": "Pieņem bezkontakta maksājumu"

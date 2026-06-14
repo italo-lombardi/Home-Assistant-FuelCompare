@@ -221,7 +221,8 @@ def test_primary_url_points_to_cargopedia() -> None:
     """_PRIMARY_URL points to cargopedia.net."""
     from urllib.parse import urlparse
 
-    assert urlparse(_PRIMARY_URL).netloc in ("cargopedia.net", "www.cargopedia.net")
+    netloc = urlparse(_PRIMARY_URL).netloc
+    assert netloc == "cargopedia.net" or netloc == "www.cargopedia.net"
     assert _PRIMARY_URL.startswith("https://")
 
 
@@ -229,7 +230,8 @@ def test_fallback_url_points_to_tolls_eu() -> None:
     """_FALLBACK_URL points to tolls.eu."""
     from urllib.parse import urlparse
 
-    assert urlparse(_FALLBACK_URL).netloc in ("tolls.eu", "www.tolls.eu")
+    netloc_fb = urlparse(_FALLBACK_URL).netloc
+    assert netloc_fb == "tolls.eu" or netloc_fb == "www.tolls.eu"
     assert _FALLBACK_URL.startswith("https://")
 
 

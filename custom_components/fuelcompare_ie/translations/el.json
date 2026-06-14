@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Αμόλυβδη"
-      },
-      "diesel": {
-        "name": "Ντίζελ"
-      },
-      "brand": {
-        "name": "Μάρκα"
-      },
-      "county": {
-        "name": "Κομητεία"
-      },
-      "working_hours": {
-        "name": "Ώρες λειτουργίας"
-      },
-      "accessibility": {
-        "name": "Προσβασιμότητα"
-      },
-      "offerings": {
-        "name": "Υπηρεσίες"
-      },
-      "amenities": {
-        "name": "Παροχές"
-      },
-      "payments": {
-        "name": "Πληρωμές"
-      },
-      "price_last_updated": {
-        "name": "Τελευταία ενημέρωση τιμής"
-      },
-      "station_name": {
-        "name": "Όνομα Σταθμού"
-      },
-      "last_successful_fetch": {
-        "name": "Τελευταία επιτυχημένη λήψη"
-      },
-      "petrol": {
-        "name": "Βενζίνη"
-      },
-      "kerosene": {
-        "name": "Κηροζίνη"
-      },
-      "price_confidence": {
-        "name": "Αξιοπιστία τιμής"
-      },
-      "opening_hours": {
-        "name": "Ώρες λειτουργίας"
-      },
-      "address": {
-        "name": "Διεύθυνση"
-      },
-      "latitude": {
-        "name": "Γεωγρ. πλάτος"
-      },
-      "longitude": {
-        "name": "Γεωγρ. μήκος"
-      },
-      "phone": {
-        "name": "Τηλέφωνο"
-      },
-      "website": {
-        "name": "Ιστοσελίδα"
-      },
-      "location": {
-        "name": "Τοποθεσία"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Ντίζελ"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Κηροζίνη"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Βενζίνη"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Αμόλυβδη"
+      },
+      "address": {
+        "name": "Διεύθυνση"
+      },
+      "brand": {
+        "name": "Μάρκα"
+      },
+      "county": {
+        "name": "Κομητεία"
+      },
+      "latitude": {
+        "name": "Γεωγρ. πλάτος"
+      },
+      "location": {
+        "name": "Τοποθεσία"
+      },
+      "longitude": {
+        "name": "Γεωγρ. μήκος"
+      },
+      "station_name": {
+        "name": "Όνομα Σταθμού"
+      },
+      "accessibility": {
+        "name": "Προσβασιμότητα"
+      },
+      "amenities": {
+        "name": "Παροχές"
+      },
+      "last_successful_fetch": {
+        "name": "Τελευταία επιτυχημένη λήψη"
+      },
+      "offerings": {
+        "name": "Υπηρεσίες"
+      },
+      "opening_hours": {
+        "name": "Ώρες λειτουργίας"
+      },
+      "payments": {
+        "name": "Πληρωμές"
+      },
+      "phone": {
+        "name": "Τηλέφωνο"
+      },
+      "price_confidence": {
+        "name": "Αξιοπιστία τιμής"
+      },
+      "price_last_updated": {
+        "name": "Τελευταία ενημέρωση τιμής"
+      },
+      "website": {
+        "name": "Ιστοσελίδα"
+      },
+      "working_hours": {
+        "name": "Ώρες λειτουργίας"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Είναι ανοιχτό"
-      },
       "data_fetch_problem": {
         "name": "Πρόβλημα λήψης δεδομένων"
       },
       "has_price": {
         "name": "Έχει τιμή"
       },
-      "has_car_wash": {
-        "name": "Πλυντήριο αυτοκινήτων"
-      },
-      "has_shop": {
-        "name": "Κατάστημα"
-      },
-      "has_toilet": {
-        "name": "Τουαλέτα"
+      "is_open": {
+        "name": "Είναι ανοιχτό"
       },
       "has_atm": {
         "name": "ΑΤΜ"
+      },
+      "has_car_wash": {
+        "name": "Πλυντήριο αυτοκινήτων"
       },
       "has_disabled_access": {
         "name": "Πρόσβαση ΑΜΕΑ"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Φόρτιση ηλεκτρικών οχημάτων"
       },
-      "accepts_cash": {
-        "name": "Δέχεται μετρητά"
+      "has_shop": {
+        "name": "Κατάστημα"
+      },
+      "has_toilet": {
+        "name": "Τουαλέτα"
       },
       "accepts_cards": {
         "name": "Δέχεται κάρτες"
+      },
+      "accepts_cash": {
+        "name": "Δέχεται μετρητά"
       },
       "accepts_contactless": {
         "name": "Δέχεται ανέπαφη πληρωμή"

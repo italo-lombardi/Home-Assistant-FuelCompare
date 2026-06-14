@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Loodvrij"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Merk"
-      },
-      "county": {
-        "name": "District"
-      },
-      "working_hours": {
-        "name": "Openingstijden"
-      },
-      "accessibility": {
-        "name": "Toegankelijkheid"
-      },
-      "offerings": {
-        "name": "Diensten"
-      },
-      "amenities": {
-        "name": "Voorzieningen"
-      },
-      "payments": {
-        "name": "Betalingen"
-      },
-      "price_last_updated": {
-        "name": "Prijs laatst bijgewerkt"
-      },
-      "station_name": {
-        "name": "Stationsnaam"
-      },
-      "last_successful_fetch": {
-        "name": "Laatste succesvolle ophaalactie"
-      },
-      "petrol": {
-        "name": "Benzine"
-      },
-      "kerosene": {
-        "name": "Kerosine"
-      },
-      "price_confidence": {
-        "name": "Prijsbetrouwbaarheid"
-      },
-      "opening_hours": {
-        "name": "Openingstijden"
-      },
-      "address": {
-        "name": "Adres"
-      },
-      "latitude": {
-        "name": "Breedtegraad"
-      },
-      "longitude": {
-        "name": "Lengtegraad"
-      },
-      "phone": {
-        "name": "Telefoon"
-      },
-      "website": {
-        "name": "Website"
-      },
-      "location": {
-        "name": "Locatie"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerosine"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzine"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Loodvrij"
+      },
+      "address": {
+        "name": "Adres"
+      },
+      "brand": {
+        "name": "Merk"
+      },
+      "county": {
+        "name": "District"
+      },
+      "latitude": {
+        "name": "Breedtegraad"
+      },
+      "location": {
+        "name": "Locatie"
+      },
+      "longitude": {
+        "name": "Lengtegraad"
+      },
+      "station_name": {
+        "name": "Stationsnaam"
+      },
+      "accessibility": {
+        "name": "Toegankelijkheid"
+      },
+      "amenities": {
+        "name": "Voorzieningen"
+      },
+      "last_successful_fetch": {
+        "name": "Laatste succesvolle ophaalactie"
+      },
+      "offerings": {
+        "name": "Diensten"
+      },
+      "opening_hours": {
+        "name": "Openingstijden"
+      },
+      "payments": {
+        "name": "Betalingen"
+      },
+      "phone": {
+        "name": "Telefoon"
+      },
+      "price_confidence": {
+        "name": "Prijsbetrouwbaarheid"
+      },
+      "price_last_updated": {
+        "name": "Prijs laatst bijgewerkt"
+      },
+      "website": {
+        "name": "Website"
+      },
+      "working_hours": {
+        "name": "Openingstijden"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Is open"
-      },
       "data_fetch_problem": {
         "name": "Probleem met gegevensophalen"
       },
       "has_price": {
         "name": "Heeft prijs"
       },
-      "has_car_wash": {
-        "name": "Autowasstraat"
-      },
-      "has_shop": {
-        "name": "Winkel"
-      },
-      "has_toilet": {
-        "name": "Toilet"
+      "is_open": {
+        "name": "Is open"
       },
       "has_atm": {
         "name": "Geldautomaat"
+      },
+      "has_car_wash": {
+        "name": "Autowasstraat"
       },
       "has_disabled_access": {
         "name": "Rolstoeltoegankelijk"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Laadpaal elektrisch"
       },
-      "accepts_cash": {
-        "name": "Accepteert contant"
+      "has_shop": {
+        "name": "Winkel"
+      },
+      "has_toilet": {
+        "name": "Toilet"
       },
       "accepts_cards": {
         "name": "Accepteert kaarten"
+      },
+      "accepts_cash": {
+        "name": "Accepteert contant"
       },
       "accepts_contactless": {
         "name": "Accepteert contactloos"

@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Gan Luaidhe"
-      },
-      "diesel": {
-        "name": "Díosal"
-      },
-      "brand": {
-        "name": "Branda"
-      },
-      "county": {
-        "name": "Contae"
-      },
-      "working_hours": {
-        "name": "Uaireanta Oibre"
-      },
-      "accessibility": {
-        "name": "Inrochtaineacht"
-      },
-      "offerings": {
-        "name": "Seirbhísí"
-      },
-      "amenities": {
-        "name": "Áiseanna"
-      },
-      "payments": {
-        "name": "Íocaíochtaí"
-      },
-      "price_last_updated": {
-        "name": "Praghas Nuashonraithe go Deireanach"
-      },
-      "station_name": {
-        "name": "Ainm an Stáisiúin"
-      },
-      "last_successful_fetch": {
-        "name": "Aisghabháil dheireanach rathúil"
-      },
-      "petrol": {
-        "name": "Peitreal"
-      },
-      "kerosene": {
-        "name": "Ceirisín"
-      },
-      "price_confidence": {
-        "name": "Iontaofacht praghas"
-      },
-      "opening_hours": {
-        "name": "Uaireanta oscailte"
-      },
-      "address": {
-        "name": "Seoladh"
-      },
-      "latitude": {
-        "name": "Domhanleithead"
-      },
-      "longitude": {
-        "name": "Domhanfhad"
-      },
-      "phone": {
-        "name": "Fón"
-      },
-      "website": {
-        "name": "Suíomh gréasáin"
-      },
-      "location": {
-        "name": "Suíomh"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Díosal"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Ceirisín"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Peitreal"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Gan Luaidhe"
+      },
+      "address": {
+        "name": "Seoladh"
+      },
+      "brand": {
+        "name": "Branda"
+      },
+      "county": {
+        "name": "Contae"
+      },
+      "latitude": {
+        "name": "Domhanleithead"
+      },
+      "location": {
+        "name": "Suíomh"
+      },
+      "longitude": {
+        "name": "Domhanfhad"
+      },
+      "station_name": {
+        "name": "Ainm an Stáisiúin"
+      },
+      "accessibility": {
+        "name": "Inrochtaineacht"
+      },
+      "amenities": {
+        "name": "Áiseanna"
+      },
+      "last_successful_fetch": {
+        "name": "Aisghabháil dheireanach rathúil"
+      },
+      "offerings": {
+        "name": "Seirbhísí"
+      },
+      "opening_hours": {
+        "name": "Uaireanta oscailte"
+      },
+      "payments": {
+        "name": "Íocaíochtaí"
+      },
+      "phone": {
+        "name": "Fón"
+      },
+      "price_confidence": {
+        "name": "Iontaofacht praghas"
+      },
+      "price_last_updated": {
+        "name": "Praghas Nuashonraithe go Deireanach"
+      },
+      "website": {
+        "name": "Suíomh gréasáin"
+      },
+      "working_hours": {
+        "name": "Uaireanta Oibre"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Ar Oscailt"
-      },
       "data_fetch_problem": {
         "name": "Fadhb le sonraí a fháil"
       },
       "has_price": {
         "name": "Tá praghas ann"
       },
-      "has_car_wash": {
-        "name": "Níochán carr"
-      },
-      "has_shop": {
-        "name": "Siopa"
-      },
-      "has_toilet": {
-        "name": "Leithreas"
+      "is_open": {
+        "name": "Ar Oscailt"
       },
       "has_atm": {
         "name": "Meaisín airgid"
+      },
+      "has_car_wash": {
+        "name": "Níochán carr"
       },
       "has_disabled_access": {
         "name": "Rochtain faoi mhíchumas"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Luchtú feithiclí leictreacha"
       },
-      "accepts_cash": {
-        "name": "Glacann le hairgead tirim"
+      "has_shop": {
+        "name": "Siopa"
+      },
+      "has_toilet": {
+        "name": "Leithreas"
       },
       "accepts_cards": {
         "name": "Glacann le cártaí"
+      },
+      "accepts_cash": {
+        "name": "Glacann le hairgead tirim"
       },
       "accepts_contactless": {
         "name": "Glacann le híocaíocht gan teagmháil"

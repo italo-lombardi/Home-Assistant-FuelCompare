@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Senza piombo"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Marchio"
-      },
-      "county": {
-        "name": "Contea"
-      },
-      "working_hours": {
-        "name": "Orari di apertura"
-      },
-      "accessibility": {
-        "name": "Accessibilità"
-      },
-      "offerings": {
-        "name": "Servizi"
-      },
-      "amenities": {
-        "name": "Comfort"
-      },
-      "payments": {
-        "name": "Pagamenti"
-      },
-      "price_last_updated": {
-        "name": "Ultimo aggiornamento prezzo"
-      },
-      "station_name": {
-        "name": "Nome della Stazione"
-      },
-      "last_successful_fetch": {
-        "name": "Ultimo aggiornamento riuscito"
-      },
-      "petrol": {
-        "name": "Benzina"
-      },
-      "kerosene": {
-        "name": "Cherosene"
-      },
-      "price_confidence": {
-        "name": "Affidabilità prezzo"
-      },
-      "opening_hours": {
-        "name": "Orario"
-      },
-      "address": {
-        "name": "Indirizzo"
-      },
-      "latitude": {
-        "name": "Latitudine"
-      },
-      "longitude": {
-        "name": "Longitudine"
-      },
-      "phone": {
-        "name": "Telefono"
-      },
-      "website": {
-        "name": "Sito web"
-      },
-      "location": {
-        "name": "Posizione"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Cherosene"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzina"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Senza piombo"
+      },
+      "address": {
+        "name": "Indirizzo"
+      },
+      "brand": {
+        "name": "Marchio"
+      },
+      "county": {
+        "name": "Contea"
+      },
+      "latitude": {
+        "name": "Latitudine"
+      },
+      "location": {
+        "name": "Posizione"
+      },
+      "longitude": {
+        "name": "Longitudine"
+      },
+      "station_name": {
+        "name": "Nome della Stazione"
+      },
+      "accessibility": {
+        "name": "Accessibilità"
+      },
+      "amenities": {
+        "name": "Comfort"
+      },
+      "last_successful_fetch": {
+        "name": "Ultimo aggiornamento riuscito"
+      },
+      "offerings": {
+        "name": "Servizi"
+      },
+      "opening_hours": {
+        "name": "Orario"
+      },
+      "payments": {
+        "name": "Pagamenti"
+      },
+      "phone": {
+        "name": "Telefono"
+      },
+      "price_confidence": {
+        "name": "Affidabilità prezzo"
+      },
+      "price_last_updated": {
+        "name": "Ultimo aggiornamento prezzo"
+      },
+      "website": {
+        "name": "Sito web"
+      },
+      "working_hours": {
+        "name": "Orari di apertura"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "È aperto"
-      },
       "data_fetch_problem": {
         "name": "Problema di recupero dati"
       },
       "has_price": {
         "name": "Ha un prezzo"
       },
-      "has_car_wash": {
-        "name": "Autolavaggio"
-      },
-      "has_shop": {
-        "name": "Negozio"
-      },
-      "has_toilet": {
-        "name": "Servizi igienici"
+      "is_open": {
+        "name": "È aperto"
       },
       "has_atm": {
         "name": "Bancomat"
+      },
+      "has_car_wash": {
+        "name": "Autolavaggio"
       },
       "has_disabled_access": {
         "name": "Accesso disabili"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Ricarica veicoli elettrici"
       },
-      "accepts_cash": {
-        "name": "Accetta contanti"
+      "has_shop": {
+        "name": "Negozio"
+      },
+      "has_toilet": {
+        "name": "Servizi igienici"
       },
       "accepts_cards": {
         "name": "Accetta carte"
+      },
+      "accepts_cash": {
+        "name": "Accetta contanti"
       },
       "accepts_contactless": {
         "name": "Accetta pagamento contactless"

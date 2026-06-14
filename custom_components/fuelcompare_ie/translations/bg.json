@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Безоловен"
-      },
-      "diesel": {
-        "name": "Дизел"
-      },
-      "brand": {
-        "name": "Марка"
-      },
-      "county": {
-        "name": "Окръг"
-      },
-      "working_hours": {
-        "name": "Работно време"
-      },
-      "accessibility": {
-        "name": "Достъпност"
-      },
-      "offerings": {
-        "name": "Услуги"
-      },
-      "amenities": {
-        "name": "Удобства"
-      },
-      "payments": {
-        "name": "Плащания"
-      },
-      "price_last_updated": {
-        "name": "Последна актуализация на цената"
-      },
-      "station_name": {
-        "name": "Име на Станция"
-      },
-      "last_successful_fetch": {
-        "name": "Последно успешно извличане"
-      },
-      "petrol": {
-        "name": "Бензин"
-      },
-      "kerosene": {
-        "name": "Керосин"
-      },
-      "price_confidence": {
-        "name": "Надеждност на цената"
-      },
-      "opening_hours": {
-        "name": "Работно време"
-      },
-      "address": {
-        "name": "Адрес"
-      },
-      "latitude": {
-        "name": "Ширина"
-      },
-      "longitude": {
-        "name": "Дължина"
-      },
-      "phone": {
-        "name": "Телефон"
-      },
-      "website": {
-        "name": "Уебсайт"
-      },
-      "location": {
-        "name": "Местоположение"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Дизел"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Керосин"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Бензин"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Безоловен"
+      },
+      "address": {
+        "name": "Адрес"
+      },
+      "brand": {
+        "name": "Марка"
+      },
+      "county": {
+        "name": "Окръг"
+      },
+      "latitude": {
+        "name": "Ширина"
+      },
+      "location": {
+        "name": "Местоположение"
+      },
+      "longitude": {
+        "name": "Дължина"
+      },
+      "station_name": {
+        "name": "Име на Станция"
+      },
+      "accessibility": {
+        "name": "Достъпност"
+      },
+      "amenities": {
+        "name": "Удобства"
+      },
+      "last_successful_fetch": {
+        "name": "Последно успешно извличане"
+      },
+      "offerings": {
+        "name": "Услуги"
+      },
+      "opening_hours": {
+        "name": "Работно време"
+      },
+      "payments": {
+        "name": "Плащания"
+      },
+      "phone": {
+        "name": "Телефон"
+      },
+      "price_confidence": {
+        "name": "Надеждност на цената"
+      },
+      "price_last_updated": {
+        "name": "Последна актуализация на цената"
+      },
+      "website": {
+        "name": "Уебсайт"
+      },
+      "working_hours": {
+        "name": "Работно време"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Отворено е"
-      },
       "data_fetch_problem": {
         "name": "Проблем при извличане на данни"
       },
       "has_price": {
         "name": "Има цена"
       },
-      "has_car_wash": {
-        "name": "Автомивка"
-      },
-      "has_shop": {
-        "name": "Магазин"
-      },
-      "has_toilet": {
-        "name": "Тоалетна"
+      "is_open": {
+        "name": "Отворено е"
       },
       "has_atm": {
         "name": "банкомат"
+      },
+      "has_car_wash": {
+        "name": "Автомивка"
       },
       "has_disabled_access": {
         "name": "Достъп за инвалиди"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Зареждане на електромобили"
       },
-      "accepts_cash": {
-        "name": "Приема в брой"
+      "has_shop": {
+        "name": "Магазин"
+      },
+      "has_toilet": {
+        "name": "Тоалетна"
       },
       "accepts_cards": {
         "name": "Приема карти"
+      },
+      "accepts_cash": {
+        "name": "Приема в брой"
       },
       "accepts_contactless": {
         "name": "Приема безконтактно плащане"

@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Ólommentes"
-      },
-      "diesel": {
-        "name": "Dízel"
-      },
-      "brand": {
-        "name": "Márka"
-      },
-      "county": {
-        "name": "Megye"
-      },
-      "working_hours": {
-        "name": "Nyitvatartás"
-      },
-      "accessibility": {
-        "name": "Akadálymentesség"
-      },
-      "offerings": {
-        "name": "Szolgáltatások"
-      },
-      "amenities": {
-        "name": "Felszereltség"
-      },
-      "payments": {
-        "name": "Fizetési módok"
-      },
-      "price_last_updated": {
-        "name": "Ár utolsó frissítése"
-      },
-      "station_name": {
-        "name": "Állomás Neve"
-      },
-      "last_successful_fetch": {
-        "name": "Utolsó sikeres lekérdezés"
-      },
-      "petrol": {
-        "name": "Benzin"
-      },
-      "kerosene": {
-        "name": "Kerozin"
-      },
-      "price_confidence": {
-        "name": "Ármeghbízhatóság"
-      },
-      "opening_hours": {
-        "name": "Nyitvatartás"
-      },
-      "address": {
-        "name": "Cím"
-      },
-      "latitude": {
-        "name": "Szélességi fok"
-      },
-      "longitude": {
-        "name": "Hosszúsági fok"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Weboldal"
-      },
-      "location": {
-        "name": "Helyszín"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Dízel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerozin"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzin"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Ólommentes"
+      },
+      "address": {
+        "name": "Cím"
+      },
+      "brand": {
+        "name": "Márka"
+      },
+      "county": {
+        "name": "Megye"
+      },
+      "latitude": {
+        "name": "Szélességi fok"
+      },
+      "location": {
+        "name": "Helyszín"
+      },
+      "longitude": {
+        "name": "Hosszúsági fok"
+      },
+      "station_name": {
+        "name": "Állomás Neve"
+      },
+      "accessibility": {
+        "name": "Akadálymentesség"
+      },
+      "amenities": {
+        "name": "Felszereltség"
+      },
+      "last_successful_fetch": {
+        "name": "Utolsó sikeres lekérdezés"
+      },
+      "offerings": {
+        "name": "Szolgáltatások"
+      },
+      "opening_hours": {
+        "name": "Nyitvatartás"
+      },
+      "payments": {
+        "name": "Fizetési módok"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Ármeghbízhatóság"
+      },
+      "price_last_updated": {
+        "name": "Ár utolsó frissítése"
+      },
+      "website": {
+        "name": "Weboldal"
+      },
+      "working_hours": {
+        "name": "Nyitvatartás"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Nyitva van"
-      },
       "data_fetch_problem": {
         "name": "Adatlekérési probléma"
       },
       "has_price": {
         "name": "Van ár"
       },
-      "has_car_wash": {
-        "name": "Autómosó"
-      },
-      "has_shop": {
-        "name": "Bolt"
-      },
-      "has_toilet": {
-        "name": "Mosdó"
+      "is_open": {
+        "name": "Nyitva van"
       },
       "has_atm": {
         "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "Autómosó"
       },
       "has_disabled_access": {
         "name": "Akadálymentesített hozzáférés"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Elektromos töltőállomás"
       },
-      "accepts_cash": {
-        "name": "Elfogad készpénzt"
+      "has_shop": {
+        "name": "Bolt"
+      },
+      "has_toilet": {
+        "name": "Mosdó"
       },
       "accepts_cards": {
         "name": "Elfogad kártyát"
+      },
+      "accepts_cash": {
+        "name": "Elfogad készpénzt"
       },
       "accepts_contactless": {
         "name": "Elfogad érintésmentes fizetést"

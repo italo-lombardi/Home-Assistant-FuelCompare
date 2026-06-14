@@ -82,8 +82,7 @@ def _countries_from_registry() -> list[tuple[str, str]]:
         if cls.COUNTRY not in seen:
             seen[cls.COUNTRY] = cls.COUNTRY
     pairs = [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
-    # Ireland first, then alphabetical by display name
-    pairs.sort(key=lambda x: "" if x[0] == "IE" else x[1])
+    pairs.sort(key=lambda x: x[1])
     return pairs
 
 

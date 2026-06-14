@@ -506,10 +506,15 @@ class NoDrivstoffProvider(BaseProvider):
                 response.raise_for_status()
                 payload: dict = await response.json()
         except ClientResponseError as err:
-            _LOGGER.debug("HTTP error fetching Drivstoffpriser stations: %s", err)
+            _LOGGER.debug(
+                "HTTP error fetching Drivstoffpriser stations: HTTP %s", err.status
+            )
             return None
         except Exception as err:  # noqa: BLE001
-            _LOGGER.debug("Unexpected error fetching Drivstoffpriser stations: %s", err)
+            _LOGGER.debug(
+                "Unexpected error fetching Drivstoffpriser stations: %s",
+                type(err).__name__,
+            )
             return None
 
         return payload.get("stations") or []

@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Sans plomb"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Marque"
-      },
-      "county": {
-        "name": "Comté"
-      },
-      "working_hours": {
-        "name": "Heures d'ouverture"
-      },
-      "accessibility": {
-        "name": "Accessibilité"
-      },
-      "offerings": {
-        "name": "Services"
-      },
-      "amenities": {
-        "name": "Commodités"
-      },
-      "payments": {
-        "name": "Paiements"
-      },
-      "price_last_updated": {
-        "name": "Dernière mise à jour du prix"
-      },
-      "station_name": {
-        "name": "Nom de la Station"
-      },
-      "last_successful_fetch": {
-        "name": "Dernière récupération réussie"
-      },
-      "petrol": {
-        "name": "Essence"
-      },
-      "kerosene": {
-        "name": "Kérosène"
-      },
-      "price_confidence": {
-        "name": "Fiabilité du prix"
-      },
-      "opening_hours": {
-        "name": "Heures d'ouverture"
-      },
-      "address": {
-        "name": "Adresse"
-      },
-      "latitude": {
-        "name": "Latitude"
-      },
-      "longitude": {
-        "name": "Longitude"
-      },
-      "phone": {
-        "name": "Téléphone"
-      },
-      "website": {
-        "name": "Site web"
-      },
-      "location": {
-        "name": "Localisation"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kérosène"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Essence"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Sans plomb"
+      },
+      "address": {
+        "name": "Adresse"
+      },
+      "brand": {
+        "name": "Marque"
+      },
+      "county": {
+        "name": "Comté"
+      },
+      "latitude": {
+        "name": "Latitude"
+      },
+      "location": {
+        "name": "Localisation"
+      },
+      "longitude": {
+        "name": "Longitude"
+      },
+      "station_name": {
+        "name": "Nom de la Station"
+      },
+      "accessibility": {
+        "name": "Accessibilité"
+      },
+      "amenities": {
+        "name": "Commodités"
+      },
+      "last_successful_fetch": {
+        "name": "Dernière récupération réussie"
+      },
+      "offerings": {
+        "name": "Services"
+      },
+      "opening_hours": {
+        "name": "Heures d'ouverture"
+      },
+      "payments": {
+        "name": "Paiements"
+      },
+      "phone": {
+        "name": "Téléphone"
+      },
+      "price_confidence": {
+        "name": "Fiabilité du prix"
+      },
+      "price_last_updated": {
+        "name": "Dernière mise à jour du prix"
+      },
+      "website": {
+        "name": "Site web"
+      },
+      "working_hours": {
+        "name": "Heures d'ouverture"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Est ouvert"
-      },
       "data_fetch_problem": {
         "name": "Problème de récupération de données"
       },
       "has_price": {
         "name": "A un prix"
       },
-      "has_car_wash": {
-        "name": "Lavage auto"
-      },
-      "has_shop": {
-        "name": "Boutique"
-      },
-      "has_toilet": {
-        "name": "Toilettes"
+      "is_open": {
+        "name": "Est ouvert"
       },
       "has_atm": {
         "name": "Distributeur"
+      },
+      "has_car_wash": {
+        "name": "Lavage auto"
       },
       "has_disabled_access": {
         "name": "Accès handicapés"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Recharge véhicule électrique"
       },
-      "accepts_cash": {
-        "name": "Accepte espèces"
+      "has_shop": {
+        "name": "Boutique"
+      },
+      "has_toilet": {
+        "name": "Toilettes"
       },
       "accepts_cards": {
         "name": "Accepte les cartes"
+      },
+      "accepts_cash": {
+        "name": "Accepte espèces"
       },
       "accepts_contactless": {
         "name": "Accepte le sans contact"

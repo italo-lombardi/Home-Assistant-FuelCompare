@@ -508,16 +508,16 @@ class LuCarbuProvider(BaseProvider):
                 payload = await response.json(content_type=None)
         except ClientResponseError as err:
             _LOGGER.debug(
-                "HTTP error fetching carbu.com LU stations fuel=%s: %s",
+                "HTTP error fetching carbu.com LU stations fuel=%s: HTTP %s",
                 fuel_key,
-                err,
+                err.status,
             )
             return None
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug(
                 "Error fetching carbu.com LU stations fuel=%s: %s",
                 fuel_key,
-                err,
+                type(err).__name__,
             )
             return None
 

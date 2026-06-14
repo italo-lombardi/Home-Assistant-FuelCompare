@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Blyfri"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Merke"
-      },
-      "county": {
-        "name": "Fylke"
-      },
-      "working_hours": {
-        "name": "Åpningstider"
-      },
-      "accessibility": {
-        "name": "Tilgjengelighet"
-      },
-      "offerings": {
-        "name": "Tjenester"
-      },
-      "amenities": {
-        "name": "Fasiliteter"
-      },
-      "payments": {
-        "name": "Betalinger"
-      },
-      "price_last_updated": {
-        "name": "Pris sist oppdatert"
-      },
-      "station_name": {
-        "name": "Stasjonsnavn"
-      },
-      "last_successful_fetch": {
-        "name": "Siste vellykkede henting"
-      },
-      "petrol": {
-        "name": "Bensin"
-      },
-      "kerosene": {
-        "name": "Parafin"
-      },
-      "price_confidence": {
-        "name": "Prispålitelighet"
-      },
-      "opening_hours": {
-        "name": "Åpningstider"
-      },
-      "address": {
-        "name": "Adresse"
-      },
-      "latitude": {
-        "name": "Breddegrad"
-      },
-      "longitude": {
-        "name": "Lengdegrad"
-      },
-      "phone": {
-        "name": "Telefon"
-      },
-      "website": {
-        "name": "Nettsted"
-      },
-      "location": {
-        "name": "Plassering"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Parafin"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Bensin"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Blyfri"
+      },
+      "address": {
+        "name": "Adresse"
+      },
+      "brand": {
+        "name": "Merke"
+      },
+      "county": {
+        "name": "Fylke"
+      },
+      "latitude": {
+        "name": "Breddegrad"
+      },
+      "location": {
+        "name": "Plassering"
+      },
+      "longitude": {
+        "name": "Lengdegrad"
+      },
+      "station_name": {
+        "name": "Stasjonsnavn"
+      },
+      "accessibility": {
+        "name": "Tilgjengelighet"
+      },
+      "amenities": {
+        "name": "Fasiliteter"
+      },
+      "last_successful_fetch": {
+        "name": "Siste vellykkede henting"
+      },
+      "offerings": {
+        "name": "Tjenester"
+      },
+      "opening_hours": {
+        "name": "Åpningstider"
+      },
+      "payments": {
+        "name": "Betalinger"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Prispålitelighet"
+      },
+      "price_last_updated": {
+        "name": "Pris sist oppdatert"
+      },
+      "website": {
+        "name": "Nettsted"
+      },
+      "working_hours": {
+        "name": "Åpningstider"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "Er åpen"
-      },
       "data_fetch_problem": {
         "name": "Problem med datahenting"
       },
       "has_price": {
         "name": "Har pris"
       },
-      "has_car_wash": {
-        "name": "Bilvask"
-      },
-      "has_shop": {
-        "name": "Butikk"
-      },
-      "has_toilet": {
-        "name": "Toalett"
+      "is_open": {
+        "name": "Er åpen"
       },
       "has_atm": {
         "name": "Minibank"
+      },
+      "has_car_wash": {
+        "name": "Bilvask"
       },
       "has_disabled_access": {
         "name": "Tilgang for funksjonshemmede"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Elbillading"
       },
-      "accepts_cash": {
-        "name": "Godtar kontanter"
+      "has_shop": {
+        "name": "Butikk"
+      },
+      "has_toilet": {
+        "name": "Toalett"
       },
       "accepts_cards": {
         "name": "Godtar kort"
+      },
+      "accepts_cash": {
+        "name": "Godtar kontanter"
       },
       "accepts_contactless": {
         "name": "Godtar kontaktløs betaling"

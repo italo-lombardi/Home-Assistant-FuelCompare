@@ -27,77 +27,14 @@
   },
   "entity": {
     "sensor": {
-      "unleaded": {
-        "name": "Lyijytön"
-      },
-      "diesel": {
-        "name": "Diesel"
-      },
-      "brand": {
-        "name": "Merkki"
-      },
-      "county": {
-        "name": "Lääni"
-      },
-      "working_hours": {
-        "name": "Aukioloajat"
-      },
-      "accessibility": {
-        "name": "Esteettömyys"
-      },
-      "offerings": {
-        "name": "Palvelut"
-      },
-      "amenities": {
-        "name": "Mukavuudet"
-      },
-      "payments": {
-        "name": "Maksutavat"
-      },
-      "price_last_updated": {
-        "name": "Hinnan viimeisin päivitys"
-      },
-      "station_name": {
-        "name": "Aseman Nimi"
-      },
-      "last_successful_fetch": {
-        "name": "Viimeisin onnistunut haku"
-      },
-      "petrol": {
-        "name": "Bensiini"
-      },
-      "kerosene": {
-        "name": "Kerosiini"
-      },
-      "price_confidence": {
-        "name": "Hinnan luotettavuus"
-      },
-      "opening_hours": {
-        "name": "Aukioloajat"
-      },
-      "address": {
-        "name": "Osoite"
-      },
-      "latitude": {
-        "name": "Leveysaste"
-      },
-      "longitude": {
-        "name": "Pituusaste"
-      },
-      "phone": {
-        "name": "Puhelin"
-      },
-      "website": {
-        "name": "Verkkosivusto"
-      },
-      "location": {
-        "name": "Sijainti"
+      "adblue": {
+        "name": "AdBlue"
       },
       "cng": {
         "name": "CNG"
       },
-      "lpg": {
-        "name": "LPG"
+      "diesel": {
+        "name": "Diesel"
       },
       "e10": {
         "name": "E10"
@@ -105,37 +42,94 @@
       "e85": {
         "name": "E85"
       },
-      "premium_unleaded": {
-        "name": "Premium Unleaded"
+      "kerosene": {
+        "name": "Kerosiini"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Bensiini"
       },
       "premium_diesel": {
         "name": "Premium Diesel"
       },
-      "adblue": {
-        "name": "AdBlue"
+      "premium_unleaded": {
+        "name": "Premium Unleaded"
+      },
+      "unleaded": {
+        "name": "Lyijytön"
+      },
+      "address": {
+        "name": "Osoite"
+      },
+      "brand": {
+        "name": "Merkki"
+      },
+      "county": {
+        "name": "Lääni"
+      },
+      "latitude": {
+        "name": "Leveysaste"
+      },
+      "location": {
+        "name": "Sijainti"
+      },
+      "longitude": {
+        "name": "Pituusaste"
+      },
+      "station_name": {
+        "name": "Aseman Nimi"
+      },
+      "accessibility": {
+        "name": "Esteettömyys"
+      },
+      "amenities": {
+        "name": "Mukavuudet"
+      },
+      "last_successful_fetch": {
+        "name": "Viimeisin onnistunut haku"
+      },
+      "offerings": {
+        "name": "Palvelut"
+      },
+      "opening_hours": {
+        "name": "Aukioloajat"
+      },
+      "payments": {
+        "name": "Maksutavat"
+      },
+      "phone": {
+        "name": "Puhelin"
+      },
+      "price_confidence": {
+        "name": "Hinnan luotettavuus"
+      },
+      "price_last_updated": {
+        "name": "Hinnan viimeisin päivitys"
+      },
+      "website": {
+        "name": "Verkkosivusto"
+      },
+      "working_hours": {
+        "name": "Aukioloajat"
       }
     },
     "binary_sensor": {
-      "is_open": {
-        "name": "On auki"
-      },
       "data_fetch_problem": {
         "name": "Tietojen haun ongelma"
       },
       "has_price": {
         "name": "On hinta"
       },
-      "has_car_wash": {
-        "name": "Autopesula"
-      },
-      "has_shop": {
-        "name": "Kauppa"
-      },
-      "has_toilet": {
-        "name": "WC"
+      "is_open": {
+        "name": "On auki"
       },
       "has_atm": {
         "name": "Pankkiautomaatti"
+      },
+      "has_car_wash": {
+        "name": "Autopesula"
       },
       "has_disabled_access": {
         "name": "Esteetön pääsy"
@@ -143,11 +137,17 @@
       "has_electric_charging": {
         "name": "Sähköautojen lataus"
       },
-      "accepts_cash": {
-        "name": "Hyväksyy käteistä"
+      "has_shop": {
+        "name": "Kauppa"
+      },
+      "has_toilet": {
+        "name": "WC"
       },
       "accepts_cards": {
         "name": "Hyväksyy kortteja"
+      },
+      "accepts_cash": {
+        "name": "Hyväksyy käteistä"
       },
       "accepts_contactless": {
         "name": "Hyväksyy lähimaksun"
