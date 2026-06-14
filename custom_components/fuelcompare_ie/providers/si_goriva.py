@@ -421,7 +421,7 @@ class SiGorivaProvider(BaseProvider):
         """
         now = time.monotonic()
         if (
-            self._franchise_cache
+            self._franchise_cache_ts > 0
             and (now - self._franchise_cache_ts) < _FRANCHISE_CACHE_TTL
         ):
             return self._franchise_cache
@@ -505,9 +505,12 @@ def _parse_station(
     lpg = _parse_price(prices_raw.get("avtoplin-lpg"))
 
     franchise_pk = station.get("franchise")
-    brand: str | None = (
-        franchise_map.get(int(franchise_pk)) if franchise_pk is not None else None
-    )
+    brand: str | None = None
+    if franchise_pk is not None:
+        try:
+            brand = franchise_map.get(int(franchise_pk))
+        except (ValueError, TypeError):
+            pass
 
     name: str | None = station.get("name") or None
     address: str | None = station.get("address") or None

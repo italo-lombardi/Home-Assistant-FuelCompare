@@ -603,6 +603,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_list = station_list
 
         if not station_list:
+            # For location-based providers the unique_id is already set from
+            # lat/lng — we can proceed to the name step without a station pick.
+            if self.unique_id:
+                return await self.async_step_name()
             errors["base"] = "no_stations_found"
             return self.async_show_form(
                 step_id="station_picker",

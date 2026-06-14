@@ -54,14 +54,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     county = entry.data.get(CONF_STATION_COUNTY)
     # API key is stored in entry.options (not entry.data) for security; fall back
     # to entry.data for entries created before this change was introduced.
-    api_key = entry.options.get(CONF_API_KEY) or entry.data.get(CONF_API_KEY)
+    # Use explicit is not None checks — empty string is a valid (invalid) key,
+    # not a signal to fall through to entry.data.
+    _api_key_options = entry.options.get(CONF_API_KEY)
+    api_key = (
+        _api_key_options
+        if _api_key_options is not None
+        else entry.data.get(CONF_API_KEY)
+    )
     latitude = entry.data.get(CONF_LATITUDE)
     longitude = entry.data.get(CONF_LONGITUDE)
-    radius_km = entry.options.get(CONF_RADIUS_KM) or entry.data.get(CONF_RADIUS_KM)
+    _radius_options = entry.options.get(CONF_RADIUS_KM)
+    radius_km = (
+        _radius_options
+        if _radius_options is not None
+        else entry.data.get(CONF_RADIUS_KM)
+    )
     sig = inspect.signature(provider_cls.__init__)
     kwargs: dict = {}
     if county and "county" in sig.parameters:
         kwargs["county"] = county
+    # postal_code: for providers that accept it (e.g. BeCarbuProvider), pass
+    # the station_county value if it looks like a postal code, or any explicit
+    # postal_code field stored in entry.data.
+    if "postal_code" in sig.parameters:
+        postal_code = entry.data.get("postal_code")
+        if not postal_code and county and str(county).isdigit():
+            postal_code = county
+        if postal_code:
+            kwargs["postal_code"] = postal_code
     if api_key and "api_key" in sig.parameters:
         kwargs["api_key"] = api_key
     if latitude is not None and "latitude" in sig.parameters:

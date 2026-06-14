@@ -11,7 +11,6 @@ from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.gr_fuelgov import (
     GrFuelgovProvider,
     _API_URL,
-    _FUEL_NAME_TO_KEY,
     _NATIONAL_AVG_ID,
     _NATIONAL_AVG_NAME,
 )
@@ -203,26 +202,6 @@ def test_api_url_points_to_nireas() -> None:
     assert "nireas.iee.ihu.gr" in _API_URL
     assert _API_URL.startswith("https://")
     assert "latest" in _API_URL
-
-
-def test_fuel_name_to_key_diesel() -> None:
-    """_FUEL_NAME_TO_KEY maps Greek diesel name to 'diesel'."""
-    assert _FUEL_NAME_TO_KEY["Diesel Κίνησης"] == "diesel"
-
-
-def test_fuel_name_to_key_unleaded() -> None:
-    """_FUEL_NAME_TO_KEY maps Greek unleaded 95 name to 'unleaded'."""
-    assert _FUEL_NAME_TO_KEY["Αμόλυβδη 95 οκτ."] == "unleaded"
-
-
-def test_fuel_name_to_key_premium_unleaded() -> None:
-    """_FUEL_NAME_TO_KEY maps Greek unleaded 100 name to 'premium_unleaded'."""
-    assert _FUEL_NAME_TO_KEY["Αμόλυβδη 100 οκτ."] == "premium_unleaded"
-
-
-def test_fuel_name_to_key_lpg() -> None:
-    """_FUEL_NAME_TO_KEY maps Greek autogas name to 'lpg'."""
-    assert _FUEL_NAME_TO_KEY["Υγραέριο κίνησης (Autogas)"] == "lpg"
 
 
 def test_national_avg_id_is_52() -> None:

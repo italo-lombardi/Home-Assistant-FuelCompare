@@ -573,10 +573,17 @@ class BeCarbuProvider(BaseProvider):
         Returns:
             Ordered list of (station_id, label) tuples.  Empty list on failure.
         """
+        # postal_code kwarg takes priority; fall back to county kwarg (config flow
+        # passes the county field as "county" — for BE this should be a 4-digit
+        # Belgian postal code); then fall back to instance postal_code.
         postal_code: str | None = (
             str(kwargs["postal_code"])
             if kwargs.get("postal_code")
-            else self._postal_code
+            else (
+                str(kwargs["county"])
+                if kwargs.get("county") and str(kwargs.get("county", "")).isdigit()
+                else self._postal_code
+            )
         )
         lat: float | None = kwargs.get("lat")  # type: ignore[assignment]
         lng: float | None = kwargs.get("lng")  # type: ignore[assignment]

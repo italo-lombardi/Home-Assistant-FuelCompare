@@ -231,11 +231,17 @@ class DeTankerkoenigProvider(BaseProvider):
         }
         _LOGGER.debug("Fetching Tankerkoenig detail for station %s", station_id)
 
-        async with session.get(
-            url, params=params, headers=_HEADERS, timeout=_TIMEOUT
-        ) as resp:
-            resp.raise_for_status()
-            payload: dict[str, Any] = await resp.json()
+        try:
+            async with session.get(
+                url, params=params, headers=_HEADERS, timeout=_TIMEOUT
+            ) as resp:
+                resp.raise_for_status()
+                payload: dict[str, Any] = await resp.json()
+        except Exception as err:
+            raise ProviderError(
+                f"Tankerkoenig API request failed for station '{station_id}': "
+                f"{type(err).__name__}"
+            ) from err
 
         if not payload.get("ok"):
             message = payload.get("message", "unknown error")

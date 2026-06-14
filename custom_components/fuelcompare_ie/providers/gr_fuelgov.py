@@ -92,14 +92,6 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _NATIONAL_AVG_NAME = "ΠΑΝΕΛΛΗΝΙΟΣ ΣΤΑΘΜΙΣΜΕΝΟΣ Μ.Ο."
 _NATIONAL_AVG_ID = 52
 
-# Mapping from raw Greek fuel type name → StationData key.
-_FUEL_NAME_TO_KEY: dict[str, str] = {
-    "Αμόλυβδη 95 οκτ.": "unleaded",
-    "Αμόλυβδη 100 οκτ.": "premium_unleaded",
-    "Diesel Κίνησης": "diesel",
-    "Υγραέριο κίνησης (Autogas)": "lpg",
-}
-
 
 class GrFuelgovProvider(BaseProvider):
     """Fetch Greek fuel prices from the nireas.iee.ihu.gr community API.

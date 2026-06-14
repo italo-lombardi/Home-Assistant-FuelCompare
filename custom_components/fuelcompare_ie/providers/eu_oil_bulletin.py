@@ -286,27 +286,30 @@ class EuOilBulletinProvider(BaseProvider):
                 f"Failed to parse EC Oil Bulletin Excel file: {err}"
             ) from err
 
-        sheet = wb.active
-        if sheet is None:
-            raise ProviderError("EC Oil Bulletin Excel file has no active sheet.")
-
-        # Extract week date: row 2 col A has the reference date string.
-        # Row 1 col A is the "in EUR" units header — skip it.
-        week_label: str | None = None
         try:
-            for row_idx, col_idx in ((2, 1), (1, 2)):
-                header_val = sheet.cell(row=row_idx, column=col_idx).value
-                if header_val:
-                    candidate = str(header_val).strip()
-                    if candidate and candidate.lower() != "in eur":
-                        week_label = candidate
-                        break
-        except Exception:  # noqa: BLE001
-            pass
-        if not week_label:
-            week_label = datetime.now(tz=UTC).date().isoformat()
+            sheet = wb.active
+            if sheet is None:
+                raise ProviderError("EC Oil Bulletin Excel file has no active sheet.")
 
-        rows_parsed = _parse_sheet(sheet, _HEADER_ROWS)
+            # Extract week date: row 2 col A has the reference date string.
+            # Row 1 col A is the "in EUR" units header — skip it.
+            week_label: str | None = None
+            try:
+                for row_idx, col_idx in ((2, 1), (1, 2)):
+                    header_val = sheet.cell(row=row_idx, column=col_idx).value
+                    if header_val:
+                        candidate = str(header_val).strip()
+                        if candidate and candidate.lower() != "in eur":
+                            week_label = candidate
+                            break
+            except Exception:  # noqa: BLE001
+                pass
+            if not week_label:
+                week_label = datetime.now(tz=UTC).date().isoformat()
+
+            rows_parsed = _parse_sheet(sheet, _HEADER_ROWS)
+        finally:
+            wb.close()
 
         # Look up the requested country
         record = rows_parsed.get(country_code)
@@ -410,11 +413,14 @@ class EuOilBulletinProvider(BaseProvider):
             )
             return []
 
-        sheet = wb.active
-        if sheet is None:
-            return []
+        try:
+            sheet = wb.active
+            if sheet is None:
+                return []
 
-        rows_parsed = _parse_sheet(sheet, _HEADER_ROWS)
+            rows_parsed = _parse_sheet(sheet, _HEADER_ROWS)
+        finally:
+            wb.close()
 
         result: list[tuple[str, str]] = []
         for code, rec in sorted(rows_parsed.items()):
@@ -546,8 +552,12 @@ def _resolve_country_code(country_name: str) -> str | None:
         result = _COUNTRY_NAME_TO_CODE.get(normalised)
         if result:
             return result
-        # Partial match for composite strings like "EUR27_2020 (IV)"
-        for key, code in _COUNTRY_NAME_TO_CODE.items():
+        # Partial match for composite strings like "EUR27_2020 (IV)".
+        # Sort by key length descending so "euro area" is tried before "eu"
+        # to prevent "eu" matching "euro area weighted average".
+        for key, code in sorted(
+            _COUNTRY_NAME_TO_CODE.items(), key=lambda x: len(x[0]), reverse=True
+        ):
             if key in normalised or normalised in key:
                 return code
     return None

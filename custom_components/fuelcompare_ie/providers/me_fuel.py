@@ -389,7 +389,6 @@ class MeFuelProvider(BaseProvider):
                 xlsx_url,
                 headers=_HEADERS,
                 timeout=_TIMEOUT,
-                allow_redirects=False,
             ) as response:
                 response.raise_for_status()
                 return await response.read()

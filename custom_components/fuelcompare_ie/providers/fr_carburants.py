@@ -510,7 +510,7 @@ class FrCarburantsProvider(BaseProvider):
             resp.raise_for_status()
             compressed = await resp.read()
 
-        try:
+        def _extract_xml() -> bytes:
             with zipfile.ZipFile(io.BytesIO(compressed)) as zf:
                 names = zf.namelist()
                 if not names:
@@ -518,13 +518,23 @@ class FrCarburantsProvider(BaseProvider):
                         "Prix Carburants ZIP archive is empty — "
                         "cannot extract XML data."
                     )
-                # Check uncompressed size before reading to guard against ZIP bombs
                 if zf.getinfo(names[0]).file_size > 50_000_000:
                     raise ProviderError("FR carburants XML response exceeds size limit")
-                xml_bytes: bytes = zf.read(names[0])
-        except zipfile.BadZipFile as err:
+                return zf.read(names[0])
+
+        try:
+            xml_bytes: bytes = await asyncio.get_running_loop().run_in_executor(
+                None, _extract_xml
+            )
+        except ProviderError:
+            raise
+        except Exception as err:
+            if isinstance(err, zipfile.BadZipFile):
+                raise ProviderError(
+                    f"Prix Carburants response is not a valid ZIP archive: {err}"
+                ) from err
             raise ProviderError(
-                f"Prix Carburants response is not a valid ZIP archive: {err}"
+                f"Prix Carburants ZIP extraction failed: {type(err).__name__}"
             ) from err
 
         return xml_bytes

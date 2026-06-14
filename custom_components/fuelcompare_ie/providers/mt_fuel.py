@@ -507,32 +507,33 @@ async def _parse_malta_row(xlsx_bytes: bytes) -> dict[str, float | None] | None:
         ),
     )
 
-    # Use the first sheet; bulletins typically have one data sheet.
-    ws = wb.worksheets[0]
+    try:
+        # Use the first sheet; bulletins typically have one data sheet.
+        ws = wb.worksheets[0]
 
-    for row in ws.iter_rows(values_only=True):
-        if not row:
-            continue
-        country_cell = row[_COL_COUNTRY]
-        if country_cell is None:
-            continue
-        country_str = str(country_cell).strip()
-        if country_str.startswith(_MALTA_LABEL):
-            wb.close()
-            return {
-                "petrol_95": _parse_price_cell(
-                    row[_COL_PETROL95] if len(row) > _COL_PETROL95 else None
-                ),
-                "diesel": _parse_price_cell(
-                    row[_COL_DIESEL] if len(row) > _COL_DIESEL else None
-                ),
-                "lpg": _parse_price_cell(
-                    row[_COL_LPG] if len(row) > _COL_LPG else None
-                ),
-                "heating_oil": _parse_price_cell(
-                    row[_COL_HEATING_OIL] if len(row) > _COL_HEATING_OIL else None
-                ),
-            }
+        for row in ws.iter_rows(values_only=True):
+            if not row:
+                continue
+            country_cell = row[_COL_COUNTRY]
+            if country_cell is None:
+                continue
+            country_str = str(country_cell).strip()
+            if country_str.startswith(_MALTA_LABEL):
+                return {
+                    "petrol_95": _parse_price_cell(
+                        row[_COL_PETROL95] if len(row) > _COL_PETROL95 else None
+                    ),
+                    "diesel": _parse_price_cell(
+                        row[_COL_DIESEL] if len(row) > _COL_DIESEL else None
+                    ),
+                    "lpg": _parse_price_cell(
+                        row[_COL_LPG] if len(row) > _COL_LPG else None
+                    ),
+                    "heating_oil": _parse_price_cell(
+                        row[_COL_HEATING_OIL] if len(row) > _COL_HEATING_OIL else None
+                    ),
+                }
+    finally:
+        wb.close()
 
-    wb.close()
     return None

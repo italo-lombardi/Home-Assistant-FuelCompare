@@ -382,7 +382,8 @@ class LuCarbuProvider(BaseProvider):
         lng: float | None = kwargs.get("lng")
         if lng is None:
             lng = self._longitude
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        _rk = kwargs.get("radius_km")
+        radius_km: float = float(_rk if _rk is not None else self._radius_km)
 
         if lat is None or lng is None:
             _LOGGER.debug(

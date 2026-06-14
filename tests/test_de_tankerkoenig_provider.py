@@ -828,37 +828,37 @@ async def test_async_fetch_raises_provider_error_when_station_null() -> None:
 
 
 async def test_async_fetch_propagates_client_error() -> None:
-    """async_fetch lets aiohttp ClientError propagate (coordinator converts to UpdateFailed)."""
+    """async_fetch wraps aiohttp ClientError in ProviderError to prevent apikey URL logging."""
     session = MagicMock()
     session.get = MagicMock(side_effect=ClientError("connection refused"))
 
     provider = _make_provider()
 
-    with pytest.raises(ClientError):
+    with pytest.raises(ProviderError):
         await provider.async_fetch(session, _STATION_UUID)
 
 
 async def test_async_fetch_raises_on_non_200() -> None:
-    """async_fetch raises when raise_for_status() raises (e.g. HTTP 401)."""
+    """async_fetch wraps raise_for_status ClientError in ProviderError."""
     resp = _make_mock_response(401)
     resp.raise_for_status = MagicMock(side_effect=ClientError("401 Unauthorized"))
     session = _make_session(resp)
 
     provider = _make_provider()
 
-    with pytest.raises(ClientError):
+    with pytest.raises(ProviderError):
         await provider.async_fetch(session, _STATION_UUID)
 
 
 async def test_async_fetch_raises_on_http_403() -> None:
-    """async_fetch raises when raise_for_status() raises for HTTP 403."""
+    """async_fetch wraps raise_for_status ClientError in ProviderError for 403."""
     resp = _make_mock_response(403)
     resp.raise_for_status = MagicMock(side_effect=ClientError("403 Forbidden"))
     session = _make_session(resp)
 
     provider = _make_provider()
 
-    with pytest.raises(ClientError):
+    with pytest.raises(ProviderError):
         await provider.async_fetch(session, _STATION_UUID)
 
 

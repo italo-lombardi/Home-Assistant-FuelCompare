@@ -434,7 +434,7 @@ class CaQcProvider(BaseProvider):
                     "diesel": "Diesel",
                 }
                 short = label_map.get(data_key, gas_type)
-                price_parts.append(f"{short} $​{parsed:.3f}")  # CAD/L
+                price_parts.append(f"{short} ${parsed:.3f}")  # CAD/L
 
             # Compose display label
             display_name = f"{brand} {name}".strip() if brand else name

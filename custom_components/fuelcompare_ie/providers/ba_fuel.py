@@ -599,9 +599,7 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
     """
     # Use div-card parser when the modern Tailwind CSS layout is detected
     # (presence of id="item_N" divs); fall back to table parser otherwise.
-    import re as _re
-
-    if _re.search(r'id=["\']item_\d+["\']', html):
+    if re.search(r'id=["\']item_\d+["\']', html):
         div_result = _parse_stations_div(html)
         if div_result:
             _LOGGER.debug(
