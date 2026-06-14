@@ -485,12 +485,7 @@ class NoDrivstoffProvider(BaseProvider):
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
 
-        _LOGGER.debug(
-            "Fetching Drivstoffpriser stations: lat=%s lng=%s distance_m=%s",
-            lat,
-            lng,
-            distance_m,
-        )
+        _LOGGER.debug("Fetching Drivstoffpriser stations")
 
         try:
             async with session.get(

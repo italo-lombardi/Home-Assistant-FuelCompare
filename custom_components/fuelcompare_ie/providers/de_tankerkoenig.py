@@ -333,12 +333,7 @@ class DeTankerkoenigProvider(BaseProvider):
             "type": "all",
             "apikey": self._api_key,
         }
-        _LOGGER.debug(
-            "Fetching Tankerkoenig station list: lat=%s lng=%s rad=%s",
-            lat,
-            lng,
-            radius_km,
-        )
+        _LOGGER.debug("Fetching Tankerkoenig station list")
 
         try:
             async with session.get(

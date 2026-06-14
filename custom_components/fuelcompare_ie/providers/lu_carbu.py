@@ -496,13 +496,7 @@ class LuCarbuProvider(BaseProvider):
             "lng": lng,
             "dist": int(radius_km),
         }
-        _LOGGER.debug(
-            "Fetching carbu.com LU stations: fuel=%s lat=%s lng=%s dist=%s",
-            fuel_key,
-            lat,
-            lng,
-            radius_km,
-        )
+        _LOGGER.debug("Fetching carbu.com LU stations: fuel=%s", fuel_key)
         try:
             async with session.get(
                 _BASE_URL,

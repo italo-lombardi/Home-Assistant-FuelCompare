@@ -517,16 +517,7 @@ def _build_station_data(entry: dict[str, Any]) -> StationData:
         "source_station_id": fs.get("id") or None,
     }
 
-    _LOGGER.debug(
-        "VIC FuelWatch parsed station %s: unleaded=%s diesel=%s "
-        "premium_diesel=%s e10=%s updated=%s",
-        fs.get("id"),
-        data.get("unleaded"),
-        data.get("diesel"),
-        data.get("premium_diesel"),
-        data.get("e10"),
-        updated_at,
-    )
+    _LOGGER.debug("VIC FuelWatch parsed station %s", fs.get("id"))
 
     return data
 

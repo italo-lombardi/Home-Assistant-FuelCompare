@@ -219,13 +219,17 @@ def test_constructor_default_station_id_is_al() -> None:
 
 def test_primary_url_points_to_cargopedia() -> None:
     """_PRIMARY_URL points to cargopedia.net."""
-    assert "cargopedia.net" in _PRIMARY_URL
+    from urllib.parse import urlparse
+
+    assert urlparse(_PRIMARY_URL).netloc in ("cargopedia.net", "www.cargopedia.net")
     assert _PRIMARY_URL.startswith("https://")
 
 
 def test_fallback_url_points_to_tolls_eu() -> None:
     """_FALLBACK_URL points to tolls.eu."""
-    assert "tolls.eu" in _FALLBACK_URL
+    from urllib.parse import urlparse
+
+    assert urlparse(_FALLBACK_URL).netloc in ("tolls.eu", "www.tolls.eu")
     assert _FALLBACK_URL.startswith("https://")
 
 
