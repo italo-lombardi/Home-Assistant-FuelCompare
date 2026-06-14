@@ -897,7 +897,7 @@ class BeCarbuProvider(BaseProvider):
         # Extra fuel types (not in CAPABILITIES but useful as pass-through attrs)
         data["diesel_b10"] = prices.get("diesel_b10")  # type: ignore[typeddict-unknown-key]
         data["diesel_hvo"] = prices.get("diesel_hvo")  # type: ignore[typeddict-unknown-key]
-        data["lng"] = prices.get("lng")  # type: ignore[typeddict-unknown-key]
+        data["lng_fuel"] = prices.get("lng_fuel")  # type: ignore[typeddict-unknown-key]
         data["hydrogen"] = prices.get("hydrogen")  # type: ignore[typeddict-unknown-key]
         data["electric"] = prices.get("electric")  # type: ignore[typeddict-unknown-key]
 
