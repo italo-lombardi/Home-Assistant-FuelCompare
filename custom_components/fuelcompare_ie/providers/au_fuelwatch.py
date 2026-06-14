@@ -371,12 +371,20 @@ def _make_station_id(item: dict[str, str | None]) -> str | None:
 
 
 def _parse_price(raw: str | None) -> float | None:
-    """Parse a FuelWatch price string (NNN.N cents/litre) to float or None."""
+    """Parse a FuelWatch price string (NNN.N cents/litre) to AUD/litre or None.
+
+    FuelWatch publishes prices in cents/litre (e.g. 153.3 c/L).  Values > 10
+    are divided by 100 to convert to AUD/litre (e.g. 1.533 A$/L).
+    """
     if raw is None:
         return None
     try:
         value = float(raw)
-        return value if value > 0 else None
+        if value <= 0:
+            return None
+        if value > 10:
+            value = round(value / 100.0, 4)
+        return value
     except (ValueError, TypeError):
         return None
 
@@ -480,7 +488,7 @@ def _build_display_label(data: StationData) -> str:
     ):
         price = data.get(key)  # type: ignore[literal-required]
         if price is not None:
-            price_parts.append(f"{label} {price:.1f}¢/L")
+            price_parts.append(f"{label} A${price:.3f}")
 
     if price_parts:
         return f"{identity} — {' | '.join(price_parts)}"

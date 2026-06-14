@@ -210,50 +210,50 @@ async def test_async_fetch_returns_station_data_dict() -> None:
 
 
 async def test_async_fetch_unleaded_price_is_cents() -> None:
-    """async_fetch returns unleaded price in cents/L (> 10; coordinator /100 rule applies)."""
+    """async_fetch returns unleaded price in AUD/L after cents-to-dollars conversion."""
     session = _make_session_both()
     provider = AuQldProvider(_SITE_ID, api_key="tok")
     data = await provider.async_fetch(session, _SITE_ID)
 
-    # FuelId=2, Price=1799 → 179.9 c/L
-    assert data["unleaded"] == pytest.approx(179.9)
-    assert data["unleaded"] > 10.0  # must be raw cents, not AUD
+    # FuelId=2, Price=1799 → 179.9 c/L → 1.799 AUD/L
+    assert data["unleaded"] == pytest.approx(1.799)
+    assert data["unleaded"] < 10.0  # must be AUD, not cents
 
 
 async def test_async_fetch_diesel_price() -> None:
-    """async_fetch returns diesel price in cents/L."""
+    """async_fetch returns diesel price in AUD/L."""
     session = _make_session_both()
     provider = AuQldProvider(_SITE_ID, api_key="tok")
     data = await provider.async_fetch(session, _SITE_ID)
 
-    assert data["diesel"] == pytest.approx(175.9)
+    assert data["diesel"] == pytest.approx(1.759)
 
 
 async def test_async_fetch_e10_price() -> None:
-    """async_fetch maps FuelId=12 to e10 in cents/L."""
+    """async_fetch maps FuelId=12 to e10 in AUD/L."""
     session = _make_session_both()
     provider = AuQldProvider(_SITE_ID, api_key="tok")
     data = await provider.async_fetch(session, _SITE_ID)
 
-    assert data["e10"] == pytest.approx(169.9)
+    assert data["e10"] == pytest.approx(1.699)
 
 
 async def test_async_fetch_premium_unleaded_price() -> None:
-    """async_fetch maps FuelId=5 to premium_unleaded in cents/L."""
+    """async_fetch maps FuelId=5 to premium_unleaded in AUD/L."""
     session = _make_session_both()
     provider = AuQldProvider(_SITE_ID, api_key="tok")
     data = await provider.async_fetch(session, _SITE_ID)
 
-    assert data["premium_unleaded"] == pytest.approx(189.9)
+    assert data["premium_unleaded"] == pytest.approx(1.899)
 
 
 async def test_async_fetch_premium_diesel_price() -> None:
-    """async_fetch maps FuelId=11 to premium_diesel in cents/L."""
+    """async_fetch maps FuelId=11 to premium_diesel in AUD/L."""
     session = _make_session_both()
     provider = AuQldProvider(_SITE_ID, api_key="tok")
     data = await provider.async_fetch(session, _SITE_ID)
 
-    assert data["premium_diesel"] == pytest.approx(195.9)
+    assert data["premium_diesel"] == pytest.approx(1.959)
 
 
 async def test_async_fetch_name_field() -> None:
@@ -360,7 +360,7 @@ async def test_async_fetch_fuelid8_maps_to_premium_unleaded() -> None:
     data = await provider.async_fetch(session, _SITE_ID)
 
     # FuelId=5 (189.9 c/L) is cheaper than FuelId=8 (199.9 c/L) — keep the lower
-    assert data["premium_unleaded"] == pytest.approx(189.9)
+    assert data["premium_unleaded"] == pytest.approx(1.899)
 
 
 async def test_async_fetch_fuelid8_wins_when_cheaper() -> None:
@@ -373,7 +373,7 @@ async def test_async_fetch_fuelid8_wins_when_cheaper() -> None:
     provider = AuQldProvider(_SITE_ID, api_key="tok")
     data = await provider.async_fetch(session, _SITE_ID)
 
-    assert data["premium_unleaded"] == pytest.approx(188.9)
+    assert data["premium_unleaded"] == pytest.approx(1.889)
 
 
 # ---------------------------------------------------------------------------
@@ -724,12 +724,12 @@ def test_build_index_builds_prices_map() -> None:
 
 
 def test_build_index_price_converted_from_tenths_of_cent() -> None:
-    """_build_index divides Price by 10 to get cents/L."""
+    """_build_index divides Price by 10 then by 100 to get AUD/L."""
     _, prices_map = _build_index(
         [], [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": 1799}]
     )
-    # 1799 / 10 = 179.9 c/L
-    assert prices_map[_SITE_ID]["unleaded"] == pytest.approx(179.9)
+    # 1799 / 10 = 179.9 c/L → / 100 = 1.799 AUD/L
+    assert prices_map[_SITE_ID]["unleaded"] == pytest.approx(1.799)
 
 
 def test_build_index_skips_missing_site_id() -> None:
@@ -779,7 +779,7 @@ def test_build_index_keeps_lower_price_for_same_key() -> None:
         {"SiteId": int(_SITE_ID), "FuelId": 8, "Price": 1990},  # 199.0 c/L
     ]
     _, prices_map = _build_index([], entries)
-    assert prices_map[_SITE_ID]["premium_unleaded"] == pytest.approx(189.0)
+    assert prices_map[_SITE_ID]["premium_unleaded"] == pytest.approx(1.890)
 
 
 def test_build_index_keeps_lower_price_when_second_is_cheaper() -> None:
@@ -789,7 +789,7 @@ def test_build_index_keeps_lower_price_when_second_is_cheaper() -> None:
         {"SiteId": int(_SITE_ID), "FuelId": 8, "Price": 1870},  # 187.0 c/L — cheaper
     ]
     _, prices_map = _build_index([], entries)
-    assert prices_map[_SITE_ID]["premium_unleaded"] == pytest.approx(187.0)
+    assert prices_map[_SITE_ID]["premium_unleaded"] == pytest.approx(1.870)
 
 
 def test_build_index_handles_empty_input() -> None:

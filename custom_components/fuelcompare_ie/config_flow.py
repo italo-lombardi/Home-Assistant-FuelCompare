@@ -664,6 +664,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     errors=errors,
                 )
             self._station_id = ""
+            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
+            await self.async_set_unique_id(unique)
+            self._abort_if_unique_id_configured()
             self._suggested_name = (
                 f"{_COUNTRY_NAMES.get(self._country, self._country)} "
                 f"({self._latitude:.3f}, {self._longitude:.3f})"
@@ -707,7 +710,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
                     data[CONF_STATION_COUNTY] = self._station_county
-            else:
+            if self._latitude is not None:
                 from .const import CONF_LATITUDE, CONF_LONGITUDE, CONF_RADIUS_KM
 
                 data[CONF_LATITUDE] = self._latitude

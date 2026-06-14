@@ -17,7 +17,7 @@ from custom_components.fuelcompare_ie.providers.fr_carburants import (
     _HEADERS,
     _NOM_TO_KEY,
     _build_station_data,
-    _find_station_in_xml,
+    _find_station_in_root,
     _haversine_km,
     _parse_coord,
     _parse_pdv,
@@ -776,44 +776,48 @@ def test_build_station_data_empty_prices() -> None:
 
 
 # ---------------------------------------------------------------------------
-# _find_station_in_xml
+# _find_station_in_root
 # ---------------------------------------------------------------------------
 
 
-def test_find_station_in_xml_returns_matching_station() -> None:
-    """_find_station_in_xml returns parsed station dict for the requested ID."""
-    xml_bytes = _xml_bytes(_PDV_XML_TEMPLATE, sid=_STATION_ID, auto24="")
-    result = _find_station_in_xml(xml_bytes, _STATION_ID)
+def test_find_station_in_root_returns_matching_station() -> None:
+    """_find_station_in_root returns parsed station dict for the requested ID."""
+    xml_str = _PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24="")
+    root = ET.fromstring(xml_str.encode("iso-8859-1"))
+    result = _find_station_in_root(root, _STATION_ID)
     assert result is not None
     assert result["id"] == _STATION_ID
 
 
-def test_find_station_in_xml_returns_none_when_not_found() -> None:
-    """_find_station_in_xml returns None when station ID is absent from XML."""
-    xml_bytes = _xml_bytes(_PDV_XML_TEMPLATE, sid=_STATION_ID, auto24="")
-    result = _find_station_in_xml(xml_bytes, "99999999")
+def test_find_station_in_root_returns_none_when_not_found() -> None:
+    """_find_station_in_root returns None when station ID is absent from root."""
+    xml_str = _PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24="")
+    root = ET.fromstring(xml_str.encode("iso-8859-1"))
+    result = _find_station_in_root(root, "99999999")
     assert result is None
 
 
-def test_find_station_in_xml_selects_correct_station_from_multiple() -> None:
-    """_find_station_in_xml returns the correct station among multiple stations."""
-    xml_bytes = _xml_bytes(_PDV_XML_TWO_STATIONS, sid1=_STATION_ID, sid2=_OTHER_ID)
-    result = _find_station_in_xml(xml_bytes, _OTHER_ID)
+def test_find_station_in_root_selects_correct_station_from_multiple() -> None:
+    """_find_station_in_root returns the correct station among multiple stations."""
+    xml_str = _PDV_XML_TWO_STATIONS.format(sid1=_STATION_ID, sid2=_OTHER_ID)
+    root = ET.fromstring(xml_str.encode("iso-8859-1"))
+    result = _find_station_in_root(root, _OTHER_ID)
     assert result is not None
     assert result["id"] == _OTHER_ID
     assert result["name"] == "PARIS (75001)"
 
 
-def test_find_station_in_xml_raises_provider_error_on_malformed_xml() -> None:
-    """_find_station_in_xml raises ProviderError for invalid XML bytes."""
-    with pytest.raises(ProviderError):
-        _find_station_in_xml(b"this is not xml at all {{{{", _STATION_ID)
+def test_find_station_in_root_malformed_xml_raises_parse_error() -> None:
+    """ET.fromstring raises ET.ParseError for invalid XML bytes (root never created)."""
+    with pytest.raises(ET.ParseError):
+        ET.fromstring(b"this is not xml at all {{{{")
 
 
-def test_find_station_in_xml_parses_prices_correctly() -> None:
-    """_find_station_in_xml includes correctly parsed prices in returned dict."""
-    xml_bytes = _xml_bytes(_PDV_XML_TEMPLATE, sid=_STATION_ID, auto24="")
-    result = _find_station_in_xml(xml_bytes, _STATION_ID)
+def test_find_station_in_root_parses_prices_correctly() -> None:
+    """_find_station_in_root includes correctly parsed prices in returned dict."""
+    xml_str = _PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24="")
+    root = ET.fromstring(xml_str.encode("iso-8859-1"))
+    result = _find_station_in_root(root, _STATION_ID)
     assert result is not None
     assert result["prices"]["diesel"] == pytest.approx(1.799)
     assert result["prices"]["lpg"] == pytest.approx(0.989)

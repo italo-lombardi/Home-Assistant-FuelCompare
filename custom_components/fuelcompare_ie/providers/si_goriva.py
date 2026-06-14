@@ -66,6 +66,8 @@ _HEADERS: dict[str, str] = {
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 2)
 
+MAX_PAGES = 100
+
 # Mapping from goriva.si price dict keys to StationData keys.
 # IMPORTANT: Diesel is "dizel" (Slovenian), not "diesel".
 _PRICE_KEY_MAP: dict[str, str] = {
@@ -263,6 +265,8 @@ class SiGorivaProvider(BaseProvider):
                         dist = None
                     if dist is None or dist > radius_km:
                         continue
+                else:
+                    continue
 
             franchise_pk = station.get("franchise")
             brand = franchise_map.get(franchise_pk, "") if franchise_pk else ""
@@ -375,6 +379,12 @@ class SiGorivaProvider(BaseProvider):
                 break
 
             page += 1
+            if page > MAX_PAGES:
+                _LOGGER.error(
+                    "SI goriva: exceeded %d page limit, pagination may be infinite",
+                    MAX_PAGES,
+                )
+                break
 
         _LOGGER.debug("goriva.si: fetched %d stations total", len(stations))
         return stations

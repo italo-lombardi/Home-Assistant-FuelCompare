@@ -1162,9 +1162,7 @@ def test_parse_row_handles_malformed_timestamp() -> None:
     }
     result = _parse_row(row)
     # Falls back to forecourt_update_timestamp
-    assert (
-        result["lastupdated"] is not None or result["lastupdated"] is None
-    )  # no crash
+    assert result["lastupdated"] is not None
 
 
 # ---------------------------------------------------------------------------

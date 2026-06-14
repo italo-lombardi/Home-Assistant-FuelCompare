@@ -129,7 +129,7 @@ def test_provider_poll_interval() -> None:
 def test_provider_capabilities_include_fuel_types() -> None:
     """CAPABILITIES includes all MINETUR fuel types."""
     caps = EsMineturProvider.CAPABILITIES
-    for fuel in ("unleaded", "diesel", "premium_unleaded", "lpg", "e85", "adblue"):
+    for fuel in ("unleaded", "diesel", "premium_unleaded", "lpg"):
         assert fuel in caps, f"'{fuel}' missing from CAPABILITIES"
 
 

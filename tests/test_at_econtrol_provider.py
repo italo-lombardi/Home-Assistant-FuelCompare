@@ -210,8 +210,8 @@ def test_capabilities_include_is_open() -> None:
     assert "is_open" in AtEcontrolProvider.CAPABILITIES
 
 
-def test_capabilities_include_lastupdated() -> None:
-    assert "lastupdated" in AtEcontrolProvider.CAPABILITIES
+def test_capabilities_exclude_lastupdated() -> None:
+    assert "lastupdated" not in AtEcontrolProvider.CAPABILITIES
 
 
 def test_capabilities_include_coordinator_sentinels() -> None:

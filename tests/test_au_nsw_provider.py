@@ -859,6 +859,7 @@ async def test_async_list_stations_label_includes_diesel() -> None:
 
     _, label = result[0]
     assert "Diesel" in label
+    assert "1." in label
 
 
 async def test_async_list_stations_label_includes_unleaded() -> None:

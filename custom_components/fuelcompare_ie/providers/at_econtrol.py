@@ -70,7 +70,6 @@ class AtEcontrolProvider(BaseProvider):
             "diesel",
             "is_open",
             "last_successful_fetch",
-            "lastupdated",
             "latitude",
             "longitude",
             "name",

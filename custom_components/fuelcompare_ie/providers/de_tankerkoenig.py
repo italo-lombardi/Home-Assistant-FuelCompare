@@ -314,8 +314,16 @@ class DeTankerkoenigProvider(BaseProvider):
             List of (uuid, "Brand Name — Diesel €1.789/L") tuples sorted
             cheapest-first.  Empty list on any failure.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs.get("lng") or self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"]
+            if "lat" in kwargs and kwargs["lat"] is not None
+            else self._latitude
+        )
+        lng: float | None = (
+            kwargs["lng"]
+            if "lng" in kwargs and kwargs["lng"] is not None
+            else self._longitude
+        )
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:

@@ -428,13 +428,13 @@ def test_make_station_id_preserves_exact_strings() -> None:
 
 
 def test_parse_price_normal_cents_value() -> None:
-    """_parse_price converts a cents string to a float."""
-    assert _parse_price("153.3") == pytest.approx(153.3)
+    """_parse_price converts a cents string to AUD/litre by dividing by 100."""
+    assert _parse_price("153.3") == pytest.approx(1.533)
 
 
 def test_parse_price_whole_number() -> None:
     """_parse_price handles an integer string."""
-    assert _parse_price("150") == pytest.approx(150.0)
+    assert _parse_price("150") == pytest.approx(1.5)
 
 
 def test_parse_price_none_input() -> None:
@@ -660,16 +660,17 @@ def test_build_display_label_brand_and_name() -> None:
 
 
 def test_build_display_label_includes_price_parts() -> None:
-    """_build_display_label includes ULP and Diesel price strings."""
+    """_build_display_label includes ULP and Diesel price strings in AUD."""
     data = {
         "brand": "BP",
         "name": "BP Morley",
-        "unleaded": 155.0,
-        "diesel": 163.5,
+        "unleaded": 1.55,
+        "diesel": 1.635,
     }
     label = _build_display_label(data)
-    assert "155.0" in label
-    assert "163.5" in label
+    assert "A$" in label
+    assert "1.550" in label
+    assert "1.635" in label
 
 
 def test_build_display_label_no_prices_returns_name_only() -> None:
@@ -701,14 +702,14 @@ def test_build_display_label_e10_lpg_premium_shown() -> None:
     """_build_display_label includes E10, LPG, and Prem price parts when present."""
     data = {
         "name": "Some Station",
-        "premium_unleaded": 165.0,
-        "lpg": 90.0,
-        "e10": 151.0,
+        "premium_unleaded": 1.65,
+        "lpg": 0.90,
+        "e10": 1.51,
     }
     label = _build_display_label(data)
-    assert "165.0" in label
-    assert "90.0" in label
-    assert "151.0" in label
+    assert "1.650" in label
+    assert "0.900" in label
+    assert "1.510" in label
 
 
 # ---------------------------------------------------------------------------
@@ -774,7 +775,7 @@ async def test_async_fetch_success_unleaded_price() -> None:
     data = await provider.async_fetch(session, _STATION_ID)
 
     # All 5 products hit the same mock returning the same station/price
-    assert data["unleaded"] == pytest.approx(153.3)
+    assert data["unleaded"] == pytest.approx(1.533)
 
 
 async def test_async_fetch_success_all_fuel_keys_present() -> None:
@@ -949,11 +950,11 @@ async def test_async_fetch_multi_product_merges_by_station_id() -> None:
     provider = AuFuelwatchProvider(_STATION_ID)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["unleaded"] == pytest.approx(153.3)
-    assert data["premium_unleaded"] == pytest.approx(163.5)
-    assert data["diesel"] == pytest.approx(168.9)
-    assert data["lpg"] == pytest.approx(92.0)
-    assert data["e10"] == pytest.approx(151.0)
+    assert data["unleaded"] == pytest.approx(1.533)
+    assert data["premium_unleaded"] == pytest.approx(1.635)
+    assert data["diesel"] == pytest.approx(1.689)
+    assert data["lpg"] == pytest.approx(0.92)
+    assert data["e10"] == pytest.approx(1.51)
 
 
 # ---------------------------------------------------------------------------
@@ -972,7 +973,7 @@ async def test_async_fetch_handles_bom_in_response() -> None:
     provider = AuFuelwatchProvider(_STATION_ID)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["unleaded"] == pytest.approx(153.3)
+    assert data["unleaded"] == pytest.approx(1.533)
 
 
 # ---------------------------------------------------------------------------
@@ -1055,7 +1056,7 @@ async def test_async_fetch_partial_failure_continues() -> None:
     provider = AuFuelwatchProvider(_STATION_ID)
     # Should NOT raise because unleaded feed succeeded and station is found
     data = await provider.async_fetch(session, _STATION_ID)
-    assert data["unleaded"] == pytest.approx(153.3)
+    assert data["unleaded"] == pytest.approx(1.533)
 
 
 async def test_async_fetch_invalid_xml_all_feeds_raises_provider_error() -> None:

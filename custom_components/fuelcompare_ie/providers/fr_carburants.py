@@ -131,7 +131,7 @@ def _parse_pdv(element: ET.Element) -> dict[str, Any]:
     ville: str | None = None
     is_open: bool | None = None
     prices: dict[str, float | None] = {}
-    lastupdated: str | None = None
+    maj_values: list[str] = []
 
     for child in element:
         tag = child.tag
@@ -153,12 +153,12 @@ def _parse_pdv(element: ET.Element) -> dict[str, Any]:
             if key is not None:
                 price = _parse_price(child.attrib.get("valeur"))
                 prices[key] = price
-                # Use the most recent maj timestamp as lastupdated
                 maj = child.attrib.get("maj")
                 if maj:
-                    # Keep the first (any) timestamp; they are per fuel type
-                    if lastupdated is None:
-                        lastupdated = maj
+                    maj_values.append(maj)
+
+    # Use the most recent maj timestamp across all fuel types as lastupdated
+    lastupdated: str | None = max(maj_values) if maj_values else None
 
     # Build county from postal code (département = first 2 digits, or 3 for DOM)
     county: str | None = None
@@ -375,8 +375,16 @@ class FrCarburantsProvider(BaseProvider):
         Returns:
             Ordered list of (station_id, label) tuples.  Empty list on failure.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs.get("lng") or self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"]
+            if "lat" in kwargs and kwargs["lat"] is not None
+            else self._latitude
+        )
+        lng: float | None = (
+            kwargs["lng"]
+            if "lng" in kwargs and kwargs["lng"] is not None
+            else self._longitude
+        )
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:
@@ -526,29 +534,4 @@ def _find_station_in_root(root: ET.Element, station_id: str) -> dict[str, Any] |
     for pdv in root.iter("pdv"):
         if pdv.attrib.get("id") == station_id:
             return _parse_pdv(pdv)
-    return None
-
-
-def _find_station_in_xml(xml_bytes: bytes, station_id: str) -> dict[str, Any] | None:
-    """Parse the XML and return the raw station dict for station_id, or None.
-
-    Parses the full ``<pdv_liste>`` document and returns the first ``<pdv>``
-    element whose ``id`` attribute matches ``station_id``.
-
-    Args:
-        xml_bytes:  Raw XML bytes (ISO-8859-1, straight from the ZIP).
-        station_id: Target station ID string.
-
-    Returns:
-        Parsed station dict (from ``_parse_pdv``), or None if not found.
-    """
-    try:
-        root = ET.fromstring(xml_bytes)
-    except ET.ParseError as err:
-        raise ProviderError(f"Failed to parse Prix Carburants XML: {err}") from err
-
-    for pdv in root.iter("pdv"):
-        if pdv.attrib.get("id") == station_id:
-            return _parse_pdv(pdv)
-
     return None

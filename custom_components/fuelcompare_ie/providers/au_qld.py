@@ -347,7 +347,7 @@ class AuQldProvider(BaseProvider):
                 else name
             )
 
-            # Build price label; convert cents to AUD for display.
+            # Build price label; prices are already in AUD/litre.
             price_parts: list[str] = []
             sort_price = 9999.0
 
@@ -356,17 +356,14 @@ class AuQldProvider(BaseProvider):
             e10_price = prices.get("e10")
 
             if diesel_price is not None:
-                aud = diesel_price / 100.0  # cents → AUD
-                price_parts.append(f"Diesel A${aud:.3f}")
-                sort_price = min(sort_price, aud)
+                price_parts.append(f"Diesel A${diesel_price:.3f}")
+                sort_price = min(sort_price, diesel_price)
             if unleaded_price is not None:
-                aud = unleaded_price / 100.0
-                price_parts.append(f"Unleaded A${aud:.3f}")
-                sort_price = min(sort_price, aud)
+                price_parts.append(f"Unleaded A${unleaded_price:.3f}")
+                sort_price = min(sort_price, unleaded_price)
             elif e10_price is not None:
-                aud = e10_price / 100.0
-                price_parts.append(f"E10 A${aud:.3f}")
-                sort_price = min(sort_price, aud)
+                price_parts.append(f"E10 A${e10_price:.3f}")
+                sort_price = min(sort_price, e10_price)
 
             label = (
                 f"{display_name} — {' / '.join(price_parts)}"
@@ -469,10 +466,9 @@ def _build_index(
     Returns:
         Tuple of:
           site_map    — {site_id_str: site_dict}
-          prices_map  — {site_id_str: {StationData_key: price_cents_float}}
+          prices_map  — {site_id_str: {StationData_key: price_aud_float}}
 
-    Prices are stored as **cents/litre** (``raw_price / 10``).  The
-    coordinator's ``> 10 → / 100`` rule converts them to AUD/litre.
+    Prices are stored as **AUD/litre** (``raw_price / 10 / 100``).
     When multiple FuelId values map to the same StationData key, the lower
     (cheaper) value is kept.
     """
@@ -509,12 +505,14 @@ def _build_index(
         # Sanity check: valid pump prices are between 50 and 999 c/L.
         if not (50 <= price_cents <= 999):
             continue
+        # Convert cents/litre to AUD/litre.
+        price_aud = round(price_cents / 100.0, 4)
 
         station_prices = prices_map.setdefault(site_id_str, {})
         # When two fuel IDs map to the same StationData key, keep the lower price.
         existing = station_prices.get(data_key)
-        if existing is None or price_cents < existing:
-            station_prices[data_key] = price_cents
+        if existing is None or price_aud < existing:
+            station_prices[data_key] = price_aud
 
     return site_map, prices_map
 
@@ -528,12 +526,11 @@ def _build_station_data(
 
     Args:
         site:       Single site dict from the FPPS sites array.
-        prices:     Dict of {StationData_key: price_cents_float} for this station.
+        prices:     Dict of {StationData_key: price_aud_float} for this station.
         station_id: SiteId string (used for source_station_id).
 
     Returns:
-        Populated StationData dict.  Price values are in cents/litre (> 10);
-        the coordinator's normalisation rule converts them to AUD/litre.
+        Populated StationData dict.  Price values are in AUD/litre.
     """
     name: str | None = site.get("N") or None
     brand: str | None = site.get("B") or None

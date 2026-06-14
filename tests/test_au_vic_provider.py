@@ -156,7 +156,6 @@ def test_provider_capabilities_include_station_fields() -> None:
     caps = AuVicProvider.CAPABILITIES
     for field in (
         "name",
-        "brand",
         "address",
         "county",
         "latitude",

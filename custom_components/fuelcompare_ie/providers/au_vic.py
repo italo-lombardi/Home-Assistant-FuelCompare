@@ -158,7 +158,6 @@ class AuVicProvider(BaseProvider):
             "e85",
             # Station identity
             "name",
-            "brand",
             "address",
             "county",
             "latitude",
