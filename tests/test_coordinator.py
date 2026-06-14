@@ -1155,3 +1155,45 @@ async def test_base_provider_async_list_stations_default_returns_empty() -> None
     provider = _MinimalProvider("123")
     result = await provider.async_list_stations(MagicMock())
     assert result == []
+
+
+# ---------------------------------------------------------------------------
+# CURRENCY ClassVar enforcement — non-EUR providers must override the default
+# ---------------------------------------------------------------------------
+
+
+def test_non_eur_providers_override_currency() -> None:
+    """All non-EUR providers declare a CURRENCY override (not the '€' default)."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+
+    # Countries that are EUR-zone (CURRENCY should be "€")
+    _EUR_COUNTRIES = {
+        "AL",
+        "AT",
+        "BE",
+        "DE",
+        "EU",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "MD",
+        "ME",
+        "MT",
+        "NL",
+        "PT",
+        "SI",
+        "ES",
+    }
+
+    for key, cls in PROVIDER_REGISTRY.items():
+        currency = getattr(cls, "CURRENCY", "€")
+        if cls.COUNTRY not in _EUR_COUNTRIES:
+            assert currency != "€", (
+                f"Provider {key} (COUNTRY={cls.COUNTRY}) appears to be non-EUR "
+                f"but uses the default '€' CURRENCY. Override CURRENCY ClassVar."
+            )
