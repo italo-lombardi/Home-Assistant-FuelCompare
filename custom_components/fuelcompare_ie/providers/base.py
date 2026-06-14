@@ -1,9 +1,26 @@
-"""BaseProvider ABC for Fuel Compare data sources."""
+"""Plugin base for Fuel Compare data providers.
+
+A provider is a self-contained plugin that:
+  1. Declares metadata (COUNTRY, PROVIDER_KEY, LABEL, CONFIG_MODE).
+  2. Declares CAPABILITIES — the exact set of StationData keys it populates.
+     The sensor/binary_sensor platforms read CAPABILITIES and create exactly
+     those entities. No changes to the core component are ever needed when a
+     new provider is added.
+  3. Implements async_fetch() → StationData.
+  4. Implements async_fetch_station_name() for the config flow.
+
+Adding a new country / provider:
+  - Write a new file: providers/{country_code}_{provider_name}.py
+  - Subclass BaseProvider, set class attrs, implement the two abstract methods.
+  - Register it in providers/__init__.py (one line).
+  - Done. No changes to sensor.py, binary_sensor.py, coordinator.py or
+    config_flow.py are required.
+"""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar, Literal
+from typing import Any, ClassVar, Literal, TypedDict
 
 from aiohttp import ClientSession
 
@@ -12,25 +29,221 @@ class ProviderError(Exception):
     """Raised by a provider when it cannot retrieve station data."""
 
 
+class StationData(TypedDict, total=False):
+    """Normalised station data dict returned by every provider.
+
+    All values are optional (total=False). Providers set the keys listed in
+    their CAPABILITIES and leave the rest absent or None. The sensor platform
+    only creates entities for keys present in CAPABILITIES, so absent keys
+    are simply not surfaced in HA — no errors, no unavailable entities.
+
+    Price normalisation rule: values >10 are treated as cents and divided
+    by 100 so all prices are stored as EUR/litre (or local currency/litre).
+    """
+
+    # ── Fuel prices ──────────────────────────────────────────────────────────
+    unleaded: float | None
+    """Standard unleaded / petrol (E5/E10 generic). Legacy fuelcompare.ie key."""
+
+    petrol: float | None
+    """Petrol price (FuelFinder.ie key for unleaded)."""
+
+    diesel: float | None
+    """Standard diesel."""
+
+    kerosene: float | None
+    """Kerosene / heating oil."""
+
+    cng: float | None
+    """Compressed natural gas."""
+
+    lpg: float | None
+    """Autogas / LPG."""
+
+    e10: float | None
+    """E10 petrol (10% ethanol blend)."""
+
+    e85: float | None
+    """E85 (85% ethanol flex-fuel)."""
+
+    premium_unleaded: float | None
+    """Super unleaded / premium petrol."""
+
+    premium_diesel: float | None
+    """Premium diesel (BP Ultimate, Shell V-Power Diesel, etc.)."""
+
+    adblue: float | None
+    """AdBlue / diesel exhaust fluid."""
+
+    # ── Station identity ──────────────────────────────────────────────────────
+    name: str | None
+    """Full station name e.g. 'Circle K Mulhuddart'."""
+
+    tablename: str | None
+    """Brand as a slug e.g. 'circle_k'. Legacy fuelcompare.ie field."""
+
+    brand: str | None
+    """Normalised brand name e.g. 'Circle K'. Preferred over tablename."""
+
+    address: str | None
+    """Street address."""
+
+    county: str | None
+    """County or region e.g. 'Co. Dublin'."""
+
+    latitude: float | None
+    """WGS84 latitude."""
+
+    longitude: float | None
+    """WGS84 longitude."""
+
+    phone: str | None
+    """Station phone number."""
+
+    website: str | None
+    """Station or brand website URL."""
+
+    # ── Timing ───────────────────────────────────────────────────────────────
+    lastupdated: str | None
+    """ISO 8601 timestamp when the data source last updated prices."""
+
+    working_hours: str | None
+    """JSON-encoded weekly schedule: {"Monday": "6a.m.-10p.m.", ...}. fuelcompare.ie format."""
+
+    opening_hours: str | None
+    """OSM opening_hours format string: "Mo-Su 07:00-23:00" or "24/7". FuelFinder.ie format."""
+
+    # ── Facilities (structured dicts) ────────────────────────────────────────
+    # The legacy fuelcompare.ie nested structure:
+    about: dict | None
+    """Legacy nested dict: {category: {feature: bool}}."""
+
+    # Flat facility dicts (preferred for new providers):
+    accessibility: dict | None
+    """Dict of accessibility features: {feature_name: bool}."""
+
+    offerings: dict | None
+    """Dict of fuel/service offerings: {feature_name: bool}."""
+
+    amenities: dict | None
+    """Dict of amenities: {feature_name: bool}."""
+
+    payments: dict | None
+    """Dict of accepted payment methods: {method_name: bool}."""
+
+    # ── Flat facility booleans ────────────────────────────────────────────────
+    # Providers that return flat booleans instead of dicts use these.
+    # The FacilityBinarySensor reads directly from these keys.
+    has_car_wash: bool | None
+    has_shop: bool | None
+    has_toilet: bool | None
+    has_atm: bool | None
+    has_disabled_access: bool | None
+    has_electric_charging: bool | None
+    accepts_cash: bool | None
+    accepts_cards: bool | None
+    accepts_contactless: bool | None
+
+    # ── Open status ───────────────────────────────────────────────────────────
+    is_open: bool | None
+    """Current open/closed status if provided directly by the source."""
+
+    # ── Provider-specific extras ──────────────────────────────────────────────
+    price_confidence: str | None
+    """FuelFinder.ie freshness tier: 'fresh' | 'likely' | 'outdated'."""
+
+    has_price: bool | None
+    """FuelFinder.ie: whether any community price exists for this station."""
+
+    location: str | None
+    """Formatted GPS location string: '{lat},{lng}' (e.g. '53.345349,-6.2779')."""
+
+    # ── Meta ─────────────────────────────────────────────────────────────────
+    source_station_id: str | None
+    """The provider's own station identifier (for attribute passthrough)."""
+
+
+# All keys that the sensor platform knows how to handle.
+# Used as a reference — providers declare a subset in CAPABILITIES.
+ALL_SENSOR_KEYS: frozenset[str] = frozenset(StationData.__annotations__.keys())
+
+
 class BaseProvider(ABC):
-    """Abstract base class for a fuel price data provider."""
+    """Abstract base class for a Fuel Compare data provider plugin.
+
+    Subclass this, set the class attributes, implement the two abstract
+    methods, and register in providers/__init__.py. That is all.
+    """
+
+    # ── Required class attributes (enforced by __init_subclass__) ────────────
 
     COUNTRY: ClassVar[str]
-    """ISO 3166-1 alpha-2 country code this provider serves, e.g. 'IE'."""
+    """ISO 3166-1 alpha-2 country code, e.g. 'IE', 'DE', 'FR'."""
 
     PROVIDER_KEY: ClassVar[str]
-    """Unique machine key stored in config entry data, e.g. 'ie_fuelcompare'."""
+    """Unique machine key stored in config entry data, e.g. 'ie_fuelfinder'."""
 
     LABEL: ClassVar[str]
     """Human-readable label shown in the config flow provider picker."""
 
-    CONFIG_MODE: ClassVar[Literal["station_id", "location"]] = "station_id"
-    """How the user identifies what to track.
+    # ── Optional class attributes (with defaults) ─────────────────────────────
 
-    'station_id' — user enters a numeric/string station ID (current IE behaviour).
-    'location'   — user enters lat/lng + radius; coordinator fetches all stations
-                   in range and creates entities dynamically.
+    CONFIG_MODE: ClassVar[Literal["station_id", "location"]] = "station_id"
+    """How the user selects what to track.
+
+    'station_id' — user enters a numeric/string identifier (default).
+    'location'   — user enters lat/lng + radius; coordinator fetches all
+                   stations in the radius and creates entities dynamically.
     """
+
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
+        {
+            # Default: the 14 entities created by the original fuelcompare.ie provider.
+            # Override in subclasses to declare exactly what your provider populates.
+            "unleaded",
+            "diesel",
+            "lastupdated",
+            "name",
+            "brand",
+            "county",
+            "working_hours",
+            "accessibility",
+            "offerings",
+            "amenities",
+            "payments",
+            "last_successful_fetch",  # always added by coordinator, not provider data
+            "is_open",
+            "data_fetch_problem",  # always added by coordinator
+        }
+    )
+    """Set of StationData keys this provider populates.
+
+    The sensor and binary_sensor platforms iterate CAPABILITIES to decide
+    which entities to create. Only keys listed here get entities. Unknown
+    keys are silently ignored.
+
+    Keys 'last_successful_fetch' and 'data_fetch_problem' are special:
+    they are always created regardless of CAPABILITIES (they come from the
+    coordinator, not the provider data). Listing them here is optional but
+    documents intent.
+    """
+
+    STATION_ID_HINT: ClassVar[str] = "Enter the station ID from the station URL."
+    """Short description shown in the config flow station-ID input field.
+
+    Override to give provider-specific guidance e.g.:
+    'For fuelfinder.ie/station/123, enter 123.'
+    """
+
+    POLL_INTERVAL_SECONDS: ClassVar[int] = 1800
+    """Default polling interval in seconds. Coordinator uses this value.
+
+    Override to set a provider-appropriate cadence. Government open-data
+    APIs that update every 30 min should use 1800. Real-time APIs can use
+    600. Daily (FuelWatch WA) should use 86400.
+    """
+
+    # ── Enforcement ──────────────────────────────────────────────────────────
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
@@ -40,22 +253,37 @@ class BaseProvider(ABC):
                     raise TypeError(
                         f"{cls.__name__} must define class attribute '{attr}'"
                     )
+            unknown = (
+                cls.CAPABILITIES
+                - ALL_SENSOR_KEYS
+                - {"last_successful_fetch", "data_fetch_problem"}
+            )
+            if unknown:
+                raise TypeError(
+                    f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "
+                    f"Add them to StationData first."
+                )
+
+    # ── Abstract interface ────────────────────────────────────────────────────
 
     @abstractmethod
     async def async_fetch(
         self,
         session: ClientSession,
         station_id: str,
-    ) -> dict[str, Any]:
+    ) -> StationData:
         """Fetch and return normalised station data.
 
-        For CONFIG_MODE='station_id': station_id is the user-entered identifier.
-        For CONFIG_MODE='location': station_id is unused; the provider uses its
-        own lat/lng/radius stored at construction time.
+        Return a StationData dict with all keys declared in CAPABILITIES
+        populated (values may be None if the source has no data for that
+        field). Keys not in CAPABILITIES should be absent from the dict.
 
-        The returned dict must contain at minimum:
-        'unleaded', 'diesel', 'lastupdated', 'name', 'tablename',
-        'working_hours', 'about', 'county'.  All values may be None.
+        For CONFIG_MODE='station_id': use station_id parameter.
+        For CONFIG_MODE='location': ignore station_id; use coordinates
+          stored at construction time.
+
+        Raise ProviderError on unrecoverable data errors.
+        Let aiohttp ClientError propagate (coordinator converts to UpdateFailed).
         """
 
     @abstractmethod
@@ -64,8 +292,11 @@ class BaseProvider(ABC):
         session: ClientSession,
         station_id: str,
     ) -> str | None:
-        """Return a display name for the station, or None if unavailable.
+        """Return a human-readable station name for the config flow, or None.
 
-        For CONFIG_MODE='location' providers this may return None; the config
-        flow uses the entry title from the location step instead.
+        Called once during setup to pre-populate the name confirmation step.
+        May return None — the config flow falls back to 'Station {id}'.
+
+        For CONFIG_MODE='location' providers, returning None is correct;
+        the config flow uses the auto-generated 'Country (lat, lon)' title.
         """

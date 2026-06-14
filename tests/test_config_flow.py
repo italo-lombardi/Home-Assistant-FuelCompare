@@ -38,11 +38,13 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
         mock_fetch.return_value = "Circle K"
 
-        # Step 1: user (country) — auto-advances since only IE is available
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
-        # Single country auto-skips to station step
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
         assert result["type"] == "form"
         assert result["step_id"] == "station"
 
@@ -81,6 +83,10 @@ async def test_config_flow_custom_name(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
         assert result["step_id"] == "station"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -114,6 +120,10 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
+        if result.get("step_id") == "provider":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+            )
         assert result["step_id"] == "station"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -138,11 +148,30 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
 # ---------------------------------------------------------------------------
 
 
+async def _reach_station_step(hass, flow_id: str) -> dict:
+    """Navigate through provider step if shown, returning the station step result."""
+    # If a provider step is shown (happens when >1 IE provider is registered),
+    # select the default fuelcompare.ie provider to reach the station step.
+
+    result = {"step_id": "provider", "flow_id": flow_id}
+    if result["step_id"] == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            flow_id,
+            user_input={CONF_PROVIDER: DEFAULT_PROVIDER},
+        )
+    return result
+
+
 async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
     """Non-integer station ID causes a form error."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    # Navigate through provider step if shown (multiple IE providers registered)
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+        )
     assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
@@ -164,6 +193,10 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+        )
     assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
@@ -185,6 +218,10 @@ async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+        )
     assert result["step_id"] == "station"
 
     result = await hass.config_entries.flow.async_configure(
@@ -214,6 +251,10 @@ async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_PROVIDER: DEFAULT_PROVIDER}
+        )
     assert result["step_id"] == "station"
 
     with _PATCH_FETCH_NAME:

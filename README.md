@@ -13,7 +13,29 @@
 
 ---
 
-> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. A provider abstraction layer has been introduced to allow alternative data sources to be added without breaking existing installations. See [#roadmap](#roadmap) below.
+> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. A provider abstraction layer has been introduced (0.7.0) and a second Ireland source — **FuelFinder.ie** — is available from 0.8.0. See [Supported Data Sources](#supported-data-sources) and [Roadmap](#roadmap) below.
+
+---
+
+## Supported Data Sources
+
+| Provider | Country | Stations | Fuel types | Station lookup | Status |
+|----------|---------|----------|------------|----------------|--------|
+| **fuelcompare.ie** | Ireland | ~100 listed stations | Unleaded, Diesel | Numeric station ID from the fuelcompare.ie URL | Active (site closing June 2025) |
+| **FuelFinder.ie** | Ireland | ~1,000+ (OpenStreetMap + community) | Diesel, Petrol, Kerosene, CNG | County picker → station picker in config flow | Active |
+
+Both providers create a device per station with the same diagnostic entities (`last_successful_fetch`, `data_fetch_problem`) and the same stale-retention behaviour. Entity sets differ where the underlying data differs — see the entities tables below.
+
+### Switching or adding a provider
+
+You do not need to remove the existing integration to add a FuelFinder.ie station. Each config entry is independent:
+
+1. Go to **Settings → Devices & Services → Add Integration** and search for **Fuel Compare**.
+2. Select **Ireland** as the country.
+3. Select the data source: **fuelcompare.ie** or **FuelFinder.ie**.
+4. Follow the provider-specific steps (station ID for fuelcompare.ie; county + station picker for FuelFinder.ie).
+
+To remove a provider, delete the relevant config entry from the Fuel Compare integration card. Existing entries are unaffected.
 
 ---
 
@@ -53,16 +75,18 @@ The integration repeats data fetch every **30 minutes** via Home Assistant's `Da
 
 ![Sensors screenshot](assets/sensors.png)
 
+### fuelcompare.ie provider
+
 Each station creates **14 entities** grouped under a single device.
 
-### Fuel price sensors
+#### Fuel price sensors
 
 | Entity | Unit | Attributes |
 |--------|------|------------|
 | `sensor.<name>_unleaded` | € | `station_id`, `fuel_type`, `source`, `price_last_updated` |
 | `sensor.<name>_diesel` | € | `station_id`, `fuel_type`, `source`, `price_last_updated` |
 
-### Station info sensors
+#### Station info sensors
 
 | Entity | State | Attributes |
 |--------|-------|------------|
@@ -78,24 +102,67 @@ Each station creates **14 entities** grouped under a single device.
 
 > Facility sensors (`accessibility`, `offerings`, `amenities`, `payments`) are marked unavailable if a station does not provide data for that category.
 
-### Diagnostic sensor
+#### Diagnostic sensor
 
 | Entity | State | Attributes |
 |--------|-------|------------|
 | `sensor.<name>_last_successful_fetch` | Timestamp (UTC) of the last successful fetch by *this integration* | `station_id` |
 
-This is distinct from `price_last_updated`: that sensor reflects the timestamp the **site** records for the price record, while `last_successful_fetch` reflects the **integration's own poll cadence**. Use it to detect "the integration hasn't fetched anything in N hours" independently of whether the site has refreshed its prices.
-
-### Binary sensors
+#### Binary sensors
 
 | Entity | State | Attributes |
 |--------|-------|------------|
 | `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `station_id`, `today_hours` |
-| `binary_sensor.<name>_data_fetch_problem` | `on` = problem (last fetch failed), `off` = healthy (last fetch succeeded) | `station_id`, `last_exception`, `last_successful_fetch` |
+| `binary_sensor.<name>_data_fetch_problem` | `on` = problem (last fetch failed), `off` = healthy | `station_id`, `last_exception`, `last_successful_fetch` |
 
-The is-open state is derived by parsing today's working hours against the current time. Supports standard ranges (`6a.m.-10p.m.`), 24-hour stations, and closed days.
+---
 
-The `data_fetch_problem` sensor (device class `problem`, diagnostic category) is always available and gives automations a single deterministic on/off signal for "is the integration currently failing to reach fuelcompare.ie?". Pairs with the stale-retention behaviour described below.
+### FuelFinder.ie provider
+
+Each station creates **15 entities** grouped under a single device. The four facility sensors (`accessibility`, `offerings`, `amenities`, `payments`) are absent — FuelFinder has no facility data. Two new fuel types (kerosene, CNG) and three new entity types (confidence, location, has-price) are added instead.
+
+#### Fuel price sensors
+
+| Entity | Unit | Attributes |
+|--------|------|------------|
+| `sensor.<name>_diesel` | € | `station_id`, `osm_id`, `fuel_type`, `confidence`, `price_last_updated`, `source` |
+| `sensor.<name>_petrol` | € | `station_id`, `osm_id`, `fuel_type`, `confidence`, `price_last_updated`, `source` |
+| `sensor.<name>_kerosene` | € | `station_id`, `osm_id`, `fuel_type`, `confidence`, `price_last_updated`, `source` |
+| `sensor.<name>_cng` | € | `station_id`, `osm_id`, `fuel_type`, `confidence`, `price_last_updated`, `source` |
+
+> Kerosene and CNG sensors are marked unavailable if no community submission exists for that fuel at the station.
+
+#### Station info sensors
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `sensor.<name>_price_last_updated` | Timestamp (UTC) of the most recent community price submission | `station_id` |
+| `sensor.<name>_price_confidence` | `fresh` / `likely` / `outdated` — FuelFinder freshness tier | `station_id`, `has_price`, per-fuel confidence |
+| `sensor.<name>_station_name` | Full station name e.g. `Circle K Mulhuddart` | `station_id`, `slug`, `osm_id` |
+| `sensor.<name>_brand` | Chain name e.g. `Circle K` | `station_id`, `logo_url` |
+| `sensor.<name>_county` | County e.g. `Dublin` | `station_id`, `street`, `lat`, `lng` |
+| `sensor.<name>_opening_hours` | OSM opening hours string e.g. `Mo-Su 07:00-23:00` | `station_id`, `phone`, `website` |
+| `sensor.<name>_location` | `"{lat},{lng}"` e.g. `53.345,-6.278` | `station_id`, `latitude`, `longitude`, `osm_id` |
+
+#### Diagnostic sensor
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `sensor.<name>_last_successful_fetch` | Timestamp (UTC) of the last successful fetch by *this integration* | `station_id` |
+
+#### Binary sensors
+
+| Entity | State | Attributes |
+|--------|-------|------------|
+| `binary_sensor.<name>_is_open` | `on` = open, `off` = closed | `station_id`, `opening_hours`, `today_rule` |
+| `binary_sensor.<name>_data_fetch_problem` | `on` = problem (last fetch failed), `off` = healthy | `station_id`, `last_exception`, `last_successful_fetch` |
+| `binary_sensor.<name>_has_price` | `on` = at least one community price exists, `off` = no submissions yet | `station_id`, per-fuel prices |
+
+---
+
+The `last_successful_fetch` sensor is distinct from `price_last_updated`: the former reflects the **integration's own poll cadence**, the latter reflects the timestamp the **source site** records for the price record. Use `last_successful_fetch` to detect "the integration hasn't fetched anything in N hours" independently of whether the site has refreshed its prices.
+
+The `data_fetch_problem` sensor (device class `problem`, diagnostic category) is always available and gives automations a single deterministic on/off signal for "is the integration currently failing to reach the data source?". Pairs with the stale-retention behaviour described below.
 
 ## Behaviour during fetch failures
 
@@ -145,7 +212,12 @@ Example automation skeleton:
 
 1. Go to **Settings → Devices & Services → Add Integration**.
 2. Search for **Fuel Compare**.
-3. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
+3. Select **Ireland** as the country (auto-skipped if only one country is available).
+4. Select a **data source**: **fuelcompare.ie** or **FuelFinder.ie** (auto-skipped if only one provider is available).
+
+### fuelcompare.ie setup
+
+5. Enter the **Station ID** — the number at the end of the station URL on fuelcompare.ie. Leading zeros are stripped automatically (`007` → `7`).
 
    ![Config flow step 1](assets/config_flow_step_1.png)
 
@@ -153,17 +225,22 @@ Example automation skeleton:
 
    ![Config flow step 1 error](assets/config_flow_step_1_error.png)
 
-4. The integration will automatically fetch the station's name and pre-populate the name field. Confirm or enter a custom name.
+6. The integration will automatically fetch the station's name and pre-populate the name field. Confirm or enter a custom name.
 
    ![Config flow step 2](assets/config_flow_step_2.png)
 
-### Finding a station ID
+#### Finding a station ID
 
 1. Go to [fuelcompare.ie](https://fuelcompare.ie) and search for your station.
 2. Click the station — the URL will look like `https://fuelcompare.ie/station/790`.
 3. The number at the end (`790` in this example) is the Station ID.
 
-You can add as many stations as you like; each gets its own device entry.
+### FuelFinder.ie setup
+
+5. Select the **county** where the station is located (e.g. Dublin, Cork, Kerry).
+6. Select the **station** from the list of stations in that county. The integration resolves the station UUID automatically.
+
+You can add as many stations as you like from either provider; each gets its own device entry.
 
 ## Requirements
 
@@ -180,14 +257,17 @@ This project is a personal, community tool. It is **not** the official FuelCompa
 
 ## Roadmap
 
-fuelcompare.ie announced it is closing at end of June 2025. The integration has been restructured with a provider abstraction layer so alternative data sources can be added without breaking existing installations or requiring users to reconfigure anything.
+fuelcompare.ie announced it is closing at end of June 2025. The integration was restructured with a provider abstraction layer (0.7.0) so alternative data sources can be added without breaking existing installations. FuelFinder.ie is available as a second Ireland provider from 0.8.0.
+
+**Done:**
+- Provider abstraction layer (`BaseProvider` ABC, `providers/` module) — 0.7.0
+- FuelFinder.ie (Conjora) as an Ireland source (~1,000+ stations, diesel/petrol/kerosene/CNG) — 0.8.0
 
 **Planned:**
-- Investigate and integrate FuelFinder.ie (Conjora) as an Ireland fallback source
 - Explore fuelwatch.ie API access (1,800+ stations, API listed as coming soon)
 - Potentially expand to additional countries where government open-data fuel price APIs exist (e.g. Germany via Tankerkoenig, Spain via MINETUR, Portugal via DGEG)
 
-Existing users: your installation continues to work as long as fuelcompare.ie remains online. When an alternative source is ready, it will be available as a new option in the config flow — no reinstallation required.
+Existing users: your fuelcompare.ie installation continues to work as long as the site remains online. FuelFinder.ie stations can be added independently via the config flow at any time — no reinstallation required.
 
 ## Sibling integrations
 
