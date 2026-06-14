@@ -293,22 +293,21 @@ class BaseProvider(ABC):
     to guide the user to the correct registration page.
     """
 
-    CURRENCY: ClassVar[str] = "EUR/L"
-    """ISO currency code with unit for fuel price sensors.
+    CURRENCY: ClassVar[str] = "€"
+    """Currency unit for fuel price sensors (unit_of_measurement).
 
-    Displayed as the unit_of_measurement on all FuelPriceSensor entities for
-    this provider. Override in subclasses for non-EUR providers:
-      GBP/L  — United Kingdom
-      AUD/L  — Australia
-      NOK/L  — Norway
-      DKK/L  — Denmark
-      SEK/L  — Sweden
-      CHF/L  — Switzerland
-      CZK/L  — Czech Republic
-      PLN/L  — Poland
-      ISK/L  — Iceland
-      CAD/L  — Canada
-      BAM/L  — Bosnia and Herzegovina
+    Use "€" for EUR providers to maintain backward compatibility with existing
+    HA long-term statistics (prior releases used homeassistant.const.CURRENCY_EURO).
+    Override in subclasses for non-EUR providers:
+      £      — United Kingdom (GBP)
+      A$     — Australia (AUD)
+      kr     — Norway/Denmark/Sweden
+      Fr.    — Switzerland (CHF)
+      Kč     — Czech Republic (CZK)
+      zł     — Poland (PLN)
+      kr     — Iceland (ISK)
+      CA$    — Canada (CAD)
+      KM     — Bosnia and Herzegovina (BAM)
     """
 
     # ── Enforcement ──────────────────────────────────────────────────────────
