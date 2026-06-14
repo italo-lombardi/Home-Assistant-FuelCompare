@@ -681,3 +681,188 @@ def test_provider_registered_in_registry() -> None:
 
     assert "fi_tankille" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["fi_tankille"] is FiTankilleProvider
+
+
+# ---------------------------------------------------------------------------
+# _parse_price — cents/litre branch (line 165)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_price_divides_cents_to_eur() -> None:
+    """_parse_price divides values >10 by 100 to convert cents/litre to EUR/litre."""
+    result = _parse_price(193)
+    assert result == pytest.approx(1.93, rel=1e-4)
+
+
+# ---------------------------------------------------------------------------
+# _extract_prices_from_jsonstat2 — fallback dimension index (lines 208-211)
+# ---------------------------------------------------------------------------
+
+
+def test_extract_prices_fallback_dimension_index() -> None:
+    """_extract_prices_from_jsonstat2 falls back to commodity=0, time=last when ids unrecognised."""
+    payload: dict = {
+        "dataset": {
+            "id": ["commodity_dim", "time_dim"],
+            "size": [2, 1],
+            "dimension": {
+                "energia_22_20200205": {
+                    "label": "Commodity",
+                    "category": {
+                        "index": {"A": 0, "B": 1},
+                        "label": {"A": "Motor petrol 95 E10", "B": "Diesel"},
+                    },
+                },
+                "commodity_dim": {
+                    "label": "Commodity",
+                    "category": {
+                        "index": {"A": 0, "B": 1},
+                        "label": {"A": "Motor petrol 95 E10", "B": "Diesel"},
+                    },
+                },
+                "time_dim": {
+                    "label": "Time",
+                    "category": {
+                        "index": {"2026M02": 0},
+                        "label": {"2026M02": "2026M02"},
+                    },
+                },
+            },
+            "value": [1.712, 1.845],
+        }
+    }
+    prices = _extract_prices_from_jsonstat2(payload)
+    assert prices.get("A") == pytest.approx(1.712)
+    assert prices.get("B") == pytest.approx(1.845)
+
+
+# ---------------------------------------------------------------------------
+# _extract_prices_from_jsonstat2 — skip missing commodity code (line 231)
+# ---------------------------------------------------------------------------
+
+
+def test_extract_prices_skips_missing_commodity_code() -> None:
+    """_extract_prices_from_jsonstat2 skips commodity positions with no mapped code."""
+    payload: dict = {
+        "dataset": {
+            "id": ["energia_22_20200205", "Tiedot", "timeperiod_m"],
+            "size": [3, 1, 1],
+            "dimension": {
+                "energia_22_20200205": {
+                    "label": "Commodity",
+                    "category": {
+                        # position 1 intentionally absent — gap in the index
+                        "index": {"A": 0, "B": 2},
+                        "label": {"A": "Motor petrol 95 E10", "B": "Diesel"},
+                    },
+                },
+                "Tiedot": {
+                    "label": "Data",
+                    "category": {"index": {"hinta": 0}, "label": {"hinta": "Price"}},
+                },
+                "timeperiod_m": {
+                    "label": "Year-month",
+                    "category": {
+                        "index": {"2026M02": 0},
+                        "label": {"2026M02": "2026M02"},
+                    },
+                },
+            },
+            "value": [1.712, 0.0, 1.845],
+        }
+    }
+    prices = _extract_prices_from_jsonstat2(payload)
+    assert prices.get("A") == pytest.approx(1.712)
+    assert prices.get("B") == pytest.approx(1.845)
+    assert len(prices) == 2
+
+
+# ---------------------------------------------------------------------------
+# _extract_prices_from_jsonstat2 — time-major flat index (line 238)
+# ---------------------------------------------------------------------------
+
+
+def test_extract_prices_time_major_flat_index() -> None:
+    """_extract_prices_from_jsonstat2 uses time-major index when time is the first dimension."""
+    payload: dict = {
+        "dataset": {
+            "id": ["timeperiod_m", "energia_22_20200205"],
+            "size": [2, 2],
+            "dimension": {
+                "energia_22_20200205": {
+                    "label": "Commodity",
+                    "category": {
+                        "index": {"A": 0, "B": 1},
+                        "label": {"A": "Motor petrol 95 E10", "B": "Diesel"},
+                    },
+                },
+                "timeperiod_m": {
+                    "label": "Year-month",
+                    "category": {
+                        "index": {"2026M01": 0, "2026M02": 1},
+                        "label": {"2026M01": "2026M01", "2026M02": "2026M02"},
+                    },
+                },
+            },
+            # time-major layout: [A_t0, B_t0, A_t1, B_t1]
+            "value": [1.700, 1.830, 1.712, 1.845],
+        }
+    }
+    prices = _extract_prices_from_jsonstat2(payload)
+    assert prices.get("A") == pytest.approx(1.712)
+    assert prices.get("B") == pytest.approx(1.845)
+
+
+# ---------------------------------------------------------------------------
+# async_fetch — raise_for_status wrapping (lines 470-471)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_raises_provider_error_on_raise_for_status() -> None:
+    """async_fetch wraps ClientResponseError from raise_for_status as ProviderError."""
+    from aiohttp import ClientResponseError
+
+    req_info = MagicMock()
+    req_info.real_url = _API_URL
+    http_exc = ClientResponseError(
+        request_info=req_info,
+        history=(),
+        status=500,
+        message="Internal Server Error",
+    )
+
+    resp = _make_mock_post_response(500)
+    resp.raise_for_status = MagicMock(side_effect=http_exc)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    with pytest.raises(ProviderError, match="500"):
+        await provider.async_fetch(session, _NATIONAL_STATION_ID)
+
+
+# ---------------------------------------------------------------------------
+# async_fetch — outer ClientResponseError handler (line 478)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_raises_provider_error_on_client_response_error_from_post() -> (
+    None
+):
+    """async_fetch wraps ClientResponseError raised by session.post as ProviderError."""
+    from aiohttp import ClientResponseError
+
+    req_info = MagicMock()
+    req_info.real_url = _API_URL
+    http_exc = ClientResponseError(
+        request_info=req_info,
+        history=(),
+        status=503,
+        message="Service Unavailable",
+    )
+
+    session = MagicMock()
+    session.post = MagicMock(side_effect=http_exc)
+
+    provider = _make_provider()
+    with pytest.raises(ProviderError, match="HTTP error"):
+        await provider.async_fetch(session, _NATIONAL_STATION_ID)

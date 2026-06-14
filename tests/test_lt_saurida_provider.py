@@ -744,3 +744,106 @@ def test_provider_registered_in_registry() -> None:
 
     assert "lt_saurida" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["lt_saurida"] is LtSauridaProvider
+
+
+# ---------------------------------------------------------------------------
+# _TableParser — line 146: handle_starttag early return when _done=True
+# ---------------------------------------------------------------------------
+
+
+def test_parse_table_ignores_tags_after_first_table_closes() -> None:
+    """_parse_table correctly handles HTML with content after </table> (line 146)."""
+    html = (
+        "<table>"
+        "<tr><th>Degalinė</th><th>Dyzelinas_B7</th></tr>"
+        "<tr><td>Station A</td><td>1.539</td></tr>"
+        "</table>"
+        "<table><tr><td>should be ignored</td></tr></table>"
+    )
+    result = _parse_table(html)
+    assert len(result) == 1
+    assert result[0]["name"] == "Station A"
+
+
+# ---------------------------------------------------------------------------
+# _parse_table — line 257: empty header row raises ProviderError
+# ---------------------------------------------------------------------------
+
+
+def test_parse_table_raises_provider_error_for_empty_header(monkeypatch) -> None:
+    """_parse_table raises ProviderError when header row is empty (line 257)."""
+    import custom_components.fuelcompare_ie.providers.lt_saurida as _mod
+
+    class _FakeParser:
+        def feed(self, html: str) -> None:
+            pass
+
+        @property
+        def rows(self):
+            return [[]]
+
+    monkeypatch.setattr(_mod, "_TableParser", _FakeParser)
+    with pytest.raises(ProviderError, match="Empty header row"):
+        _parse_table("<irrelevant/>")
+
+
+# ---------------------------------------------------------------------------
+# _parse_table — line 274: rows with empty station name are skipped
+# ---------------------------------------------------------------------------
+
+
+def test_parse_table_skips_rows_with_empty_station_name() -> None:
+    """_parse_table skips data rows whose first cell is blank (line 274)."""
+    html = (
+        "<table>"
+        "<tr><th>Degalinė</th><th>Dyzelinas_B7</th></tr>"
+        "<tr><td>  </td><td>1.539</td></tr>"
+        "<tr><td>Real Station</td><td>1.529</td></tr>"
+        "</table>"
+    )
+    result = _parse_table(html)
+    assert len(result) == 1
+    assert result[0]["name"] == "Real Station"
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — line 512: empty stations list returns []
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_when_fetch_yields_no_stations(
+    monkeypatch,
+) -> None:
+    """async_list_stations returns [] when _fetch_all_stations returns [] (line 512)."""
+    provider = _make_provider()
+
+    async def _fake_fetch_all(session):
+        return []
+
+    monkeypatch.setattr(provider, "_fetch_all_stations", _fake_fetch_all)
+    result = await provider.async_list_stations(MagicMock())
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — line 519: stations without a name are skipped
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_stations_with_missing_name(
+    monkeypatch,
+) -> None:
+    """async_list_stations skips station dicts with no 'name' key (line 519)."""
+    provider = _make_provider()
+
+    async def _fake_fetch_all(session):
+        return [
+            {"diesel": 1.539, "unleaded": 1.629},
+            {"name": "", "diesel": 1.529, "unleaded": 1.619},
+            {"name": _STATION_NAME_1, "diesel": 1.539, "unleaded": 1.629},
+        ]
+
+    monkeypatch.setattr(provider, "_fetch_all_stations", _fake_fetch_all)
+    result = await provider.async_list_stations(MagicMock())
+    assert len(result) == 1
+    assert result[0][0] == _STATION_NAME_1

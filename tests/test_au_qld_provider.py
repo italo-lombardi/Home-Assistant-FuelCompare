@@ -1003,3 +1003,131 @@ async def test_async_fetch_authorization_header_format() -> None:
     first_call = session.get.call_args_list[0]
     headers = first_call.kwargs.get("headers", {})
     assert headers["Authorization"] == "FPDAPI SubscriberToken=tok_abc123"
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — E10 fallback (lines 367-368)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_e10_fallback_when_no_unleaded() -> None:
+    """async_list_stations uses E10 price label when unleaded is absent but E10 present."""
+    prices_e10_only: list[dict] = [
+        {
+            "SiteId": int(_SITE_ID),
+            "FuelId": 12,
+            "Price": 1699,
+        },  # e10 169.9 c/L, no unleaded
+    ]
+    session = _make_session_both(prices_payload={"SitePrices": prices_e10_only})
+    provider = AuQldProvider(
+        _SITE_ID, api_key="tok", latitude=-27.4698, longitude=153.0251, radius_km=1.0
+    )
+    result = await provider.async_list_stations(
+        session, lat=-27.4698, lng=153.0251, radius_km=1.0
+    )
+
+    assert len(result) == 1
+    _, label = result[0]
+    assert "E10" in label
+    assert "A$" in label
+
+
+async def test_async_list_stations_e10_sort_price_updated() -> None:
+    """async_list_stations sort_price includes E10 when unleaded absent."""
+    prices_diesel_and_e10: list[dict] = [
+        {"SiteId": int(_SITE_ID), "FuelId": 3, "Price": 1800},  # diesel 180.0 c/L
+        {"SiteId": int(_SITE_ID), "FuelId": 12, "Price": 1650},  # e10 165.0 c/L
+    ]
+    session = _make_session_both(prices_payload={"SitePrices": prices_diesel_and_e10})
+    provider = AuQldProvider(
+        _SITE_ID, api_key="tok", latitude=-27.4698, longitude=153.0251, radius_km=1.0
+    )
+    result = await provider.async_list_stations(
+        session, lat=-27.4698, lng=153.0251, radius_km=1.0
+    )
+
+    assert len(result) == 1
+    _, label = result[0]
+    assert "E10" in label
+    assert "Diesel" in label
+
+
+# ---------------------------------------------------------------------------
+# _build_index — timestamp capture (line 495) and null FuelId (line 499)
+# ---------------------------------------------------------------------------
+
+
+def test_build_index_captures_transaction_date_utc_timestamp() -> None:
+    """_build_index stores TransactionDateutc in timestamps_map on first occurrence."""
+    entries = [
+        {
+            "SiteId": int(_SITE_ID),
+            "FuelId": 2,
+            "Price": 1799,
+            "TransactionDateutc": "2024-01-15T10:00:00",
+        }
+    ]
+    _, _, timestamps_map = _build_index([], entries)
+    assert timestamps_map[_SITE_ID] == "2024-01-15T10:00:00"
+
+
+def test_build_index_captures_last_confirmed_date_fallback_timestamp() -> None:
+    """_build_index falls back to LastConfirmedDate when TransactionDateutc is absent."""
+    entries = [
+        {
+            "SiteId": int(_SITE_ID),
+            "FuelId": 2,
+            "Price": 1799,
+            "LastConfirmedDate": "2024-01-15T09:00:00",
+        }
+    ]
+    _, _, timestamps_map = _build_index([], entries)
+    assert timestamps_map[_SITE_ID] == "2024-01-15T09:00:00"
+
+
+def test_build_index_skips_null_fuel_id() -> None:
+    """_build_index skips entries where FuelId is None."""
+    entries = [{"SiteId": int(_SITE_ID), "FuelId": None, "Price": 1799}]
+    _, prices_map, _ = _build_index([], entries)
+    assert prices_map.get(_SITE_ID, {}) == {}
+
+
+# ---------------------------------------------------------------------------
+# _build_index — sanity-check price bounds (line 516)
+# ---------------------------------------------------------------------------
+
+
+def test_build_index_rejects_price_below_50_cents() -> None:
+    """_build_index discards prices below 50 c/L (sanity check lower bound)."""
+    # 499 tenths-of-cent = 49.9 c/L — below minimum
+    entries = [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": 499}]
+    _, prices_map, _ = _build_index([], entries)
+    assert "unleaded" not in prices_map.get(_SITE_ID, {})
+
+
+def test_build_index_rejects_price_above_999_cents() -> None:
+    """_build_index discards prices above 999 c/L (sanity check upper bound)."""
+    # 9991 tenths-of-cent = 999.1 c/L — above maximum
+    entries = [{"SiteId": int(_SITE_ID), "FuelId": 2, "Price": 9991}]
+    _, prices_map, _ = _build_index([], entries)
+    assert "unleaded" not in prices_map.get(_SITE_ID, {})
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — invalid / None Lng (lines 560-561)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_invalid_lng_gives_none() -> None:
+    """_build_station_data handles non-numeric Lng gracefully."""
+    site_bad_lng = {**_BASE_SITE, "Lng": "bad"}
+    data = _build_station_data(site_bad_lng, {}, _SITE_ID)
+    assert data["longitude"] is None
+
+
+def test_build_station_data_none_lng_gives_none() -> None:
+    """_build_station_data handles None Lng gracefully."""
+    site_none_lng = {**_BASE_SITE, "Lng": None}
+    data = _build_station_data(site_none_lng, {}, _SITE_ID)
+    assert data["longitude"] is None

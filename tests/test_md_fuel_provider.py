@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.md_fuel import (
@@ -589,3 +589,124 @@ def test_provider_is_registered_in_registry() -> None:
 
     assert "md_fuel" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["md_fuel"] is MdFuelProvider
+
+
+# ---------------------------------------------------------------------------
+# New coverage tests: lines 250-253, 304-310, 353, 356-376
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_on_generic_exception_returns_fallback() -> None:
+    """async_list_stations catches a non-ClientError exception and returns fallback label.
+
+    Covers lines 250-253: the ``except Exception`` branch that sets both prices to None.
+    _fetch_price itself catches internal exceptions, so we patch it directly to raise
+    so the exception propagates to the outer try/except in async_list_stations.
+    """
+    session = MagicMock()
+
+    provider = MdFuelProvider()
+    with patch.object(
+        provider, "_fetch_price", side_effect=RuntimeError("unexpected boom")
+    ):
+        results = await provider.async_list_stations(session)
+
+    assert len(results) == 1
+    station_id, label = results[0]
+    assert station_id == "MD"
+    assert "ANRE" in label or "Moldova" in label
+    # No price data — both set to None → fallback label without MDL
+    assert "MDL" not in label
+
+
+@pytest.mark.asyncio
+async def test_fetch_price_client_response_error_returns_none() -> None:
+    """_fetch_price returns None when aiohttp raises ClientResponseError.
+
+    Covers lines 304-310: the ``except ClientResponseError`` handler in ``_fetch_price``.
+    """
+    err = ClientResponseError(request_info=MagicMock(), history=(), status=500)
+
+    mock_resp = AsyncMock()
+    mock_resp.__aenter__ = AsyncMock(side_effect=err)
+    mock_resp.__aexit__ = AsyncMock(return_value=False)
+
+    session = MagicMock()
+    session.get = MagicMock(return_value=mock_resp)
+
+    provider = MdFuelProvider()
+    result = await provider._fetch_price(session, _URL_BENZINA_95, "benzina_95")
+    assert result is None
+
+
+def test_extract_price_from_html_tag_get_returns_none() -> None:
+    """_extract_price_from_html returns None when tag.get('data-price') is None.
+
+    Covers line 353: ``if raw is None: return None``.
+    The BeautifulSoup constructor is patched at the ``bs4`` module level so the
+    locally-imported name inside ``_extract_price_from_html`` uses the mock.
+    """
+    mock_tag = MagicMock()
+    mock_tag.get = MagicMock(return_value=None)
+
+    mock_soup = MagicMock()
+    mock_soup.select_one = MagicMock(return_value=mock_tag)
+
+    with patch("bs4.BeautifulSoup", return_value=mock_soup):
+        result = _extract_price_from_html("<html></html>", "benzina_95")
+
+    assert result is None
+
+
+def test_extract_price_from_html_import_error_regex_finds_price() -> None:
+    """_extract_price_from_html falls back to regex and returns price when bs4 missing.
+
+    Covers lines 356-370 (ImportError branch, match sub-path).
+    """
+    import builtins
+
+    real_import = builtins.__import__
+
+    def mock_import(name: str, *args: object, **kwargs: object) -> object:
+        if name == "bs4":
+            raise ImportError("No module named 'bs4'")
+        return real_import(name, *args, **kwargs)
+
+    with patch("builtins.__import__", side_effect=mock_import):
+        result = _extract_price_from_html(_HTML_BENZINA_95, "benzina_95")
+
+    assert result == pytest.approx(28.71)
+
+
+def test_extract_price_from_html_import_error_regex_no_match_returns_none() -> None:
+    """_extract_price_from_html falls back to regex and returns None when no data-price found.
+
+    Covers lines 356-370 (ImportError branch, no-match sub-path).
+    """
+    import builtins
+
+    real_import = builtins.__import__
+
+    def mock_import(name: str, *args: object, **kwargs: object) -> object:
+        if name == "bs4":
+            raise ImportError("No module named 'bs4'")
+        return real_import(name, *args, **kwargs)
+
+    with patch("builtins.__import__", side_effect=mock_import):
+        result = _extract_price_from_html(_HTML_NO_PRICE, "benzina_95")
+
+    assert result is None
+
+
+def test_extract_price_from_html_unexpected_exception_returns_none() -> None:
+    """_extract_price_from_html returns None when BeautifulSoup raises an unexpected error.
+
+    Covers lines 372-376: the ``except Exception`` catch-all in ``_extract_price_from_html``.
+    Patches ``bs4.BeautifulSoup`` at the module level so the locally-imported name
+    inside the function raises ``ValueError``.
+    """
+    with patch("bs4.BeautifulSoup", side_effect=ValueError("unexpected parse failure")):
+        result = _extract_price_from_html("<html></html>", "benzina_95")
+
+    assert result is None

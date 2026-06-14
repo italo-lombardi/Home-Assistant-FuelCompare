@@ -752,3 +752,70 @@ async def test_async_fetch_missing_products_return_none() -> None:
     assert data.get("diesel") is None
     assert data.get("premium_unleaded") is None
     assert data.get("lpg") is None
+
+
+# ---------------------------------------------------------------------------
+# _parse_price_pln / _fetch_lpg_price edge-cases (lines 142, 145-146, 148,
+# 406-410)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_non_list_payload_returns_none_for_lpg() -> None:
+    """_fetch_lpg_price returns None when /autogasprices returns a non-list JSON value."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(200, json_data={"error": "unexpected"})
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_none_value_skipped() -> None:
+    """_parse_price_pln returns None for a None value; record is skipped in LPG min."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(
+        200,
+        json_data=[{"voivodeship": "Mazowieckie", "value": None}],
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_non_numeric_value_skipped() -> None:
+    """_parse_price_pln returns None for a non-numeric string; record is skipped in LPG min."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(
+        200,
+        json_data=[{"voivodeship": "Mazowieckie", "value": "not-a-number"}],
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_non_positive_value_skipped() -> None:
+    """_parse_price_pln returns None for a non-positive value; record is skipped in LPG min."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(
+        200,
+        json_data=[{"voivodeship": "Mazowieckie", "value": 0}],
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None

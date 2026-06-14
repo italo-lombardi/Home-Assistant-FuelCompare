@@ -909,3 +909,141 @@ def test_provider_registered_in_registry() -> None:
 
     assert "se_bensinpriser" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["se_bensinpriser"] is SEBensinpriserProvider
+
+
+# ---------------------------------------------------------------------------
+# async_fetch_station_name — name-only path (line 296) and generic exception
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_returns_name_when_address_absent() -> None:
+    """async_fetch_station_name returns just the company name when address is empty (line 296)."""
+    station_no_address = {**_BASE_STATION, "address": ""}
+    resp = _make_mock_response(200, json_data=[station_no_address])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    name = await provider.async_fetch_station_name(session, _STATION_ID)
+
+    assert name == "St1"
+
+
+async def test_async_fetch_station_name_returns_none_on_generic_exception() -> None:
+    """async_fetch_station_name returns None when _fetch_all_stations raises a non-aiohttp error."""
+    session = MagicMock()
+    session.get = MagicMock(side_effect=ValueError("json decode error"))
+
+    provider = _make_provider()
+    name = await provider.async_fetch_station_name(session, _STATION_ID)
+
+    assert name is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — invalid lat/lng strings (lines 348-349)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_stations_with_invalid_lat_string() -> None:
+    """async_list_stations skips stations whose lat is an unparseable string."""
+    bad_lat = {**_BASE_STATION, "id": 55, "lat": "n/a", "lng": 12.555}
+    resp = _make_mock_response(200, json_data=[bad_lat, _BASE_STATION])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=57.929, lng=12.555, radius_km=5.0
+    )
+
+    ids = [r[0] for r in result]
+    assert "55" not in ids  # invalid-lat station skipped
+    assert "13" in ids
+
+
+async def test_async_list_stations_skips_stations_with_invalid_lng_string() -> None:
+    """async_list_stations skips stations whose lng is an unparseable string."""
+    bad_lng = {**_BASE_STATION, "id": 56, "lat": 57.929, "lng": "bad"}
+    resp = _make_mock_response(200, json_data=[bad_lng, _BASE_STATION])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=57.929, lng=12.555, radius_km=5.0
+    )
+
+    ids = [r[0] for r in result]
+    assert "56" not in ids  # invalid-lng station skipped
+    assert "13" in ids
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — display name fallbacks (lines 370-375)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_display_name_company_only() -> None:
+    """async_list_stations uses company alone when address is absent (line 371)."""
+    no_address = {
+        **_BASE_STATION,
+        "id": 60,
+        "company": "CircleK",
+        "address": "",
+        "commune": "",
+    }
+    resp = _make_mock_response(200, json_data=[no_address])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=57.929, lng=12.555, radius_km=5.0
+    )
+
+    assert result
+    _, label = result[0]
+    assert "CircleK" in label
+    assert "—" not in label.split("CircleK")[0]  # company used directly, not compound
+
+
+async def test_async_list_stations_display_name_address_only() -> None:
+    """async_list_stations uses address alone when company is absent (line 373)."""
+    no_company = {
+        **_BASE_STATION,
+        "id": 61,
+        "company": "",
+        "address": "Storgatan 1",
+        "commune": "",
+    }
+    resp = _make_mock_response(200, json_data=[no_company])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=57.929, lng=12.555, radius_km=5.0
+    )
+
+    assert result
+    _, label = result[0]
+    assert "Storgatan 1" in label
+
+
+async def test_async_list_stations_display_name_falls_back_to_uid() -> None:
+    """async_list_stations uses uid when both company and address are absent (line 375)."""
+    no_name = {
+        **_BASE_STATION,
+        "id": 62,
+        "company": "",
+        "address": "",
+        "commune": "",
+    }
+    resp = _make_mock_response(200, json_data=[no_name])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=57.929, lng=12.555, radius_km=5.0
+    )
+
+    assert result
+    uid, label = result[0]
+    assert uid == "62"
+    assert label.startswith("62")

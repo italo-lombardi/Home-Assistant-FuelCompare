@@ -772,3 +772,112 @@ def test_provider_registry_get_provider_class() -> None:
 
     cls = get_provider_class("me_fuel")
     assert cls is MeFuelProvider
+
+
+# ---------------------------------------------------------------------------
+# New tests — covering lines 319, 368, 396, 493, 504-505
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_fetch_xlsx_url_reraises_provider_error_from_json() -> None:
+    """_fetch_xlsx_url re-raises ProviderError raised by response.json() (line 319)."""
+    ckan_resp = _make_mock_response(200)
+    ckan_resp.json = AsyncMock(side_effect=ProviderError("inner error"))
+    session = _make_session(ckan_resp)
+
+    provider = _default_provider()
+    with pytest.raises(ProviderError, match="inner error"):
+        await provider._fetch_xlsx_url(session)
+
+
+@pytest.mark.asyncio
+async def test_fetch_xlsx_url_raises_on_untrusted_xlsx_host() -> None:
+    """_fetch_xlsx_url raises ProviderError for a XLSX URL not on data.gov.me (line 368)."""
+    untrusted_payload: dict = {
+        "success": True,
+        "result": {
+            "count": 1,
+            "results": [
+                {
+                    "id": "evil123",
+                    "metadata_modified": _MODIFIED,
+                    "resources": [
+                        {
+                            "format": "XLSX",
+                            "url": "https://evil.example.com/malware.xlsx",
+                        }
+                    ],
+                }
+            ],
+        },
+    }
+    ckan_resp = _make_mock_response(200, json_data=untrusted_payload)
+    session = _make_session(ckan_resp)
+
+    provider = _default_provider()
+    with pytest.raises(ProviderError, match="untrusted host"):
+        await provider._fetch_xlsx_url(session)
+
+
+@pytest.mark.asyncio
+async def test_download_xlsx_reraises_provider_error_from_read() -> None:
+    """_download_xlsx re-raises ProviderError raised by response.read() (line 396)."""
+    xlsx_resp = _make_mock_response(200)
+    xlsx_resp.read = AsyncMock(side_effect=ProviderError("read provider error"))
+    session = _make_session(xlsx_resp)
+
+    provider = _default_provider()
+    with pytest.raises(ProviderError, match="read provider error"):
+        await provider._download_xlsx(session, _XLSX_URL)
+
+
+@pytest.mark.asyncio
+async def test_parse_xlsx_logs_debug_for_unparseable_cell_value() -> None:
+    """_parse_xlsx emits a debug log when a cell has an unparseable non-None value (line 493)."""
+    wb_tmp = openpyxl.Workbook()
+    ws_tmp = wb_tmp.active
+    for r in range(1, 53):
+        ws_tmp.cell(row=r, column=1, value=f"row{r}")
+    ws_tmp.cell(row=_PRICE_ROW, column=1, value="MP")
+    ws_tmp.cell(row=_PRICE_ROW, column=_COL_EUROSUPER_95, value="N/A")
+    ws_tmp.cell(row=_PRICE_ROW, column=_COL_EUROSUPER_98, value=_PRICE_E98)
+    ws_tmp.cell(row=_PRICE_ROW, column=_COL_EURODIESEL, value=_PRICE_EDIESEL)
+    ws_tmp.cell(row=_PRICE_ROW, column=_COL_LOZ_ULJE, value=_PRICE_LOZ)
+    buf = io.BytesIO()
+    wb_tmp.save(buf)
+
+    data = await _parse_xlsx(buf.getvalue())
+
+    assert data["unleaded"] is None
+    assert data["diesel"] == pytest.approx(_PRICE_EDIESEL)
+
+
+@pytest.mark.asyncio
+async def test_parse_xlsx_swallows_wb_close_exception(monkeypatch) -> None:
+    """_parse_xlsx swallows any exception from wb.close() without raising (lines 504-505)."""
+    from unittest.mock import MagicMock, patch
+
+    mock_cell = MagicMock()
+    mock_cell.value = 1.65
+
+    mock_ws = MagicMock()
+    mock_ws.max_row = _PRICE_ROW
+    mock_ws.cell.return_value = mock_cell
+
+    mock_wb = MagicMock()
+    mock_wb.active = mock_ws
+    mock_wb.close.side_effect = OSError("disk flush error")
+
+    # Patch at the asyncio event loop run_in_executor level to avoid
+    # coverage/monkeypatch thread interaction issues
+    async def _fake_executor(executor, func, *args):
+        return mock_wb
+
+    with patch(
+        "custom_components.fuelcompare_ie.providers.me_fuel.asyncio.get_running_loop"
+    ) as mock_loop:
+        mock_loop.return_value.run_in_executor = _fake_executor
+        data = await _parse_xlsx(b"irrelevant bytes - workbook is mocked")
+
+    assert data["unleaded"] == pytest.approx(1.65)
