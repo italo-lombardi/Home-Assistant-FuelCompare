@@ -480,7 +480,7 @@ async def test_async_fetch_raises_provider_error_when_all_responses_empty() -> N
 
 
 async def test_async_fetch_propagates_client_error() -> None:
-    """ClientError raised by aiohttp propagates out of async_fetch uncaught."""
+    """When all _fetch_stations calls return None due to ClientError, async_fetch raises ProviderError."""
     session = MagicMock()
     session.get = MagicMock(side_effect=ClientError("network error"))
 
