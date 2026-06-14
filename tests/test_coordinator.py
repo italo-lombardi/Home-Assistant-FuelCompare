@@ -1162,6 +1162,32 @@ async def test_base_provider_async_list_stations_default_returns_empty() -> None
 # ---------------------------------------------------------------------------
 
 
+def test_get_provider_or_default_returns_cls_when_primary_key_found() -> None:
+    """get_provider_or_default returns the provider class when the primary key exists."""
+    from custom_components.fuelcompare_ie.providers import (
+        PROVIDER_REGISTRY,
+        get_provider_or_default,
+    )
+
+    primary_key = next(iter(PROVIDER_REGISTRY))
+    result = get_provider_or_default(primary_key, "also_nonexistent_xyz")
+
+    assert result is PROVIDER_REGISTRY[primary_key]
+
+
+def test_get_provider_or_default_returns_cls_when_only_default_key_found() -> None:
+    """get_provider_or_default falls back to default_key and returns that provider class."""
+    from custom_components.fuelcompare_ie.providers import (
+        PROVIDER_REGISTRY,
+        get_provider_or_default,
+    )
+
+    default_key = next(iter(PROVIDER_REGISTRY))
+    result = get_provider_or_default("nonexistent_key_xyz", default_key)
+
+    assert result is PROVIDER_REGISTRY[default_key]
+
+
 def test_non_eur_providers_override_currency() -> None:
     """All non-EUR providers declare a CURRENCY override (not the '€' default)."""
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
@@ -1197,3 +1223,167 @@ def test_non_eur_providers_override_currency() -> None:
                 f"Provider {key} (COUNTRY={cls.COUNTRY}) appears to be non-EUR "
                 f"but uses the default '€' CURRENCY. Override CURRENCY ClassVar."
             )
+
+
+# ---------------------------------------------------------------------------
+# Coordinator delegation fallback (lines 89, 94) — no provider method
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_encrypted_api_returns_none_without_provider_method(
+    hass: HomeAssistant,
+) -> None:
+    """_fetch_encrypted_api returns None when provider lacks _fetch_encrypted_api."""
+
+    class _NoEncMethod:
+        pass
+
+    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
+    coord._provider = _NoEncMethod()
+    result = await coord._fetch_encrypted_api(MagicMock())
+    assert result is None
+
+
+def test_parse_station_returns_station_without_provider_method(
+    hass: HomeAssistant,
+) -> None:
+    """_parse_station returns the unmodified station dict when provider lacks _parse_station."""
+
+    class _NoParseMethod:
+        pass
+
+    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
+    coord._provider = _NoParseMethod()
+    raw = {"name": "test", "price": 1.99}
+    result = coord._parse_station(raw)
+    assert result is raw
+
+
+# ---------------------------------------------------------------------------
+# IEFuelCompareProvider.async_fetch_station_name — direct unit tests
+# covers lines 99-111 in ie_fuelcompare.py
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_ie_fuelcompare_fetch_station_name_returns_name() -> None:
+    """async_fetch_station_name returns station name from Next.js data."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+
+    async def _fake_fetch_page_assets(session, broad=False):
+        pass
+
+    async def _fake_fetch_nextjs(session):
+        return {"name": "Circle K Mulhuddart"}
+
+    with (
+        patch.object(
+            provider, "_fetch_page_assets", side_effect=_fake_fetch_page_assets
+        ),
+        patch.object(provider, "_fetch_nextjs", side_effect=_fake_fetch_nextjs),
+    ):
+        name = await provider.async_fetch_station_name(MagicMock(), "790")
+
+    assert name == "Circle K Mulhuddart"
+
+
+@pytest.mark.asyncio
+async def test_ie_fuelcompare_fetch_station_name_falls_back_to_tablename() -> None:
+    """async_fetch_station_name falls back to tablename when name is absent."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+
+    async def _fake_page_assets(session, broad=False):
+        pass
+
+    async def _fake_nextjs(session):
+        return {"tablename": "circle_k"}
+
+    async def _fake_encrypted(session):
+        return None
+
+    with (
+        patch.object(provider, "_fetch_page_assets", side_effect=_fake_page_assets),
+        patch.object(provider, "_fetch_nextjs", side_effect=_fake_nextjs),
+        patch.object(provider, "_fetch_encrypted_api", side_effect=_fake_encrypted),
+    ):
+        name = await provider.async_fetch_station_name(MagicMock(), "790")
+
+    assert name == "Circle K"
+
+
+@pytest.mark.asyncio
+async def test_ie_fuelcompare_fetch_station_name_falls_back_to_encrypted_api() -> None:
+    """async_fetch_station_name tries encrypted API when Next.js returns None."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+
+    async def _fake_page_assets(session, broad=False):
+        pass
+
+    async def _fake_nextjs(session):
+        return None
+
+    async def _fake_encrypted(session):
+        return {"name": "Texaco Fairview"}
+
+    with (
+        patch.object(provider, "_fetch_page_assets", side_effect=_fake_page_assets),
+        patch.object(provider, "_fetch_nextjs", side_effect=_fake_nextjs),
+        patch.object(provider, "_fetch_encrypted_api", side_effect=_fake_encrypted),
+    ):
+        name = await provider.async_fetch_station_name(MagicMock(), "790")
+
+    assert name == "Texaco Fairview"
+
+
+@pytest.mark.asyncio
+async def test_ie_fuelcompare_fetch_station_name_returns_none_on_exception() -> None:
+    """async_fetch_station_name returns None when an exception occurs."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+
+    with patch.object(
+        provider, "_fetch_page_assets", side_effect=Exception("network error")
+    ):
+        name = await provider.async_fetch_station_name(MagicMock(), "790")
+
+    assert name is None
+
+
+@pytest.mark.asyncio
+async def test_ie_fuelcompare_fetch_station_name_returns_none_when_no_data() -> None:
+    """async_fetch_station_name returns None when both paths return None."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+
+    async def _noop(session, broad=False):
+        pass
+
+    async def _none(session):
+        return None
+
+    with (
+        patch.object(provider, "_fetch_page_assets", side_effect=_noop),
+        patch.object(provider, "_fetch_nextjs", side_effect=_none),
+        patch.object(provider, "_fetch_encrypted_api", side_effect=_none),
+    ):
+        name = await provider.async_fetch_station_name(MagicMock(), "790")
+
+    assert name is None

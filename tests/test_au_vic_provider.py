@@ -1279,3 +1279,61 @@ def test_api_url_targets_service_vic() -> None:
     assert "fuel.service.vic.gov.au" in _API_URL
     assert _API_URL.startswith("https://")
     assert "open-data/v1/fuel/prices" in _API_URL
+
+
+def test_extract_prices_string_price_triggers_valueerror_continue() -> None:
+    """A non-numeric string price triggers the ValueError handler and is skipped."""
+    prices = _extract_prices(
+        [
+            {
+                "fuelType": "U91",
+                "price": "not-a-number",
+                "isAvailable": True,
+            }
+        ]
+    )
+    assert "unleaded" not in prices
+
+
+def test_extract_prices_dict_price_triggers_typeerror_continue() -> None:
+    """A dict price triggers the TypeError handler and is skipped."""
+    prices = _extract_prices(
+        [
+            {
+                "fuelType": "U91",
+                "price": {"value": 1.759},
+                "isAvailable": True,
+            }
+        ]
+    )
+    assert "unleaded" not in prices
+
+
+def test_build_station_data_malformed_latitude_becomes_none() -> None:
+    """A non-numeric latitude string triggers the TypeError/ValueError handler and returns None."""
+    station = {
+        **_BASE_STATION,
+        "location": {"latitude": "bad-lat", "longitude": 144.9631},
+    }
+    entry = {**_BASE_ENTRY, "fuelStation": station}
+    data = _build_station_data(entry)
+    assert data["latitude"] is None
+
+
+def test_build_station_data_malformed_longitude_becomes_none() -> None:
+    """A non-numeric longitude string triggers the TypeError/ValueError handler and returns None."""
+    station = {
+        **_BASE_STATION,
+        "location": {"latitude": -37.8136, "longitude": "bad-lng"},
+    }
+    entry = {**_BASE_ENTRY, "fuelStation": station}
+    data = _build_station_data(entry)
+    assert data["longitude"] is None
+
+
+def test_build_station_data_no_suburb_or_state_uses_address_fallback() -> None:
+    """When suburb and state are both absent, full_address falls back to the raw address field."""
+    station = {**_BASE_STATION, "suburb": None, "state": None, "address": "99 Test St"}
+    entry = {**_BASE_ENTRY, "fuelStation": station}
+    data = _build_station_data(entry)
+    assert data["address"] == "99 Test St"

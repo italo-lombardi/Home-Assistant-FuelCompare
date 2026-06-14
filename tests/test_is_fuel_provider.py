@@ -864,3 +864,259 @@ def test_provider_registered_in_registry() -> None:
 
     assert "is_fuel" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["is_fuel"] is IsFuelProvider
+
+
+# ---------------------------------------------------------------------------
+# _parse_station — invalid geo coordinate error paths (lines 139-144)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_station_invalid_lat_falls_back_to_none() -> None:
+    """_parse_station sets latitude to None when geo.lat cannot be cast to float."""
+    station = {**_BASE_STATION, "geo": {"lat": "not-a-number", "lon": -22.0328}}
+    result = _parse_station(station)
+    assert result["latitude"] is None
+
+
+def test_parse_station_invalid_lon_falls_back_to_none() -> None:
+    """_parse_station sets longitude to None when geo.lon cannot be cast to float."""
+    station = {**_BASE_STATION, "geo": {"lat": 64.0328, "lon": "bad-lon"}}
+    result = _parse_station(station)
+    assert result["longitude"] is None
+
+
+# ---------------------------------------------------------------------------
+# async_fetch_station_name — partial name/company fallback (line 343)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_returns_name_only_when_no_company() -> None:
+    """async_fetch_station_name returns just name when company is absent."""
+    station_name_only = {
+        "key": _STATION_KEY,
+        "name": "Solo Station",
+        "geo": {"lat": _LAT, "lon": _LNG},
+    }
+    payload = {"stations": [station_name_only]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    name = await provider.async_fetch_station_name(session, _STATION_KEY)
+
+    assert name == "Solo Station"
+
+
+async def test_async_fetch_station_name_returns_company_only_when_no_name() -> None:
+    """async_fetch_station_name returns just company when name is absent."""
+    station_company_only = {
+        "key": _STATION_KEY,
+        "company": "SoloCompany",
+        "geo": {"lat": _LAT, "lon": _LNG},
+    }
+    payload = {"stations": [station_company_only]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    name = await provider.async_fetch_station_name(session, _STATION_KEY)
+
+    assert name == "SoloCompany"
+
+
+async def test_async_fetch_station_name_returns_none_when_both_absent() -> None:
+    """async_fetch_station_name returns None when both name and company are absent."""
+    station_no_identity = {
+        "key": _STATION_KEY,
+        "geo": {"lat": _LAT, "lon": _LNG},
+    }
+    payload = {"stations": [station_no_identity]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    name = await provider.async_fetch_station_name(session, _STATION_KEY)
+
+    assert name is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — invalid geo coords skipped (lines 403-404)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_station_with_invalid_lat() -> None:
+    """async_list_stations skips a station whose geo.lat is not a valid float."""
+    bad_station = {
+        **_BASE_STATION,
+        "key": "BAD_LAT",
+        "geo": {"lat": "invalid", "lon": _LNG},
+    }
+    payload = {"stations": [bad_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    keys = [k for k, _ in result]
+    assert "BAD_LAT" not in keys
+    assert _STATION_KEY in keys
+
+
+async def test_async_list_stations_skips_station_with_invalid_lon() -> None:
+    """async_list_stations skips a station whose geo.lon is not a valid float."""
+    bad_station = {
+        **_BASE_STATION,
+        "key": "BAD_LON",
+        "geo": {"lat": _LAT, "lon": "not-a-float"},
+    }
+    payload = {"stations": [bad_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    keys = [k for k, _ in result]
+    assert "BAD_LON" not in keys
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — None coordinate check (line 407)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_station_with_none_geo_lat() -> None:
+    """async_list_stations skips a station whose geo.lat is None."""
+    none_lat_station = {
+        **_BASE_STATION,
+        "key": "NONE_LAT",
+        "geo": {"lat": None, "lon": _LNG},
+    }
+    payload = {"stations": [none_lat_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    keys = [k for k, _ in result]
+    assert "NONE_LAT" not in keys
+    assert _STATION_KEY in keys
+
+
+async def test_async_list_stations_skips_station_with_none_geo_lon() -> None:
+    """async_list_stations skips a station whose geo.lon is None."""
+    none_lon_station = {
+        **_BASE_STATION,
+        "key": "NONE_LON",
+        "geo": {"lat": _LAT, "lon": None},
+    }
+    payload = {"stations": [none_lon_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    keys = [k for k, _ in result]
+    assert "NONE_LON" not in keys
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — display_name fallback branches (lines 422-427)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_display_name_company_only() -> None:
+    """async_list_stations uses company as display_name when name is empty."""
+    station = {
+        "key": "CO_ONLY",
+        "company": "OnlyCompany",
+        "name": "",
+        "bensin95": 190.0,
+        "diesel": 225.0,
+        "geo": {"lat": _LAT, "lon": _LNG},
+    }
+    payload = {"stations": [station]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert len(result) == 1
+    _, label = result[0]
+    assert "OnlyCompany" in label
+
+
+async def test_async_list_stations_display_name_name_only() -> None:
+    """async_list_stations uses name as display_name when company is empty."""
+    station = {
+        "key": "NAME_ONLY",
+        "company": "",
+        "name": "OnlyName",
+        "bensin95": 190.0,
+        "diesel": 225.0,
+        "geo": {"lat": _LAT, "lon": _LNG},
+    }
+    payload = {"stations": [station]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert len(result) == 1
+    _, label = result[0]
+    assert "OnlyName" in label
+
+
+async def test_async_list_stations_display_name_falls_back_to_key() -> None:
+    """async_list_stations uses station key as display_name when both name and company are empty."""
+    station = {
+        "key": "KEY_FALLBACK",
+        "company": "",
+        "name": "",
+        "bensin95": 190.0,
+        "diesel": 225.0,
+        "geo": {"lat": _LAT, "lon": _LNG},
+    }
+    payload = {"stations": [station]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert len(result) == 1
+    _, label = result[0]
+    assert "KEY_FALLBACK" in label
+
+
+# ---------------------------------------------------------------------------
+# _fetch_all_stations — non-dict payload raises ProviderError (line 478)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_raises_provider_error_when_payload_is_list() -> None:
+    """_fetch_all_stations raises ProviderError when API returns a JSON list."""
+    resp = _make_mock_response(200, json_data=[{"key": "AT_001"}])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+
+    with pytest.raises(ProviderError, match="unexpected format"):
+        await provider.async_fetch(session, _STATION_KEY)
+
+
+async def test_async_list_stations_returns_empty_when_payload_is_list() -> None:
+    """async_list_stations returns [] when API payload is a list (non-dict)."""
+    resp = _make_mock_response(200, json_data=[{"key": "AT_001"}])
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert result == []

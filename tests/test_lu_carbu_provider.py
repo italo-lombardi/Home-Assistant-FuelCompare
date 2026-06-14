@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aiohttp import ClientError, ClientResponseError
@@ -931,3 +931,215 @@ def test_provider_registered_in_registry() -> None:
 
     assert "lu_carbu" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["lu_carbu"] is LuCarbuProvider
+
+
+# ---------------------------------------------------------------------------
+# async_fetch_station_name — generic exception path (lines 354-355)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_returns_none_on_generic_exception() -> None:
+    """async_fetch_station_name returns None when _fetch_fuel_stations raises unexpectedly (lines 354-355)."""
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+
+    async def _raise(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("unexpected internal error")
+
+    with patch.object(provider, "_fetch_fuel_stations", side_effect=_raise):
+        session = MagicMock()
+        name = await provider.async_fetch_station_name(session, _STATION_ID)
+
+    assert name is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — generic exception from asyncio.gather (lines 412-414)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_on_gather_exception() -> None:
+    """async_list_stations returns [] when asyncio.gather raises unexpectedly (lines 412-414)."""
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    session = MagicMock()
+
+    with patch(
+        "custom_components.fuelcompare_ie.providers.lu_carbu.asyncio.gather",
+        side_effect=RuntimeError("unexpected gather failure"),
+    ):
+        results = await provider.async_list_stations(
+            session, lat=49.617, lng=6.076, radius_km=10.0
+        )
+
+    assert results == []
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — sp95 dedup: same station already in diesel (line 433)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_deduplicates_sp95_station_keeps_diesel_entry() -> (
+    None
+):
+    """async_list_stations keeps diesel entry when same station also appears in sp95 (line 433)."""
+    diesel_station = {**_STATION_STRASSEN, "price": "1.753"}
+    sp95_station = {**_STATION_STRASSEN, "price": "1.733"}
+
+    resp_diesel = _make_mock_response(200, body=[diesel_station])
+    resp_sp95 = _make_mock_response(200, body=[sp95_station])
+
+    session = MagicMock()
+    session.get = MagicMock(side_effect=[resp_diesel, resp_sp95])
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    results = await provider.async_list_stations(
+        session, lat=49.617, lng=6.076, radius_km=10.0
+    )
+
+    # Station should appear exactly once
+    station_ids = [sid for sid, _label in results]
+    assert station_ids.count(_STATION_ID) == 1
+    # Label should contain Diesel price
+    _sid, label = results[0]
+    assert "Diesel" in label
+
+
+async def test_async_list_stations_sp95_only_station_added_to_merged() -> None:
+    """async_list_stations adds sp95-only station to merged dict (line 433)."""
+    # Diesel returns a different station; sp95 returns _STATION_KIRCHBERG (unique)
+    diesel_station = {**_STATION_STRASSEN, "price": "1.753"}
+    sp95_only_station = {**_STATION_KIRCHBERG, "price": "1.733"}
+
+    resp_diesel = _make_mock_response(200, body=[diesel_station])
+    resp_sp95 = _make_mock_response(200, body=[sp95_only_station])
+
+    session = MagicMock()
+    session.get = MagicMock(side_effect=[resp_diesel, resp_sp95])
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    results = await provider.async_list_stations(
+        session, lat=49.617, lng=6.076, radius_km=10.0
+    )
+
+    # Both stations should be present
+    station_ids = [sid for sid, _label in results]
+    assert _STATION_ID in station_ids
+    assert _OTHER_ID in station_ids
+
+
+# ---------------------------------------------------------------------------
+# _fetch_fuel_stations — dict payload with known / unknown keys (lines 529-534)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_fuel_stations_returns_list_under_stations_key() -> None:
+    """_fetch_fuel_stations unwraps payload dict with 'stations' key (lines 529-533)."""
+    wrapped = {"stations": [_STATION_STRASSEN]}
+    resp = _make_mock_response(200, body=wrapped)
+    session = _make_session(resp)
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    result = await provider._fetch_fuel_stations(
+        session,
+        fuel_key="diesel",
+        fuel_id=_FUEL_IDS["diesel"],
+        lat=49.617,
+        lng=6.076,
+        radius_km=10.0,
+    )
+
+    assert result == [_STATION_STRASSEN]
+
+
+async def test_fetch_fuel_stations_returns_list_under_data_key() -> None:
+    """_fetch_fuel_stations unwraps payload dict with 'data' key (lines 529-533)."""
+    wrapped = {"data": [_STATION_STRASSEN]}
+    resp = _make_mock_response(200, body=wrapped)
+    session = _make_session(resp)
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    result = await provider._fetch_fuel_stations(
+        session,
+        fuel_key="diesel",
+        fuel_id=_FUEL_IDS["diesel"],
+        lat=49.617,
+        lng=6.076,
+        radius_km=10.0,
+    )
+
+    assert result == [_STATION_STRASSEN]
+
+
+async def test_fetch_fuel_stations_returns_empty_for_unwrappable_dict() -> None:
+    """_fetch_fuel_stations returns [] when dict payload has no known list key (line 534)."""
+    wrapped = {"unknown_key": [_STATION_STRASSEN]}
+    resp = _make_mock_response(200, body=wrapped)
+    session = _make_session(resp)
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    result = await provider._fetch_fuel_stations(
+        session,
+        fuel_key="diesel",
+        fuel_id=_FUEL_IDS["diesel"],
+        lat=49.617,
+        lng=6.076,
+        radius_km=10.0,
+    )
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — address assembly branches (lines 562-567)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_address_street_only() -> None:
+    """_build_station_data uses street alone when city is absent (lines 562-563)."""
+    meta = {
+        "name": "Test Station",
+        "brand": "BP",
+        "address": "123 Rue de la Paix",
+        "city": None,
+        "lat": "49.617",
+        "lng": "6.076",
+        "updated": None,
+    }
+    provider = LuCarbuProvider(_STATION_ID)
+    data = provider._build_station_data(_STATION_ID, meta, {})
+
+    assert data["address"] == "123 Rue de la Paix"
+
+
+def test_build_station_data_address_city_only() -> None:
+    """_build_station_data uses city alone when street is absent (lines 564-565)."""
+    meta = {
+        "name": "Test Station",
+        "brand": "BP",
+        "address": None,
+        "city": "Luxembourg",
+        "lat": "49.617",
+        "lng": "6.076",
+        "updated": None,
+    }
+    provider = LuCarbuProvider(_STATION_ID)
+    data = provider._build_station_data(_STATION_ID, meta, {})
+
+    assert data["address"] == "Luxembourg"
+
+
+def test_build_station_data_address_none_when_both_missing() -> None:
+    """_build_station_data sets address to None when both street and city are absent (lines 566-567)."""
+    meta = {
+        "name": "Test Station",
+        "brand": "BP",
+        "address": None,
+        "city": None,
+        "lat": "49.617",
+        "lng": "6.076",
+        "updated": None,
+    }
+    provider = LuCarbuProvider(_STATION_ID)
+    data = provider._build_station_data(_STATION_ID, meta, {})
+
+    assert data["address"] is None

@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.al_fuel import (
@@ -779,3 +779,55 @@ def test_provider_registered_in_registry() -> None:
 
     assert "al_fuel" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["al_fuel"] is AlFuelProvider
+
+
+# ---------------------------------------------------------------------------
+# New coverage: lines 297-298, 336-337, 382, 388
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_fetch_html_returns_none_on_client_response_error() -> None:
+    """_fetch_html returns None when raise_for_status raises ClientResponseError (lines 296-298)."""
+    err = ClientResponseError(request_info=None, history=(), status=503)
+    resp = _make_mock_response(503, raise_on_raise_for_status=err)
+    session = _make_session(resp)
+
+    provider = _default_provider()
+    result = await provider._fetch_html(session, _PRIMARY_URL)
+
+    assert result is None
+
+
+def test_extract_price_returns_none_when_float_conversion_fails() -> None:
+    """_extract_price_from_cell returns None when float() conversion raises ValueError (lines 335-337)."""
+    from unittest.mock import patch
+
+    mock_match = MagicMock()
+    mock_match.group.return_value = "not-a-float"
+
+    with patch(
+        "custom_components.fuelcompare_ie.providers.al_fuel._PRICE_RE"
+    ) as mock_re:
+        mock_re.search.return_value = mock_match
+        result = _extract_price_from_cell("<td>1.809</td>")
+
+    assert result is None
+
+
+def test_parse_albania_row_skips_row_with_too_few_cells() -> None:
+    """_parse_albania_row skips a row that contains 'Albania' but has < 2 cells (line 382)."""
+    html = "<table><tr><td>Albania</td></tr></table>"
+    result = _parse_albania_row(html)
+    assert result is None
+
+
+def test_parse_albania_row_skips_row_when_albania_not_in_first_cell() -> None:
+    """_parse_albania_row skips a row where 'Albania' appears in a non-first cell (line 388)."""
+    html = (
+        "<table>"
+        "<tr><td>SomeCountry</td><td>Albania average 1.809</td><td>1.955</td></tr>"
+        "</table>"
+    )
+    result = _parse_albania_row(html)
+    assert result is None

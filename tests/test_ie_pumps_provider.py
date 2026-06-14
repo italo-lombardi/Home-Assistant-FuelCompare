@@ -653,3 +653,224 @@ def test_provider_registered_in_registry() -> None:
 
     assert "ie_pumps" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["ie_pumps"] is IePumpsProvider
+
+
+# ---------------------------------------------------------------------------
+# 14. _parse_xml — station missing ID is skipped (line 447)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_xml_skips_station_without_id() -> None:
+    """_parse_xml skips <station> elements that have no ID or id attribute."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station Lat="53.0" Lng="-7.0"
+           name="No ID Station" brand="" addr1="" addr2=""
+           price="170.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Midlands" County="Offaly" />
+  <station ID="7777" Lat="53.0" Lng="-7.0"
+           name="Has ID" brand="" addr1="" addr2=""
+           price="170.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Midlands" County="Offaly" />
+</stations>
+"""
+    stations = _parse_xml(xml, "diesel")
+    assert stations is not None
+    assert len(stations) == 1
+    assert stations[0]["ID"] == "7777"
+
+
+# ---------------------------------------------------------------------------
+# 15. _parse_xml — addr1 only, no addr2 (line 465)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_xml_address_uses_addr1_when_addr2_empty() -> None:
+    """_parse_xml uses addr1 alone when addr2 is absent."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="8001" Lat="53.0" Lng="-7.0"
+           name="Addr1 Only" brand="" addr1="High Street" addr2=""
+           price="172.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Midlands" County="Offaly" />
+</stations>
+"""
+    stations = _parse_xml(xml, "diesel")
+    assert stations is not None
+    assert stations[0]["address"] == "High Street"
+
+
+# ---------------------------------------------------------------------------
+# 16. _build_station_data — price <= 0 returns None (line 550)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_negative_price_becomes_none() -> None:
+    """_build_station_data treats a negative price_eur value as None."""
+    diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
+    assert diesel_stations
+    record = _find_station(diesel_stations, _STATION_ID)
+    assert record
+    negative_price_record = {**record, "price_eur": -0.5}
+    data = _build_station_data(_STATION_ID, record, {"diesel": negative_price_record})
+
+    assert data["diesel"] is None
+
+
+def test_build_station_data_explicit_none_price_becomes_none() -> None:
+    """_build_station_data returns None when price_eur key is explicitly None (line 550)."""
+    diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
+    assert diesel_stations
+    record = _find_station(diesel_stations, _STATION_ID)
+    assert record
+    none_price_record = {**record, "price_eur": None}
+    data = _build_station_data(_STATION_ID, record, {"diesel": none_price_record})
+
+    assert data["diesel"] is None
+
+
+# ---------------------------------------------------------------------------
+# 17. async_fetch_station_name — generic exception path (lines 253-254)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_returns_none_on_generic_exception() -> None:
+    """async_fetch_station_name returns None when _fetch_stations raises unexpectedly."""
+    provider = IePumpsProvider(_STATION_ID)
+    provider._fetch_stations = AsyncMock(side_effect=RuntimeError("unexpected failure"))  # type: ignore[method-assign]
+
+    session = MagicMock()
+    name = await provider.async_fetch_station_name(session, _STATION_ID)
+
+    assert name is None
+
+
+# ---------------------------------------------------------------------------
+# 18. async_list_stations — generic exception path (lines 297-299)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_on_generic_exception() -> None:
+    """async_list_stations returns [] when _fetch_stations raises unexpectedly."""
+    provider = IePumpsProvider(_STATION_ID)
+    provider._fetch_stations = AsyncMock(
+        side_effect=RuntimeError("unexpected gather failure")
+    )  # type: ignore[method-assign]
+
+    session = MagicMock()
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=50.0
+    )
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# 19. async_list_stations — petrol-only station not in diesel → merge (line 318)
+# ---------------------------------------------------------------------------
+
+_PETROL_ONLY_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="1234" Lat="53.3498" Lng="-6.2603"
+           name="Test Station" brand="Circle K"
+           addr1="Main Street" addr2="Dublin"
+           price="175.9" fuel="petrol" trend="down"
+           dateupdated="2025-05-20 09:00:00" dateupdatedshort="May 20 2025"
+           Updater="user1" Zone="Dublin" County="Dublin" />
+  <station ID="6666" Lat="53.34" Lng="-6.26"
+           name="Petrol Only" brand="Maxol"
+           addr1="North Road" addr2="Dublin"
+           price="176.0" fuel="petrol" trend="stable"
+           dateupdated="2025-06-01 08:00:00" dateupdatedshort="Jun 1 2025"
+           Updater="user3" Zone="Dublin" County="Dublin" />
+</stations>
+"""
+
+
+async def test_async_list_stations_includes_petrol_only_station() -> None:
+    """async_list_stations merges petrol-only station not present in diesel list."""
+    diesel_resp = _make_mock_response(200, _EMPTY_XML)
+    petrol_resp = _make_mock_response(200, _PETROL_ONLY_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID)
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=5.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "6666" in station_ids
+
+
+# ---------------------------------------------------------------------------
+# 20. async_list_stations — station missing coordinates is skipped (line 330)
+# ---------------------------------------------------------------------------
+
+_NO_COORD_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="3333" name="No Coords" brand="Shell"
+           addr1="Nowhere" addr2=""
+           price="171.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+  <station ID="4444" Lat="53.3498" Lng="-6.2603"
+           name="Has Coords" brand="Esso"
+           addr1="Main Road" addr2="Dublin"
+           price="172.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+</stations>
+"""
+
+
+async def test_async_list_stations_skips_station_without_coordinates() -> None:
+    """async_list_stations skips stations that have no lat/lng coordinates."""
+    diesel_resp = _make_mock_response(200, _NO_COORD_XML)
+    petrol_resp = _make_mock_response(200, _EMPTY_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID)
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=5.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "3333" not in station_ids
+    assert "4444" in station_ids
+
+
+# ---------------------------------------------------------------------------
+# 21. async_list_stations — no-price station gets sort_key 9999 (lines 353-354)
+# ---------------------------------------------------------------------------
+
+_NO_PRICE_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="5500" Lat="53.3498" Lng="-6.2603"
+           name="No Price" brand="BP"
+           addr1="Some Street" addr2="Dublin"
+           price="0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+  <station ID="5501" Lat="53.3498" Lng="-6.2603"
+           name="Has Price" brand="Circle K"
+           addr1="Other Street" addr2="Dublin"
+           price="171.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+</stations>
+"""
+
+
+async def test_async_list_stations_sorts_no_price_station_last() -> None:
+    """async_list_stations places stations with no price data after priced ones."""
+    diesel_resp = _make_mock_response(200, _NO_PRICE_XML)
+    petrol_resp = _make_mock_response(200, _EMPTY_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID)
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=5.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert station_ids.index("5501") < station_ids.index("5500")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time as _time
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -1246,3 +1247,111 @@ def test_parse_price_pence_boundary_300_1_rejected() -> None:
     assert _MAX_PENCE_PER_LITRE == pytest.approx(300.0)
     result = _parse_price_pence("300.1")
     assert result is None, "300.1 p/L exceeds the boundary and must be rejected"
+
+
+# ---------------------------------------------------------------------------
+# async_fetch — permanent closure raises ProviderError (line 224)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_raises_provider_error_on_permanent_closure() -> None:
+    """async_fetch raises ProviderError when the station is permanently closed."""
+    closed_row = {**_BASE_ROW, "forecourts.permanent_closure": "true"}
+    resp = _make_csv_response(closed_row)
+    session = _make_session(resp)
+    provider = GbFuelfinderProvider(_NODE_ID)
+    with pytest.raises(ProviderError, match="permanently closed"):
+        await provider.async_fetch(session, _NODE_ID)
+
+
+# ---------------------------------------------------------------------------
+# async_fetch — temporary closure sets is_open=False (lines 227-228)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_temporary_closure_sets_is_open_false() -> None:
+    """async_fetch sets is_open=False and does not raise for a temporarily closed station."""
+    temp_closed_row = {**_BASE_ROW, "forecourts.temporary_closure": "true"}
+    resp = _make_csv_response(temp_closed_row)
+    session = _make_session(resp)
+    provider = GbFuelfinderProvider(_NODE_ID)
+    data = await provider.async_fetch(session, _NODE_ID)
+    assert data["is_open"] is False
+
+
+# ---------------------------------------------------------------------------
+# _fetch_csv — in-process cache hit logs and skips HTTP (lines 339-340)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_csv_serves_from_in_process_cache_within_ttl() -> None:
+    """_fetch_csv returns cached CSV text and skips HTTP when cache is fresh."""
+    csv_text = _make_csv_text(_BASE_ROW)
+    # Set cache with a timestamp so recent it will never be expired.
+    GbFuelfinderProvider._csv_cache = csv_text
+    GbFuelfinderProvider._csv_cache_ts = _time.monotonic()
+
+    session = MagicMock()
+    provider = GbFuelfinderProvider(_NODE_ID)
+    rows = await provider._fetch_csv(session)
+
+    session.get.assert_not_called()
+    assert any(r.get("forecourts.node_id", "").strip() == _NODE_ID for r in rows)
+
+
+# ---------------------------------------------------------------------------
+# _fetch_csv — HTTP 304 Not Modified refreshes cache timestamp (lines 350-354)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_csv_304_not_modified_uses_cached_text_and_refreshes_ts() -> None:
+    """_fetch_csv on HTTP 304 reuses cached CSV and updates _csv_cache_ts."""
+    csv_text = _make_csv_text(_BASE_ROW)
+    # Cache has content but expired timestamp so HTTP request is made.
+    GbFuelfinderProvider._csv_cache = csv_text
+    GbFuelfinderProvider._csv_cache_ts = 0.0
+
+    resp = _make_mock_response(304, b"")
+    session = _make_session(resp)
+    provider = GbFuelfinderProvider(_NODE_ID)
+
+    before = _time.monotonic()
+    rows = await provider._fetch_csv(session)
+    after = _time.monotonic()
+
+    assert any(r.get("forecourts.node_id", "").strip() == _NODE_ID for r in rows)
+    assert before <= GbFuelfinderProvider._csv_cache_ts <= after + 1.0
+
+
+# ---------------------------------------------------------------------------
+# _parse_row — ValueError in datetime.fromisoformat is silently ignored (lines 461-462)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_row_ignores_invalid_iso_timestamp_in_price_submission() -> None:
+    """_parse_row silently skips a malformed ISO string returned by _parse_js_timestamp."""
+    from unittest.mock import patch
+
+    call_count = {"n": 0}
+    original_parse_js = _parse_js_timestamp
+
+    def fake_parse_js(ts: str | None) -> str | None:
+        result = original_parse_js(ts)
+        call_count["n"] += 1
+        # On the first call (E10 timestamp) return a string that looks non-None
+        # but that datetime.fromisoformat cannot parse, triggering lines 461-462.
+        if call_count["n"] == 1 and result is not None:
+            return "not-a-valid-iso-string"
+        return result
+
+    with patch(
+        "custom_components.fuelcompare_ie.providers.gb_fuelfinder._parse_js_timestamp",
+        side_effect=fake_parse_js,
+    ):
+        result = _parse_row(_BASE_ROW)
+
+    # Reaching here without ValueError means the except block at lines 461-462
+    # executed correctly and swallowed the error.
+    assert isinstance(result, dict)
+    # lastupdated should still be set from one of the other valid timestamps.
+    assert result["lastupdated"] is not None

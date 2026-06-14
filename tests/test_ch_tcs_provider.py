@@ -957,3 +957,100 @@ async def test_async_list_stations_deduplicates_by_station_id() -> None:
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
     ids = [sid for sid, _ in result]
     assert ids.count(_STATION_ID) == 1, "Duplicate station should be de-duplicated"
+
+
+# ---------------------------------------------------------------------------
+# New tests — covering lines 287-288, 332-334, 343, 347-348, 422, 506
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_logs_debug_on_generic_exception() -> None:
+    """Lines 287-288: async_fetch_station_name catches generic exceptions and returns None."""
+    from unittest.mock import patch
+
+    p = _provider()
+    with patch.object(
+        p,
+        "_fetch_all_fuels",
+        side_effect=RuntimeError("unexpected boom"),
+    ):
+        session = MagicMock()
+        name = await p.async_fetch_station_name(session, _STATION_ID)
+    assert name is None
+
+
+async def test_async_list_stations_returns_empty_on_generic_exception() -> None:
+    """Lines 332-334: async_list_stations catches generic exceptions, logs, and returns []."""
+    from unittest.mock import patch
+
+    p = _provider()
+    with patch.object(
+        p,
+        "_fetch_all_fuels",
+        side_effect=RuntimeError("unexpected boom"),
+    ):
+        session = MagicMock()
+        result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+    assert result == []
+
+
+async def test_async_list_stations_skips_station_with_missing_latitude() -> None:
+    """Line 343: stations with missing latitude are skipped (continue)."""
+    no_lat = {**_BASE_STATION, "id": "no-lat-station", "latitude": None}
+    payload = {"data": [no_lat]}
+    session = _make_session_always(payload)
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+    ids = {sid for sid, _ in result}
+    assert "no-lat-station" not in ids
+
+
+async def test_async_list_stations_skips_station_with_missing_longitude() -> None:
+    """Line 343: stations with missing longitude are skipped (continue)."""
+    no_lng = {**_BASE_STATION, "id": "no-lng-station", "longitude": None}
+    payload = {"data": [no_lng]}
+    session = _make_session_always(payload)
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+    ids = {sid for sid, _ in result}
+    assert "no-lng-station" not in ids
+
+
+async def test_async_list_stations_skips_station_with_invalid_coordinates() -> None:
+    """Lines 347-348: stations with non-numeric coordinates are skipped (ValueError/TypeError)."""
+    bad_coords = {
+        **_BASE_STATION,
+        "id": "bad-coords",
+        "latitude": "not-a-float",
+        "longitude": "also-bad",
+    }
+    payload = {"data": [bad_coords]}
+    session = _make_session_always(payload)
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+    ids = {sid for sid, _ in result}
+    assert "bad-coords" not in ids
+
+
+async def test_async_list_stations_skips_station_with_no_id() -> None:
+    """Line 422: stations with missing/falsy id are skipped (continue), others are returned."""
+    no_id = {**_BASE_STATION, "id": None}
+    payload = {"data": [no_id, _BASE_STATION]}
+    session = _make_session_always(payload)
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+    ids = {sid for sid, _ in result}
+    # The real station is still returned; the id-less one is silently skipped
+    assert _STATION_ID in ids
+
+
+async def test_async_fetch_bbox_returns_empty_list_on_malformed_data_field() -> None:
+    """Line 506: _fetch_bbox returns [] when payload.data is a non-list (malformed response)."""
+    # payload.data is a dict, not a list — triggers the isinstance(data, list) guard
+    malformed_payload = {"data": {"unexpected": "object"}}
+    session = _make_session_always(malformed_payload)
+    p = _provider()
+    # async_fetch will not raise; the malformed bbox results contribute nothing
+    # We can verify via async_list_stations: no stations should appear
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+    assert result == []

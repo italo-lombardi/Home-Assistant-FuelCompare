@@ -431,3 +431,165 @@ def test_is_open_legacy_24_hours() -> None:
     from custom_components.fuelcompare_ie.binary_sensor import _is_open
 
     assert _is_open("Open 24 hours") is True
+
+
+# ---------------------------------------------------------------------------
+# _is_open_osm — OSM parser robustness (lines 127-128, 132-133, 143)
+# ---------------------------------------------------------------------------
+
+
+def test_is_open_osm_skips_rule_with_fewer_than_two_times() -> None:
+    """Rule with only one time token is skipped; returns None when no valid rule (line 128)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # 'mo-su 07:00' has only one HH:MM token — rule is skipped, None returned
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open_osm("mo-su 07:00")
+    assert result is None
+
+
+def test_is_open_osm_skips_rule_with_invalid_hour_value() -> None:
+    """Rule with hour=25 raises ValueError, rule is skipped (lines 132-133)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # 25:00-23:00 — hours[0] = '25' → dt_time(25, 0) raises ValueError → continue
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open_osm("mo-su 25:00-23:00")
+    assert result is None
+
+
+def test_is_open_osm_returns_none_when_no_rule_matches() -> None:
+    """Returns None when day does not match any rule (line 143)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # Only Saturday rule; simulate Monday (idx=0) -> no match -> None
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open_osm("sa 09:00-18:00")
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# _is_open_osm — midnight crossing (line 140)
+# ---------------------------------------------------------------------------
+
+
+def test_is_open_osm_midnight_crossing_returns_true_after_open() -> None:
+    """Overnight rule (22:00-06:00) returns True at 23:30 (line 140)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(23, 30)
+        result = _is_open_osm("mo-su 22:00-06:00")
+    assert result is True
+
+
+def test_is_open_osm_midnight_crossing_returns_true_before_close() -> None:
+    """Overnight rule (22:00-06:00) returns True at 03:00 (line 140)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(3, 0)
+        result = _is_open_osm("mo-su 22:00-06:00")
+    assert result is True
+
+
+def test_is_open_osm_midnight_crossing_returns_false_between_close_and_open() -> None:
+    """Overnight rule (22:00-06:00) returns False at 10:00 (line 140)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open_osm("mo-su 22:00-06:00")
+    assert result is False
+
+
+# ---------------------------------------------------------------------------
+# _day_matches — empty day spec, wrapped range, single day (lines 149, 159-164)
+# ---------------------------------------------------------------------------
+
+
+def test_day_matches_empty_spec_returns_true() -> None:
+    """Empty day_spec returns True for any day index (line 149)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    assert _day_matches("", 0) is True
+    assert _day_matches("", 6) is True
+
+
+def test_day_matches_wrapped_range_fri_to_mon() -> None:
+    """Wrapped range 'fr-mo' (4-0) matches Friday and Monday (line 159)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    assert _day_matches("fr-mo", 4) is True  # Friday (idx=4)
+    assert _day_matches("fr-mo", 0) is True  # Monday (idx=0)
+    assert _day_matches("fr-mo", 2) is False  # Wednesday (idx=2) outside wrap
+
+
+def test_day_matches_single_day_spec_matches_exact_day() -> None:
+    """Single day 'sa' matches only Saturday (idx=5) (lines 160-163)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    assert _day_matches("sa", 5) is True
+    assert _day_matches("sa", 0) is False
+
+
+def test_day_matches_unparseable_spec_returns_true() -> None:
+    """Unparseable day spec returns True as fallback (line 164)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    assert _day_matches("xx-yy", 3) is True
+
+
+# ---------------------------------------------------------------------------
+# StationIsOpenBinarySensor — OSM string priority (line 252)
+# ---------------------------------------------------------------------------
+
+
+def test_get_today_hours_str_returns_osm_string_directly() -> None:
+    """_get_today_hours_str returns raw OSM string when opening_hours present (line 252)."""
+    sensor = _make_binary_sensor({"opening_hours": "Mo-Su 07:00-23:00"})
+    result = sensor._get_today_hours_str()
+    assert result == "Mo-Su 07:00-23:00"
+
+
+# ---------------------------------------------------------------------------
+# StationIsOpenBinarySensor — pre-computed is_open bool priority (line 269)
+# ---------------------------------------------------------------------------
+
+
+def test_is_on_returns_direct_bool_true_from_data() -> None:
+    """is_on returns True directly when data['is_open'] is True (line 269)."""
+    sensor = _make_binary_sensor({"is_open": True})
+    assert sensor.is_on is True
+
+
+def test_is_on_returns_direct_bool_false_from_data() -> None:
+    """is_on returns False directly when data['is_open'] is False (line 269)."""
+    sensor = _make_binary_sensor({"is_open": False})
+    assert sensor.is_on is False
+
+
+# ---------------------------------------------------------------------------
+# FacilityBinarySensor — None key returns None not False (line 392)
+# ---------------------------------------------------------------------------
+
+
+def test_facility_sensor_is_on_none_when_key_is_none_value() -> None:
+    """is_on returns None (not False) when cap_key maps to None in data (line 392)."""
+    sensor = _make_facility_sensor("has_atm", {"has_atm": None})
+    assert sensor.is_on is None

@@ -894,13 +894,6 @@ class BeCarbuProvider(BaseProvider):
             "source_station_id": station_id,
         }
 
-        # Extra fuel types (not in CAPABILITIES but useful as pass-through attrs)
-        data["diesel_b10"] = prices.get("diesel_b10")  # type: ignore[typeddict-unknown-key]
-        data["diesel_hvo"] = prices.get("diesel_hvo")  # type: ignore[typeddict-unknown-key]
-        data["lng_fuel"] = prices.get("lng_fuel")  # type: ignore[typeddict-unknown-key]
-        data["hydrogen"] = prices.get("hydrogen")  # type: ignore[typeddict-unknown-key]
-        data["electric"] = prices.get("electric")  # type: ignore[typeddict-unknown-key]
-
         _LOGGER.debug(
             "BeCarbu: assembled data for station %s: diesel=%s unleaded=%s "
             "premium_unleaded=%s lpg=%s cng=%s",

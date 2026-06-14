@@ -1146,3 +1146,134 @@ async def test_async_list_stations_includes_zero_coordinate_station() -> None:
     assert "zero-island" in uids, (
         "Station at lat=0.0/lng=0.0 must not be dropped by falsy check"
     )
+
+
+# ---------------------------------------------------------------------------
+# New coverage tests: lines 356-358, 405-407, 423, 427-428, 511-514, 587,
+# 667-668, 673-674
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_station_name_returns_none_on_generic_exception() -> None:
+    """async_fetch_station_name returns None when _fetch_stations raises a generic exception (lines 356-358)."""
+    provider = _make_provider()
+
+    # Patch _fetch_stations directly so the exception bypasses its own try/except
+    # and propagates to the caller's except block at lines 356-358.
+    provider._fetch_stations = AsyncMock(side_effect=RuntimeError("unexpected boom"))
+
+    session = MagicMock()
+    name = await provider.async_fetch_station_name(session, _STATION_UUID)
+
+    assert name is None
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_returns_empty_on_generic_exception() -> None:
+    """async_list_stations returns [] when _fetch_stations raises a generic exception (lines 405-407)."""
+    provider = _make_provider()
+
+    # Patch _fetch_stations directly so the exception bypasses its own try/except
+    # and propagates to the caller's except block at lines 405-407.
+    provider._fetch_stations = AsyncMock(side_effect=RuntimeError("unexpected boom"))
+
+    session = MagicMock()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert result == []
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_skips_station_with_no_gps() -> None:
+    """async_list_stations skips stations whose location has no lat/lng (line 423)."""
+    no_gps_station = {
+        **_BASE_STATION,
+        "id": "no-gps",
+        "location": {"lat": None, "lng": None},
+    }
+    payload = {"stations": [no_gps_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    ids = [uid for uid, _ in result]
+    assert "no-gps" not in ids
+    assert _STATION_UUID in ids
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_skips_station_with_malformed_coords() -> None:
+    """async_list_stations skips stations with non-numeric lat/lng strings (lines 427-428)."""
+    bad_coords_station = {
+        **_BASE_STATION,
+        "id": "bad-coords",
+        "location": {"lat": "not-a-number", "lng": "also-bad"},
+    }
+    payload = {"stations": [bad_coords_station, _BASE_STATION]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    ids = [uid for uid, _ in result]
+    assert "bad-coords" not in ids
+    assert _STATION_UUID in ids
+
+
+@pytest.mark.asyncio
+async def test_fetch_stations_returns_none_on_http_error() -> None:
+    """_fetch_stations returns None when raise_for_status raises ClientResponseError (lines 511-514)."""
+    from aiohttp import ClientResponseError
+
+    mock_resp = AsyncMock()
+    mock_resp.status = 500
+    mock_resp.raise_for_status = MagicMock(
+        side_effect=ClientResponseError(request_info=None, history=(), status=500)
+    )
+    mock_resp.__aenter__ = AsyncMock(return_value=mock_resp)
+    mock_resp.__aexit__ = AsyncMock(return_value=False)
+    session = MagicMock()
+    session.get = MagicMock(return_value=mock_resp)
+
+    provider = _make_provider()
+    result = await provider._fetch_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    assert result is None
+
+
+def test_extract_prices_skips_record_with_none_fuel_type() -> None:
+    """_extract_prices skips price records where fuelType is None (line 587)."""
+    prices = _extract_prices(
+        [
+            {"fuelType": None, "price": "20.90"},
+            {"fuelType": "DIESEL", "price": "21.00"},
+        ]
+    )
+    assert prices.get("diesel") == pytest.approx(21.00)
+    assert len(prices) == 1
+
+
+def test_parse_station_lat_none_on_non_numeric_lat() -> None:
+    """_parse_station sets latitude to None when lat is non-numeric (lines 667-668)."""
+    station = {**_BASE_STATION, "location": {"lat": "bad-lat", "lng": 10.7528}}
+    result = _parse_station(station)
+    assert result["latitude"] is None
+    assert result["longitude"] == pytest.approx(10.7528)
+
+
+def test_parse_station_lng_none_on_non_numeric_lng() -> None:
+    """_parse_station sets longitude to None when lng is non-numeric (lines 673-674)."""
+    station = {**_BASE_STATION, "location": {"lat": 59.9110, "lng": "bad-lng"}}
+    result = _parse_station(station)
+    assert result["latitude"] == pytest.approx(59.9110)
+    assert result["longitude"] is None

@@ -542,3 +542,24 @@ async def test_async_list_stations_returns_empty_on_404() -> None:
     result = await provider.async_list_stations(session)
 
     assert result == []
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_fallback_label_when_prices_unavailable() -> None:
+    """async_list_stations returns fallback label when both cap prices are None."""
+    payload_no_prices = {
+        **_FULL_PAYLOAD,
+        "current": {**_CURRENT_PRICES, "natural95_cap": None, "diesel_cap": None},
+    }
+    resp = _make_mock_response(200, json_data=payload_no_prices)
+    session = _make_session(resp)
+
+    provider = CzCcsProvider()
+    result = await provider.async_list_stations(session)
+
+    assert len(result) == 1
+    station_id, label = result[0]
+    assert station_id == _NATIONAL_STATION_ID
+    assert "Czech Republic" in label
+    assert "Natural95" not in label
+    assert "Diesel" not in label

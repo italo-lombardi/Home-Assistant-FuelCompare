@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import io
-from unittest.mock import AsyncMock, MagicMock
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.mt_fuel import (
@@ -645,3 +646,165 @@ def test_provider_registered_in_registry() -> None:
 
     assert "mt_fuel" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["mt_fuel"] is MtFuelProvider
+
+
+# ---------------------------------------------------------------------------
+# New coverage tests — lines 218-219, 354-356, 365-371, 405-406, 495-500,
+# 518, 521
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_raises_provider_error_on_parse_exception() -> None:
+    """async_fetch wraps XLSX parse exceptions in ProviderError (lines 218-219)."""
+    provider = MtFuelProvider()
+    provider._cached_xlsx_url = _FALLBACK_XLSX_URL
+
+    xlsx_resp = _make_mock_response(200, body=b"not-valid-xlsx-bytes", is_binary=True)
+    session = _make_session(xlsx_resp)
+
+    with pytest.raises(ProviderError, match="MtFuelProvider: failed to parse"):
+        await provider.async_fetch(session, "MT")
+
+
+@pytest.mark.asyncio
+async def test_scrape_xlsx_url_returns_none_on_network_error() -> None:
+    """_scrape_xlsx_url returns None when session.get raises (lines 354-356)."""
+    provider = MtFuelProvider()
+    session = MagicMock()
+    session.get = MagicMock(side_effect=OSError("network failure"))
+
+    result = await provider._scrape_xlsx_url(session)
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_scrape_xlsx_url_fallback_download_href_xlsx_in_href() -> None:
+    """_scrape_xlsx_url uses fallback pattern when href contains 'xlsx' (lines 365-368)."""
+    provider = MtFuelProvider()
+    html = (
+        '<a href="/document/download/abcdef01-1234-5678-9abc-def012345678_en'
+        '?filename=something.xlsx">download</a>'
+    )
+    page_resp = _make_mock_response(200, body=html.encode())
+    session = _make_session(page_resp)
+
+    result = await provider._scrape_xlsx_url(session)
+    assert result is not None
+    assert "abcdef01" in result
+
+
+@pytest.mark.asyncio
+async def test_scrape_xlsx_url_fallback_download_href_weekly_in_href() -> None:
+    """_scrape_xlsx_url uses fallback pattern when href contains 'Weekly' (lines 365-368)."""
+    provider = MtFuelProvider()
+    html = (
+        '<a href="/document/download/bbbbbbbb-1234-5678-9abc-def012345678_en'
+        '?filename=Weekly_bulletin">download</a>'
+    )
+    page_resp = _make_mock_response(200, body=html.encode())
+    session = _make_session(page_resp)
+
+    result = await provider._scrape_xlsx_url(session)
+    assert result is not None
+    assert "bbbbbbbb" in result
+
+
+@pytest.mark.asyncio
+async def test_download_xlsx_returns_none_on_client_response_error() -> None:
+    """_download_xlsx returns None on ClientResponseError (lines 404-406)."""
+    provider = MtFuelProvider()
+
+    request_info = MagicMock()
+    request_info.real_url = _FALLBACK_XLSX_URL
+    err = ClientResponseError(request_info, (), status=403, message="Forbidden")
+
+    session = MagicMock()
+    session.get = MagicMock(side_effect=err)
+
+    result = await provider._download_xlsx(session, _FALLBACK_XLSX_URL)
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_parse_malta_row_raises_import_error_when_openpyxl_missing() -> None:
+    """_parse_malta_row logs warning and re-raises ImportError when openpyxl absent (lines 495-500)."""
+    with patch.dict(sys.modules, {"openpyxl": None}):
+        with pytest.raises(ImportError):
+            await _parse_malta_row(b"irrelevant")
+
+
+@pytest.mark.asyncio
+async def test_parse_malta_row_skips_empty_rows() -> None:
+    """_parse_malta_row skips rows where 'not row' is True (line 518)."""
+    openpyxl = pytest.importorskip("openpyxl")
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    # Insert an empty row first, then the Malta row
+    ws.append([])  # empty row — triggers `if not row: continue`
+    ws.append(["Malta", 1340.0, 1210.0, 980.0, 800.0, 780.0, 1000.0])
+    buf = io.BytesIO()
+    wb.save(buf)
+    xlsx = buf.getvalue()
+
+    result = await _parse_malta_row(xlsx)
+    assert result is not None
+    assert result["petrol_95"] == pytest.approx(1.340)
+
+
+@pytest.mark.asyncio
+async def test_parse_malta_row_skips_rows_with_none_country_cell() -> None:
+    """_parse_malta_row skips rows where country_cell is None (line 521)."""
+    rows = [
+        [None, 9999.0, 9999.0, 9999.0, 9999.0, 9999.0, 9999.0],
+        ["Malta", 1340.0, 1210.0, 980.0, 800.0, 780.0, 1000.0],
+    ]
+    xlsx = _make_xlsx_bytes(rows)
+    result = await _parse_malta_row(xlsx)
+    assert result is not None
+    assert result["petrol_95"] == pytest.approx(1.340)
+
+
+@pytest.mark.asyncio
+async def test_scrape_xlsx_url_returns_none_when_no_matching_link() -> None:
+    """_scrape_xlsx_url returns None and logs debug when download link exists
+    but matches neither xlsx nor Weekly criteria (lines 370-371)."""
+    provider = MtFuelProvider()
+    # Matches _DOWNLOAD_HREF_PATTERN but not the xlsx/Weekly sub-check
+    html = (
+        '<a href="/document/download/cccccccc-1234-5678-9abc-def012345678_en'
+        '?filename=other_document.pdf">other</a>'
+    )
+    page_resp = _make_mock_response(200, body=html.encode())
+    session = _make_session(page_resp)
+
+    result = await provider._scrape_xlsx_url(session)
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# _parse_malta_row — empty row + None country_cell paths (lines 517-521)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_parse_malta_row_skips_empty_row_and_none_country_cell() -> None:
+    """_parse_malta_row skips empty rows (line 517-518) and None country cell (line 520-521)."""
+    from unittest.mock import MagicMock, patch
+
+    def _fake_iter_rows(values_only=False):
+        yield ()  # empty — triggers 'if not row: continue'
+        yield (None, 1340.0, 1210.0, 980.0, 800.0, 780.0, 1000.0)  # None country
+        yield ("Malta", 1340.0, 1210.0, 980.0, 800.0, 780.0, 1000.0)
+
+    mock_ws = MagicMock()
+    mock_ws.iter_rows = _fake_iter_rows
+    mock_wb = MagicMock()
+    mock_wb.worksheets = [mock_ws]
+    mock_wb.close = MagicMock()
+
+    with patch("openpyxl.load_workbook", return_value=mock_wb):
+        result = await _parse_malta_row(_malta_xlsx())
+
+    assert result is not None
+    assert result["petrol_95"] == pytest.approx(1.340)

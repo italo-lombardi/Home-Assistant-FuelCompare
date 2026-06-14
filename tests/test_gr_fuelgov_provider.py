@@ -920,3 +920,105 @@ def test_build_station_data_missing_price_is_none() -> None:
     assert data["unleaded"] is None
     assert data["premium_unleaded"] is None
     assert data["lpg"] is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — line 246 (empty entries after successful fetch)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_when_entries_empty_after_fetch() -> (
+    None
+):
+    """async_list_stations returns [] at line 246 when _fetch_payload returns payload with empty entries (line 246)."""
+    from unittest.mock import patch, AsyncMock as _AsyncMock
+
+    payload_empty_entries = {"data": {"date": _DATE, "entries": []}}
+
+    provider = GrFuelgovProvider()
+    with patch.object(
+        provider,
+        "_fetch_payload",
+        new=_AsyncMock(return_value=payload_empty_entries),
+    ):
+        results = await provider.async_list_stations(MagicMock())
+
+    assert results == []
+
+
+# ---------------------------------------------------------------------------
+# _select_entry — default fallback (lines 374-381)
+# ---------------------------------------------------------------------------
+
+
+def test_select_entry_default_fallback_matches_by_national_id() -> None:
+    """_select_entry default branch returns entry matching _NATIONAL_AVG_ID when both _prefecture_id and _prefecture are None (lines 374-377)."""
+    provider = GrFuelgovProvider()
+    provider._prefecture_id = None
+    provider._prefecture = None
+    entry = provider._select_entry(_FULL_PAYLOAD)
+    assert entry["prefecture"]["id"] == _NATIONAL_AVG_ID
+
+
+def test_select_entry_default_fallback_matches_by_national_name() -> None:
+    """_select_entry default branch returns entry matching _NATIONAL_AVG_NAME when id field is None (lines 378-379)."""
+    payload_name_only = {
+        "data": {
+            "date": _DATE,
+            "entries": [
+                {
+                    "prefecture": {"id": None, "name": _NATIONAL_AVG_NAME},
+                    "prices": {"Αμόλυβδη 95 οκτ.": 2.001},
+                }
+            ],
+        }
+    }
+    provider = GrFuelgovProvider()
+    provider._prefecture_id = None
+    provider._prefecture = None
+    entry = provider._select_entry(payload_name_only)
+    assert entry["prefecture"]["name"] == _NATIONAL_AVG_NAME
+
+
+def test_select_entry_default_fallback_raises_when_national_avg_absent() -> None:
+    """_select_entry raises ProviderError when default fallback finds no national entry (line 381)."""
+    payload_no_national = {
+        "data": {
+            "date": _DATE,
+            "entries": [_ENTRY_ATTIKI, _ENTRY_AITOLIA],
+        }
+    }
+    provider = GrFuelgovProvider()
+    provider._prefecture_id = None
+    provider._prefecture = None
+    with pytest.raises(ProviderError, match="national average entry not found"):
+        provider._select_entry(payload_no_national)
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — non-numeric price paths (lines 410-411)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_non_numeric_string_price_returns_none() -> None:
+    """_build_station_data returns None when price is a non-numeric string (ValueError path, lines 410-411)."""
+    entry_bad_price = {
+        "prefecture": {"id": 1, "name": "ΝΟΜΟΣ ΑΤΤΙΚΗΣ"},
+        "prices": {"Diesel Κίνησης": "not_a_number"},
+    }
+    provider = GrFuelgovProvider(prefecture_id=1)
+    data = provider._build_station_data(entry_bad_price, _FULL_PAYLOAD)
+
+    assert data["diesel"] is None
+
+
+def test_build_station_data_list_price_returns_none() -> None:
+    """_build_station_data returns None when price is a non-scalar type (TypeError path, lines 410-411)."""
+    entry_bad_type = {
+        "prefecture": {"id": 1, "name": "ΝΟΜΟΣ ΑΤΤΙΚΗΣ"},
+        "prices": {"Αμόλυβδη 95 οκτ.": [1, 2, 3]},
+    }
+    provider = GrFuelgovProvider(prefecture_id=1)
+    data = provider._build_station_data(entry_bad_type, _FULL_PAYLOAD)
+
+    assert data["unleaded"] is None
