@@ -357,10 +357,11 @@ class IEFuelFinderProvider(BaseProvider):
         """
         county: str = str(kwargs.get("county", "ireland")).lower()
         try:
+            # _fetch_stations catches all exceptions and returns None — no exceptions
+            # will propagate, so return_exceptions is not needed here.
             diesel_resp, petrol_resp = await asyncio.gather(
                 self._fetch_stations(session, city=county, fuel="diesel"),
                 self._fetch_stations(session, city=county, fuel="petrol"),
-                return_exceptions=True,
             )
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed for county %s: %s", county, err)
