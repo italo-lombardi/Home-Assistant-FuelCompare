@@ -385,6 +385,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="api_key",
             data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}),
+            description_placeholders={"registration_url": "https://onboarding.tankerkoenig.de/"},
             errors=errors,
         )
 

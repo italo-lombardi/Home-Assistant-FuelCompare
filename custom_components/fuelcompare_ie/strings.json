@@ -22,7 +22,7 @@
       },
       "api_key": {
         "title": "API Key",
-        "description": "Enter your API key. For Tankerkoenig (Germany), get a free key at https://onboarding.tankerkoenig.de/",
+        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
         "data": {
           "api_key": "API Key"
         }
