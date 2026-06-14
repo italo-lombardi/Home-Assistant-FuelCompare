@@ -47,10 +47,18 @@ def _malta_xlsx(
 ) -> bytes:
     """Return XLSX bytes with a minimal Malta row at the expected column positions."""
     rows = [
-        # Header row (not required by parser, but realistic)
-        ["Country", "Euro-super 95", "Automotive Diesel", "LPG", "Heating Oil"],
-        ["Germany", 1590.0, 1480.0, 870.0, 850.0],
-        ["Malta", petrol, diesel, lpg, heating_oil],
+        # Header row matching EU Oil Bulletin layout
+        [
+            "Country",
+            "Euro-super 95",
+            "Diesel",
+            "Heating gas oil",
+            "Fuel oil (LS)",
+            "Fuel oil (HS)",
+            "LPG",
+        ],
+        ["Germany", 1590.0, 1480.0, 850.0, 800.0, 780.0, 870.0],
+        ["Malta", petrol, diesel, heating_oil, 800.0, 780.0, lpg],
         ["Netherlands", 1780.0, 1550.0, 890.0, 900.0],
     ]
     return _make_xlsx_bytes(rows)

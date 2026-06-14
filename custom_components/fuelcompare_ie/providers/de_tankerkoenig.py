@@ -295,7 +295,11 @@ class DeTankerkoenigProvider(BaseProvider):
                 if brand:
                     return brand
         except Exception as err:  # noqa: BLE001
-            _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
+            _LOGGER.debug(
+                "Failed to fetch station name for %s: %s",
+                station_id,
+                type(err).__name__,
+            )
         return None
 
     async def async_list_stations(

@@ -498,7 +498,7 @@ class LuCarbuProvider(BaseProvider):
             "carburant": fuel_id,
             "lat": lat,
             "lng": lng,
-            "dist": int(radius_km),
+            "dist": max(1, round(radius_km)),
         }
         _LOGGER.debug("Fetching carbu.com LU stations: fuel=%s", fuel_key)
         try:

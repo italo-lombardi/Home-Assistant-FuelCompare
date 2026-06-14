@@ -83,6 +83,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             postal_code = county
         if postal_code:
             kwargs["postal_code"] = postal_code
+    # prefecture_id: for gr_fuelgov — station_id stores the prefecture numeric id.
+    if "prefecture_id" in sig.parameters and station_id:
+        try:
+            kwargs["prefecture_id"] = int(station_id)
+        except (ValueError, TypeError):
+            pass
     if api_key and "api_key" in sig.parameters:
         kwargs["api_key"] = api_key
     if latitude is not None and "latitude" in sig.parameters:

@@ -76,6 +76,7 @@ import asyncio
 import functools
 import io
 import logging
+import re
 from datetime import UTC, datetime
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -553,12 +554,13 @@ def _resolve_country_code(country_name: str) -> str | None:
         if result:
             return result
         # Partial match for composite strings like "EUR27_2020 (IV)".
-        # Sort by key length descending so "euro area" is tried before "eu"
-        # to prevent "eu" matching "euro area weighted average".
+        # Use word-boundary anchoring to prevent "eu" matching "euro area" etc.
         for key, code in sorted(
             _COUNTRY_NAME_TO_CODE.items(), key=lambda x: len(x[0]), reverse=True
         ):
-            if key in normalised or normalised in key:
+            if re.search(rf"\b{re.escape(key)}\b", normalised) or re.search(
+                rf"\b{re.escape(normalised)}\b", key
+            ):
                 return code
     return None
 

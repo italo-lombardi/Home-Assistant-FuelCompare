@@ -442,11 +442,11 @@ class GrFuelgovProvider(BaseProvider):
 
         _LOGGER.debug(
             "GrFuelgovProvider: parsed data for prefecture '%s' (id=%s): "
-            "unleaded=%.3f diesel=%.3f lpg=%s date=%s",
+            "unleaded=%s diesel=%s lpg=%s date=%s",
             pref_name,
             pref_id,
-            data.get("unleaded") or 0.0,
-            data.get("diesel") or 0.0,
+            data.get("unleaded"),
+            data.get("diesel"),
             data.get("lpg"),
             bulletin_date,
         )

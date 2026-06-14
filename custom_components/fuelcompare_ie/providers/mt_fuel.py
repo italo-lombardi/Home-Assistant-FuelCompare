@@ -107,13 +107,13 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 6)  # XLSX can be ~400 KB
 _MALTA_LABEL = "Malta"
 
 # Column indices (0-based) in the XLSX for Malta's prices.
-# The bulletin layout is: A=Country, B=Euro-super 95, C=Diesel, D=LPG, E=Heating oil.
-# Column indices: 0=Country, 1=petrol_95, 2=diesel, 3=lpg, 4=heating_oil
+# The EU Oil Bulletin layout: A=Country, B=Euro-super 95, C=Diesel,
+# D=Heating gas oil, E=Fuel oil (low S), F=Fuel oil (high S), G=LPG.
 _COL_COUNTRY = 0
 _COL_PETROL95 = 1
 _COL_DIESEL = 2
-_COL_LPG = 3
-_COL_HEATING_OIL = 4
+_COL_HEATING_OIL = 3
+_COL_LPG = 6
 
 
 class MtFuelProvider(BaseProvider):
@@ -424,8 +424,10 @@ def _make_absolute(href: str) -> str:
     Raises:
         ProviderError: The resolved URL points to an unexpected host.
     """
-    if href.startswith("http://") or href.startswith("https://"):
+    if href.startswith("https://"):
         resolved_url = href
+    elif href.startswith("http://"):
+        resolved_url = "https://" + href[7:]  # upgrade http → https
     elif href.startswith("//"):
         resolved_url = "https:" + href
     elif href.startswith("/"):
