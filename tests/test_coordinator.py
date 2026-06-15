@@ -512,6 +512,90 @@ async def test_fetch_page_assets_skips_chunk_on_client_error(
 
 
 # ---------------------------------------------------------------------------
+# test_fetch_page_assets_skips_station_chunk_with_path_traversal
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_skips_station_chunk_with_path_traversal(
+    hass: HomeAssistant,
+) -> None:
+    """Station chunk path with '..' is rejected; no HTTP request made for it (lines 112-117)."""
+    # Path must match _STATION_CHUNK_RE (contains pages/station/) but fail '..' check
+    bad_chunk = "/_next/static/chunks/pages/station/../../../etc/passwd.js"
+    html = f'"buildId":"abc123" src="{bad_chunk}"'
+    html_resp = _make_mock_response(200, text_data=html)
+    session = _make_session(html_resp)
+
+    coordinator = _ie_coordinator(hass, "12345")
+    await coordinator._provider._fetch_page_assets(session)
+
+    # Decrypt key must remain None — the bad chunk was rejected, no JS fetch happened
+    assert coordinator._provider._decrypt_key is None
+    assert coordinator._provider._build_id == "abc123"
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_broad_skips_chunk_with_path_traversal
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_broad_skips_chunk_with_path_traversal(
+    hass: HomeAssistant,
+) -> None:
+    """Broad scan skips chunk paths with '..' — continue on line 172 is exercised."""
+    bad_chunk = "/_next/static/chunks/../exploit.js"
+    good_chunk = "/_next/static/chunks/1890-good.js"
+    html = f'"buildId":"abc123" src="{bad_chunk}" src="{good_chunk}"'
+    html_resp = _make_mock_response(200, text_data=html)
+    good_resp = _make_mock_response(
+        200, text_data=f'AES.decrypt(e,"{_TEST_DECRYPT_KEY}")'
+    )
+    session = _make_session(html_resp, good_resp)
+
+    coordinator = _ie_coordinator(hass, "12345")
+    await coordinator._provider._fetch_page_assets(session, broad=True)
+
+    # Only the good chunk was fetched; key extracted correctly
+    assert coordinator._provider._decrypt_key == _TEST_DECRYPT_KEY
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_page_assets_station_chunk_http_error
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_page_assets_station_chunk_http_error(
+    hass: HomeAssistant,
+) -> None:
+    """ClientError fetching station chunk is caught; key remains None (lines 131-138)."""
+    from aiohttp import ClientError as _CE
+
+    html = (
+        '"buildId":"abc123" '
+        'src="/_next/static/chunks/pages/station/station-deadbeef.js"'
+    )
+    html_resp = _make_mock_response(200, text_data=html)
+
+    session = MagicMock()
+    call_iter = iter([html_resp, _CE("timeout")])
+
+    def _get(*_args, **_kwargs):
+        item = next(call_iter)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    session.get = MagicMock(side_effect=_get)
+    session.post = MagicMock()
+
+    coordinator = _ie_coordinator(hass, "12345")
+    await coordinator._provider._fetch_page_assets(session)
+
+    assert coordinator._provider._decrypt_key is None
+    assert coordinator._provider._build_id == "abc123"
+
+
+# ---------------------------------------------------------------------------
 # test_fetch_page_assets_all_chunks_fail_leaves_key_unchanged
 # ---------------------------------------------------------------------------
 
@@ -1054,6 +1138,28 @@ def test_cryptojs_decrypt_non_list_json() -> None:
         _cryptojs_decrypt(payload, evp_key)
 
 
+def test_cryptojs_decrypt_empty_decrypted_output() -> None:
+    """Decryptor returning empty bytes raises ValueError (defensive guard, line 46)."""
+    from unittest.mock import MagicMock, patch
+
+    evp_key = _TEST_DECRYPT_KEY
+    # Build a syntactically valid Salted__ payload (content doesn't matter — decryptor mocked)
+    import os
+    salt = os.urandom(8)
+    dummy_cipher = b"\x00" * 16
+    payload = base64.b64encode(b"Salted__" + salt + dummy_cipher).decode()
+
+    mock_decryptor = MagicMock()
+    mock_decryptor.update.return_value = b""
+    mock_decryptor.finalize.return_value = b""
+    mock_cipher_obj = MagicMock()
+    mock_cipher_obj.decryptor.return_value = mock_decryptor
+
+    with patch("custom_components.fuelcompare_ie.crypto.Cipher", return_value=mock_cipher_obj):
+        with pytest.raises(ValueError, match="Decrypted output is empty"):
+            _cryptojs_decrypt(payload, evp_key)
+
+
 # ---------------------------------------------------------------------------
 # last_successful_fetch stamping
 # ---------------------------------------------------------------------------
@@ -1195,6 +1301,45 @@ async def test_base_provider_async_list_stations_default_returns_empty() -> None
     provider = _MinimalProvider("123")
     result = await provider.async_list_stations(MagicMock())
     assert result == []
+
+
+def test_base_provider_forbidden_capability_raises() -> None:
+    """Defining a BaseProvider with a forbidden CAPABILITIES key raises TypeError."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    with pytest.raises(TypeError, match="forbidden keys"):
+
+        class _ForbiddenCapProvider(BaseProvider):
+            COUNTRY = "XX"
+            PROVIDER_KEY = "xx_forbidden_cap"
+            LABEL = "Forbidden Cap Test"
+            CAPABILITIES: frozenset = frozenset({"source_station_id"})
+
+            async def async_fetch(self, session, station_id):
+                return {}
+
+            async def async_fetch_station_name(self, session, station_id):
+                return None
+
+
+def test_base_provider_location_search_without_async_list_stations_raises() -> None:
+    """Non-manual_id provider that omits async_list_stations raises TypeError."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    with pytest.raises(TypeError, match="must override async_list_stations"):
+
+        class _MissingListProvider(BaseProvider):
+            COUNTRY = "XX"
+            PROVIDER_KEY = "xx_missing_list"
+            LABEL = "Missing List Test"
+            STATION_LOOKUP_MODE = "location_search"
+            CAPABILITIES: frozenset = frozenset()
+
+            async def async_fetch(self, session, station_id):
+                return {}
+
+            async def async_fetch_station_name(self, session, station_id):
+                return None
 
 
 # ---------------------------------------------------------------------------

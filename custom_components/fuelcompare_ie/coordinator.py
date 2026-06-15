@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .providers.base import BaseProvider, ProviderError, StationData
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)

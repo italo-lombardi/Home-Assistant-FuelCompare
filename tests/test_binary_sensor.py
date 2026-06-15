@@ -578,6 +578,32 @@ def test_is_open_osm_normalizes_2400_opening_time() -> None:
     assert result is True
 
 
+def test_is_open_osm_closed_rule_non_matching_day_continues() -> None:
+    """'closed' rule for Sa does not affect Tue — continues to next rule (line 134)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # Sa is closed; Tu-Fr 08:00-18:00 — simulate Tuesday at 10:00 → open
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 1  # Tuesday
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open_osm("Sa closed; Tu-Fr 08:00-18:00")
+    assert result is True
+
+
+def test_is_open_osm_00_to_24_treated_as_open_all_day() -> None:
+    """'00:00-24:00' triggers was_24_close → returns True immediately (line 163)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # 00:00-24:00 normalises to open_time=00:00, close_time=00:00 with was_24_close=True
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 3  # Thursday
+        mock_now.return_value.time.return_value = dt_time(15, 0)
+        result = _is_open_osm("mo-su 00:00-24:00")
+    assert result is True
+
+
 # ---------------------------------------------------------------------------
 # _day_matches — empty day spec, wrapped range, single day (lines 149, 159-164)
 # ---------------------------------------------------------------------------
@@ -672,3 +698,12 @@ def test_facility_sensor_is_on_none_when_key_is_none_value() -> None:
     """is_on returns None (not False) when cap_key maps to None in data (line 392)."""
     sensor = _make_facility_sensor("has_atm", {"has_atm": None})
     assert sensor.is_on is None
+
+
+def test_day_matches_time_token_segment_returns_true() -> None:
+    """Segment that looks like a time token (e.g. '07:30') returns True immediately (line 188)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    # A day_spec that starts with a time token — treated as no-day-restriction
+    assert _day_matches("07:30", 3) is True
+    assert _day_matches("07:30", 0) is True
