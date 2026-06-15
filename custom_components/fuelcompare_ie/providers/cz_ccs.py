@@ -128,7 +128,6 @@ class CzCcsProvider(BaseProvider):
             "diesel",  # Diesel cap price
             # Station / source identity
             "name",
-            "source_station_id",
             # Timing
             "lastupdated",
         }

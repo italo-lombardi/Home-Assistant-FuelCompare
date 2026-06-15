@@ -55,7 +55,7 @@ STATION_LOOKUP_MODE = "location_search"
 ---------------------------------------
 The config flow calls ``async_list_stations`` with lat/lng/radius kwargs.
 The provider queries the carbu.com API for Diesel stations within the
-radius and returns them sorted cheapest-first.
+radius and returns them sorted alphabetically by label.
 
 CONFIG_MODE = "station_id"
 --------------------------
@@ -363,7 +363,7 @@ class LuCarbuProvider(BaseProvider):
 
         Called by the config flow location_search step.  Queries Diesel and
         Super 95 stations within the radius, de-dupes by ID, and returns
-        a list sorted cheapest-diesel-first.
+        a list sorted alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -414,58 +414,42 @@ class LuCarbuProvider(BaseProvider):
 
         # Merge per-fuel results into one dict keyed by station ID
         merged: dict[str, dict] = {}
-        diesel_prices: dict[str, float | None] = {}
-        sp95_prices: dict[str, float | None] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 sid = s.get("id")
                 if sid:
                     merged[sid] = s
-                    diesel_prices[sid] = _parse_price(s.get("price"))
 
         if isinstance(sp95_resp, list):
             for s in sp95_resp:
                 sid = s.get("id")
-                if sid:
-                    if sid not in merged:
-                        merged[sid] = s
-                    sp95_prices[sid] = _parse_price(s.get("price"))
+                if sid and sid not in merged:
+                    merged[sid] = s
 
         if not merged:
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for sid, station in merged.items():
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
+            street = station.get("address") or ""
             city = station.get("city") or ""
+
+            # Prefer brand over name when they differ; combine street + city
             display_name = (
                 f"{brand} {name}".strip() if brand and brand != name else name
             )
-            if city and city not in display_name:
-                display_name = f"{display_name}, {city}"
+            address_parts = [p for p in (street, city) if p]
+            address_str = ", ".join(address_parts) if address_parts else ""
 
-            d_price = diesel_prices.get(sid)
-            s_price = sp95_prices.get(sid)
+            label = f"{display_name}, {address_str} (#{str(sid)[:8]})"
 
-            price_parts = []
-            if d_price is not None:
-                price_parts.append(f"Diesel €{d_price:.3f}")
-            if s_price is not None:
-                price_parts.append(f"SP95 €{s_price:.3f}")
+            result.append((sid, label))
 
-            if price_parts:
-                label = f"{display_name} — {' / '.join(price_parts)}"
-                sort_key = d_price if d_price is not None else (s_price or 9999.0)
-            else:
-                label = display_name
-                sort_key = 9999.0
-
-            result.append((sid, label, sort_key))
-
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1].casefold())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

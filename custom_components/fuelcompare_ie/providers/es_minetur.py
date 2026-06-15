@@ -220,8 +220,8 @@ class EsMineturProvider(BaseProvider):
         """Return (station_id, display_label) pairs for the location-search picker.
 
         Fetches the full national dataset, filters by Haversine distance from
-        (lat, lng), and returns stations within radius_km sorted cheapest-first
-        by diesel price (then unleaded, then alphabetically by brand).
+        (lat, lng), and returns stations within radius_km sorted alphabetically
+        by label.
 
         Kwargs:
             lat (float):       Centre latitude for the search.
@@ -229,7 +229,8 @@ class EsMineturProvider(BaseProvider):
             radius_km (float): Search radius.  Falls back to self._radius_km.
 
         Returns:
-            List of (IDEESS, "Brand — City — Diesel €1.67/L") tuples.
+            List of (IDEESS, "Brand, Address (#ideess8)") tuples, sorted A-Z.
+            If address is absent the label is "Brand (#ideess8)".
             Empty list on any failure.
         """
         lat: float | None = (
@@ -256,10 +257,9 @@ class EsMineturProvider(BaseProvider):
             _LOGGER.debug("async_list_stations fetch failed: %s", err)
             return []
 
-        fecha = payload.get("Fecha") or None
         stations: list[dict] = payload.get("ListaEESSPrecio") or []
 
-        nearby: list[tuple[str, str, float]] = []
+        nearby: list[tuple[str, str]] = []
         for raw in stations:
             station_lat = _parse_coord(raw.get("Latitud"))
             station_lng = _parse_coord(raw.get("Longitud (WGS84)"))
@@ -274,39 +274,19 @@ class EsMineturProvider(BaseProvider):
             if not ideess:
                 continue
 
-            data = _parse_station(raw, fecha)
-            brand = data.get("brand") or "Unknown"
-            city = str(raw.get("Municipio", "")).strip().title() or ""
-            county = data.get("county") or ""
+            brand = str(raw.get("Rótulo", "")).strip() or "Unknown"
+            address = str(raw.get("Dirección", "")).strip()
 
-            location_parts = [p for p in (city, county) if p]
-            location_str = ", ".join(location_parts) if location_parts else ""
+            id_suffix = ideess[:8]
+            if address:
+                label = f"{brand}, {address} (#{id_suffix})"
+            else:
+                label = f"{brand} (#{id_suffix})"
 
-            price_parts: list[str] = []
-            diesel = data.get("diesel")
-            unleaded = data.get("unleaded")
-            if diesel is not None:
-                price_parts.append(f"Diesel €{diesel:.3f}")
-            if unleaded is not None:
-                price_parts.append(f"95 €{unleaded:.3f}")
+            nearby.append((ideess, label))
 
-            label_parts = [brand]
-            if location_str:
-                label_parts.append(location_str)
-            if price_parts:
-                label_parts.append(" / ".join(price_parts))
-            label = " — ".join(label_parts)
-
-            # Sort key: cheapest diesel first, then unleaded, then distance
-            sort_key = (
-                diesel
-                if diesel is not None
-                else (unleaded if unleaded is not None else 9999.0)
-            )
-            nearby.append((ideess, label, sort_key))
-
-        nearby.sort(key=lambda x: (x[2], x[1]))
-        return [(ideess, label) for ideess, label, _ in nearby]
+        nearby.sort(key=lambda x: x[1])
+        return nearby
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

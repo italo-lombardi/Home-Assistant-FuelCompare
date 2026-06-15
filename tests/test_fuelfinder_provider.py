@@ -126,9 +126,10 @@ def test_provider_capabilities_include_fuel_types() -> None:
     """CAPABILITIES includes all four FuelFinder fuel types."""
     caps = IEFuelFinderProvider.CAPABILITIES
     assert "diesel" in caps
-    assert "petrol" in caps
+    assert "unleaded" in caps
     assert "kerosene" in caps
     assert "cng" in caps
+    assert "petrol" not in caps
 
 
 def test_provider_capabilities_include_fuelfinder_fields() -> None:
@@ -237,7 +238,7 @@ async def test_async_fetch_success_petrol() -> None:
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
 
-    assert data["petrol"] == pytest.approx(1.849)
+    assert data["unleaded"] == pytest.approx(1.849)
 
 
 async def test_async_fetch_kerosene_none_when_absent_from_results() -> None:
@@ -650,7 +651,7 @@ def test_provider_unique_id_uses_uuid_not_osm_id() -> None:
 
 
 def test_parse_station_returns_all_required_keys() -> None:
-    """_parse_station returns a dict with all 15 normalised data keys."""
+    """_parse_station returns a dict with all normalised data keys."""
     provider = IEFuelFinderProvider(_STATION_UUID)
     prices_by_fuel = {
         "diesel": {**_BASE_STATION, "price": 1.828},
@@ -660,7 +661,7 @@ def test_parse_station_returns_all_required_keys() -> None:
 
     required_keys = {
         "diesel",
-        "petrol",
+        "unleaded",
         "kerosene",
         "cng",
         "lastupdated",
@@ -671,12 +672,6 @@ def test_parse_station_returns_all_required_keys() -> None:
         "phone",
         "website",
         "opening_hours",
-        "slug",
-        "osm_id",
-        "lat",
-        "lng",
-        "logo_url",
-        "confidence",
         "has_price",
     }
     for key in required_keys:
@@ -692,7 +687,7 @@ def test_parse_station_price_not_divided() -> None:
     }
     result = provider._build_station_data(_STATION_UUID, _BASE_STATION, prices_by_fuel)
     assert result["diesel"] == pytest.approx(1.828)
-    assert result["petrol"] == pytest.approx(1.849)
+    assert result["unleaded"] == pytest.approx(1.849)
 
 
 def test_parse_station_kerosene_none() -> None:

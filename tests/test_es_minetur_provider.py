@@ -604,7 +604,7 @@ async def test_async_list_stations_returns_nearby_stations() -> None:
 
 
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """Station label includes formatted diesel price."""
+    """Station label includes short station ID suffix (no price)."""
     resp = _make_mock_response(200)
     session = _make_session(resp)
 
@@ -614,11 +614,11 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     )
 
     _, label = results[0]
-    assert "1.549" in label or "Diesel" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_unleaded_price() -> None:
-    """Station label includes formatted unleaded/95 price."""
+    """Station label includes station address (no price)."""
     resp = _make_mock_response(200)
     session = _make_session(resp)
 
@@ -628,7 +628,7 @@ async def test_async_list_stations_label_includes_unleaded_price() -> None:
     )
 
     _, label = results[0]
-    assert "1.629" in label or "95" in label
+    assert "CALLE MAYOR" in label or "REPSOL" in label
 
 
 async def test_async_list_stations_excludes_stations_outside_radius() -> None:

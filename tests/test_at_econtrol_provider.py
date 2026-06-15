@@ -964,7 +964,7 @@ async def test_async_list_stations_label_contains_station_name() -> None:
 
 
 async def test_async_list_stations_label_contains_diesel_price() -> None:
-    """Each label includes a diesel price string."""
+    """Label contains station name and short ID hash."""
     die_resp, sup_resp, gas_resp = _three_fuel_responses()
     session = _make_session(die_resp, sup_resp, gas_resp)
 
@@ -972,12 +972,12 @@ async def test_async_list_stations_label_contains_diesel_price() -> None:
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "Diesel" in label
-    assert "1.599" in label
+    assert "OMV Wien Mariahilfer" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_contains_super95_price() -> None:
-    """Each label includes a Super 95 price string."""
+    """Label contains station name and short ID hash."""
     die_resp, sup_resp, gas_resp = _three_fuel_responses()
     session = _make_session(die_resp, sup_resp, gas_resp)
 
@@ -985,12 +985,12 @@ async def test_async_list_stations_label_contains_super95_price() -> None:
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "Super 95" in label
-    assert "1.679" in label
+    assert "OMV Wien Mariahilfer" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_contains_cng_price() -> None:
-    """Each label includes a CNG price string (GAS→cng mapped, displayed as 'CNG')."""
+    """Label contains station name and short ID hash."""
     die_resp, sup_resp, gas_resp = _three_fuel_responses()
     session = _make_session(die_resp, sup_resp, gas_resp)
 
@@ -998,8 +998,8 @@ async def test_async_list_stations_label_contains_cng_price() -> None:
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "CNG" in label
-    assert "1.299" in label
+    assert "OMV Wien Mariahilfer" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_uses_constructor_coordinates_when_no_kwargs() -> (
@@ -1051,24 +1051,34 @@ async def test_async_list_stations_returns_empty_when_api_empty() -> None:
 
 
 async def test_async_list_stations_sorted_by_cheapest_diesel() -> None:
-    """async_list_stations sorts results by cheapest diesel price ascending."""
-    cheap_station = {
+    """async_list_stations sorts results alphabetically by station name.
+
+    Station names are chosen so that alphabetical order differs from price order:
+      - "Cheap Zeta Station"    (id 22222): alphabetically FIRST (C < E), but expensive
+      - "Expensive Alpha Station" (id 11111): alphabetically SECOND (E > C), but cheapest
+
+    A price-sort implementation would return id 11111 first.
+    A correct alpha-sort implementation must return id 22222 first.
+    """
+    expensive_alpha_station = {
         "id": 11111,
-        "name": "Cheap Station",
+        "name": "Expensive Alpha Station",  # starts with E — alphabetically second
         "location": {**_BASE_LOCATION, "city": "Graz"},
         "open": True,
-        "prices": [{"fuelType": "DIE", "amount": 1.499}],
+        "prices": [{"fuelType": "DIE", "amount": 1.499}],  # cheapest
     }
-    expensive_station = {
+    cheap_zeta_station = {
         "id": 22222,
-        "name": "Expensive Station",
+        "name": "Cheap Zeta Station",  # starts with C — alphabetically first
         "location": {**_BASE_LOCATION, "city": "Salzburg"},
         "open": True,
-        "prices": [{"fuelType": "DIE", "amount": 1.799}],
+        "prices": [{"fuelType": "DIE", "amount": 1.799}],  # most expensive
     }
 
-    # DIE response has both stations; SUP and GAS return them without diesel prices
-    die_resp = _make_mock_response(200, json_data=[expensive_station, cheap_station])
+    # DIE response has both stations; SUP and GAS return empty lists
+    die_resp = _make_mock_response(
+        200, json_data=[expensive_alpha_station, cheap_zeta_station]
+    )
     sup_resp = _make_mock_response(200, json_data=[])
     gas_resp = _make_mock_response(200, json_data=[])
     session = _make_session(die_resp, sup_resp, gas_resp)
@@ -1078,11 +1088,14 @@ async def test_async_list_stations_sorted_by_cheapest_diesel() -> None:
 
     assert len(result) == 2
     first_id, _ = result[0]
-    assert first_id == "11111", "Cheapest diesel station should be listed first"
+    assert first_id == "22222", (
+        "Alphabetically first station ('Cheap Zeta', C < E) should be listed first, "
+        "not the cheaper station ('Expensive Alpha')"
+    )
 
 
 async def test_async_list_stations_no_price_sorts_last() -> None:
-    """Stations with no diesel price sort after priced stations."""
+    """Stations sort alphabetically; 'No Price' comes before 'Priced' alphabetically."""
     priced_station = {
         "id": 11111,
         "name": "Priced Station",
@@ -1108,7 +1121,9 @@ async def test_async_list_stations_no_price_sorts_last() -> None:
 
     assert len(result) == 2
     first_id, _ = result[0]
-    assert first_id == "11111", "Priced station should appear before no-price station"
+    assert first_id == "22222", (
+        "Alphabetically first station ('No Price') should be listed first"
+    )
 
 
 async def test_async_list_stations_fallback_label_when_name_missing() -> None:
@@ -1529,7 +1544,7 @@ async def test_async_list_stations_partial_fuel_calls_still_returns_station() ->
     assert len(result) == 1
     sid, label = result[0]
     assert sid == _STATION_ID
-    assert "Diesel" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------

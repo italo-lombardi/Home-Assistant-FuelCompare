@@ -189,7 +189,6 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            "source_station_id",
             "lastupdated",
         }
     )
@@ -303,8 +302,7 @@ class SEBensinpriserProvider(BaseProvider):
         """Return (station_id, display_label) pairs for the config flow station picker.
 
         Downloads the full /karta/data dataset, filters by haversine distance,
-        and returns stations within radius_km sorted cheapest-first by petrol 95
-        price (stations with no price sorted last).
+        and returns stations within radius_km sorted alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -313,8 +311,8 @@ class SEBensinpriserProvider(BaseProvider):
             radius_km: Search radius in kilometres (overrides constructor value).
 
         Returns:
-            List of (str(id), "Company — Address — 95: 17.54 kr / Diesel: 19.84 kr")
-            tuples sorted cheapest-first.  Empty list on any failure.
+            List of (str(id), "Company, Address (#id[:8])")
+            tuples sorted alphabetically by label.  Empty list on any failure.
         """
         lat: float | None = (
             kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
@@ -339,7 +337,7 @@ class SEBensinpriserProvider(BaseProvider):
             )
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for station in stations:
             s_lat_raw = station.get("lat")
             s_lng_raw = station.get("lng")
@@ -363,46 +361,19 @@ class SEBensinpriserProvider(BaseProvider):
 
             company: str = station.get("company") or ""
             address: str = station.get("address") or ""
-            commune: str = station.get("commune") or ""
 
-            # Build display name
-            if company and address:
-                display_name = f"{company} — {address}"
-            elif company:
-                display_name = company
-            elif address:
-                display_name = address
+            # Build label: "{company/name}, {address} (#{station_id[:8]})"
+            name_part = company or address or uid
+            addr_part = address if company and address else ""
+            if addr_part:
+                label = f"{name_part}, {addr_part} (#{uid[:8]})"
             else:
-                display_name = uid
+                label = f"{name_part} (#{uid[:8]})"
 
-            if commune:
-                display_name = f"{display_name} ({commune})"
+            result.append((uid, label))
 
-            # Prices
-            p95 = _parse_price(station.get("price95"))
-            p_diesel = _parse_price(station.get("priceDiesel"))
-
-            price_parts: list[str] = []
-            if p95 is not None:
-                price_parts.append(f"95: {p95:.2f} kr")
-            if p_diesel is not None:
-                price_parts.append(f"Diesel: {p_diesel:.2f} kr")
-
-            sort_key: float = min(
-                (p for p in (p95, p_diesel) if p is not None),
-                default=float("inf"),
-            )
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
-
-            result.append((uid, label, sort_key))
-
-        result.sort(key=lambda x: x[2])
-        return [(uid, label) for uid, label, _ in result]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

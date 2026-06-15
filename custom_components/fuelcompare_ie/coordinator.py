@@ -102,7 +102,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
         except UpdateFailed:
             raise
         except Exception as err:
-            _LOGGER.debug(
+            _LOGGER.exception(
                 "Unexpected error fetching station %s: %s", self.station_id, err
             )
             raise UpdateFailed(f"Unexpected error: {type(err).__name__}") from err

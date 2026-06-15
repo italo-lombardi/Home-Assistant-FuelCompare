@@ -560,7 +560,7 @@ async def test_async_list_stations_returns_empty_without_coords() -> None:
 
 
 async def test_async_list_stations_label_includes_price() -> None:
-    """async_list_stations label includes diesel price."""
+    """async_list_stations label includes station name and short ID suffix."""
     diesel_resp = _make_mock_response(200, _DIESEL_XML)
     petrol_resp = _make_mock_response(200, _PETROL_XML)
     session = _make_session(diesel_resp, petrol_resp)
@@ -572,7 +572,7 @@ async def test_async_list_stations_label_includes_price() -> None:
 
     assert result
     _, label = result[0]
-    assert "Diesel" in label or "Petrol" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_returns_empty_on_network_error() -> None:
@@ -851,12 +851,12 @@ _NO_PRICE_XML = """\
 <?xml version="1.0" encoding="UTF-8"?>
 <stations>
   <station ID="5500" Lat="53.3498" Lng="-6.2603"
-           name="No Price" brand="BP"
+           name="Zeta No Price" brand="Zeta"
            addr1="Some Street" addr2="Dublin"
            price="0" fuel="diesel" trend="stable"
            dateupdated="" Zone="Dublin" County="Dublin" />
   <station ID="5501" Lat="53.3498" Lng="-6.2603"
-           name="Has Price" brand="Circle K"
+           name="Alpha Has Price" brand="Alpha"
            addr1="Other Street" addr2="Dublin"
            price="171.0" fuel="diesel" trend="stable"
            dateupdated="" Zone="Dublin" County="Dublin" />
@@ -865,7 +865,7 @@ _NO_PRICE_XML = """\
 
 
 async def test_async_list_stations_sorts_no_price_station_last() -> None:
-    """async_list_stations places stations with no price data after priced ones."""
+    """async_list_stations sorts stations alphabetically; priced station name sorts before no-price."""
     diesel_resp = _make_mock_response(200, _NO_PRICE_XML)
     petrol_resp = _make_mock_response(200, _EMPTY_XML)
     session = _make_session(diesel_resp, petrol_resp)
@@ -876,4 +876,5 @@ async def test_async_list_stations_sorts_no_price_station_last() -> None:
     )
 
     station_ids = [sid for sid, _ in result]
+    # "Alpha Has Price" sorts before "Zeta No Price" alphabetically (A < Z)
     assert station_ids.index("5501") < station_ids.index("5500")

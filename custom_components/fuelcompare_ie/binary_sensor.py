@@ -148,6 +148,7 @@ def _is_open_osm(hours_str: str) -> bool | None:
                 try:
                     open_h, open_m = int(times[i][0]), int(times[i][1])
                     close_h, close_m = int(times[i + 1][0]), int(times[i + 1][1])
+                    was_24_close = close_h == 24
                     if open_h == 24:
                         open_h = 0
                     if close_h == 24:
@@ -158,8 +159,10 @@ def _is_open_osm(hours_str: str) -> bool | None:
                     continue
                 # Successfully parsed a time window for today
                 any_valid_window_for_today = True
-                # L-07: "00:00-24:00" normalises to 00:00-00:00 → always open
-                if open_time == close_time == dt_time(0, 0):
+                # Guard fires only for the literal "00:00-24:00" pattern (was_24_close),
+                # which normalises to 00:00-00:00 and means "open all day". A genuine
+                # "00:00-00:00" window (zero-duration) must NOT be treated as always-open.
+                if open_time == close_time == dt_time(0, 0) and was_24_close:
                     return True
                 if close_time <= open_time:  # crosses midnight
                     if now_time >= open_time or now_time < close_time:
@@ -215,7 +218,7 @@ async def async_setup_entry(
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = coordinator.station_id
     station_name = entry.title
-    caps = coordinator._provider.CAPABILITIES
+    caps = coordinator.provider_capabilities
 
     # is_open: created only when provider declares "is_open" capability.
     # data_fetch_problem: always created (coordinator-managed).
@@ -307,8 +310,8 @@ class StationIsOpenBinarySensor(
     def is_on(self) -> bool | None:
         """Return True if the station is currently open."""
         direct = self.coordinator.data.get("is_open") if self.coordinator.data else None
-        if isinstance(direct, bool):
-            return direct
+        if direct is not None:
+            return bool(direct)
         today_hours = self._get_today_hours_str()
         if today_hours is None:
             return None

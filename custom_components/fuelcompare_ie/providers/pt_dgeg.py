@@ -157,7 +157,7 @@ class PtDgegProvider(BaseProvider):
                 f"DGEG: failed to fetch station {station_id}: {err}"
             ) from err
 
-        if not data.get("status"):
+        if data.get("status") is not True:
             raise ProviderError(
                 f"DGEG: API returned failure for station {station_id}: "
                 f"{data.get('mensagem', 'unknown error')}"
@@ -194,11 +194,14 @@ class PtDgegProvider(BaseProvider):
         session: ClientSession,
         **kwargs: Any,
     ) -> list[tuple[str, str]]:
-        """Return (station_id, display_label) sorted by diesel price ascending.
+        """Return (station_id, display_label) sorted alphabetically by label.
 
         Searches PesquisarPostos across all districts, collecting up to
         qtd=5000 results, then filters by geographic proximity when lat/lng
         are available.
+
+        Label format: "{brand/name}, {address} (#{station_id[:8]})"
+        No price information is included in the label.
 
         Keyword args (from config flow location_search):
             lat (float): Centre latitude.
@@ -283,56 +286,28 @@ class PtDgegProvider(BaseProvider):
                 # Stations without coordinates are excluded when filtering by location
             stations = filtered
 
-        # Sort by diesel price (lowest first), then by name
-        def _sort_key(item: tuple[str, dict[str, Any]]) -> tuple[float, str]:
-            prices = item[1].get("prices", {})
-            diesel_price = prices.get("diesel") or prices.get("unleaded") or 999.0
-            return (diesel_price, item[1].get("name", ""))
-
-        sorted_stations = sorted(stations.items(), key=_sort_key)
-
+        # Sort alphabetically by label
         result: list[tuple[str, str]] = []
-        for sid, info in sorted_stations:
+        for sid, info in stations.items():
             name = info.get("name") or f"Station {sid}"
             brand = info.get("brand") or ""
-            location_parts = [
-                p
-                for p in [
-                    info.get("localidade"),
-                    info.get("municipio"),
-                    info.get("distrito"),
-                ]
-                if p
-            ]
-            location_str = location_parts[0] if location_parts else ""
+            address = info.get("address") or ""
 
-            display_parts: list[str] = []
+            # Primary identifier: prefer "Brand — Name" when brand differs from name
             if brand and brand.lower() not in name.lower():
-                display_parts.append(f"{brand} — {name}")
+                primary = f"{brand} — {name}"
             else:
-                display_parts.append(name)
+                primary = name
 
-            if location_str:
-                display_parts[0] = f"{display_parts[0]}, {location_str}"
+            # Build label: "{primary}, {address} (#{sid[:8]})"
+            parts: list[str] = [primary]
+            if address:
+                parts.append(address)
+            label = ", ".join(parts) + f" (#{sid[:8]})"
 
-            prices = info.get("prices", {})
-            price_snippets: list[str] = []
-            for fuel_key, label in [
-                ("diesel", "Diesel"),
-                ("unleaded", "95"),
-                ("premium_unleaded", "98"),
-                ("lpg", "GPL"),
-            ]:
-                p = prices.get(fuel_key)
-                if p is not None:
-                    price_snippets.append(f"{label} €{p:.3f}")
-
-            if price_snippets:
-                display_parts.append(f"[{' / '.join(price_snippets)}]")
-
-            label = " ".join(display_parts)
             result.append((sid, label))
 
+        result.sort(key=lambda item: item[1].lower())
         return result
 
 

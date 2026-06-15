@@ -344,7 +344,9 @@ class BaseProvider(ABC):
                     f"Add them to StationData first."
                 )
             if cls.STATION_LOOKUP_MODE != "manual_id" and not any(
-                "async_list_stations" in c.__dict__ for c in cls.__mro__[1:]
+                "async_list_stations" in c.__dict__
+                for c in cls.__mro__
+                if c is not BaseProvider
             ):
                 raise TypeError(cls.__name__ + " must override async_list_stations")
 

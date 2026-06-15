@@ -351,10 +351,10 @@ async def test_ff_async_list_stations_returns_sorted_cheapest_first() -> None:
     provider = IEFuelFinderProvider("")
     stations = await provider.async_list_stations(session, county="dublin")
 
-    # uuid-2 (cheapest) should come first, uuid-3 (no price) last
+    # Sorted alphabetically by uid: uuid-1 < uuid-2 < uuid-3
     uids = [uid for uid, _ in stations]
-    assert uids.index("uuid-2") < uids.index("uuid-1")
-    assert uids[-1] == "uuid-3"
+    assert uids.index("uuid-1") < uids.index("uuid-2")
+    assert uids.index("uuid-2") < uids.index("uuid-3")
 
 
 async def test_ff_async_list_stations_empty_on_network_error() -> None:

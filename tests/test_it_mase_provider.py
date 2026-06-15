@@ -1313,7 +1313,7 @@ async def test_async_list_stations_label_contains_comune() -> None:
 
 
 async def test_async_list_stations_label_contains_distance() -> None:
-    """async_list_stations includes distance (km) in the display label."""
+    """async_list_stations label contains station identifier token (no distance)."""
     session = _make_session_with_csvs(meta_csv=_META_CSV_NEARBY)
     provider = ItMaseProvider(
         "3464", latitude=41.9028, longitude=12.4964, radius_km=50.0
@@ -1323,11 +1323,11 @@ async def test_async_list_stations_label_contains_distance() -> None:
     )
 
     labels = [label for _, label in results]
-    assert any("km" in label for label in labels)
+    assert any("(#" in label for label in labels)
 
 
 async def test_async_list_stations_label_contains_price_info() -> None:
-    """async_list_stations includes price info in the display label when prices are available."""
+    """async_list_stations label contains station identifier token (no price)."""
     session = _make_session_with_csvs(meta_csv=_META_CSV_NEARBY)
     provider = ItMaseProvider(
         "3464", latitude=41.9028, longitude=12.4964, radius_km=50.0
@@ -1336,15 +1336,14 @@ async def test_async_list_stations_label_contains_price_info() -> None:
         session, lat=41.9028, lng=12.4964, radius_km=50.0
     )
 
-    # Station 3464 has prices in _PRICE_CSV
     labels = {sid: label for sid, label in results}
     if "3464" in labels:
-        assert "€" in labels["3464"]
+        assert "(#" in labels["3464"]
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations returns results sorted cheapest-first by min(diesel, unleaded)."""
-    # Two stations near Rome: 3464 with normal prices, 4444 with cheaper diesel
+    """async_list_stations returns results sorted alphabetically by label."""
+    # Two stations near Rome: 3464 (ENI) and 4444 (IP) — "ENI" < "IP" alphabetically
     meta_csv_two = (
         "Estrazione del 2026-06-13\n"
         "idImpianto|Gestore|Bandiera|Tipo Impianto|Nome Impianto|Indirizzo|Comune|Provincia|Latitudine|Longitudine\n"
@@ -1366,7 +1365,8 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
     )
 
     station_ids = [sid for sid, _ in results]
-    assert station_ids.index("4444") < station_ids.index("3464")
+    # "ENI/ENI Via Roma..." < "IP/IP Roma..." alphabetically → 3464 first
+    assert station_ids.index("3464") < station_ids.index("4444")
 
 
 async def test_async_list_stations_returns_empty_when_no_coordinates() -> None:
