@@ -143,7 +143,7 @@ async def async_setup_entry(
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = coordinator.station_id
     station_name = entry.title
-    caps = coordinator._provider.CAPABILITIES
+    caps = coordinator.provider_capabilities
 
     entities: list[SensorEntity] = []
 
@@ -199,14 +199,14 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
-        self._attr_native_unit_of_measurement = coordinator._provider.CURRENCY
+        self._attr_native_unit_of_measurement = coordinator.provider_currency
         self._station_id = station_id
         self._fuel_type = fuel_type
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{fuel_type}"
         self._attr_translation_key = translation_key or fuel_type
         self._attr_icon = icon
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -233,7 +233,7 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         attrs: dict = {
             "station_id": self._station_id,
             "fuel_type": self._fuel_type,
-            "source": self.coordinator._provider.LABEL,
+            "source": self.coordinator.provider_label,
         }
         if self.coordinator.data:
             if self.coordinator.data.get("lastupdated") is not None:
@@ -261,7 +261,7 @@ class StationPriceLastUpdatedSensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_price_last_updated"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -291,7 +291,7 @@ class StationNameSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntit
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_station_name"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -321,7 +321,7 @@ class StationBrandSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnti
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_brand"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -358,7 +358,7 @@ class StationCountySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_county"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -390,7 +390,7 @@ class StationWorkingHoursSensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_working_hours"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -406,7 +406,7 @@ class StationWorkingHoursSensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = _DAYS[dt_util.as_local(dt_util.now()).weekday()]
+            today = _DAYS[dt_util.now().weekday()]
             return hours.get(today)
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours for native_value: %s", err)
@@ -443,7 +443,7 @@ class StationOpeningHoursSensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_opening_hours"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -490,7 +490,7 @@ class StationSimpleStrSensor(CoordinatorEntity[FuelCompareIECoordinator], Sensor
         self._attr_translation_key = translation_key
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{data_key}"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -531,7 +531,7 @@ class StationSimpleFloatSensor(
         self._attr_translation_key = translation_key
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{data_key}"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -577,7 +577,7 @@ class StationAboutCategorySensor(
         self._attr_unique_id = f"{DOMAIN}_{station_id}_about_{category.lower()}"
         self._attr_translation_key = translation_key
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     def _get_category_data(self) -> dict:
@@ -638,7 +638,7 @@ class LastSuccessfulFetchSensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_last_successful_fetch"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property

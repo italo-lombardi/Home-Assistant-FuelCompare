@@ -23,8 +23,10 @@ Approach
      A: Country name
      B: Euro-super 95 (EUR/1000L)
      C: Automotive diesel (EUR/1000L)
-     D: LPG (EUR/1000L)
-     E: Heating oil (EUR/1000L)
+     D: Heating gas oil (EUR/1000L)
+     E: Fuel oil (low S) (EUR/1000L)
+     F: Fuel oil (high S) (EUR/1000L)
+     G: LPG (EUR/1000L)
    Divide each value by 1000 to obtain EUR/litre.
 
 Station level: False.  No station-level data source exists for Malta.
@@ -471,8 +473,10 @@ async def _parse_malta_row(xlsx_bytes: bytes) -> dict[str, float | None] | None:
       0: Country name
       1: Euro-super 95 (EUR/1000L)
       2: Automotive diesel (EUR/1000L)
-      3: LPG (EUR/1000L)
-      4: Heating oil (EUR/1000L)
+      3: Heating gas oil (EUR/1000L)
+      4: Fuel oil (low S) (EUR/1000L)
+      5: Fuel oil (high S) (EUR/1000L)
+      6: LPG (EUR/1000L)
 
     Args:
         xlsx_bytes: Raw XLSX file content.

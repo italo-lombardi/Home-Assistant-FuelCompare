@@ -358,7 +358,7 @@ async def _fetch_station_name(
             provider = provider_cls(station_id)
         return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
-        _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
+        _LOGGER.warning("Failed to fetch station name for %s: %s", station_id, err)
     return None
 
 
@@ -613,7 +613,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     session, **list_kwargs
                 )
             except Exception as err:  # noqa: BLE001
-                _LOGGER.debug("Failed to load station list: %s", err)
+                _LOGGER.warning("Failed to load station list: %s", err)
 
         self._station_list = station_list
 

@@ -214,7 +214,7 @@ async def async_setup_entry(
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = coordinator.station_id
     station_name = entry.title
-    caps = coordinator._provider.CAPABILITIES
+    caps = coordinator.provider_capabilities
 
     # is_open: created only when provider declares "is_open" capability.
     # data_fetch_problem: always created (coordinator-managed).
@@ -253,7 +253,6 @@ class StationIsOpenBinarySensor(
 ):
     """Binary sensor indicating whether the station is currently open."""
 
-    _attr_device_class = None
     _attr_icon = "mdi:store-clock"
     _attr_has_entity_name = True
     _attr_translation_key = "is_open"
@@ -269,7 +268,7 @@ class StationIsOpenBinarySensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -297,7 +296,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(_DAYS[dt_util.as_local(dt_util.now()).weekday()])
+            return hours.get(_DAYS[dt_util.now().weekday()])
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None
@@ -354,7 +353,7 @@ class DataFetchProblemBinarySensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_data_fetch_problem"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -413,7 +412,7 @@ class FacilityBinarySensor(
         self._attr_device_class = device_class
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{cap_key}"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property

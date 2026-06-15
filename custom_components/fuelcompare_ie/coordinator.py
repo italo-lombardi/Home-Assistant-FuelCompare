@@ -27,7 +27,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     def __init__(
         self,
         hass: HomeAssistant,
-        provider_or_station_id: "BaseProvider | str",
+        provider_or_station_id: BaseProvider | str,
         station_id: str | None = None,
     ) -> None:
         # Support old 2-arg call: FuelCompareIECoordinator(hass, station_id_str)
@@ -79,8 +79,16 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
             )
 
     @property
-    def provider_capabilities(self) -> frozenset:
+    def provider_capabilities(self) -> frozenset[str]:
         return self._provider.CAPABILITIES
+
+    @property
+    def provider_label(self) -> str:
+        return self._provider.LABEL
+
+    @property
+    def provider_currency(self) -> str:
+        return self._provider.CURRENCY
 
     # ---- Update cycle -----------------------------------------------------------
 
@@ -106,7 +114,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
         except UpdateFailed:
             raise
         except Exception as err:
-            _LOGGER.debug(
+            _LOGGER.exception(
                 "Unexpected error fetching station %s: %s", self.station_id, err
             )
             raise UpdateFailed(f"Unexpected error: {type(err).__name__}") from err

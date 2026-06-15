@@ -143,7 +143,6 @@ class NlAnwbProvider(BaseProvider):
             # Identity / meta
             "name",
             "lastupdated",
-            "source_station_id",
         }
     )
 

@@ -117,7 +117,6 @@ class SiGorivaProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "source_station_id",
         }
     )
 
@@ -540,5 +539,4 @@ def _parse_station(
         "county": county,
         "latitude": latitude,
         "longitude": longitude,
-        "source_station_id": str(station.get("pk", "")),
     }

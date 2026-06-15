@@ -294,6 +294,8 @@ def _extract_prices(prices_list: list[dict[str, Any]]) -> dict[str, float | None
     Maps fuelType codes (DIE, SUP, GAS) to StationData keys.
     Handles empty array gracefully.
     """
+    if prices_list is True:
+        return {}
     fuel_code_map = {
         "DIE": "diesel",
         "SUP": "unleaded",
@@ -369,5 +371,7 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "is_open": raw.get("open") if "open" in raw else None,
-        "source_station_id": str(raw.get("id") or ""),
+        "source_station_id": str(raw["id"])
+        if "id" in raw and raw["id"] is not None
+        else "",
     }

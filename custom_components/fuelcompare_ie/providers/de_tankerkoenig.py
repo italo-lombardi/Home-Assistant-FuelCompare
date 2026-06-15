@@ -74,6 +74,8 @@ def _parse_price(raw: Any) -> float | None:
     """
     if raw is False or raw is None:
         return None
+    if isinstance(raw, bool):
+        return None
     try:
         val = float(raw)
     except (ValueError, TypeError):

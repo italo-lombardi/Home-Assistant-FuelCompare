@@ -40,7 +40,7 @@ class IEFuelCompareProvider(BaseProvider):
             "name",
             "county",
             "working_hours",
-            "tablename",
+            "brand",
         }
     )
 

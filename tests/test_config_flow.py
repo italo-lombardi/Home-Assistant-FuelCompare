@@ -2368,7 +2368,7 @@ async def test_options_flow_station_entry_with_api_key(
 
 
 async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> None:
-    """_reload_entry inner function awaits async_reload when options change."""
+    """_reload_entry calls async_schedule_reload when options change."""
     from custom_components.fuelcompare_ie import async_setup_entry
     from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
 
@@ -2380,12 +2380,11 @@ async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> 
     )
     entry.add_to_hass(hass)
 
-    reload_called_with: list = []
+    schedule_reload_called: list = []
 
-    async def _spy_reload(entry_id):
-        reload_called_with.append(entry_id)
-
-    hass.config_entries.async_reload = _spy_reload
+    # Patch async_schedule_reload on the entry to spy on calls
+    original_entry = entry
+    original_entry.async_schedule_reload = lambda: schedule_reload_called.append(True)
 
     with (
         patch.object(
@@ -2407,7 +2406,7 @@ async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> 
     import asyncio
 
     await asyncio.sleep(0)
-    assert entry.entry_id in reload_called_with
+    assert schedule_reload_called, "async_schedule_reload was not called"
 
 
 async def test_async_setup_entry_unknown_provider_raises_config_entry_not_ready(

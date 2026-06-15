@@ -27,6 +27,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import urllib.parse
 from typing import Final
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
@@ -44,7 +45,7 @@ _HEADERS: Final = {
 _BUILD_ID_RE: Final = re.compile(r'"buildId":"([^"]+)"')
 _STATION_CHUNK_RE: Final = re.compile(r'(/_next/static/chunks/pages/station/[^"]+\.js)')
 _ANY_CHUNK_FINDALL_RE: Final = re.compile(r'/_next/static/chunks/[^"]+\.js')
-_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,"([a-fA-F0-9]{64})"')
+_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,["\']([a-fA-F0-9]{64})["\']')
 
 
 class PageAssets:
@@ -146,7 +147,8 @@ class PageAssets:
             return
 
         for chunk_path in ordered:
-            if ".." in chunk_path or not re.match(
+            decoded = urllib.parse.unquote(chunk_path)
+            if ".." in decoded or not re.match(
                 r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
             ):
                 continue

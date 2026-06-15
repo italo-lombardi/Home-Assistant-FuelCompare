@@ -204,8 +204,6 @@ class EuOilBulletinProvider(BaseProvider):
             "county",  # Country name (region context)
             # Timing
             "lastupdated",  # Week date from Excel header
-            # Source reference
-            "source_station_id",
         }
     )
 

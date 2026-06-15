@@ -494,10 +494,10 @@ def test_parse_station_longitude_none_for_invalid_lng() -> None:
     assert result["longitude"] is None
 
 
-def test_parse_station_source_station_id_matches_pk() -> None:
-    """_parse_station sets source_station_id to str(pk)."""
+def test_parse_station_source_station_id_not_in_result() -> None:
+    """_parse_station does not include source_station_id (removed from M-12 fix)."""
     result = _parse_station(_BASE_STATION, {})
-    assert result["source_station_id"] == str(_STATION_PK)
+    assert "source_station_id" not in result
 
 
 def test_parse_station_null_prices_return_none() -> None:

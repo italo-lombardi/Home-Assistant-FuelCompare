@@ -193,7 +193,6 @@ class IePumpsProvider(BaseProvider):
             station_id: pumps.ie integer station ID as a string (e.g. '1234').
         """
         self._station_id = station_id
-        _get_ssl_context()
 
     # ── Public interface ──────────────────────────────────────────────────────
 
