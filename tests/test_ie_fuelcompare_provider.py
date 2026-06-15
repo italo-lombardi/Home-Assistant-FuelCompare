@@ -190,9 +190,7 @@ async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() 
             "custom_components.fuelcompare_ie.providers.ie_fuelcompare._cryptojs_decrypt",
             side_effect=_mock_decrypt,
         ):
-            with patch.object(
-                provider, "_fetch_page_assets", AsyncMock()
-            ):
+            with patch.object(provider, "_fetch_page_assets", AsyncMock()):
                 with patch.object(
                     provider,
                     "_fetch_encrypted_api",

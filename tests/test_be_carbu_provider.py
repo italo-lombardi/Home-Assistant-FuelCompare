@@ -1105,7 +1105,7 @@ def test_parse_station_html_primary_div_id_format() -> None:
     html = (
         '<div id="item_0" data-price="1.999" data-name="Test Station" '
         'data-lat="50.85" data-lng="4.35" data-id="99001">'
-        '</div>'
+        "</div>"
     )
     result = _parse_station_html(html, "diesel")
     assert len(result) == 1

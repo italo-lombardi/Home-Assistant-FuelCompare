@@ -401,7 +401,9 @@ async def test_about_category_extra_attributes() -> None:
 
 async def test_about_category_flat_key_non_dict_returns_empty() -> None:
     """_get_category_data returns {} when flat key exists but is not a dict."""
-    sensor = _make_about_sensor({"Accessibility": "not_a_dict"}, category="Accessibility")
+    sensor = _make_about_sensor(
+        {"Accessibility": "not_a_dict"}, category="Accessibility"
+    )
     assert sensor.native_value is None
     assert sensor.available is False
 

@@ -614,7 +614,7 @@ def test_day_matches_trailing_comma_skips_empty_segment() -> None:
     from custom_components.fuelcompare_ie.binary_sensor import _day_matches
 
     # "mo," splits to ["mo", ""] — empty segment should be skipped, not match
-    assert _day_matches("mo,", 0) is True   # Monday matches
+    assert _day_matches("mo,", 0) is True  # Monday matches
     assert _day_matches("mo,", 2) is False  # Wednesday doesn't match
 
 

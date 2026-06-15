@@ -1223,7 +1223,9 @@ async def test_async_list_stations_returns_empty_when_lat_lng_none() -> None:
     """async_list_stations returns [] immediately when lat or lng is None."""
     provider = GbFuelfinderProvider(_NODE_ID)
     session = _make_session(_make_mock_response(200, b""))
-    result = await provider.async_list_stations(session, lat=None, lng=None, radius_km=10.0)
+    result = await provider.async_list_stations(
+        session, lat=None, lng=None, radius_km=10.0
+    )
     assert result == []
 
 

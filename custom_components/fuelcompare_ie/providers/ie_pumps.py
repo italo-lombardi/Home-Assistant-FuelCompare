@@ -106,6 +106,7 @@ def _get_ssl_context() -> ssl.SSLContext:
         _SSL_UNVERIFIED.verify_mode = ssl.CERT_NONE
     return _SSL_UNVERIFIED
 
+
 # pumps.ie has an expired TLS certificate — ssl=False is required.
 # Use HTTPS anyway so the connection is encrypted (just not verified).
 _BASE_URL = "https://pumps.ie/api/getStationsByPriceAPI.php"

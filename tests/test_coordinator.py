@@ -21,7 +21,9 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 from custom_components.fuelcompare_ie.coordinator import (
     FuelCompareIECoordinator,
 )
-from custom_components.fuelcompare_ie.crypto import cryptojs_decrypt as _cryptojs_decrypt
+from custom_components.fuelcompare_ie.crypto import (
+    cryptojs_decrypt as _cryptojs_decrypt,
+)
 
 
 # ---------------------------------------------------------------------------
