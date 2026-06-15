@@ -6,12 +6,13 @@ import logging
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT, BASE_URL, FUEL_TYPES
+from ..const import API_TIMEOUT, BASE_URL
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
 from ..page_assets import PageAssets
 from .base import BaseProvider, ProviderError, StationData
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
+_FUEL_TYPES: tuple[str, ...] = ("unleaded", "diesel")
 _HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 }
@@ -305,7 +306,7 @@ class IEFuelCompareProvider(BaseProvider):
     def _parse_station(self, station: dict) -> StationData:
         fuel_data: StationData = {}  # type: ignore[typeddict-item]
 
-        for fuel_type in FUEL_TYPES:
+        for fuel_type in _FUEL_TYPES:
             raw_value = station.get(fuel_type)
             _LOGGER.debug(
                 "Parsing %s for station %s: raw=%r",

@@ -210,7 +210,9 @@ def test_provider_init_stores_coordinates() -> None:
 
 def test_base_url_points_to_carbu_luxembourg() -> None:
     """_BASE_URL points to the carbu.com Luxembourg endpoint."""
-    assert "carbu.com" in _BASE_URL
+    from urllib.parse import urlparse
+
+    assert urlparse(_BASE_URL).netloc == "carbu.com"
     assert "luxembourg" in _BASE_URL
     assert _BASE_URL.startswith("https://")
 
@@ -676,11 +678,6 @@ async def test_async_fetch_handles_connection_error_gracefully() -> None:
 
 async def test_async_fetch_http_error_returns_none_prices() -> None:
     """async_fetch handles per-fuel HTTP errors and still assembles partial data."""
-    # Diesel response is HTTP 500, but at least one fuel (unleaded) succeeds
-    _make_mock_response(
-        500,
-        raise_on_status=ClientResponseError(MagicMock(), (), status=500),
-    )
     resp_ok = _make_mock_response(200, body=[{**_STATION_STRASSEN, "price": "1.733"}])
 
     fuel_responses = []

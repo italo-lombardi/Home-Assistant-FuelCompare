@@ -74,7 +74,9 @@ def _parse_time(s: str) -> dt_time | None:
         hours += 12
     elif period == "am" and hours == 12:
         hours = 0
-    return dt_time(hours % 24, minutes)
+    if hours > 23:
+        return None
+    return dt_time(hours, minutes)
 
 
 def _is_open(hours_str: str) -> bool | None:

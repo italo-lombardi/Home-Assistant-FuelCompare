@@ -247,7 +247,7 @@ class CaQcProvider(BaseProvider):
 
     REQUIRES_API_KEY = False
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",

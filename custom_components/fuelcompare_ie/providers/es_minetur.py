@@ -46,6 +46,7 @@ will always be None.
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -333,11 +334,9 @@ class EsMineturProvider(BaseProvider):
                 f"MINETUR response could not be decoded as UTF-8: {err}"
             ) from err
 
-        import json as _json
-
         try:
-            payload: dict[str, Any] = _json.loads(text)
-        except _json.JSONDecodeError as err:
+            payload: dict[str, Any] = json.loads(text)
+        except json.JSONDecodeError as err:
             raise ProviderError(f"MINETUR response is not valid JSON: {err}") from err
 
         if payload.get("ResultadoConsulta") != "OK":

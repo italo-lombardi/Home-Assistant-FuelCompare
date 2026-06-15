@@ -16,13 +16,47 @@
         "data": {
           "name": "Ime"
         }
+      },
+      "county": {
+        "title": "Select County",
+        "description": "Select your county to find nearby stations.",
+        "data": {
+          "station_county": "County"
+        }
+      },
+      "api_key": {
+        "title": "API Key",
+        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "data": {
+          "api_key": "API Key"
+        }
+      },
+      "station_picker": {
+        "title": "Select Station",
+        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "data": {
+          "station_id": "Station"
+        }
+      },
+      "location": {
+        "title": "Set Location",
+        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "data": {
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "radius_km": "Radius (km)"
+        }
       }
     },
     "error": {
-      "invalid_station_id": "Neveljaven ID postaje. Vnesite veljavno pozitivno število."
+      "invalid_station_id": "Neveljaven ID postaje. Vnesite veljavno pozitivno število.",
+      "invalid_api_key": "API key cannot be empty.",
+      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
+      "no_stations_found": "No stations found for this county. Try a different county."
     },
     "abort": {
-      "already_configured": "Ta postaja je že nastavljena."
+      "already_configured": "Ta postaja je že nastavljena.",
+      "no_providers_for_country": "No data providers are available for this country."
     }
   },
   "entity": {

@@ -40,6 +40,7 @@ HTML scraping with no formal API stability guarantee.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import ClassVar
 
@@ -161,8 +162,6 @@ class MdFuelProvider(BaseProvider):
         Raises:
             ProviderError: When both pages fail to return a valid price.
         """
-        import asyncio
-
         benzina_task = self._fetch_price(session, _URL_BENZINA_95, "benzina_95")
         motorina_task = self._fetch_price(session, _URL_MOTORINA, "motorina")
 

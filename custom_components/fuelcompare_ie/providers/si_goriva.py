@@ -438,8 +438,6 @@ class SiGorivaProvider(BaseProvider):
                 "goriva.si: failed to fetch franchise list (brand names will be absent): %s",
                 err,
             )
-            # Stamp the timestamp even on failure so we don't retry on every poll.
-            self._franchise_cache_ts = time.monotonic()
             return {}
 
         cache: dict[int, str] = {}

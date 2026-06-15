@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from math import atan2, cos, radians, sin, sqrt
-from typing import Any, ClassVar, Literal, TypedDict
+from typing import Any, ClassVar, Final, Literal, TypedDict
 
 from aiohttp import ClientSession
 
@@ -190,7 +190,9 @@ class StationData(TypedDict, total=False):
 
 # All keys that the sensor platform knows how to handle.
 # Used as a reference — providers declare a subset in CAPABILITIES.
-ALL_SENSOR_KEYS: frozenset[str] = frozenset(StationData.__annotations__.keys())
+ALL_SENSOR_KEYS: Final[frozenset[str]] = frozenset(
+    StationData.__required_keys__ | StationData.__optional_keys__
+)
 
 
 class BaseProvider(ABC):
@@ -236,9 +238,7 @@ class BaseProvider(ABC):
             "offerings",
             "amenities",
             "payments",
-            "last_successful_fetch",  # always added by coordinator, not provider data
             "is_open",
-            "data_fetch_problem",  # always added by coordinator
         }
     )
     """Set of StationData keys this provider populates.
@@ -248,9 +248,9 @@ class BaseProvider(ABC):
     keys are silently ignored.
 
     Keys 'last_successful_fetch' and 'data_fetch_problem' are special:
-    they are always created regardless of CAPABILITIES (they come from the
-    coordinator, not the provider data). Listing them here is optional but
-    documents intent.
+    they are always created by the coordinator regardless of CAPABILITIES.
+    Do NOT list them here — they are coordinator-level passthroughs, like
+    'source_station_id' and 'tablename' which are also injected automatically.
     """
 
     STATION_ID_HINT: ClassVar[str] = "Enter the station ID from the station URL."

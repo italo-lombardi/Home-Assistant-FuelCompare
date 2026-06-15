@@ -230,7 +230,12 @@ def test_capabilities_include_coordinator_sentinels() -> None:
 
 def test_api_url_targets_tcs_cloudfunctions() -> None:
     """_API_URL must target the TCS Cloud Function."""
-    assert "tcs-digitalbackend.cloudfunctions.net" in _API_URL
+    from urllib.parse import urlparse
+
+    assert (
+        urlparse(_API_URL).netloc
+        == "europe-west6-tcs-digitalbackend.cloudfunctions.net"
+    )
     assert _API_URL.startswith("https://")
 
 

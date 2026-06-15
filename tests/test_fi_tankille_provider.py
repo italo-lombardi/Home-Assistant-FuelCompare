@@ -565,7 +565,7 @@ async def test_async_fetch_propagates_client_error() -> None:
     session.post = MagicMock(side_effect=ClientError("connection refused"))
 
     provider = _make_provider()
-    with pytest.raises(Exception):
+    with pytest.raises(ClientError):
         await provider.async_fetch(session, _NATIONAL_STATION_ID)
 
 
@@ -692,6 +692,13 @@ def test_parse_price_divides_cents_to_eur() -> None:
     """_parse_price divides values >10 by 100 to convert cents/litre to EUR/litre."""
     result = _parse_price(193)
     assert result == pytest.approx(1.93, rel=1e-4)
+
+
+def test_parse_price_rejects_implausibly_high_eur_after_conversion() -> None:
+    """_parse_price returns None when value >10 EUR/L after /100 conversion."""
+    # 1100 cents -> 11.0 EUR/L -> exceeds 10.0 guard -> None
+    result = _parse_price(1100)
+    assert result is None
 
 
 # ---------------------------------------------------------------------------

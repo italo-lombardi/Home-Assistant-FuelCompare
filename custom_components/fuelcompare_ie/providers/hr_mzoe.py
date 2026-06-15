@@ -20,6 +20,7 @@ Fuel type mapping (vrsta_gorivas tip_goriva_id):
 from __future__ import annotations
 
 import gzip
+import json
 import logging
 from typing import Any
 
@@ -199,10 +200,9 @@ class HRMzoeProvider(BaseProvider):
         async with session.get(_DATA_URL, headers=_HEADERS, timeout=_TIMEOUT) as resp:
             resp.raise_for_status()
             compressed = await resp.read()
-        import json as _json
 
         try:
-            return _json.loads(gzip.decompress(compressed))
+            return json.loads(gzip.decompress(compressed))
         except (gzip.BadGzipFile, OSError, ValueError) as err:
             raise ProviderError(
                 f"Failed to decompress/parse mzoe-gor.hr response: {err}"

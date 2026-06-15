@@ -100,6 +100,7 @@ any HTTP/network failure so the config flow does not crash.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any, ClassVar
 
@@ -400,8 +401,6 @@ class AuQldProvider(BaseProvider):
         headers = self._auth_headers()
 
         # Fetch sites and prices concurrently.
-        import asyncio  # local import to avoid top-level asyncio in module scope
-
         sites_task = self._get_json(session, _SITES_URL, headers, "sites")
         prices_task = self._get_json(session, _PRICES_URL, headers, "prices")
         sites_payload, prices_payload = await asyncio.gather(sites_task, prices_task)

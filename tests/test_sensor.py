@@ -399,6 +399,23 @@ async def test_about_category_extra_attributes() -> None:
     assert result == {"station_id": "12345", "Wheelchair ramp": True, "Elevator": False}
 
 
+async def test_about_category_flat_key_non_dict_returns_empty() -> None:
+    """_get_category_data returns {} when flat key exists but is not a dict."""
+    sensor = _make_about_sensor(
+        {"Accessibility": "not_a_dict"}, category="Accessibility"
+    )
+    assert sensor.native_value is None
+    assert sensor.available is False
+
+
+async def test_about_category_flat_key_dict_returned() -> None:
+    """_get_category_data returns flat key dict when about key is absent."""
+    flat_data = {"Wheelchair ramp": True, "Elevator": False}
+    sensor = _make_about_sensor({"Accessibility": flat_data}, category="Accessibility")
+    assert sensor.available is True
+    assert sensor.native_value == "Wheelchair ramp"
+
+
 async def test_working_hours_extra_attributes_no_raw() -> None:
     """extra_state_attributes returns station_id only when working_hours is None in data."""
     sensor = _make_working_hours_sensor({"working_hours": None})

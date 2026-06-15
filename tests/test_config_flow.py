@@ -1717,14 +1717,15 @@ def _make_simple_float_sensor(data_key: str, data: dict):
 
 
 def test_make_location_factory_returns_simple_str_sensor() -> None:
-    """_make_location factory creates a StationSimpleStrSensor for the location key (line 106)."""
+    """_INFO_SENSOR_REGISTRY['location'] creates a StationSimpleStrSensor for the location key."""
     from custom_components.fuelcompare_ie.sensor import (
         StationSimpleStrSensor,
-        _make_location,
+        _INFO_SENSOR_REGISTRY,
     )
 
     coord = _make_coordinator({"location": "53.3498,-6.2603"})
-    sensor = _make_location(coord, "99999", "Test Station")
+    factory = _INFO_SENSOR_REGISTRY["location"]
+    sensor = factory(coord, "99999", "Test Station")
     assert isinstance(sensor, StationSimpleStrSensor)
     assert sensor._data_key == "location"
     assert sensor._attr_icon == "mdi:map-marker-radius"

@@ -181,7 +181,7 @@ class ChTcsProvider(BaseProvider):
     CURRENCY: ClassVar[str] = "CHF/L"
     REQUIRES_API_KEY = False
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",
@@ -405,7 +405,6 @@ class ChTcsProvider(BaseProvider):
         results: list[list[dict] | None] = list(await asyncio.gather(*tasks))
 
         merged: dict[str, dict[str, Any]] = {}
-        fuel_idx = 0
         bbox_count = len(sub_bboxes)
 
         for i, stations in enumerate(results):
@@ -445,7 +444,6 @@ class ChTcsProvider(BaseProvider):
                         "fiability"
                     )
 
-        _ = fuel_idx  # silence unused-variable warning
         return merged
 
     async def _fetch_bbox(

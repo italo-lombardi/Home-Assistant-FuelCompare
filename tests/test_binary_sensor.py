@@ -13,6 +13,7 @@ from custom_components.fuelcompare_ie.binary_sensor import (
     _is_open,
     _parse_time,
 )
+from tests.test_sensor import _make_coordinator
 
 
 # ---------------------------------------------------------------------------
@@ -66,6 +67,12 @@ async def test_parse_time_midnight() -> None:
 async def test_parse_time_invalid() -> None:
     """Garbage string returns None."""
     assert _parse_time("garbage") is None
+
+
+async def test_parse_time_hours_over_23_returns_none() -> None:
+    """_parse_time returns None when computed hours exceed 23."""
+    # "13pm" → hours=13+12=25 → > 23 → None
+    assert _parse_time("13p.m.") is None
 
 
 # ---------------------------------------------------------------------------
@@ -354,7 +361,6 @@ async def test_is_open_extra_attributes_no_data() -> None:
 
 def _make_facility_sensor(cap_key: str, data: dict | None):
     from custom_components.fuelcompare_ie.binary_sensor import FacilityBinarySensor
-    from tests.test_sensor import _make_coordinator
 
     coord = _make_coordinator(data)
     sensor = object.__new__(FacilityBinarySensor)
@@ -423,13 +429,13 @@ def test_is_open_osm_standard_range() -> None:
     # Simulate Monday 10:00 (open)
     with patch.object(_dt, "now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
-        mock_now.return_value.time.return_value = __import__("datetime").time(10, 0)
+        mock_now.return_value.time.return_value = dt_time(10, 0)
         assert _is_open("Mo-Su 07:00-23:00") is True
 
     # Simulate Monday 06:00 (before opening)
     with patch.object(_dt, "now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
-        mock_now.return_value.time.return_value = __import__("datetime").time(6, 0)
+        mock_now.return_value.time.return_value = dt_time(6, 0)
         assert _is_open("Mo-Su 07:00-23:00") is False
 
 
@@ -601,6 +607,15 @@ def test_day_matches_comma_separated_list() -> None:
     assert _day_matches("tu-th,sa", 3) is True  # Thursday (idx=3)
     assert _day_matches("tu-th,sa", 5) is True  # Saturday (idx=5)
     assert _day_matches("tu-th,sa", 4) is False  # Friday not in list
+
+
+def test_day_matches_trailing_comma_skips_empty_segment() -> None:
+    """Trailing comma in day spec produces empty segment, which is skipped."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    # "mo," splits to ["mo", ""] — empty segment should be skipped, not match
+    assert _day_matches("mo,", 0) is True  # Monday matches
+    assert _day_matches("mo,", 2) is False  # Wednesday doesn't match
 
 
 # ---------------------------------------------------------------------------

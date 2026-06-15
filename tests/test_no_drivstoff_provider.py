@@ -323,6 +323,12 @@ def test_parse_price_returns_none_for_zero() -> None:
     assert _parse_price(0) is None
 
 
+def test_parse_price_returns_none_above_100_nok() -> None:
+    """_parse_price returns None for implausibly high values (> 100 NOK/L)."""
+    assert _parse_price(101) is None
+    assert _parse_price(100) == pytest.approx(100.0)
+
+
 def test_parse_price_returns_none_for_negative() -> None:
     """_parse_price returns None for a negative value."""
     assert _parse_price(-1.0) is None
