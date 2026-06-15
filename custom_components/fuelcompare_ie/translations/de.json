@@ -69,7 +69,7 @@
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",
       "no_providers_for_country": "Für dieses Land sind keine Datenanbieter verfügbar.",
-      "no_counties_for_country": "Für das ausgewählte Land sind keine Landkreise konfiguriert."
+      "no_counties_for_country": "Für das ausgewählte Land sind keine Bezirke konfiguriert."
     }
   },
   "issues": {

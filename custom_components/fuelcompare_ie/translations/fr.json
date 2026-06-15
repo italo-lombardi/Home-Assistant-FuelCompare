@@ -53,7 +53,7 @@
         }
       },
       "name": {
-        "title": "Nom de la Station",
+        "title": "Nom de la station",
         "description": "Confirmez ou modifiez le nom de cette station.",
         "data": {
           "name": "Nom"
@@ -69,7 +69,7 @@
     "abort": {
       "already_configured": "Cette station est déjà configurée.",
       "no_providers_for_country": "Aucun fournisseur de données n'est disponible pour ce pays.",
-      "no_counties_for_country": "Aucun département n'est configuré pour le pays sélectionné."
+      "no_counties_for_country": "Aucun comté n'est configuré pour le pays sélectionné."
     }
   },
   "issues": {
@@ -136,7 +136,7 @@
         "name": "Longitude"
       },
       "station_name": {
-        "name": "Nom de la Station"
+        "name": "Nom de la station"
       },
       "accessibility": {
         "name": "Accessibilité"
@@ -204,7 +204,7 @@
         "name": "Accepte les cartes"
       },
       "accepts_cash": {
-        "name": "Accepte espèces"
+        "name": "Accepte les espèces"
       },
       "accepts_contactless": {
         "name": "Accepte le sans contact"

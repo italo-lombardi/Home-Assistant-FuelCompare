@@ -69,7 +69,7 @@
     "abort": {
       "already_configured": "Denna station är redan konfigurerad.",
       "no_providers_for_country": "Inga dataleverantörer finns tillgängliga för detta land.",
-      "no_counties_for_country": "Inga kommuner är konfigurerade för det valda landet."
+      "no_counties_for_country": "Inga län är konfigurerade för det valda landet."
     }
   },
   "issues": {

@@ -69,7 +69,7 @@
     "abort": {
       "already_configured": "Ta stacja jest już skonfigurowana.",
       "no_providers_for_country": "Brak dostępnych dostawców danych dla tego kraju.",
-      "no_counties_for_country": "Dla wybranego kraju nie skonfigurowano żadnych powiatów."
+      "no_counties_for_country": "Dla wybranego kraju nie skonfigurowano żadnych hrabstw."
     }
   },
   "issues": {

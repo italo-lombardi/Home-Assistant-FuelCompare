@@ -69,7 +69,7 @@
     "abort": {
       "already_configured": "Esta estación ya está configurada.",
       "no_providers_for_country": "No hay proveedores de datos disponibles para este país.",
-      "no_counties_for_country": "No hay municipios configurados para el país seleccionado."
+      "no_counties_for_country": "No hay condados configurados para el país seleccionado."
     }
   },
   "issues": {

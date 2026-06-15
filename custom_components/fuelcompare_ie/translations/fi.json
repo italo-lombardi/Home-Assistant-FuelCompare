@@ -69,7 +69,7 @@
     "abort": {
       "already_configured": "Tämä asema on jo määritetty.",
       "no_providers_for_country": "Tälle maalle ei ole saatavilla tietolähteen tarjoajia.",
-      "no_counties_for_country": "Valitulle maalle ei ole konfiguroitu maakuntia."
+      "no_counties_for_country": "Valitulle maalle ei ole konfiguroitu läänejä."
     }
   },
   "issues": {
