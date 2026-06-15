@@ -14,12 +14,12 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import DEFAULT_SCAN_INTERVAL
 from .crypto import cryptojs_decrypt as _cryptojs_decrypt  # noqa: F401  # re-exported for test compat
-from .providers.base import BaseProvider, ProviderError
+from .providers.base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class FuelCompareIECoordinator(DataUpdateCoordinator[dict]):
+class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     """Coordinator that delegates data fetching to a BaseProvider."""
 
     def __init__(
@@ -120,4 +120,4 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[dict]):
             _LOGGER.debug(
                 "Unexpected error fetching station %s: %s", self.station_id, err
             )
-            raise UpdateFailed(f"Unexpected error: {err}") from err
+            raise UpdateFailed(f"Unexpected error: {type(err).__name__}") from err

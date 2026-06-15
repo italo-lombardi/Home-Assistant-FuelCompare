@@ -45,13 +45,21 @@ def _make_xlsx_bytes(
     ws = wb.active
 
     # Row 1 — date row (date in col A)
-    ws.append([bulletin_date, "", "", "", "", ""])
+    ws.append([bulletin_date, "", "", "", "", "", ""])
     # Row 2 — units
     ws.append(
-        ["Country", "Euro/1000L", "Euro/1000L", "Euro/1000L", "change", "Euro/1000L"]
+        [
+            "Country",
+            "Euro/1000L",
+            "Euro/1000L",
+            "Euro/1000L",
+            "change",
+            "Euro/1000L",
+            "Euro/1000L",
+        ]
     )
     # Row 3 — Germany (filler)
-    ws.append(["Germany", 1900.0, 1750.0, 850.0, 5.0, 1100.0])
+    ws.append(["Germany", 1900.0, 1750.0, 1100.0, 5.0, 800.0, 850.0])
     # Row 4 — Netherlands (optional)
     if include_nl:
         ws.append(
@@ -59,9 +67,10 @@ def _make_xlsx_bytes(
                 "Netherlands",
                 nl_benzine,
                 nl_diesel,
-                nl_lpg,
-                0.0,  # col 4 is a change column, skipped
-                nl_heating,
+                nl_heating,  # col 3 = heating gas oil
+                0.0,  # col 4 = weekly change (skipped)
+                None,  # col 5 = fuel oil low-sulphur (skipped)
+                nl_lpg,  # col 6 = LPG
             ]
         )
 
@@ -538,3 +547,80 @@ def test_provider_registered_in_registry() -> None:
 
     assert "nl_anwb" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["nl_anwb"] is NlAnwbProvider
+
+
+# ---------------------------------------------------------------------------
+# New coverage tests for lines 285, 316-317, 340, 359
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_parse_bulletin_raises_on_openpyxl_missing() -> None:
+    """_parse_bulletin raises ProviderError when openpyxl cannot be imported (lines 316-317)."""
+    import sys
+    from unittest.mock import patch
+
+    with patch.dict(sys.modules, {"openpyxl": None}):
+        with pytest.raises(ProviderError, match="openpyxl"):
+            await _parse_bulletin(b"irrelevant")
+
+
+@pytest.mark.asyncio
+async def test_parse_bulletin_raises_when_no_active_sheet() -> None:
+    """_parse_bulletin raises ProviderError when workbook has no active sheet (line 340)."""
+    import openpyxl
+    from unittest.mock import patch
+
+    mock_wb = MagicMock()
+    mock_wb.active = None
+    mock_wb.close = MagicMock()
+    with patch.object(openpyxl, "load_workbook", return_value=mock_wb):
+        with pytest.raises(ProviderError, match="no active sheet"):
+            await _parse_bulletin(b"fake")
+
+
+@pytest.mark.asyncio
+async def test_parse_bulletin_skips_row_with_none_country_cell() -> None:
+    """_parse_bulletin skips data rows where country cell is None (line 359)."""
+    try:
+        import openpyxl
+    except ImportError:
+        pytest.skip("openpyxl not installed")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["2026-06-08", "", "", "", "", ""])
+    ws.append(
+        ["Country", "Euro/1000L", "Euro/1000L", "Euro/1000L", "change", "Euro/1000L"]
+    )
+    ws.append([None, 1900.0, 1750.0, 850.0, 5.0, 1100.0])
+    ws.append(["Netherlands", 2255.94, 2150.59, 900.0, 0.0, 1200.0])
+    buf = io.BytesIO()
+    wb.save(buf)
+    data = await _parse_bulletin(buf.getvalue())
+    assert data.get("e10") is not None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_raises_provider_error_on_client_response_error() -> None:
+    """async_fetch wraps aiohttp ClientResponseError in ProviderError (line 285)."""
+    from aiohttp import ClientResponseError, RequestInfo
+    import yarl
+
+    request_info = RequestInfo(
+        url=yarl.URL("https://example.com"),
+        method="GET",
+        headers={},
+        real_url=yarl.URL("https://example.com"),
+    )
+    exc = ClientResponseError(request_info=request_info, history=())
+
+    mock_resp = AsyncMock()
+    mock_resp.__aenter__ = AsyncMock(side_effect=exc)
+    mock_resp.__aexit__ = AsyncMock(return_value=False)
+    session = MagicMock(spec=ClientSession)
+    session.get = MagicMock(return_value=mock_resp)
+
+    provider = NlAnwbProvider()
+    with pytest.raises(ProviderError, match="HTTP error"):
+        await provider.async_fetch(session, "NL")

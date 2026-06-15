@@ -700,7 +700,7 @@ async def test_async_fetch_all_product_codes_mapped() -> None:
 
 
 async def test_async_fetch_aviation_fuels_as_extra_attrs() -> None:
-    """async_fetch stores JETA1 and AVGAS100LL as extra passthrough attributes."""
+    """Aviation fuel codes (JETA1, AVGAS100LL) are not exposed as StationData keys."""
     resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
     resp_lpg = _make_mock_response(200, json_data=_AUTOGAS_PAYLOAD)
     session = _make_session(resp_wholesale, resp_lpg)
@@ -708,11 +708,8 @@ async def test_async_fetch_aviation_fuels_as_extra_attrs() -> None:
     provider = _make_provider()
     data = await provider.async_fetch(session, "PL")
 
-    # Aviation fuels stored as lowercase keys
-    assert "jeta1" in data
-    assert "avgas100ll" in data
-    assert data["jeta1"] == pytest.approx(7.1, abs=1e-4)
-    assert data["avgas100ll"] == pytest.approx(8.9, abs=1e-4)
+    assert "jeta1" not in data
+    assert "avgas100ll" not in data
 
 
 async def test_async_fetch_prices_in_pln_per_litre_not_per_1000l() -> None:
@@ -751,4 +748,71 @@ async def test_async_fetch_missing_products_return_none() -> None:
     assert data.get("unleaded") is not None
     assert data.get("diesel") is None
     assert data.get("premium_unleaded") is None
+    assert data.get("lpg") is None
+
+
+# ---------------------------------------------------------------------------
+# _parse_price_pln / _fetch_lpg_price edge-cases (lines 142, 145-146, 148,
+# 406-410)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_non_list_payload_returns_none_for_lpg() -> None:
+    """_fetch_lpg_price returns None when /autogasprices returns a non-list JSON value."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(200, json_data={"error": "unexpected"})
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_none_value_skipped() -> None:
+    """_parse_price_pln returns None for a None value; record is skipped in LPG min."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(
+        200,
+        json_data=[{"voivodeship": "Mazowieckie", "value": None}],
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_non_numeric_value_skipped() -> None:
+    """_parse_price_pln returns None for a non-numeric string; record is skipped in LPG min."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(
+        200,
+        json_data=[{"voivodeship": "Mazowieckie", "value": "not-a-number"}],
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data.get("lpg") is None
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_lpg_non_positive_value_skipped() -> None:
+    """_parse_price_pln returns None for a non-positive value; record is skipped in LPG min."""
+    resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
+    resp_lpg = _make_mock_response(
+        200,
+        json_data=[{"voivodeship": "Mazowieckie", "value": 0}],
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
     assert data.get("lpg") is None

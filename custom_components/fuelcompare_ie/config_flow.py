@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import logging
 from typing import Any
 
@@ -21,6 +22,7 @@ from .const import (
     CONF_COUNTRY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
+    CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
     CONF_STATION_COUNTY,
@@ -76,10 +78,9 @@ _COUNTRY_NAMES: dict[str, str] = {
 
 def _countries_from_registry() -> list[tuple[str, str]]:
     """Derive (ISO code, display label) list from PROVIDER_REGISTRY."""
-    seen: dict[str, str] = {}
+    seen: set[str] = set()
     for cls in PROVIDER_REGISTRY.values():
-        if cls.COUNTRY not in seen:
-            seen[cls.COUNTRY] = cls.COUNTRY
+        seen.add(cls.COUNTRY)
     pairs = [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
     pairs.sort(key=lambda x: x[1])
     return pairs
@@ -340,7 +341,7 @@ def _counties_for_country(country: str) -> dict[str, str]:
 
 
 async def _fetch_station_name(
-    hass, station_id: str, provider_key: str = DEFAULT_PROVIDER
+    hass, station_id: str, provider_key: str = DEFAULT_PROVIDER, api_key: str = ""
 ) -> str | None:
     """Resolve station display name via the selected provider.
 
@@ -352,7 +353,11 @@ async def _fetch_station_name(
         return None
     try:
         session = async_get_clientsession(hass)
-        provider = provider_cls(station_id)
+        sig = inspect.signature(provider_cls.__init__)
+        if api_key and "api_key" in sig.parameters:
+            provider = provider_cls(station_id, api_key=api_key)
+        else:
+            provider = provider_cls(station_id)
         return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
@@ -514,7 +519,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
-                    self.hass, station_id, self._provider_key
+                    self.hass, station_id, self._provider_key, self._api_key
                 )
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
@@ -568,10 +573,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     await self.async_set_unique_id(
                         f"{DOMAIN}_{self._provider_key}_{station_id}"
                     )
-                    self._abort_if_unique_id_configured()
+                self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
-                    self.hass, station_id, self._provider_key
+                    self.hass, station_id, self._provider_key, self._api_key
                 )
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
@@ -589,6 +594,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     init_kwargs["api_key"] = self._api_key
                 provider_instance = provider_cls("", **init_kwargs)
                 list_kwargs: dict[str, Any] = {"county": self._station_county}
+                if self._postal_code:
+                    list_kwargs["postal_code"] = self._postal_code
                 if self._latitude is not None:
                     list_kwargs["lat"] = self._latitude
                 if self._longitude is not None:
@@ -637,13 +644,26 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         default_lon = self.hass.config.longitude
 
         # Detect if the selected provider needs a postal code (e.g. be_carbu).
-        import inspect as _inspect
-
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
-        needs_postal = (
-            provider_cls is not None
-            and "postal_code" in _inspect.signature(provider_cls.__init__).parameters
+        needs_postal = provider_cls is not None and getattr(
+            provider_cls, "NEEDS_POSTAL_CODE", False
         )
+
+        def _location_schema(lat: float, lon: float, needs_pc: bool) -> vol.Schema:
+            schema_dict: dict = {
+                vol.Required(CONF_LATITUDE, default=lat): vol.All(
+                    vol.Coerce(float), vol.Range(min=-90, max=90)
+                ),
+                vol.Required(CONF_LONGITUDE, default=lon): vol.All(
+                    vol.Coerce(float), vol.Range(min=-180, max=180)
+                ),
+                vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                    vol.Coerce(float), vol.Range(min=0.1, max=500)
+                ),
+            }
+            if needs_pc:
+                schema_dict[vol.Optional(CONF_POSTAL_CODE, default="")] = str
+            return vol.Schema(schema_dict)
 
         if user_input is not None:
             errors: dict[str, str] = {}
@@ -657,28 +677,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_location"
                 return self.async_show_form(
                     step_id="location",
-                    data_schema=vol.Schema(
-                        {
-                            vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
-                                vol.Coerce(float), vol.Range(min=-90, max=90)
-                            ),
-                            vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
-                                vol.Coerce(float), vol.Range(min=-180, max=180)
-                            ),
-                            vol.Optional(
-                                CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM
-                            ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=500)),
-                            **(
-                                {vol.Optional("postal_code", default=""): str}
-                                if needs_postal
-                                else {}
-                            ),
-                        }
+                    data_schema=_location_schema(
+                        default_lat, default_lon, needs_postal
                     ),
                     errors=errors,
                 )
             if needs_postal:
-                self._postal_code = str(user_input.get("postal_code") or "").strip()
+                self._postal_code = str(user_input.get(CONF_POSTAL_CODE) or "").strip()
             self._station_id = ""
             unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
             await self.async_set_unique_id(unique)
@@ -689,22 +694,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             return await self.async_step_station_picker()
 
-        schema_dict: dict = {
-            vol.Required(CONF_LATITUDE, default=default_lat): vol.All(
-                vol.Coerce(float), vol.Range(min=-90, max=90)
-            ),
-            vol.Required(CONF_LONGITUDE, default=default_lon): vol.All(
-                vol.Coerce(float), vol.Range(min=-180, max=180)
-            ),
-            vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
-                vol.Coerce(float), vol.Range(min=0.1, max=500)
-            ),
-        }
-        if needs_postal:
-            schema_dict[vol.Optional("postal_code", default="")] = str
         return self.async_show_form(
             step_id="location",
-            data_schema=vol.Schema(schema_dict),
+            data_schema=_location_schema(default_lat, default_lon, needs_postal),
             errors={},
         )
 
@@ -728,7 +720,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 if self._station_county:
                     data[CONF_STATION_COUNTY] = self._station_county
             if self._postal_code:
-                data["postal_code"] = self._postal_code
+                data[CONF_POSTAL_CODE] = self._postal_code
             if self._latitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
@@ -752,8 +744,8 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Manage options, pre-filling the existing API key and radius."""
-        is_location_entry = CONF_RADIUS_KM in self.config_entry.data
-        provider_key = self.config_entry.data.get("provider", DEFAULT_PROVIDER)
+        is_location_entry = CONF_LATITUDE in self.config_entry.data
+        provider_key = self.config_entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_key)
         requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
 
@@ -783,10 +775,8 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
             schema_dict: dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
-            schema = (
-                vol.Schema(schema_dict)
-                if schema_dict
-                else vol.Schema({vol.Optional("_dummy"): str})
-            )
+            if not schema_dict:
+                return self.async_create_entry(data={})
+            schema = vol.Schema(schema_dict)
 
         return self.async_show_form(step_id="init", data_schema=schema)

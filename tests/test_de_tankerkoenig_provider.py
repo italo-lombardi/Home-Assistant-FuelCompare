@@ -828,37 +828,37 @@ async def test_async_fetch_raises_provider_error_when_station_null() -> None:
 
 
 async def test_async_fetch_propagates_client_error() -> None:
-    """async_fetch wraps aiohttp ClientError in ProviderError to prevent apikey URL logging."""
+    """async_fetch lets aiohttp ClientError propagate for stale-data retention."""
     session = MagicMock()
     session.get = MagicMock(side_effect=ClientError("connection refused"))
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ClientError):
         await provider.async_fetch(session, _STATION_UUID)
 
 
 async def test_async_fetch_raises_on_non_200() -> None:
-    """async_fetch wraps raise_for_status ClientError in ProviderError."""
+    """async_fetch lets ClientError from raise_for_status propagate."""
     resp = _make_mock_response(401)
     resp.raise_for_status = MagicMock(side_effect=ClientError("401 Unauthorized"))
     session = _make_session(resp)
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ClientError):
         await provider.async_fetch(session, _STATION_UUID)
 
 
 async def test_async_fetch_raises_on_http_403() -> None:
-    """async_fetch wraps raise_for_status ClientError in ProviderError for 403."""
+    """async_fetch lets ClientError propagate for 403."""
     resp = _make_mock_response(403)
     resp.raise_for_status = MagicMock(side_effect=ClientError("403 Forbidden"))
     session = _make_session(resp)
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ClientError):
         await provider.async_fetch(session, _STATION_UUID)
 
 
@@ -1417,3 +1417,15 @@ async def test_async_list_stations_skips_station_with_null_id() -> None:
     assert _STATION_UUID in ids
     # Must not crash regardless of how the null id is handled
     assert isinstance(result, list)
+
+
+async def test_async_fetch_wraps_non_client_error_in_provider_error() -> None:
+    """Non-ClientError exceptions (e.g. json decode) are wrapped in ProviderError."""
+    resp = _make_mock_response(200)
+    resp.json = AsyncMock(side_effect=ValueError("bad json"))
+    session = _make_session(resp)
+
+    provider = _make_provider()
+
+    with pytest.raises(ProviderError):
+        await provider.async_fetch(session, _STATION_UUID)

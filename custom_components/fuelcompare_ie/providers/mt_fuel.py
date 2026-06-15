@@ -241,9 +241,6 @@ class MtFuelProvider(BaseProvider):
         data["diesel"] = prices.get("diesel")
         data["lpg"] = prices.get("lpg")
         data["kerosene"] = prices.get("heating_oil")
-        # Also store under source-specific keys for templates / extra attrs
-        data["petrol_95"] = prices.get("petrol_95")  # type: ignore[typeddict-unknown-key]
-        data["heating_oil"] = prices.get("heating_oil")  # type: ignore[typeddict-unknown-key]
 
         _LOGGER.debug(
             "MtFuelProvider: unleaded=%s diesel=%s lpg=%s kerosene=%s",

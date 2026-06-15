@@ -33,13 +33,8 @@ carbu.com uses short slugs in the station listing URL path:
   unleaded          E10          Super 95 (E10)
   premium_unleaded  E5           Super 98 (E5)
   diesel            D            Diesel (B7)
-  diesel_b10        B10          Diesel (B10)   (extra field, not in base TypedDict)
-  diesel_hvo        HVO          Diesel XTL/HVO (extra field)
   lpg               LPG          LPG / Autogas
   cng               CNG          CNG
-  lng               LNG          LNG            (extra field)
-  hydrogen          H2           Hydrogen       (extra field)
-  electric          ELEC         Electricity    (extra field)
 
 Bot protection
 --------------
@@ -158,15 +153,6 @@ _FUEL_KEY_TO_SLUG: dict[str, str] = {
     "cng": "CNG",  # Compressed Natural Gas
 }
 
-# Extra fuel slugs not in the StationData TypedDict — stored as pass-through keys.
-_EXTRA_SLUG_TO_KEY: dict[str, str] = {
-    "B10": "diesel_b10",  # Diesel B10
-    "HVO": "diesel_hvo",  # Diesel XTL/HVO
-    "LNG": "lng_fuel",  # Liquefied Natural Gas (renamed from "lng" to avoid confusion with longitude)
-    "H2": "hydrogen",  # Hydrogen
-    "ELEC": "electric",  # Electric charging
-}
-
 # All slugs we ever fan-out to during a station listing
 _ALL_SLUGS: tuple[str, ...] = (
     "E10",
@@ -174,13 +160,10 @@ _ALL_SLUGS: tuple[str, ...] = (
     "GO",
     "LPG",
     "CNG",
-    "B10",
-    "HVO",
 )
 
 # Reverse lookup: slug → StationData key (for the keys that have one)
 _SLUG_TO_FUEL_KEY: dict[str, str] = {v: k for k, v in _FUEL_KEY_TO_SLUG.items()}
-_SLUG_TO_FUEL_KEY.update(_EXTRA_SLUG_TO_KEY)
 
 # Primary fan-out slugs for async_list_stations display (cheaper + faster)
 _DISPLAY_SLUGS: tuple[str, ...] = ("GO", "E10")
@@ -380,6 +363,7 @@ class BeCarbuProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — carbu.com rate-limit guidance
+    NEEDS_POSTAL_CODE = True
 
     CAPABILITIES: frozenset[str] = frozenset(
         {
@@ -893,13 +877,6 @@ class BeCarbuProvider(BaseProvider):
             "lastupdated": None,  # carbu.com does not expose per-station timestamps
             "source_station_id": station_id,
         }
-
-        # Extra fuel types (not in CAPABILITIES but useful as pass-through attrs)
-        data["diesel_b10"] = prices.get("diesel_b10")  # type: ignore[typeddict-unknown-key]
-        data["diesel_hvo"] = prices.get("diesel_hvo")  # type: ignore[typeddict-unknown-key]
-        data["lng_fuel"] = prices.get("lng_fuel")  # type: ignore[typeddict-unknown-key]
-        data["hydrogen"] = prices.get("hydrogen")  # type: ignore[typeddict-unknown-key]
-        data["electric"] = prices.get("electric")  # type: ignore[typeddict-unknown-key]
 
         _LOGGER.debug(
             "BeCarbu: assembled data for station %s: diesel=%s unleaded=%s "

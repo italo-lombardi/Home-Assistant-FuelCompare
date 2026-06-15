@@ -41,6 +41,7 @@ HTML scraping with no formal API stability guarantee.
 from __future__ import annotations
 
 import logging
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -97,6 +98,7 @@ class MdFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 43200  # 12 hours — ANRE updates at most once daily
+    CURRENCY: ClassVar[str] = "MDL/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {
@@ -290,14 +292,6 @@ class MdFuelProvider(BaseProvider):
         _LOGGER.debug("Fetching ANRE Moldova price page: %s (%s)", url, fuel_label)
         try:
             async with session.get(url, headers=_HEADERS, timeout=_TIMEOUT) as resp:
-                if resp.status != 200:
-                    _LOGGER.warning(
-                        "ANRE Moldova returned HTTP %s for %s (%s)",
-                        resp.status,
-                        url,
-                        fuel_label,
-                    )
-                    return None
                 resp.raise_for_status()
                 html = await resp.text(encoding="utf-8", errors="replace")
         except ClientResponseError as err:

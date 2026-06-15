@@ -85,11 +85,11 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
 _HEADER_TO_KEY: dict[str, str] = {
     "diesel": "diesel",
     "dizel": "diesel",
-    "super 95": "super95",
-    "eurosuper 95": "super95",
-    "benz": "super95",  # fallback: any "benz*" column
-    "super 98": "super98",
-    "eurosuper 98": "super98",
+    "super 95": "unleaded",
+    "eurosuper 95": "unleaded",
+    "benz": "unleaded",  # fallback: any "benz*" column
+    "super 98": "premium_unleaded",
+    "eurosuper 98": "premium_unleaded",
     "lpg": "lpg",
     "autoplin": "lpg",
 }
@@ -135,23 +135,18 @@ class BaFuelProvider(BaseProvider):
     CAPABILITIES: frozenset[str] = frozenset(
         {
             "diesel",
+            "unleaded",
+            "premium_unleaded",
             "lpg",
             "name",
             "brand",
             "address",
             "county",
-            "latitude",
-            "longitude",
             "lastupdated",
             "last_successful_fetch",
             "data_fetch_problem",
         }
     )
-
-    # Extra fuel keys surfaced via the scraper but not in CAPABILITIES because
-    # they are not declared in the base StationData TypedDict.  They travel as
-    # extra passthrough attributes.
-    _EXTRA_FUEL_KEYS: frozenset[str] = frozenset({"super95", "super98"})
 
     def __init__(
         self,
@@ -291,13 +286,13 @@ class BaFuelProvider(BaseProvider):
             display_name = f"{name} ({address})" if address else name
 
             diesel_val = raw.get("diesel")
-            super95_val = raw.get("super95")
+            unleaded_val = raw.get("unleaded")
 
             price_parts: list[str] = []
             if diesel_val is not None:
                 price_parts.append(f"Diesel {diesel_val:.3f} KM")
-            if super95_val is not None:
-                price_parts.append(f"Super95 {super95_val:.3f} KM")
+            if unleaded_val is not None:
+                price_parts.append(f"Unleaded {unleaded_val:.3f} KM")
 
             label = (
                 f"{display_name} — {' / '.join(price_parts)}"
@@ -560,8 +555,8 @@ def _parse_stations_div(html: str) -> list[dict[str, Any]]:
                 "name": current_block.get("name"),
                 "address": current_block.get("address"),
                 "diesel": prices_found[0] if len(prices_found) > 0 else None,
-                "super95": prices_found[1] if len(prices_found) > 1 else None,
-                "super98": prices_found[2] if len(prices_found) > 2 else None,
+                "unleaded": prices_found[1] if len(prices_found) > 1 else None,
+                "premium_unleaded": prices_found[2] if len(prices_found) > 2 else None,
                 "lpg": prices_found[3] if len(prices_found) > 3 else None,
             }
             stations.append(station)
@@ -592,8 +587,8 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
     Returns:
         List of station dicts, each with keys:
           name (str|None), address (str|None),
-          diesel (float|None), super95 (float|None),
-          super98 (float|None), lpg (float|None).
+          diesel (float|None), petrol (float|None),
+          premium_unleaded (float|None), lpg (float|None).
         Empty list if no table / no parseable data found.
     """
     # Use div-card parser when the modern Tailwind CSS layout is detected
@@ -667,8 +662,8 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
             "name": name_raw,
             "address": address_raw,
             "diesel": _parse_price(_cell(fuel_cols.get("diesel"))),
-            "super95": _parse_price(_cell(fuel_cols.get("super95"))),
-            "super98": _parse_price(_cell(fuel_cols.get("super98"))),
+            "unleaded": _parse_price(_cell(fuel_cols.get("unleaded"))),
+            "premium_unleaded": _parse_price(_cell(fuel_cols.get("premium_unleaded"))),
             "lpg": _parse_price(_cell(fuel_cols.get("lpg"))),
         }
         stations.append(station)
@@ -702,6 +697,8 @@ def _build_station_data(
 
     data: StationData = {
         "diesel": raw.get("diesel"),
+        "unleaded": raw.get("unleaded"),
+        "premium_unleaded": raw.get("premium_unleaded"),
         "lpg": raw.get("lpg"),
         "name": name,
         "brand": None,  # cijenegoriva.ba does not expose a brand field
@@ -713,18 +710,14 @@ def _build_station_data(
         "source_station_id": station_id,
     }
 
-    # Extra fuel keys travel as passthrough attributes
-    data["super95"] = raw.get("super95")  # type: ignore[typeddict-unknown-key]
-    data["super98"] = raw.get("super98")  # type: ignore[typeddict-unknown-key]
-
     _LOGGER.debug(
         "cijenegoriva.ba parsed data for station %s: diesel=%s lpg=%s "
-        "super95=%s super98=%s",
+        "unleaded=%s premium_unleaded=%s",
         station_id,
         data.get("diesel"),
         data.get("lpg"),
-        data.get("super95"),
-        data.get("super98"),
+        data.get("unleaded"),
+        data.get("premium_unleaded"),
     )
 
     return data

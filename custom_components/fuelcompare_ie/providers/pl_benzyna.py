@@ -438,7 +438,6 @@ class PlBenzynaProvider(BaseProvider):
         """
         # Extract prices for each mapped product
         price_map: dict[str, float | None] = {}
-        extra_map: dict[str, float | None] = {}
         latest_date: str | None = None
 
         for record in prices_data:
@@ -455,8 +454,6 @@ class PlBenzynaProvider(BaseProvider):
             if product_code in _PRODUCT_TO_KEY:
                 key = _PRODUCT_TO_KEY[product_code]
                 price_map[key] = price
-            elif product_code in _EXTRA_PRODUCTS:
-                extra_map[product_code] = price
 
         data: StationData = {
             # Fuel prices (PLN/litre)
@@ -475,10 +472,6 @@ class PlBenzynaProvider(BaseProvider):
             # Meta
             "source_station_id": _NATIONAL_STATION_ID,
         }
-
-        # Extra aviation fuel prices as passthrough attributes
-        for product_code, price in extra_map.items():
-            data[product_code.lower()] = price  # type: ignore[literal-required]
 
         _LOGGER.debug(
             "ORLEN wholesale parsed: unleaded=%s diesel=%s lpg=%s "

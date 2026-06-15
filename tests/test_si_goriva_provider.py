@@ -231,9 +231,9 @@ def test_capabilities_includes_location_fields() -> None:
     assert "longitude" in caps
 
 
-def test_capabilities_includes_timing_field() -> None:
-    """CAPABILITIES includes lastupdated."""
-    assert "lastupdated" in SiGorivaProvider.CAPABILITIES
+def test_capabilities_excludes_lastupdated() -> None:
+    """CAPABILITIES does not include lastupdated (API has no per-station timestamps)."""
+    assert "lastupdated" not in SiGorivaProvider.CAPABILITIES
 
 
 def test_capabilities_includes_coordinator_sentinels() -> None:
@@ -1488,3 +1488,95 @@ async def test_fetch_all_stations_empty_results_key() -> None:
     stations, _ = await provider._fetch_all_stations(session)
 
     assert stations == []
+
+
+# ---------------------------------------------------------------------------
+# Coverage for lines 277, 398-402, 514-515
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_skips_station_missing_lat_lng() -> None:
+    """async_list_stations skips stations that have no lat/lng when coords provided (line 277)."""
+    no_coords_station = {
+        **_BASE_STATION,
+        "pk": 5001,
+        "lat": None,
+        "lng": None,
+    }
+    franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
+    page1 = _make_mock_response(
+        200,
+        json_data=_search_page([no_coords_station]),
+    )
+    session = _make_session(franchise_resp, page1)
+
+    provider = _default_provider()
+    result = await provider.async_list_stations(
+        session, lat=46.0517, lng=14.5079, radius_km=10.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "5001" not in station_ids
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_skips_station_missing_only_lng() -> None:
+    """async_list_stations skips stations with lat but no lng when coords provided (line 277)."""
+    partial_coords_station = {
+        **_BASE_STATION,
+        "pk": 5002,
+        "lat": 46.0517,
+        "lng": None,
+    }
+    franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
+    page1 = _make_mock_response(
+        200,
+        json_data=_search_page([partial_coords_station]),
+    )
+    session = _make_session(franchise_resp, page1)
+
+    provider = _default_provider()
+    result = await provider.async_list_stations(
+        session, lat=46.0517, lng=14.5079, radius_km=10.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "5002" not in station_ids
+
+
+@pytest.mark.asyncio
+async def test_fetch_all_stations_breaks_on_max_pages() -> None:
+    """_fetch_all_stations breaks and does not loop forever when MAX_PAGES exceeded (lines 398-402)."""
+    from custom_components.fuelcompare_ie.providers.si_goriva import MAX_PAGES
+
+    # Build MAX_PAGES responses each with has_next=True so the loop would
+    # continue past the limit.  The (MAX_PAGES + 1)-th response must never
+    # be consumed.
+    responses = [
+        _make_mock_response(200, json_data=_search_page([_BASE_STATION], has_next=True))
+        for _ in range(MAX_PAGES + 1)
+    ]
+    session = _make_session(*responses)
+
+    provider = _default_provider()
+    stations, complete = await provider._fetch_all_stations(session)
+
+    # Should have stopped at MAX_PAGES, not fetched indefinitely.
+    assert session.get.call_count == MAX_PAGES
+    # complete must be False because we hit the page limit, not the end.
+    assert complete is False
+
+
+def test_parse_station_brand_none_when_franchise_pk_invalid_type() -> None:
+    """_parse_station silently handles non-int franchise_pk, brand stays None (lines 514-515)."""
+    station = {**_BASE_STATION, "franchise": "not-an-int"}
+    result = _parse_station(station, {_FRANCHISE_PK: _BRAND_NAME})
+    assert result["brand"] is None
+
+
+def test_parse_station_brand_none_when_franchise_pk_is_dict() -> None:
+    """_parse_station silently handles dict franchise_pk (TypeError path), brand stays None (lines 514-515)."""
+    station = {**_BASE_STATION, "franchise": {"nested": "value"}}
+    result = _parse_station(station, {_FRANCHISE_PK: _BRAND_NAME})
+    assert result["brand"] is None

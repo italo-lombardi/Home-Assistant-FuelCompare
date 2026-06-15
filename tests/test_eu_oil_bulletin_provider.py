@@ -16,7 +16,7 @@ Covers:
 from __future__ import annotations
 
 import io
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -866,3 +866,341 @@ def test_download_url_targets_ec_europa() -> None:
 def test_download_url_contains_with_taxes_uuid() -> None:
     """_DOWNLOAD_URL contains the prices-with-taxes UUID."""
     assert "264c2d0f-f161-4ea3-a777-78faae59bea0" in _DOWNLOAD_URL
+
+
+# ---------------------------------------------------------------------------
+# openpyxl import error — async_fetch (lines 268-269)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_raises_provider_error_when_openpyxl_missing() -> None:
+    """async_fetch raises ProviderError when openpyxl cannot be imported (lines 268-269)."""
+    import builtins
+    import sys
+
+    real_import = builtins.__import__
+
+    def _block_openpyxl(name, *args, **kwargs):
+        if name == "openpyxl":
+            raise ImportError("no openpyxl")
+        return real_import(name, *args, **kwargs)
+
+    sys.modules.pop("openpyxl", None)
+    provider = _make_provider("DE")
+    session = MagicMock()
+
+    with patch("builtins.__import__", side_effect=_block_openpyxl):
+        with pytest.raises(ProviderError, match="openpyxl"):
+            await provider.async_fetch(session, "DE")
+
+
+# ---------------------------------------------------------------------------
+# openpyxl import warning + empty return — async_list_stations (lines 377-381)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_when_openpyxl_missing() -> None:
+    """async_list_stations returns [] and logs a warning when openpyxl is missing (lines 377-381)."""
+    import builtins
+    import sys
+
+    real_import = builtins.__import__
+
+    def _block_openpyxl(name, *args, **kwargs):
+        if name == "openpyxl":
+            raise ImportError("no openpyxl")
+        return real_import(name, *args, **kwargs)
+
+    sys.modules.pop("openpyxl", None)
+    provider = _make_provider("DE")
+    session = MagicMock()
+
+    with patch("builtins.__import__", side_effect=_block_openpyxl):
+        result = await provider.async_list_stations(session)
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# sheet is None — async_fetch (line 295)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+async def test_async_fetch_raises_provider_error_when_active_sheet_is_none() -> None:
+    """async_fetch raises ProviderError when workbook has no active sheet (line 295)."""
+    wb_bytes = _make_bulletin_workbook(
+        [("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0)]
+    )
+    resp = _make_mock_response(200, body=wb_bytes)
+    session = _make_session(resp)
+
+    wb_mock = MagicMock()
+    wb_mock.active = None
+    wb_mock.close = MagicMock()
+
+    loop_mock = MagicMock()
+    loop_mock.run_in_executor = AsyncMock(return_value=wb_mock)
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    with patch(
+        "custom_components.fuelcompare_ie.providers.eu_oil_bulletin.asyncio.get_running_loop",
+        return_value=loop_mock,
+    ):
+        with pytest.raises(ProviderError, match="no active sheet"):
+            await provider.async_fetch(session, "DE")
+
+
+# ---------------------------------------------------------------------------
+# header cell access raises — async_fetch (lines 308-309, 311)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+async def test_async_fetch_uses_date_fallback_when_header_cell_raises() -> None:
+    """async_fetch falls back to today when sheet.cell() raises during header parse (lines 308-311)."""
+
+    wb_bytes = _make_bulletin_workbook(
+        [("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0)]
+    )
+    resp = _make_mock_response(200, body=wb_bytes)
+    session = _make_session(resp)
+
+    real_wb = openpyxl.load_workbook(
+        io.BytesIO(wb_bytes), read_only=True, data_only=True
+    )
+    rows = list(real_wb.active.iter_rows(min_row=3, values_only=True))
+    real_wb.close()
+
+    sheet_mock = MagicMock()
+    sheet_mock.cell = MagicMock(side_effect=Exception("cell access error"))
+    sheet_mock.iter_rows = MagicMock(return_value=iter(rows))
+
+    wb_mock = MagicMock()
+    wb_mock.active = sheet_mock
+    wb_mock.close = MagicMock()
+
+    loop_mock = MagicMock()
+    loop_mock.run_in_executor = AsyncMock(return_value=wb_mock)
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    with patch(
+        "custom_components.fuelcompare_ie.providers.eu_oil_bulletin.asyncio.get_running_loop",
+        return_value=loop_mock,
+    ):
+        data = await provider.async_fetch(session, "DE")
+
+    assert data["lastupdated"] is not None
+    assert len(data["lastupdated"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# week_label fallback when header cells hold only 'in EUR' (line 311)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+async def test_async_fetch_uses_date_fallback_when_no_useful_header() -> None:
+    """async_fetch falls back to today's ISO date when header cells are 'in EUR' (line 311)."""
+
+    # row2/col1 = 'in EUR', row1/col2 = 'in EUR' — both candidates are filtered out
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.cell(row=1, column=1).value = None
+    ws.cell(row=1, column=2).value = "in EUR"
+    ws.cell(row=2, column=1).value = "in EUR"
+    ws.cell(row=3, column=1).value = "Germany"
+    ws.cell(row=3, column=2).value = 1800.0
+    ws.cell(row=3, column=3).value = 1650.0
+    ws.cell(row=3, column=4).value = 900.0
+    ws.cell(row=3, column=5).value = 800.0
+    ws.cell(row=3, column=6).value = 700.0
+    ws.cell(row=3, column=7).value = 600.0
+    buf = io.BytesIO()
+    wb.save(buf)
+    wb_bytes = buf.getvalue()
+
+    resp = _make_mock_response(200, body=wb_bytes)
+    session = _make_session(resp)
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    data = await provider.async_fetch(session, "DE")
+
+    assert data["lastupdated"] is not None
+    assert len(data["lastupdated"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# sheet is None — async_list_stations (line 422)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+async def test_async_list_stations_returns_empty_when_active_sheet_is_none() -> None:
+    """async_list_stations returns [] when workbook.active is None (line 422)."""
+    wb_bytes = _make_bulletin_workbook(
+        [("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0)]
+    )
+    resp = _make_mock_response(200, body=wb_bytes)
+    session = _make_session(resp)
+
+    wb_mock = MagicMock()
+    wb_mock.active = None
+    wb_mock.close = MagicMock()
+
+    loop_mock = MagicMock()
+    loop_mock.run_in_executor = AsyncMock(return_value=wb_mock)
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    with patch(
+        "custom_components.fuelcompare_ie.providers.eu_oil_bulletin.asyncio.get_running_loop",
+        return_value=loop_mock,
+    ):
+        result = await provider.async_list_stations(session)
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# label falls back to country_name when no prices — async_list_stations (line 441)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+async def test_async_list_stations_uses_country_name_as_label_when_no_prices() -> None:
+    """async_list_stations uses country_name as label when both diesel and e5 are None (line 441)."""
+    wb_bytes = _make_bulletin_workbook(
+        [("Germany", None, None, None, None, None, None)]
+    )
+    resp = _make_mock_response(200, body=wb_bytes)
+    session = _make_session(resp)
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    result = await provider.async_list_stations(session)
+
+    de_entry = next((r for r in result if r[0] == "DE"), None)
+    assert de_entry is not None
+    _, label = de_entry
+    assert label == "Germany"
+
+
+# ---------------------------------------------------------------------------
+# network exception in _fetch_excel (lines 492-493)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+async def test_async_fetch_raises_provider_error_on_general_network_error() -> None:
+    """async_fetch raises ProviderError on non-HTTP network exception (lines 492-493)."""
+    session = MagicMock()
+    session.get = MagicMock(side_effect=OSError("network unreachable"))
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    with pytest.raises(ProviderError, match="network error"):
+        await provider.async_fetch(session, "DE")
+
+
+@_skip_if_no_openpyxl
+async def test_async_list_stations_returns_empty_on_general_network_error() -> None:
+    """async_list_stations returns [] on non-HTTP network exception (lines 492-493 via _fetch_excel)."""
+    session = MagicMock()
+    session.get = MagicMock(side_effect=OSError("connection refused"))
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    provider = _make_provider("DE")
+    result = await provider.async_list_stations(session)
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# _resolve_country_code: empty lines skipped (line 554) and partial match (line 566)
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_country_code_skips_blank_lines_in_multiline_input() -> None:
+    """_resolve_country_code skips blank lines between newlines (line 554)."""
+    result = _resolve_country_code("\n\nGermany\n")
+    assert result == "DE"
+
+
+def test_resolve_country_code_partial_match_on_composite_string() -> None:
+    """_resolve_country_code matches a composite string via word-boundary partial match (line 566)."""
+    result = _resolve_country_code("european union weighted average")
+    assert result == "EU27"
+
+
+# ---------------------------------------------------------------------------
+# _parse_sheet: row skipping edge cases (lines 589, 592, 595)
+# ---------------------------------------------------------------------------
+
+
+@_skip_if_no_openpyxl
+def test_parse_sheet_skips_empty_row_tuple() -> None:
+    """_parse_sheet skips an empty row tuple and continues (line 589)."""
+    sheet_mock = MagicMock()
+    sheet_mock.iter_rows = MagicMock(
+        return_value=iter(
+            [
+                (),
+                ("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0),
+            ]
+        )
+    )
+    result = _parse_sheet(sheet_mock, 0)
+    assert "DE" in result
+    assert len(result) == 1
+
+
+@_skip_if_no_openpyxl
+def test_parse_sheet_skips_row_with_none_country_cell() -> None:
+    """_parse_sheet skips a row whose country cell is None (line 592)."""
+    sheet_mock = MagicMock()
+    sheet_mock.iter_rows = MagicMock(
+        return_value=iter(
+            [
+                (None, 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0),
+                ("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0),
+            ]
+        )
+    )
+    result = _parse_sheet(sheet_mock, 0)
+    assert "DE" in result
+    assert len(result) == 1
+
+
+@_skip_if_no_openpyxl
+def test_parse_sheet_skips_row_with_whitespace_only_country() -> None:
+    """_parse_sheet skips a row whose country cell is whitespace-only (line 595)."""
+    sheet_mock = MagicMock()
+    sheet_mock.iter_rows = MagicMock(
+        return_value=iter(
+            [
+                ("   ", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0),
+                ("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0),
+            ]
+        )
+    )
+    result = _parse_sheet(sheet_mock, 0)
+    assert "DE" in result
+    assert len(result) == 1

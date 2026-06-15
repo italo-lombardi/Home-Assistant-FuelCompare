@@ -853,3 +853,82 @@ async def test_async_list_stations_returns_all_brands_regardless_of_location() -
 
     # Both should return the same number of brands
     assert len(results_dk) == len(results_other)
+
+
+# ---------------------------------------------------------------------------
+# New tests targeting uncovered lines 153, 234, 237, 452
+# ---------------------------------------------------------------------------
+
+
+def test_table_parser_done_flag_ignores_second_table() -> None:
+    """handle_starttag returns early (line 153) once _done is set after the first table closes."""
+    html = """\
+<html><body>
+<table>
+  <tr><th>Benzinselskab</th><th>Blyfri 95 (E10)</th></tr>
+  <tr><td>Circle K</td><td>14,13</td></tr>
+</table>
+<table>
+  <tr><th>Benzinselskab</th><th>Blyfri 95 (E10)</th></tr>
+  <tr><td>ShouldNotAppear</td><td>99,99</td></tr>
+</table>
+</body></html>
+"""
+    parser = _TableParser()
+    parser.feed(html)
+    rows = parser.rows
+    brands = [r[0] for r in rows[1:]]
+    assert "Circle K" in brands
+    assert "ShouldNotAppear" not in brands
+
+
+def test_parse_table_skips_empty_row() -> None:
+    """_parse_table continues past an empty row (line 234) without raising."""
+    from unittest.mock import patch
+
+    fake_parser = MagicMock()
+    fake_parser.rows = [
+        ["Benzinselskab", "Blyfri 95 (E10)", "Diesel (B7)"],
+        [],  # empty row — triggers line 234
+        ["Circle K", "14,13", "13,89"],
+    ]
+    with patch(
+        "custom_components.fuelcompare_ie.providers.dk_fuelfinder._TableParser",
+        return_value=fake_parser,
+    ):
+        result = _parse_table("<ignored/>")
+    assert "Circle K" in result
+
+
+def test_parse_table_skips_blank_brand_row() -> None:
+    """_parse_table continues past a row with a blank brand cell (line 237) without raising."""
+    from unittest.mock import patch
+
+    fake_parser = MagicMock()
+    fake_parser.rows = [
+        ["Benzinselskab", "Blyfri 95 (E10)", "Diesel (B7)"],
+        ["   ", "14,00", "13,50"],  # whitespace-only brand — triggers line 237
+        ["Q8", "14,05", "13,79"],
+    ]
+    with patch(
+        "custom_components.fuelcompare_ie.providers.dk_fuelfinder._TableParser",
+        return_value=fake_parser,
+    ):
+        result = _parse_table("<ignored/>")
+    assert "Q8" in result
+    assert "" not in result
+    assert "   " not in result
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_returns_empty_list_when_brand_table_empty() -> None:
+    """async_list_stations returns [] when _fetch_table returns {} (line 452)."""
+    from unittest.mock import patch
+
+    provider = DkFuelFinderProvider("Circle K")
+    session = MagicMock()
+    with patch.object(provider, "_fetch_table", new=AsyncMock(return_value={})):
+        results = await provider.async_list_stations(
+            session, lat=55.67, lng=12.57, radius_km=10.0
+        )
+    assert results == []

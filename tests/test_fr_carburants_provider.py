@@ -488,13 +488,13 @@ def test_parse_pdv_address_combines_street_and_city() -> None:
     assert result["address"] == "1 RUE DES FLEURS, MONTPELLIER"
 
 
-def test_parse_pdv_is_open_false_when_empty_attribute() -> None:
-    """_parse_pdv returns is_open=False when automate-24-24 is empty string."""
+def test_parse_pdv_is_open_none_when_empty_attribute() -> None:
+    """_parse_pdv returns is_open=None for staffed stations (no real-time status)."""
     xml_str = _PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24="")
     root = ET.fromstring(xml_str.encode("iso-8859-1"))
     pdv = next(root.iter("pdv"))
     result = _parse_pdv(pdv)
-    assert result["is_open"] is False
+    assert result["is_open"] is None
 
 
 def test_parse_pdv_is_open_true_when_attribute_is_1() -> None:
@@ -670,7 +670,7 @@ def test_build_station_data_all_fuel_keys_present() -> None:
         "name": "MONTPELLIER (34150)",
         "county": "Dept. 34",
         "address": "1 RUE DES FLEURS, MONTPELLIER",
-        "is_open": False,
+        "is_open": None,
         "lastupdated": "2024-03-15 10:30:00",
         "prices": {
             "diesel": 1.799,
@@ -697,7 +697,7 @@ def test_build_station_data_prices_correct() -> None:
         "name": "MONTPELLIER (34150)",
         "county": "Dept. 34",
         "address": "1 RUE DES FLEURS, MONTPELLIER",
-        "is_open": False,
+        "is_open": None,
         "lastupdated": "2024-03-15 10:30:00",
         "prices": {"diesel": 1.799, "unleaded": 1.849},
     }
@@ -715,7 +715,7 @@ def test_build_station_data_missing_fuel_is_none() -> None:
         "name": "MONTPELLIER (34150)",
         "county": "Dept. 34",
         "address": "1 RUE DES FLEURS, MONTPELLIER",
-        "is_open": False,
+        "is_open": None,
         "lastupdated": "2024-03-15 10:30:00",
         "prices": {"diesel": 1.799},
     }
@@ -1002,8 +1002,8 @@ async def test_async_fetch_field_longitude() -> None:
     assert data["longitude"] == pytest.approx(3.547)
 
 
-async def test_async_fetch_field_is_open_false() -> None:
-    """async_fetch returns is_open=False when automate-24-24 is empty."""
+async def test_async_fetch_field_is_open_none_for_staffed() -> None:
+    """async_fetch returns is_open=None for staffed stations (no real-time status)."""
     zip_bytes = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
     resp = _make_mock_response(200, body=zip_bytes)
     session = _make_session(resp)
@@ -1011,7 +1011,7 @@ async def test_async_fetch_field_is_open_false() -> None:
     provider = FrCarburantsProvider(_STATION_ID)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["is_open"] is False
+    assert data["is_open"] is None
 
 
 async def test_async_fetch_field_is_open_true() -> None:
@@ -1756,3 +1756,79 @@ async def test_fetch_xml_calls_raise_for_status() -> None:
     await provider._fetch_xml(session)
 
     resp.raise_for_status.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _fetch_and_parse_xml — cache hit path (lines 472-476)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_and_parse_xml_returns_cached_element_on_cache_hit() -> None:
+    """_fetch_and_parse_xml returns cached element and skips HTTP when cache is fresh."""
+    cached_root = ET.fromstring("<pdv_liste/>")
+    FrCarburantsProvider._xml_cache = cached_root
+    # A far-future timestamp means (now - ts) is negative, always less than TTL.
+    FrCarburantsProvider._xml_cache_ts = 1e18
+
+    session = MagicMock()
+    provider = FrCarburantsProvider(_STATION_ID)
+    result = await provider._fetch_and_parse_xml(session)
+
+    assert result is cached_root
+    session.get.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# _fetch_xml — size-limit branch (line 522)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_xml_raises_provider_error_when_xml_exceeds_size_limit() -> None:
+    """_fetch_xml raises ProviderError when the ZIP entry's uncompressed size exceeds 50 MB."""
+    # Build a valid ZIP, then patch the uncompressed-size field in the central
+    # directory so ZipInfo.file_size reports > 50_000_000.
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("data.xml", b"<pdv_liste/>")
+    z = bytearray(buf.getvalue())
+
+    # Patch uncompressed size (4-byte LE at offset +24 in the central directory header).
+    cd_idx = z.find(b"PK\x01\x02")
+    assert cd_idx != -1, "central directory signature not found"
+    us_offset = cd_idx + 24
+    z[us_offset : us_offset + 4] = (60_000_000).to_bytes(4, "little")
+
+    resp = _make_mock_response(200, body=bytes(z))
+    session = _make_session(resp)
+
+    provider = FrCarburantsProvider(_STATION_ID)
+    with pytest.raises(ProviderError, match="exceeds size limit"):
+        await provider._fetch_xml(session)
+
+
+# ---------------------------------------------------------------------------
+# _fetch_xml — generic extraction error branch (line 536)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_xml_raises_provider_error_on_generic_extraction_error() -> None:
+    """_fetch_xml wraps non-BadZipFile extraction errors in ProviderError."""
+    from unittest.mock import patch
+
+    # Make _extract_xml raise a non-BadZipFile exception (e.g. RuntimeError)
+    # by patching zipfile.ZipFile so it raises inside the executor.
+    valid_zip = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
+    resp = _make_mock_response(200, body=valid_zip)
+    session = _make_session(resp)
+
+    provider = FrCarburantsProvider(_STATION_ID)
+
+    def _raise_runtime(*args, **kwargs):
+        raise RuntimeError("unexpected extraction error")
+
+    with patch(
+        "custom_components.fuelcompare_ie.providers.fr_carburants.zipfile.ZipFile",
+        _raise_runtime,
+    ):
+        with pytest.raises(ProviderError, match="ZIP extraction failed"):
+            await provider._fetch_xml(session)

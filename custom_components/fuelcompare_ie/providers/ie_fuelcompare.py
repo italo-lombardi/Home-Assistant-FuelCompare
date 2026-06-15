@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT, BASE_URL, FUEL_TYPES
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
 from ..page_assets import PageAssets
-from .base import BaseProvider, ProviderError
+from .base import BaseProvider, ProviderError, StationData
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _HEADERS = {
@@ -40,10 +39,7 @@ class IEFuelCompareProvider(BaseProvider):
             "brand",
             "county",
             "working_hours",
-            "accessibility",
-            "offerings",
-            "amenities",
-            "payments",
+            "tablename",
             "last_successful_fetch",
             "is_open",
             "data_fetch_problem",
@@ -65,7 +61,7 @@ class IEFuelCompareProvider(BaseProvider):
         self,
         session: ClientSession,
         station_id: str,
-    ) -> dict[str, Any]:
+    ) -> StationData:
         """Fetch and return normalised station data dict."""
         station_data = await self._fetch_nextjs(session)
 
@@ -306,8 +302,8 @@ class IEFuelCompareProvider(BaseProvider):
 
     # ---- Shared parser ----------------------------------------------------------
 
-    def _parse_station(self, station: dict) -> dict[str, Any]:
-        fuel_data: dict[str, Any] = {}
+    def _parse_station(self, station: dict) -> StationData:
+        fuel_data: StationData = {}  # type: ignore[typeddict-item]
 
         for fuel_type in FUEL_TYPES:
             raw_value = station.get(fuel_type)

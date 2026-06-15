@@ -947,17 +947,17 @@ def test_build_station_data_invalid_lat_lng_returns_none() -> None:
     assert data["longitude"] is None
 
 
-def test_build_station_data_extra_fuel_types_stored() -> None:
-    """_build_station_data stores extra fuel types (B10, HVO, H2) as pass-through."""
+def test_build_station_data_extra_fuel_types_not_stored() -> None:
+    """_build_station_data ignores extra fuel type keys not in StationData TypedDict."""
     provider = _make_provider()
     meta = {"station_id": _STATION_ID}
     prices = {"diesel_b10": 2.057, "diesel_hvo": 1.989, "hydrogen": 9.999}
 
     data = provider._build_station_data(_STATION_ID, meta, prices)
 
-    # These are extra keys (not in CAPABILITIES), stored as pass-through
-    assert data.get("diesel_b10") == pytest.approx(2.057)
-    assert data.get("diesel_hvo") == pytest.approx(1.989)
+    # Extra keys are not stored — they violate the StationData TypedDict contract
+    assert "diesel_b10" not in data
+    assert "diesel_hvo" not in data
 
 
 # ---------------------------------------------------------------------------
@@ -1058,3 +1058,437 @@ def test_provider_registered_in_registry() -> None:
 
     assert "be_carbu" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["be_carbu"] is BeCarbuProvider
+
+
+# ---------------------------------------------------------------------------
+# _extract_price_from_text — integer-only path (lines 214-217)
+# ---------------------------------------------------------------------------
+
+
+def test_extract_price_integer_only_path_returns_value() -> None:
+    """_extract_price_from_text handles integer-only strings (no decimal point)."""
+    # Covers lines 214-215: integer-only regex branch, float() conversion attempt
+    result = _extract_price_from_text("2")
+    assert result == pytest.approx(2.0)
+
+
+# ---------------------------------------------------------------------------
+# _parse_station_html — invalid lat / lng (lines 316-317, 320-321)
+# ---------------------------------------------------------------------------
+
+_INVALID_COORDS_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99001" data-lat="not_a_number" data-lng="also_bad">
+  <span class="prix">1,799</span>
+</div>
+</body>
+</html>"""
+
+
+def test_parse_station_html_invalid_lat_returns_none() -> None:
+    """_parse_station_html sets latitude to None when data-lat is non-numeric."""
+    result = _parse_station_html(_INVALID_COORDS_HTML, "diesel")
+    assert result
+    assert result[0]["latitude"] is None
+
+
+def test_parse_station_html_invalid_lng_returns_none() -> None:
+    """_parse_station_html sets longitude to None when data-lng is non-numeric."""
+    result = _parse_station_html(_INVALID_COORDS_HTML, "diesel")
+    assert result
+    assert result[0]["longitude"] is None
+
+
+# ---------------------------------------------------------------------------
+# async_fetch — exception wrapping (lines 472-475, 489-496)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_wraps_generic_exception_from_resolve_location() -> None:
+    """async_fetch wraps non-ProviderError from _resolve_location in ProviderError."""
+    provider = _make_provider()
+
+    async def _bad_resolve(session: object, postal_code: str) -> None:
+        raise KeyError("unexpected internal error")
+
+    provider._resolve_location = _bad_resolve  # type: ignore[method-assign]
+    session = MagicMock()
+
+    with pytest.raises(ProviderError, match="Failed to resolve"):
+        await provider.async_fetch(session, _STATION_ID)
+
+
+async def test_async_fetch_slug_fetch_exception_continues_to_next_slug() -> None:
+    """async_fetch logs and continues when _fetch_station_listing raises."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    async def _bad_listing(session: object, slug: str, *args: object) -> None:
+        raise RuntimeError("network timeout")
+
+    provider._fetch_station_listing = _bad_listing  # type: ignore[method-assign]
+    session = MagicMock()
+
+    with pytest.raises(ProviderError, match=_STATION_ID):
+        await provider.async_fetch(session, _STATION_ID)
+
+
+# ---------------------------------------------------------------------------
+# async_fetch_station_name — generic exception (lines 546-548)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_returns_none_on_generic_exception() -> None:
+    """async_fetch_station_name returns None when _fetch_station_listing raises."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    async def _bad_listing(session: object, slug: str, *args: object) -> None:
+        raise RuntimeError("unexpected error")
+
+    provider._fetch_station_listing = _bad_listing  # type: ignore[method-assign]
+    session = MagicMock()
+
+    name = await provider.async_fetch_station_name(session, _STATION_ID)
+    assert name is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — lat/lng only without postal_code (line 594)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_lat_lng_only_no_postal_code_returns_empty() -> None:
+    """async_list_stations returns [] when only lat/lng supplied with no postal_code."""
+    provider = BeCarbuProvider(station_id=_STATION_ID, postal_code=None)
+    session = MagicMock()
+
+    results = await provider.async_list_stations(session, lat=50.85, lng=4.35)
+
+    assert results == []
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — asyncio.gather raises (lines 621-623)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_gather_exception_returns_empty() -> None:
+    """async_list_stations returns [] when asyncio.gather raises unexpectedly."""
+    import asyncio as _real_asyncio
+    import custom_components.fuelcompare_ie.providers.be_carbu as _be_carbu_mod
+
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+    session = MagicMock()
+
+    mock_asyncio = MagicMock()
+    mock_asyncio.gather = AsyncMock(side_effect=RuntimeError("gather failed"))
+    _be_carbu_mod.asyncio = mock_asyncio
+    try:
+        results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
+    finally:
+        _be_carbu_mod.asyncio = _real_asyncio
+
+    assert results == []
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — e10-only station merged (line 642)
+# ---------------------------------------------------------------------------
+
+_DIESEL_ONE_STATION_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99001" data-lat="50.850" data-lng="4.352">
+  <span class="station-name">Diesel Station</span>
+  <span class="prix">1,799</span>
+</div>
+</body>
+</html>"""
+
+_E10_ONLY_STATION_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99003" data-lat="50.870" data-lng="4.370">
+  <span class="station-name">E10 Only Station</span>
+  <span class="prix">1,699</span>
+</div>
+</body>
+</html>"""
+
+
+async def test_async_list_stations_e10_only_station_added_to_merged() -> None:
+    """async_list_stations adds e10-only station (not in diesel) to merged results."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    diesel_resp = _make_html_response(_DIESEL_ONE_STATION_HTML)
+    e10_resp = _make_html_response(_E10_ONLY_STATION_HTML)
+    session = _make_session_with_responses(diesel_resp, e10_resp)
+
+    results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
+    ids = [sid for sid, _ in results]
+
+    assert "99001" in ids
+    assert "99003" in ids
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — station without coords included in radius filter (line 660)
+# ---------------------------------------------------------------------------
+
+_NO_COORDS_STATION_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99001">
+  <span class="station-name">No Coords Station</span>
+  <span class="prix">1,799</span>
+</div>
+</body>
+</html>"""
+
+
+async def test_async_list_stations_station_without_coords_included_in_radius_filter() -> (
+    None
+):
+    """async_list_stations includes stations without coordinates in radius filter."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    diesel_resp = _make_html_response(_NO_COORDS_STATION_HTML)
+    e10_resp = _make_html_response(_EMPTY_HTML)
+    session = _make_session_with_responses(diesel_resp, e10_resp)
+
+    results = await provider.async_list_stations(
+        session, postal_code=_POSTAL_CODE, lat=50.85, lng=4.35, radius_km=10.0
+    )
+
+    assert any(sid == "99001" for sid, _ in results)
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — merged empty after radius filter (line 664)
+# ---------------------------------------------------------------------------
+
+_FAR_STATION_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99001" data-lat="51.900" data-lng="5.352">
+  <span class="prix">1,799</span>
+</div>
+</body>
+</html>"""
+
+
+async def test_async_list_stations_all_stations_outside_radius_returns_empty() -> None:
+    """async_list_stations returns [] when all stations fall outside the radius."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    diesel_resp = _make_html_response(_FAR_STATION_HTML)
+    e10_resp = _make_html_response(_EMPTY_HTML)
+    session = _make_session_with_responses(diesel_resp, e10_resp)
+
+    results = await provider.async_list_stations(
+        session, postal_code=_POSTAL_CODE, lat=50.85, lng=4.35, radius_km=0.001
+    )
+
+    assert results == []
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — station with no prices uses fallback sort key (lines 685-686)
+# ---------------------------------------------------------------------------
+
+_NO_PRICE_STATION_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99001" data-lat="50.850" data-lng="4.352">
+  <span class="station-name">No Price Station</span>
+</div>
+</body>
+</html>"""
+
+
+async def test_async_list_stations_station_without_price_uses_fallback_label() -> None:
+    """async_list_stations uses bare display_name label when station has no price."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    diesel_resp = _make_html_response(_NO_PRICE_STATION_HTML)
+    e10_resp = _make_html_response(_EMPTY_HTML)
+    session = _make_session_with_responses(diesel_resp, e10_resp)
+
+    results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
+
+    assert results
+    sid, label = results[0]
+    assert sid == "99001"
+    assert "€" not in label
+    assert "No Price Station" in label
+
+
+# ---------------------------------------------------------------------------
+# _resolve_location — ClientResponseError raises ProviderError (line 740)
+# ---------------------------------------------------------------------------
+
+
+async def test_resolve_location_raises_provider_error_on_http_response_error() -> None:
+    """_resolve_location raises ProviderError when raise_for_status raises ClientResponseError."""
+    from aiohttp import ClientResponseError  # noqa: PLC0415
+
+    provider = _make_provider()
+    request_info = MagicMock()
+    err = ClientResponseError(request_info, (), status=500, message="Server Error")
+
+    resp = AsyncMock()
+    resp.status = 200
+    resp.raise_for_status = MagicMock(side_effect=err)
+    resp.__aenter__ = AsyncMock(return_value=resp)
+    resp.__aexit__ = AsyncMock(return_value=False)
+    session = MagicMock()
+    session.get = MagicMock(return_value=resp)
+
+    with pytest.raises(ProviderError, match="HTTP error"):
+        await provider._resolve_location(session, _POSTAL_CODE)
+
+
+# ---------------------------------------------------------------------------
+# _fetch_station_listing — ClientResponseError returns empty list (lines 833-834)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_station_listing_returns_empty_on_client_response_error() -> None:
+    """_fetch_station_listing returns [] when raise_for_status raises ClientResponseError."""
+    from aiohttp import ClientResponseError  # noqa: PLC0415
+
+    provider = _provider_with_cached_location()
+    request_info = MagicMock()
+    err = ClientResponseError(
+        request_info, (), status=503, message="Service Unavailable"
+    )
+
+    resp = AsyncMock()
+    resp.status = 200
+    resp.raise_for_status = MagicMock(side_effect=err)
+    resp.__aenter__ = AsyncMock(return_value=resp)
+    resp.__aexit__ = AsyncMock(return_value=False)
+    session = MagicMock()
+    session.get = MagicMock(return_value=resp)
+
+    result = await provider._fetch_station_listing(
+        session, "GO", _TOWN, _POSTAL_CODE, _LOCATION_ID
+    )
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — invalid longitude returns None (lines 874-875)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_invalid_lng_only_returns_none() -> None:
+    """_build_station_data returns None for longitude when it cannot be converted to float."""
+    provider = _make_provider()
+    meta = {
+        "station_id": _STATION_ID,
+        "latitude": 50.85,
+        "longitude": "invalid",
+    }
+
+    data = provider._build_station_data(_STATION_ID, meta, {})
+
+    assert data["longitude"] is None
+    assert data["latitude"] == pytest.approx(50.85)
+
+
+# ---------------------------------------------------------------------------
+# async_fetch — ProviderError re-raise path (line 473)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_reraises_provider_error_from_resolve_location() -> None:
+    """async_fetch re-raises ProviderError raised directly by _resolve_location (line 473)."""
+    provider = _make_provider()
+
+    async def _resolve_raises_provider_error(session: object, postal_code: str) -> None:
+        raise ProviderError("direct provider error from resolve")
+
+    provider._resolve_location = _resolve_raises_provider_error  # type: ignore[method-assign]
+    session = MagicMock()
+
+    with pytest.raises(ProviderError, match="direct provider error from resolve"):
+        await provider.async_fetch(session, _STATION_ID)
+
+
+# ---------------------------------------------------------------------------
+# async_fetch_station_name — E10 fallback returns station name (line 546)
+# ---------------------------------------------------------------------------
+
+_E10_STATION_NAME_HTML = """\
+<html>
+<body>
+<div class="station-content" data-id="99001" data-lat="50.850" data-lng="4.352">
+  <span class="station-name">E10 Named Station</span>
+  <span class="prix">1,699</span>
+</div>
+</body>
+</html>"""
+
+
+async def test_async_fetch_station_name_falls_back_to_e10_listing() -> None:
+    """async_fetch_station_name returns name from E10 listing when absent from diesel."""
+    provider = _make_provider(postal_code=_POSTAL_CODE)
+    provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
+
+    # Diesel listing has a different station; E10 listing has our station
+    diesel_resp = _make_html_response(
+        _STATION_HTML_TEMPLATE.format(station_id="00000", price="2,065")
+    )
+    e10_resp = _make_html_response(_E10_STATION_NAME_HTML)
+    session = _make_session_with_responses(diesel_resp, e10_resp)
+
+    name = await provider.async_fetch_station_name(session, _STATION_ID)
+
+    assert name == "E10 Named Station"
+
+
+# ---------------------------------------------------------------------------
+# _extract_price_from_text — ValueError paths (lines 216-217, 221-222)
+# These paths are defensive and require mocking the regex match objects
+# ---------------------------------------------------------------------------
+
+
+def test_extract_price_from_text_integer_only_match_value_error() -> None:
+    """_extract_price_from_text returns None when integer match raises ValueError (lines 216-217)."""
+    from unittest.mock import MagicMock, patch
+
+    # Simulate float() raising ValueError on the integer-only match
+    bad_match = MagicMock()
+    bad_match.group.return_value = "bad_int"
+
+    with patch("re.search") as mock_search:
+        # First call (decimal pattern) returns None, second (integer pattern) returns bad_match
+        mock_search.side_effect = [None, bad_match]
+        result = _extract_price_from_text("1.invalid")
+
+    assert result is None
+
+
+def test_extract_price_from_text_decimal_match_value_error() -> None:
+    """_extract_price_from_text returns None when decimal match raises ValueError (lines 221-222)."""
+    from unittest.mock import MagicMock, patch
+
+    # Simulate float() raising ValueError on the decimal match
+    bad_match = MagicMock()
+    bad_match.group.return_value = "bad_decimal"
+
+    with patch("re.search") as mock_search:
+        # First call (decimal pattern) returns a bad match
+        mock_search.return_value = bad_match
+        result = _extract_price_from_text("1.invalid")
+
+    assert result is None

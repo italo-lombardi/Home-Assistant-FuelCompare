@@ -111,7 +111,6 @@ class SiGorivaProvider(BaseProvider):
             "unleaded",
             "premium_unleaded",
             "lpg",
-            "lastupdated",
             "name",
             "brand",
             "county",

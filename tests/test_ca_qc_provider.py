@@ -990,3 +990,187 @@ def reset_ca_qc_cache():
     yield
     CaQcProvider._geojson_cache = None
     CaQcProvider._geojson_cache_ts = 0
+
+
+# ---------------------------------------------------------------------------
+# _parse_price — ValueError/TypeError path (lines 135–136)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_price_malformed_numeric_returns_none() -> None:
+    """String with multiple decimal points passes the empty-check but fails float()."""
+    # After _CENTS_RE strips non-digits/dots, '1.2.3' remains, which raises ValueError
+    assert _parse_price("1.2.3¢") is None
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — malformed coordinates (lines 161–163)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_non_numeric_coords_returns_none_latlon() -> None:
+    """Non-numeric coordinate values cause lat/lon to fall back to None."""
+    feature = {
+        **_BASE_FEATURE,
+        "geometry": {
+            "type": "Point",
+            "coordinates": ["not-a-number", "also-not-a-number"],
+        },
+    }
+    result = _build_station_data(feature, _STATION_ID)
+    assert result["latitude"] is None
+    assert result["longitude"] is None
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — unknown gas type (line 191)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_unknown_gas_type_is_skipped() -> None:
+    """Unmapped GasType (e.g. 'Premium Diesel') is skipped; known prices unaffected."""
+    feature = {
+        **_BASE_FEATURE,
+        "properties": {
+            **_BASE_FEATURE["properties"],
+            "Prices": [
+                {"GasType": "Régulier", "Price": "179.9¢", "IsAvailable": True},
+                {"GasType": "Premium Diesel", "Price": "200.0¢", "IsAvailable": True},
+            ],
+        },
+    }
+    result = _build_station_data(feature, _STATION_ID)
+    assert result["unleaded"] == pytest.approx(1.799)
+    # Premium Diesel is not in _GAS_TYPE_MAP — none of the mapped keys get its value
+    assert result["diesel"] is None
+    assert result["premium_unleaded"] is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — malformed coordinates (lines 406–407)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_features_with_non_numeric_coords() -> None:
+    """Features whose coordinates are non-numeric strings are skipped via continue."""
+    bad_coords_feature = {
+        **_BASE_FEATURE,
+        "properties": {
+            **_BASE_FEATURE["properties"],
+            "Name": "Bad Coords Station",
+            "Address": "1 Rue Invalide, Montréal",
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": ["bad", "coords"],
+        },
+    }
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [bad_coords_feature, _BASE_FEATURE],
+    }
+    resp = _make_mock_response(200, json_data=geojson)
+    session = _make_session(resp)
+
+    p = _provider()
+    result = await p.async_list_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    # Bad-coords feature must be skipped; only _BASE_FEATURE is returned
+    assert len(result) == 1
+    sid, _ = result[0]
+    assert sid == _STATION_ID
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — unknown gas type (line 432)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_unknown_gas_type_in_price_summary() -> None:
+    """Unmapped GasType entries are skipped when building the price summary label."""
+    feature_with_unknown = {
+        **_BASE_FEATURE,
+        "properties": {
+            **_BASE_FEATURE["properties"],
+            "Prices": [
+                {"GasType": "E85", "Price": "150.0¢", "IsAvailable": True},
+                {"GasType": "Régulier", "Price": "179.9¢", "IsAvailable": True},
+            ],
+        },
+    }
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [feature_with_unknown],
+    }
+    resp = _make_mock_response(200, json_data=geojson)
+    session = _make_session(resp)
+
+    p = _provider()
+    result = await p.async_list_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    assert len(result) == 1
+    _, label = result[0]
+    # Régulier is mapped → price must appear; E85 is unmapped → silently skipped
+    assert "Reg" in label
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — missing price (line 435)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_unparseable_price_in_summary() -> None:
+    """Price entries where _parse_price returns None are skipped in the summary."""
+    feature_bad_price = {
+        **_BASE_FEATURE,
+        "properties": {
+            **_BASE_FEATURE["properties"],
+            "Prices": [
+                {"GasType": "Régulier", "Price": None, "IsAvailable": True},
+                {"GasType": "Diesel", "Price": "185.4¢", "IsAvailable": True},
+            ],
+        },
+    }
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [feature_bad_price],
+    }
+    resp = _make_mock_response(200, json_data=geojson)
+    session = _make_session(resp)
+
+    p = _provider()
+    result = await p.async_list_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    assert len(result) == 1
+    _, label = result[0]
+    # Diesel price appears; Régulier (None price) is absent from label
+    assert "Diesel" in label
+    assert "Reg" not in label
+
+
+# ---------------------------------------------------------------------------
+# _fetch_geojson — cache hit path (lines 487–488)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_geojson_returns_cached_data_without_http_call() -> None:
+    """_fetch_geojson serves from cache when data is fresh (within TTL)."""
+    import time
+
+    cached_features = [_BASE_FEATURE]
+    CaQcProvider._geojson_cache = cached_features
+    CaQcProvider._geojson_cache_ts = time.monotonic()  # just set → within TTL
+
+    session = MagicMock()
+
+    p = _provider()
+    result = await p._fetch_geojson(session)
+
+    assert result is cached_features
+    session.get.assert_not_called()

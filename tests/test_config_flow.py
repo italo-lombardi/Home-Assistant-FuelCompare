@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
@@ -17,6 +17,9 @@ from custom_components.fuelcompare_ie.const import (
     DEFAULT_COUNTRY,
     DEFAULT_PROVIDER,
     DOMAIN,
+)
+from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
+    IEFuelFinderProvider,
 )
 
 _PATCH_FETCH_NAME = patch(
@@ -795,3 +798,1671 @@ async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
         assert CONF_API_KEY not in result["data"]
     finally:
         PROVIDER_REGISTRY.pop(_FakeDEProvider.PROVIDER_KEY, None)
+
+
+# ---------------------------------------------------------------------------
+# Lines 81-85: postal_code kwarg forwarding
+# ---------------------------------------------------------------------------
+
+
+async def test_async_setup_entry_postal_code_explicit(hass: HomeAssistant) -> None:
+    """Lines 81-85: explicit postal_code field in entry.data is passed to provider."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_PROVIDER,
+        CONF_STATION_ID,
+        DOMAIN,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.be_carbu import BeCarbuProvider
+
+    received: dict = {}
+
+    class _FakeBeCarbu(BeCarbuProvider):
+        PROVIDER_KEY = "be_carbu_test_postal_explicit"
+
+        def __init__(self, station_id: str, postal_code=None, **kwargs):
+            received["postal_code"] = postal_code
+            self._station_id = station_id
+            self._postal_code = postal_code
+            self._latitude = None
+            self._longitude = None
+            self._radius_km = 10.0
+            self._location_cache = {}
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeBeCarbu.PROVIDER_KEY] = _FakeBeCarbu
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_be_postal_explicit",
+            data={
+                CONF_STATION_ID: "99",
+                CONF_PROVIDER: _FakeBeCarbu.PROVIDER_KEY,
+                "postal_code": "1000",
+            },
+            title="BE Test",
+        )
+        entry.add_to_hass(hass)
+
+        with patch(
+            "custom_components.fuelcompare_ie.coordinator.FuelCompareIECoordinator.async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ):
+            assert await hass.config_entries.async_setup(entry.entry_id)
+
+        assert received["postal_code"] == "1000"
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeBeCarbu.PROVIDER_KEY, None)
+
+
+async def test_async_setup_entry_postal_code_from_numeric_county(
+    hass: HomeAssistant,
+) -> None:
+    """Lines 82-83: numeric county falls back as postal_code when postal_code absent."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_PROVIDER,
+        CONF_STATION_COUNTY,
+        CONF_STATION_ID,
+        DOMAIN,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.be_carbu import BeCarbuProvider
+
+    received: dict = {}
+
+    class _FakeBeCarbuCounty(BeCarbuProvider):
+        PROVIDER_KEY = "be_carbu_test_postal_county"
+
+        def __init__(self, station_id: str, postal_code=None, **kwargs):
+            received["postal_code"] = postal_code
+            self._station_id = station_id
+            self._postal_code = postal_code
+            self._latitude = None
+            self._longitude = None
+            self._radius_km = 10.0
+            self._location_cache = {}
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeBeCarbuCounty.PROVIDER_KEY] = _FakeBeCarbuCounty
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_be_postal_county",
+            data={
+                CONF_STATION_ID: "99",
+                CONF_PROVIDER: _FakeBeCarbuCounty.PROVIDER_KEY,
+                CONF_STATION_COUNTY: "1050",
+            },
+            title="BE County Test",
+        )
+        entry.add_to_hass(hass)
+
+        with patch(
+            "custom_components.fuelcompare_ie.coordinator.FuelCompareIECoordinator.async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ):
+            assert await hass.config_entries.async_setup(entry.entry_id)
+
+        assert received["postal_code"] == "1050"
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeBeCarbuCounty.PROVIDER_KEY, None)
+
+
+async def test_async_setup_entry_postal_code_non_numeric_county_not_used(
+    hass: HomeAssistant,
+) -> None:
+    """Line 82: non-numeric county is NOT used as postal_code fallback."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_PROVIDER,
+        CONF_STATION_COUNTY,
+        CONF_STATION_ID,
+        DOMAIN,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.be_carbu import BeCarbuProvider
+
+    received: dict = {}
+
+    class _FakeBeCarbuNonNumeric(BeCarbuProvider):
+        PROVIDER_KEY = "be_carbu_test_postal_nonnumeric"
+
+        def __init__(self, station_id: str, postal_code=None, **kwargs):
+            received["postal_code"] = postal_code
+            self._station_id = station_id
+            self._postal_code = postal_code
+            self._latitude = None
+            self._longitude = None
+            self._radius_km = 10.0
+            self._location_cache = {}
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeBeCarbuNonNumeric.PROVIDER_KEY] = _FakeBeCarbuNonNumeric
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_be_postal_nonnumeric",
+            data={
+                CONF_STATION_ID: "99",
+                CONF_PROVIDER: _FakeBeCarbuNonNumeric.PROVIDER_KEY,
+                CONF_STATION_COUNTY: "Dublin",
+            },
+            title="BE Non-numeric County",
+        )
+        entry.add_to_hass(hass)
+
+        with patch(
+            "custom_components.fuelcompare_ie.coordinator.FuelCompareIECoordinator.async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ):
+            assert await hass.config_entries.async_setup(entry.entry_id)
+
+        # postal_code kwarg should NOT be set (non-numeric county is not a postal code)
+        assert received.get("postal_code") is None
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeBeCarbuNonNumeric.PROVIDER_KEY, None)
+
+
+# ---------------------------------------------------------------------------
+# Lines 88-91: prefecture_id kwarg forwarding
+# ---------------------------------------------------------------------------
+
+
+async def test_async_setup_entry_prefecture_id_valid(hass: HomeAssistant) -> None:
+    """Lines 88-90: numeric station_id is converted to prefecture_id int."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_PROVIDER,
+        CONF_STATION_ID,
+        DOMAIN,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.gr_fuelgov import GrFuelgovProvider
+
+    received: dict = {}
+
+    class _FakeGrProvider(GrFuelgovProvider):
+        PROVIDER_KEY = "gr_fuelgov_test_valid"
+
+        def __init__(self, station_id: str, prefecture_id=None, **kwargs):
+            received["prefecture_id"] = prefecture_id
+            self._station_id = station_id
+            self._prefecture = None
+            self._prefecture_id = prefecture_id
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeGrProvider.PROVIDER_KEY] = _FakeGrProvider
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_gr_prefecture_valid",
+            data={
+                CONF_STATION_ID: "5",
+                CONF_PROVIDER: _FakeGrProvider.PROVIDER_KEY,
+            },
+            title="GR Prefecture 5",
+        )
+        entry.add_to_hass(hass)
+
+        with patch(
+            "custom_components.fuelcompare_ie.coordinator.FuelCompareIECoordinator.async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ):
+            assert await hass.config_entries.async_setup(entry.entry_id)
+
+        assert received["prefecture_id"] == 5
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeGrProvider.PROVIDER_KEY, None)
+
+
+async def test_async_setup_entry_prefecture_id_invalid_skipped(
+    hass: HomeAssistant,
+) -> None:
+    """Lines 88-91: non-numeric station_id causes ValueError; prefecture_id silently skipped."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_PROVIDER,
+        CONF_STATION_ID,
+        DOMAIN,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.gr_fuelgov import GrFuelgovProvider
+
+    received: dict = {"prefecture_id": "NOT_SET"}
+
+    class _FakeGrProviderBadId(GrFuelgovProvider):
+        PROVIDER_KEY = "gr_fuelgov_test_invalid"
+
+        def __init__(self, station_id: str, prefecture_id=None, **kwargs):
+            received["prefecture_id"] = prefecture_id
+            self._station_id = station_id
+            self._prefecture = None
+            self._prefecture_id = prefecture_id
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeGrProviderBadId.PROVIDER_KEY] = _FakeGrProviderBadId
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_gr_prefecture_invalid",
+            data={
+                CONF_STATION_ID: "not-a-number",
+                CONF_PROVIDER: _FakeGrProviderBadId.PROVIDER_KEY,
+            },
+            title="GR Bad Prefecture",
+        )
+        entry.add_to_hass(hass)
+
+        with patch(
+            "custom_components.fuelcompare_ie.coordinator.FuelCompareIECoordinator.async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ):
+            assert await hass.config_entries.async_setup(entry.entry_id)
+
+        # prefecture_id kwarg should NOT be passed (conversion failed, pass silently)
+        assert received["prefecture_id"] is None
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeGrProviderBadId.PROVIDER_KEY, None)
+
+
+# ---------------------------------------------------------------------------
+# Lines 95, 97, 99: lat/lng/radius_km kwarg forwarding
+# ---------------------------------------------------------------------------
+
+
+async def test_async_setup_entry_geo_params_passed(hass: HomeAssistant) -> None:
+    """Lines 95, 97, 99: lat/lng/radius_km are forwarded to geo-capable providers."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_PROVIDER,
+        CONF_RADIUS_KM,
+        CONF_STATION_ID,
+        DOMAIN,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
+        DeTankerkoenigProvider,
+    )
+
+    received: dict = {}
+
+    class _FakeDEGeoProvider(DeTankerkoenigProvider):
+        PROVIDER_KEY = "de_tankerkoenig_test_geo"
+
+        def __init__(
+            self,
+            station_id: str,
+            latitude=None,
+            longitude=None,
+            radius_km=None,
+            **kwargs,
+        ):
+            received["latitude"] = latitude
+            received["longitude"] = longitude
+            received["radius_km"] = radius_km
+            self._station_id = station_id
+            self._api_key = None
+            self._latitude = latitude
+            self._longitude = longitude
+            self._radius_km = radius_km if radius_km is not None else 10.0
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY[_FakeDEGeoProvider.PROVIDER_KEY] = _FakeDEGeoProvider
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_de_geo",
+            data={
+                CONF_STATION_ID: "de-station-1",
+                CONF_PROVIDER: _FakeDEGeoProvider.PROVIDER_KEY,
+                CONF_LATITUDE: 52.52,
+                CONF_LONGITUDE: 13.405,
+                CONF_RADIUS_KM: 7.5,
+            },
+            title="DE Geo Test",
+        )
+        entry.add_to_hass(hass)
+
+        with patch(
+            "custom_components.fuelcompare_ie.coordinator.FuelCompareIECoordinator.async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ):
+            assert await hass.config_entries.async_setup(entry.entry_id)
+
+        assert received["latitude"] == 52.52
+        assert received["longitude"] == 13.405
+        assert received["radius_km"] == 7.5
+    finally:
+        PROVIDER_REGISTRY.pop(_FakeDEGeoProvider.PROVIDER_KEY, None)
+
+
+# ---------------------------------------------------------------------------
+# Lines 99-111: IEFuelCompareProvider.async_fetch_station_name
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_returns_name_field() -> None:
+    """async_fetch_station_name returns data['name'] when present."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+    session = MagicMock()
+    provider._fetch_page_assets = AsyncMock()
+    provider._fetch_nextjs = AsyncMock(return_value={"name": "Circle K Swords"})
+
+    result = await provider.async_fetch_station_name(session, "790")
+
+    assert result == "Circle K Swords"
+
+
+async def test_async_fetch_station_name_falls_back_to_encrypted_api() -> None:
+    """async_fetch_station_name falls back to encrypted API when Next.js returns None."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+    session = MagicMock()
+    provider._fetch_page_assets = AsyncMock()
+    provider._fetch_nextjs = AsyncMock(return_value=None)
+    provider._fetch_encrypted_api = AsyncMock(
+        return_value={"name": "Applegreen Dublin"}
+    )
+
+    result = await provider.async_fetch_station_name(session, "790")
+
+    assert result == "Applegreen Dublin"
+
+
+async def test_async_fetch_station_name_formats_tablename_when_no_name() -> None:
+    """async_fetch_station_name formats tablename when name is absent."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+    session = MagicMock()
+    provider._fetch_page_assets = AsyncMock()
+    provider._fetch_nextjs = AsyncMock(return_value={"tablename": "circle_k_swords"})
+
+    result = await provider.async_fetch_station_name(session, "790")
+
+    assert result == "Circle K Swords"
+
+
+async def test_async_fetch_station_name_returns_none_when_data_empty() -> None:
+    """async_fetch_station_name returns None when both paths return no data."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+    session = MagicMock()
+    provider._fetch_page_assets = AsyncMock()
+    provider._fetch_nextjs = AsyncMock(return_value=None)
+    provider._fetch_encrypted_api = AsyncMock(return_value=None)
+
+    result = await provider.async_fetch_station_name(session, "790")
+
+    assert result is None
+
+
+async def test_async_fetch_station_name_returns_none_on_exception() -> None:
+    """async_fetch_station_name catches exceptions and returns None."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+    session = MagicMock()
+    provider._fetch_page_assets = AsyncMock(side_effect=RuntimeError("network fail"))
+
+    result = await provider.async_fetch_station_name(session, "790")
+
+    assert result is None
+
+
+async def test_async_fetch_station_name_returns_none_when_data_has_no_name_or_tablename() -> (
+    None
+):
+    """async_fetch_station_name returns None when data has neither name nor tablename."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    provider = IEFuelCompareProvider("790")
+    session = MagicMock()
+    provider._fetch_page_assets = AsyncMock()
+    provider._fetch_nextjs = AsyncMock(return_value={"unleaded": 1.799})
+
+    result = await provider.async_fetch_station_name(session, "790")
+
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# IEFuelFinderProvider helpers (used by tests below)
+# ---------------------------------------------------------------------------
+
+_FF_STATION_UUID = "7ec0dd4f-4322-4b4f-9de1-c8894a684626"
+
+_FF_BASE_STATION: dict = {
+    "id": _FF_STATION_UUID,
+    "osm_id": "123456789",
+    "name": "Circle K Mulhuddart",
+    "slug": "circle-k-mulhuddart",
+    "brand": "Circle K",
+    "logo_url": "https://www.google.com/s2/favicons?domain=circlek.com&sz=64",
+    "lat": 53.399,
+    "lng": -6.433,
+    "county": "Dublin",
+    "street": "Mulhuddart Village",
+    "phone": "",
+    "website": "",
+    "opening_hours": "Mo-Su 07:00-23:00",
+    "price": 1.828,
+    "updated_at": "2026-06-13T16:04:01.754194+00:00",
+    "confidence": "likely",
+    "has_price": True,
+}
+
+
+def _ff_make_mock_response(
+    status: int,
+    json_data: dict | None = None,
+) -> AsyncMock:
+    """Build a mock aiohttp response that works as an async context manager."""
+    mock_resp = AsyncMock()
+    mock_resp.status = status
+    mock_resp.json = AsyncMock(return_value=json_data or {})
+    mock_resp.raise_for_status = MagicMock()
+    mock_resp.__aenter__ = AsyncMock(return_value=mock_resp)
+    mock_resp.__aexit__ = AsyncMock(return_value=False)
+    return mock_resp
+
+
+def _ff_make_session(*responses: AsyncMock) -> MagicMock:
+    """Return a mock session whose .get() cycles through *responses*."""
+    session = MagicMock()
+    call_iter = iter(responses)
+
+    def _get(*_args, **_kwargs):
+        return next(call_iter)
+
+    session.get = MagicMock(side_effect=_get)
+    return session
+
+
+# ---------------------------------------------------------------------------
+# async_fetch_station_name — petrol fallback (lines 332-336)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_fallback_to_petrol_when_not_in_diesel() -> None:
+    """async_fetch_station_name finds name via petrol list when diesel list misses the station."""
+    other_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    other_station = {**_FF_BASE_STATION, "id": other_id}
+    diesel_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [other_station],
+            "total": 1,
+            "city": "ireland",
+            "fuel": "diesel",
+        },
+    )
+    petrol_station = {**_FF_BASE_STATION, "name": "Petrol Only Station"}
+    petrol_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [petrol_station],
+            "total": 1,
+            "city": "ireland",
+            "fuel": "petrol",
+        },
+    )
+    session = _ff_make_session(diesel_resp, petrol_resp)
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    name = await provider.async_fetch_station_name(session, _FF_STATION_UUID)
+
+    assert name == "Petrol Only Station"
+
+
+async def test_async_fetch_station_name_returns_none_when_exception_raised() -> None:
+    """async_fetch_station_name returns None (not raises) when an unexpected exception occurs."""
+    from unittest.mock import patch
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+
+    async def _raise(*_args, **_kwargs):
+        raise RuntimeError("unexpected")
+
+    with patch.object(
+        provider, "_fetch_stations", side_effect=RuntimeError("unexpected")
+    ):
+        name = await provider.async_fetch_station_name(MagicMock(), _FF_STATION_UUID)
+
+    assert name is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — exception handler (lines 366-368)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_returns_empty_list_on_exception() -> None:
+    """async_list_stations returns [] when an unexpected exception propagates from gather."""
+    from unittest.mock import patch
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+
+    call_count = 0
+
+    async def _raise_on_second(*_args, **_kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 2:
+            raise RuntimeError("boom")
+        return []
+
+    with patch.object(provider, "_fetch_stations", side_effect=_raise_on_second):
+        result = await provider.async_list_stations(MagicMock(), county="dublin")
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — petrol merge without overwriting diesel (lines 384-388)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_petrol_only_station_included_in_results() -> None:
+    """async_list_stations adds petrol-only stations not in the diesel list."""
+    petrol_only_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+    petrol_only_station = {
+        **_FF_BASE_STATION,
+        "id": petrol_only_id,
+        "name": "Petrol Only Stop",
+        "brand": "",
+        "price": 1.899,
+    }
+    diesel_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [_FF_BASE_STATION],
+            "total": 1,
+            "city": "dublin",
+            "fuel": "diesel",
+        },
+    )
+    petrol_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [_FF_BASE_STATION, petrol_only_station],
+            "total": 2,
+            "city": "dublin",
+            "fuel": "petrol",
+        },
+    )
+    session = _ff_make_session(diesel_resp, petrol_resp)
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    result = await provider.async_list_stations(session, county="dublin")
+
+    uids = [uid for uid, _ in result]
+    assert petrol_only_id in uids
+
+
+async def test_async_list_stations_diesel_record_not_overwritten_by_petrol() -> None:
+    """async_list_stations does not overwrite a diesel-merged station with the petrol record."""
+    diesel_station = {**_FF_BASE_STATION, "price": 1.828}
+    petrol_station = {**_FF_BASE_STATION, "price": 1.849}  # same UUID, different price
+
+    diesel_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [diesel_station],
+            "total": 1,
+            "city": "dublin",
+            "fuel": "diesel",
+        },
+    )
+    petrol_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [petrol_station],
+            "total": 1,
+            "city": "dublin",
+            "fuel": "petrol",
+        },
+    )
+    session = _ff_make_session(diesel_resp, petrol_resp)
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    result = await provider.async_list_stations(session, county="dublin")
+
+    assert len(result) == 1
+    uid, label = result[0]
+    assert uid == _FF_STATION_UUID
+    assert "Diesel" in label
+    assert "Petrol" in label
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — petrol price formatting (line 406)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_label_formats_petrol_price_to_3_decimals() -> None:
+    """async_list_stations formats petrol price as 'Petrol €X.XXX' in label."""
+    diesel_station = {**_FF_BASE_STATION, "price": 1.828}
+    petrol_station = {**_FF_BASE_STATION, "price": 1.849}
+
+    diesel_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [diesel_station],
+            "total": 1,
+            "city": "dublin",
+            "fuel": "diesel",
+        },
+    )
+    petrol_resp = _ff_make_mock_response(
+        200,
+        json_data={
+            "stations": [petrol_station],
+            "total": 1,
+            "city": "dublin",
+            "fuel": "petrol",
+        },
+    )
+    session = _ff_make_session(diesel_resp, petrol_resp)
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    result = await provider.async_list_stations(session, county="dublin")
+
+    assert len(result) == 1
+    _, label = result[0]
+    assert "Petrol €1.849" in label
+
+
+# ---------------------------------------------------------------------------
+# _fetch_stations — HTTP error returns None (lines 471-477)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_stations_returns_none_on_client_response_error() -> None:
+    """_fetch_stations returns None (not raises) on ClientResponseError (4xx/5xx)."""
+    from aiohttp import ClientResponseError
+
+    resp = MagicMock()
+    resp.__aenter__ = AsyncMock(return_value=resp)
+    resp.__aexit__ = AsyncMock(return_value=False)
+    resp.status = 500
+    resp.raise_for_status = MagicMock(
+        side_effect=ClientResponseError(MagicMock(), MagicMock(), status=500)
+    )
+    session = MagicMock()
+    session.get = MagicMock(return_value=resp)
+
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    result = await provider._fetch_stations(session, city="dublin", fuel="diesel")
+
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — price validation (lines 524-525, 530)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_price_returns_none_on_value_error() -> None:
+    """_build_station_data._price returns None when price cannot be cast to float."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    bad_price_station = {**_FF_BASE_STATION, "price": "not-a-number"}
+    prices_by_fuel = {"diesel": bad_price_station}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, _FF_BASE_STATION, prices_by_fuel
+    )
+    assert result["diesel"] is None
+
+
+def test_build_station_data_price_returns_none_for_none_type() -> None:
+    """_build_station_data._price returns None when price is None (TypeError path)."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    no_price_station = {**_FF_BASE_STATION, "price": None}
+    prices_by_fuel = {"diesel": no_price_station}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, _FF_BASE_STATION, prices_by_fuel
+    )
+    assert result["diesel"] is None
+
+
+def test_build_station_data_price_returns_none_for_zero() -> None:
+    """_build_station_data._price returns None when price is zero (non-positive guard)."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    zero_price_station = {**_FF_BASE_STATION, "price": 0}
+    prices_by_fuel = {"diesel": zero_price_station}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, _FF_BASE_STATION, prices_by_fuel
+    )
+    assert result["diesel"] is None
+
+
+def test_build_station_data_price_returns_none_for_negative() -> None:
+    """_build_station_data._price returns None when price is negative."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    neg_price_station = {**_FF_BASE_STATION, "price": -1.5}
+    prices_by_fuel = {"diesel": neg_price_station}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, _FF_BASE_STATION, prices_by_fuel
+    )
+    assert result["diesel"] is None
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — lat/lng float conversion (lines 549-550, 553-554)
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_data_lat_none_on_invalid_string() -> None:
+    """_build_station_data sets lat=None when lat is a non-numeric string."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    bad_lat_station = {**_FF_BASE_STATION, "lat": "not-a-float"}
+    prices_by_fuel = {"diesel": {**bad_lat_station, "price": 1.828}}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, bad_lat_station, prices_by_fuel
+    )
+    assert result["lat"] is None
+    assert result["latitude"] is None
+
+
+def test_build_station_data_lng_none_on_invalid_string() -> None:
+    """_build_station_data sets lng=None when lng is a non-numeric string."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    bad_lng_station = {**_FF_BASE_STATION, "lng": "bad-value"}
+    prices_by_fuel = {"diesel": {**bad_lng_station, "price": 1.828}}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, bad_lng_station, prices_by_fuel
+    )
+    assert result["lng"] is None
+    assert result["longitude"] is None
+
+
+def test_build_station_data_lat_none_on_type_error() -> None:
+    """_build_station_data sets lat=None when lat is an unconvertible type (list)."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    bad_lat_station = {**_FF_BASE_STATION, "lat": [53.399]}
+    prices_by_fuel = {"diesel": {**bad_lat_station, "price": 1.828}}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, bad_lat_station, prices_by_fuel
+    )
+    assert result["lat"] is None
+
+
+def test_build_station_data_lng_none_on_type_error() -> None:
+    """_build_station_data sets lng=None when lng is an unconvertible type (list)."""
+    provider = IEFuelFinderProvider(_FF_STATION_UUID)
+    bad_lng_station = {**_FF_BASE_STATION, "lng": [6.433]}
+    prices_by_fuel = {"diesel": {**bad_lng_station, "price": 1.828}}
+    result = provider._build_station_data(
+        _FF_STATION_UUID, bad_lng_station, prices_by_fuel
+    )
+    assert result["lng"] is None
+
+
+# ---------------------------------------------------------------------------
+# _normalise_county (lines 684-686)
+# ---------------------------------------------------------------------------
+
+
+def test_normalise_county_returns_none_for_none_input() -> None:
+    """_normalise_county returns None when input is None."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
+        _normalise_county,
+    )
+
+    assert _normalise_county(None) is None
+
+
+def test_normalise_county_returns_none_for_empty_string() -> None:
+    """_normalise_county returns None when input is empty string."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
+        _normalise_county,
+    )
+
+    assert _normalise_county("") is None
+
+
+def test_normalise_county_lowercases_and_strips() -> None:
+    """_normalise_county returns lowercase stripped county name."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
+        _normalise_county,
+    )
+
+    assert _normalise_county("  Dublin  ") == "dublin"
+    assert _normalise_county("Cork") == "cork"
+    assert _normalise_county("GALWAY") == "galway"
+
+
+# ---------------------------------------------------------------------------
+# Sensor unit tests — lines 106, 402, 609-610, 619
+# ---------------------------------------------------------------------------
+
+
+def _make_coordinator(data: dict) -> MagicMock:
+    """Return a minimal mock coordinator whose .data is *data*."""
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    coord = MagicMock()
+    coord.data = data
+    coord._provider = IEFuelCompareProvider("99999")
+    return coord
+
+
+def _make_brand_sensor(data: dict):
+    """Return a StationBrandSensor wired to *data*."""
+    from custom_components.fuelcompare_ie.sensor import StationBrandSensor
+
+    coord = _make_coordinator(data)
+    sensor = StationBrandSensor.__new__(StationBrandSensor)
+    sensor.coordinator = coord
+    sensor._station_id = "12345"
+    return sensor
+
+
+def _make_simple_float_sensor(data_key: str, data: dict):
+    """Return a StationSimpleFloatSensor wired to *data*."""
+    from custom_components.fuelcompare_ie.sensor import StationSimpleFloatSensor
+
+    coord = _make_coordinator(data)
+    sensor = StationSimpleFloatSensor.__new__(StationSimpleFloatSensor)
+    sensor.coordinator = coord
+    sensor._station_id = "12345"
+    sensor._data_key = data_key
+    return sensor
+
+
+def test_make_location_factory_returns_simple_str_sensor() -> None:
+    """_make_location factory creates a StationSimpleStrSensor for the location key (line 106)."""
+    from custom_components.fuelcompare_ie.sensor import (
+        StationSimpleStrSensor,
+        _make_location,
+    )
+
+    coord = _make_coordinator({"location": "53.3498,-6.2603"})
+    sensor = _make_location(coord, "99999", "Test Station")
+    assert isinstance(sensor, StationSimpleStrSensor)
+    assert sensor._data_key == "location"
+    assert sensor._attr_icon == "mdi:map-marker-radius"
+    assert sensor.native_value == "53.3498,-6.2603"
+
+
+def test_brand_sensor_returns_brand_when_present() -> None:
+    """StationBrandSensor returns the brand field directly when present (line 402)."""
+    sensor = _make_brand_sensor({"brand": "BP", "tablename": "bp_ireland"})
+    assert sensor.native_value == "BP"
+
+
+def test_simple_float_sensor_native_value_invalid_raises_returns_none() -> None:
+    """StationSimpleFloatSensor returns None when value cannot be converted to float (lines 609-610)."""
+    sensor = _make_simple_float_sensor("latitude", {"latitude": "not-a-float"})
+    assert sensor.native_value is None
+
+
+def test_simple_float_sensor_extra_state_attributes() -> None:
+    """StationSimpleFloatSensor.extra_state_attributes returns station_id dict (line 619)."""
+    sensor = _make_simple_float_sensor("longitude", {"longitude": -6.2603})
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+# ---------------------------------------------------------------------------
+# test_fetch_station_name_unknown_provider_returns_none  (config_flow.py line 352)
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_station_name_unknown_provider_returns_none(
+    hass: HomeAssistant,
+) -> None:
+    """_fetch_station_name returns None when provider_key is not in registry (line 352)."""
+    result = await _fetch_station_name(hass, "999", provider_key="nonexistent_xyz")
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# test_async_get_options_flow_returns_options_flow_instance  (config_flow.py line 371)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_get_options_flow_returns_options_flow_instance(
+    hass: HomeAssistant,
+) -> None:
+    """async_get_options_flow returns a FuelCompareIEOptionsFlow instance (line 371)."""
+    from custom_components.fuelcompare_ie.config_flow import (
+        FuelCompareIEConfigFlow,
+        FuelCompareIEOptionsFlow,
+    )
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_ie_fuelcompare_42_opts_flow",
+        data={CONF_STATION_ID: "42", CONF_PROVIDER: DEFAULT_PROVIDER},
+        title="Station 42",
+    )
+    entry.add_to_hass(hass)
+
+    options_flow = FuelCompareIEConfigFlow.async_get_options_flow(entry)
+    assert isinstance(options_flow, FuelCompareIEOptionsFlow)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_user_single_country_auto_advance  (config_flow.py lines 395-396)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_user_single_country_auto_advance(
+    hass: HomeAssistant,
+) -> None:
+    """When only one country is in the registry, user step auto-advances (lines 395-396)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _SingleCountryProvider(BaseProvider):
+        COUNTRY = "ZZ"
+        PROVIDER_KEY = "zz_only_provider_395"
+        LABEL = "Only Provider"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "manual_id"
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(self, station_id: str) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    saved_registry = dict(PROVIDER_REGISTRY)
+    PROVIDER_REGISTRY.clear()
+    PROVIDER_REGISTRY[_SingleCountryProvider.PROVIDER_KEY] = _SingleCountryProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        result = await flow.async_step_user(user_input=None)
+        # Should have advanced past the country selection
+        assert result.get("step_id") != "user"
+        assert flow._country == "ZZ"
+    finally:
+        PROVIDER_REGISTRY.clear()
+        PROVIDER_REGISTRY.update(saved_registry)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_provider_no_providers_aborts  (config_flow.py line 419)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_provider_no_providers_aborts(
+    hass: HomeAssistant,
+) -> None:
+    """_async_step_provider aborts with 'no_providers_for_country' when none found (line 419)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._country = "XX"  # country with no providers in registry
+
+    result = await flow._async_step_provider()
+    assert result["type"] == "abort"
+    assert result["reason"] == "no_providers_for_country"
+
+
+# ---------------------------------------------------------------------------
+# test_dispatch_after_provider_unknown_key_falls_back_to_station  (config_flow.py line 431)
+# ---------------------------------------------------------------------------
+
+
+async def test_dispatch_after_provider_unknown_key_falls_back_to_station(
+    hass: HomeAssistant,
+) -> None:
+    """_dispatch_after_provider routes to station step when provider_cls is None (line 431)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = "does_not_exist_in_registry_431"
+
+    result = await flow._dispatch_after_provider()
+    assert result["type"] == "form"
+    assert result["step_id"] == "station"
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_station_empty_id_shows_error  (config_flow.py line 507)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_station_empty_id_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_station sets 'invalid_station_id' error on empty station ID (line 507)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = DEFAULT_PROVIDER
+
+    result = await flow.async_step_station(user_input={CONF_STATION_ID: ""})
+    assert result["type"] == "form"
+    assert result["step_id"] == "station"
+    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_station_picker_empty_id_shows_error  (config_flow.py line 563)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_station_picker_empty_id_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_station_picker sets 'invalid_station_id' error on empty station ID (line 563)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = DEFAULT_PROVIDER
+    flow._station_list = [("abc", "Station ABC")]
+
+    with patch(
+        "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+    ):
+        result = await flow.async_step_station_picker(user_input={CONF_STATION_ID: ""})
+    assert result["type"] == "form"
+    assert result["step_id"] == "station_picker"
+    assert result["errors"].get(CONF_STATION_ID) == "invalid_station_id"
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_station_picker_exception_in_list_load  (config_flow.py lines 601-602)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_station_picker_exception_in_list_load(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_station_picker handles exception in async_list_stations (lines 601-602)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _BrokenListProvider601(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "ie_broken_list_601"
+        LABEL = "Broken List 601"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(self, station_id: str, **kwargs) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            raise RuntimeError("network exploded")
+
+    PROVIDER_REGISTRY["ie_broken_list_601"] = _BrokenListProvider601
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "ie_broken_list_601"
+        flow._latitude = 53.35
+        flow._longitude = -6.26
+        flow._radius_km = 5.0
+
+        with patch(
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ):
+            result = await flow.async_step_station_picker(user_input=None)
+
+        assert result["type"] == "form"
+        assert result["step_id"] == "station_picker"
+        assert result["errors"].get("base") == "no_stations_found"
+    finally:
+        PROVIDER_REGISTRY.pop("ie_broken_list_601", None)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_station_picker_no_stations_with_unique_id_routes_to_name  (config_flow.py line 610)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_station_picker_no_stations_with_unique_id_routes_to_name(
+    hass: HomeAssistant,
+) -> None:
+    """station_picker routes to name step when station list empty and unique_id set (line 610)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _EmptyListProvider610(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "ie_empty_list_610_new"
+        LABEL = "Empty List 610"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(self, station_id: str, **kwargs) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["ie_empty_list_610_new"] = _EmptyListProvider610
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "ie_empty_list_610_new"
+        flow._latitude = 53.35
+        flow._longitude = -6.26
+        flow._radius_km = 5.0
+        flow._suggested_name = "Test Location"
+        # Set context as a mutable dict so unique_id can be stored
+        flow.context = {"unique_id": f"{DOMAIN}_ie_empty_list_610_new_test_uid"}
+
+        with patch(
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ):
+            result = await flow.async_step_station_picker(user_input=None)
+
+        assert result["type"] == "form"
+        assert result["step_id"] == "name"
+    finally:
+        PROVIDER_REGISTRY.pop("ie_empty_list_610_new", None)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_location_postal_code_extracted  (config_flow.py line 681)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_location_postal_code_extracted(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_location extracts postal_code into _postal_code when provider needs it (line 681)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_LATITUDE, CONF_LONGITUDE
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _PostalProvider681(BaseProvider):
+        COUNTRY = "BE"
+        PROVIDER_KEY = "be_postal_test_681"
+        LABEL = "Postal Test 681"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
+        NEEDS_POSTAL_CODE = True
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(
+            self, station_id: str, postal_code: str | None = None, **kwargs
+        ) -> None:
+            self._postal_code = postal_code
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["be_postal_test_681"] = _PostalProvider681
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "be_postal_test_681"
+        flow._country = "BE"
+        # Use a mutable context dict so async_set_unique_id can write to it
+        flow.context = {}
+
+        with (
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            ),
+            patch.object(flow, "_abort_if_unique_id_configured"),
+            patch.object(flow, "_async_in_progress", return_value=[]),
+        ):
+            await flow.async_step_location(
+                user_input={
+                    CONF_LATITUDE: 50.85,
+                    CONF_LONGITUDE: 4.35,
+                    "postal_code": "1000",
+                }
+            )
+
+        assert flow._postal_code == "1000"
+    finally:
+        PROVIDER_REGISTRY.pop("be_postal_test_681", None)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_location_shows_postal_code_field_in_schema  (config_flow.py line 704)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_location_shows_postal_code_field_in_schema(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_location adds postal_code field to form schema for postal providers (line 704)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _PostalProvider704(BaseProvider):
+        COUNTRY = "BE"
+        PROVIDER_KEY = "be_postal_test_704"
+        LABEL = "Postal Test 704"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
+        NEEDS_POSTAL_CODE = True
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(
+            self, station_id: str, postal_code: str | None = None, **kwargs
+        ) -> None:
+            self._postal_code = postal_code
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["be_postal_test_704"] = _PostalProvider704
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "be_postal_test_704"
+        flow._country = "BE"
+
+        result = await flow.async_step_location(user_input=None)
+
+        assert result["type"] == "form"
+        assert result["step_id"] == "location"
+        schema_keys = [str(k) for k in result["data_schema"].schema.keys()]
+        assert any("postal_code" in k for k in schema_keys)
+    finally:
+        PROVIDER_REGISTRY.pop("be_postal_test_704", None)
+
+
+# ---------------------------------------------------------------------------
+# test_async_step_name_stores_postal_code_in_entry_data  (config_flow.py line 731)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_name_stores_postal_code_in_entry_data(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_name stores _postal_code in the config entry data dict (line 731)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _PostalProvider731(BaseProvider):
+        COUNTRY = "BE"
+        PROVIDER_KEY = "be_postal_test_731"
+        LABEL = "Postal Test 731"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(
+            self, station_id: str, postal_code: str | None = None, **kwargs
+        ) -> None:
+            self._postal_code = postal_code
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["be_postal_test_731"] = _PostalProvider731
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "be_postal_test_731"
+        flow._country = "BE"
+        flow._postal_code = "1000"
+        flow._station_id = ""
+        flow._latitude = 50.85
+        flow._longitude = 4.35
+        flow._radius_km = 5.0
+        flow._suggested_name = "Brussels Area"
+        # Set context as mutable dict so unique_id can be stored
+        flow.context = {"unique_id": f"{DOMAIN}_be_postal_test_731_uid"}
+
+        result = await flow.async_step_name(user_input={"name": "Brussels Station"})
+
+        assert result["type"] == "create_entry"
+        assert result["data"].get("postal_code") == "1000"
+    finally:
+        PROVIDER_REGISTRY.pop("be_postal_test_731", None)
+
+
+# ---------------------------------------------------------------------------
+# Options flow tests  (config_flow.py lines 755-792)
+# ---------------------------------------------------------------------------
+
+
+async def test_options_flow_station_entry_no_api_key(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a plain station entry (no API key, no location) creates entry immediately."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_{DEFAULT_PROVIDER}_opts_no_key_77",
+        data={CONF_STATION_ID: "77", CONF_PROVIDER: DEFAULT_PROVIDER},
+        title="Station 77",
+    )
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] == "create_entry"
+    assert result["data"] == {}
+
+
+async def test_options_flow_location_entry_with_radius(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a location entry shows radius field (lines 755-792)."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_{DEFAULT_PROVIDER}_loc_opts_radius",
+        data={
+            CONF_PROVIDER: DEFAULT_PROVIDER,
+            CONF_LATITUDE: 53.3498,
+            CONF_LONGITUDE: -6.2603,
+            CONF_RADIUS_KM: 10.0,
+        },
+        title="Dublin Area Opts",
+    )
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] == "form"
+    assert result["step_id"] == "init"
+
+    schema_keys = [str(k) for k in result["data_schema"].schema.keys()]
+    assert any(CONF_RADIUS_KM in k for k in schema_keys)
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], user_input={CONF_RADIUS_KM: 15.0}
+    )
+    assert result["type"] == "create_entry"
+    assert result["data"][CONF_RADIUS_KM] == 15.0
+
+
+async def test_options_flow_location_entry_with_api_key(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a location+API-key entry shows both api_key and radius fields (lines 755-792)."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _FakeDEProviderOptsKey(BaseProvider):
+        COUNTRY = "DE"
+        PROVIDER_KEY = "de_fake_opts_test_key"
+        LABEL = "DE Fake Opts Key"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        REQUIRES_API_KEY = True
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(
+            self, station_id: str, api_key: str | None = None, **kwargs
+        ) -> None:
+            self._api_key = api_key
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["de_fake_opts_test_key"] = _FakeDEProviderOptsKey
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_de_fake_opts_test_key_loc",
+            data={
+                CONF_PROVIDER: "de_fake_opts_test_key",
+                CONF_LATITUDE: 52.52,
+                CONF_LONGITUDE: 13.405,
+                CONF_RADIUS_KM: 5.0,
+            },
+            options={CONF_API_KEY: "existing-key"},
+            title="Berlin Area Key",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"
+
+        schema_keys = [str(k) for k in result["data_schema"].schema.keys()]
+        assert any(CONF_API_KEY in k for k in schema_keys)
+        assert any(CONF_RADIUS_KM in k for k in schema_keys)
+
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"],
+            user_input={CONF_API_KEY: "new-key", CONF_RADIUS_KM: 8.0},
+        )
+        assert result["type"] == "create_entry"
+        assert result["data"][CONF_API_KEY] == "new-key"
+        assert result["data"][CONF_RADIUS_KM] == 8.0
+    finally:
+        PROVIDER_REGISTRY.pop("de_fake_opts_test_key", None)
+
+
+async def test_options_flow_station_entry_with_api_key(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a station entry with API key shows api_key field (lines 755-792)."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _FakeKeyedStationOpts(BaseProvider):
+        COUNTRY = "DE"
+        PROVIDER_KEY = "de_fake_keyed_station_opts"
+        LABEL = "DE Fake Keyed Station Opts"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "manual_id"
+        REQUIRES_API_KEY = True
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(
+            self, station_id: str, api_key: str | None = None, **kwargs
+        ) -> None:
+            self._api_key = api_key
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY["de_fake_keyed_station_opts"] = _FakeKeyedStationOpts
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_de_fake_keyed_station_opts_88",
+            data={CONF_STATION_ID: "88", CONF_PROVIDER: "de_fake_keyed_station_opts"},
+            options={CONF_API_KEY: "old-key"},
+            title="Keyed Station 88 Opts",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"
+
+        schema_keys = [str(k) for k in result["data_schema"].schema.keys()]
+        assert any(CONF_API_KEY in k for k in schema_keys)
+
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"],
+            user_input={CONF_API_KEY: "updated-key"},
+        )
+        assert result["type"] == "create_entry"
+        assert result["data"][CONF_API_KEY] == "updated-key"
+    finally:
+        PROVIDER_REGISTRY.pop("de_fake_keyed_station_opts", None)
+
+
+async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> None:
+    """_reload_entry inner function awaits async_reload when options change."""
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_reload_test_99",
+        data={CONF_STATION_ID: "99", CONF_PROVIDER: "ie_fuelcompare"},
+        title="Reload Test",
+    )
+    entry.add_to_hass(hass)
+
+    reload_called_with: list = []
+
+    async def _spy_reload(entry_id):
+        reload_called_with.append(entry_id)
+
+    hass.config_entries.async_reload = _spy_reload
+
+    with (
+        patch.object(
+            FuelCompareIECoordinator,
+            "async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+    ):
+        result = await async_setup_entry(hass, entry)
+
+    assert result is True
+    # Trigger options update — HA calls the listener
+    hass.config_entries.async_update_entry(entry, options={CONF_API_KEY: "newkey"})
+    import asyncio
+
+    await asyncio.sleep(0)
+    assert entry.entry_id in reload_called_with
+
+
+async def test_async_setup_entry_unknown_provider_raises_config_entry_not_ready(
+    hass: HomeAssistant,
+) -> None:
+    """Lines 47-52: raise ConfigEntryNotReady when provider key unknown and default also absent."""
+    from homeassistant.exceptions import ConfigEntryNotReady
+
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_bad_provider",
+        data={CONF_STATION_ID: "1", CONF_PROVIDER: "__nonexistent_provider__"},
+    )
+    entry.add_to_hass(hass)
+
+    saved_default = PROVIDER_REGISTRY.pop(DEFAULT_PROVIDER, None)
+    try:
+        import pytest
+
+        with pytest.raises(ConfigEntryNotReady):
+            await async_setup_entry(hass, entry)
+    finally:
+        if saved_default is not None:
+            PROVIDER_REGISTRY[DEFAULT_PROVIDER] = saved_default

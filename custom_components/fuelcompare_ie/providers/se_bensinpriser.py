@@ -189,8 +189,6 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            # Timing
-            "lastupdated",
             # Diagnostic / coordinator-managed
             "last_successful_fetch",
             "data_fetch_problem",
@@ -319,8 +317,12 @@ class SEBensinpriserProvider(BaseProvider):
             List of (str(id), "Company — Address — 95: 17.54 kr / Diesel: 19.84 kr")
             tuples sorted cheapest-first.  Empty list on any failure.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs.get("lng") or self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        )  # type: ignore[assignment]
+        lng: float | None = (
+            kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        )  # type: ignore[assignment]
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:

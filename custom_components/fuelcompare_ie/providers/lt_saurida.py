@@ -374,8 +374,6 @@ class LtSauridaProvider(BaseProvider):
             # Station identity
             "name",
             "brand",
-            # Timing
-            "lastupdated",
             # Diagnostic / coordinator-managed
             "last_successful_fetch",
             "data_fetch_problem",

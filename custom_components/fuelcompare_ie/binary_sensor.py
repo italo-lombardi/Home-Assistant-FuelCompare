@@ -18,7 +18,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_STATION_ID, DOMAIN
+from .const import DOMAIN
 from .coordinator import FuelCompareIECoordinator
 from .sensor import _device_info
 
@@ -87,7 +87,7 @@ def _is_open(hours_str: str) -> bool | None:
     if not hours_str:
         return None
     s = hours_str.strip().lower()
-    if "24/7" in s or ("24" in s and ("7" in s or "hour" in s)):
+    if "24/7" in s or "24 hours" in s:
         return True
     if "closed" in s:
         return False
@@ -127,8 +127,15 @@ def _is_open_osm(hours_str: str) -> bool | None:
         if len(times) < 2:
             continue
         try:
-            open_time = dt_time(int(times[0][0]), int(times[0][1]))
-            close_time = dt_time(int(times[1][0]), int(times[1][1]))
+            # Normalize 24:00 (valid OSM end-of-day notation) to 0:00
+            open_h, open_m = int(times[0][0]), int(times[0][1])
+            close_h, close_m = int(times[1][0]), int(times[1][1])
+            if open_h == 24:
+                open_h = 0
+            if close_h == 24:
+                close_h = 0
+            open_time = dt_time(open_h, open_m)
+            close_time = dt_time(close_h, close_m)
         except ValueError:
             continue
 
@@ -147,21 +154,29 @@ def _day_matches(day_spec: str, today_idx: int) -> bool:
     """Return True if today_idx (0=Mon..6=Sun) is in the OSM day spec."""
     if not day_spec:
         return True  # no day spec → applies all days
-    # Handle ranges like 'mo-su', 'mo-fr', single days 'sa'
-    parts = day_spec.lower().split("-")
-    if len(parts) == 2:
-        start = _OSM_DAY_MAP.get(parts[0][:2])
-        end = _OSM_DAY_MAP.get(parts[1][:2])
-        if start is not None and end is not None:
-            if start <= end:
-                return start <= today_idx <= end
-            # wraps: e.g. 'fr-mo'
-            return today_idx >= start or today_idx <= end
-    elif len(parts) == 1:
-        day = _OSM_DAY_MAP.get(parts[0][:2])
-        if day is not None:
-            return today_idx == day
-    return True  # unparseable day spec → assume applies
+    # Handle comma-separated lists like 'Tu-Th,Sa'
+    for segment in day_spec.lower().split(","):
+        segment = segment.strip()
+        if not segment:
+            continue
+        # Handle ranges like 'mo-su', 'mo-fr'
+        parts = segment.split("-")
+        if len(parts) == 2:
+            start = _OSM_DAY_MAP.get(parts[0][:2])
+            end = _OSM_DAY_MAP.get(parts[1][:2])
+            if start is not None and end is not None:
+                if start <= end:
+                    if start <= today_idx <= end:
+                        return True
+                else:
+                    # wraps: e.g. 'fr-mo'
+                    if today_idx >= start or today_idx <= end:
+                        return True
+        elif len(parts) == 1:
+            day = _OSM_DAY_MAP.get(parts[0][:2])
+            if day is not None and today_idx == day:
+                return True
+    return False  # unparseable or no matching segment
 
 
 async def async_setup_entry(
@@ -171,7 +186,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Fuel Compare binary sensor based on a config entry."""
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
-    station_id = entry.data.get(CONF_STATION_ID, "")
+    station_id = coordinator.station_id
     station_name = entry.title
     caps = coordinator._provider.CAPABILITIES
 
@@ -212,7 +227,7 @@ class StationIsOpenBinarySensor(
 ):
     """Binary sensor indicating whether the station is currently open."""
 
-    _attr_device_class = BinarySensorDeviceClass.OPENING
+    _attr_device_class = None
     _attr_icon = "mdi:store-clock"
     _attr_has_entity_name = True
     _attr_translation_key = "is_open"
@@ -256,7 +271,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(dt_util.now().strftime("%A"))
+            return hours.get(dt_util.as_local(dt_util.now()).strftime("%A"))
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None

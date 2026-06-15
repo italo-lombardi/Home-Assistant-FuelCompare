@@ -206,8 +206,12 @@ class PtDgegProvider(BaseProvider):
             lng (float): Centre longitude.
             radius_km (float): Search radius in kilometres.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude
-        lng: float | None = kwargs.get("lng") or self._longitude
+        lat: float | None = (
+            kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        )
+        lng: float | None = (
+            kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        )
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         params: dict[str, Any] = {

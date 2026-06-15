@@ -173,7 +173,6 @@ class IEFuelFinderProvider(BaseProvider):
             # FuelFinder-specific
             "price_confidence",
             "has_price",
-            "is_open",
             # Diagnostic / coordinator-managed
             "last_successful_fetch",
             "data_fetch_problem",
@@ -407,7 +406,7 @@ class IEFuelFinderProvider(BaseProvider):
 
             if price_parts:
                 label = f"{display_name} — {' / '.join(price_parts)}"
-                sort_key = min(filter(None, [d_price, p_price]))
+                sort_key = min(v for v in (d_price, p_price) if v is not None)
             else:
                 label = f"{display_name}"
                 sort_key = 9999.0  # stations with no price go to end
@@ -619,11 +618,11 @@ class IEFuelFinderProvider(BaseProvider):
         # arbitrary extra keys at runtime even though type checkers will warn.
 
         data["confidence"] = confidence  # type: ignore[typeddict-unknown-key]
-        data["price_confidence"] = confidence  # type: ignore[typeddict-unknown-key]
+        data["price_confidence"] = confidence
         data["osm_id"] = osm_id  # type: ignore[typeddict-unknown-key]
         data["slug"] = slug  # type: ignore[typeddict-unknown-key]
         data["logo_url"] = logo_url  # type: ignore[typeddict-unknown-key]
-        data["has_price"] = has_price  # type: ignore[typeddict-unknown-key]
+        data["has_price"] = has_price
         data["kerosene"] = _price("kerosene")
         data["cng"] = _price("cng")
         # lat/lng passthrough for tests that check raw field names
