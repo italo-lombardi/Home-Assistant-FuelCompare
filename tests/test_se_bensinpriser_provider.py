@@ -723,16 +723,30 @@ async def test_async_list_stations_filters_by_radius() -> None:
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations sorts stations cheapest-first by price95."""
-    cheap = {**_BASE_STATION, "id": 1, "lat": 57.929, "lng": 12.555, "price95": 16.00}
-    expensive = {
+    """async_list_stations sorts stations alphabetically by label (not by price).
+
+    Uses company names where the alphabetically-first station ("Aral") is the MORE
+    expensive one, so if the test were sorting by price the order would be reversed.
+    Confirms the sort is label-alphabetical, not price-ascending.
+    """
+    # "Aral" sorts before "Shell" alphabetically but is more expensive
+    expensive_alpha_first = {
         **_BASE_STATION,
-        "id": 2,
+        "id": 1,
+        "company": "Aral",
         "lat": 57.929,
         "lng": 12.555,
         "price95": 18.50,
     }
-    resp = _make_mock_response(200, json_data=[expensive, cheap])
+    cheap_alpha_second = {
+        **_BASE_STATION,
+        "id": 2,
+        "company": "Shell",
+        "lat": 57.929,
+        "lng": 12.555,
+        "price95": 16.00,
+    }
+    resp = _make_mock_response(200, json_data=[cheap_alpha_second, expensive_alpha_first])
     session = _make_session(resp)
 
     provider = _make_provider()
@@ -740,8 +754,9 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
         session, lat=57.929, lng=12.555, radius_km=5.0
     )
 
-    assert result[0][0] == "1"  # cheapest first
-    assert result[1][0] == "2"  # more expensive second
+    # Alphabetical order: "Aral" before "Shell" — even though Aral is more expensive
+    assert result[0][0] == "1"  # Aral first (alpha)
+    assert result[1][0] == "2"  # Shell second (alpha)
 
 
 async def test_async_list_stations_no_price_station_sorted_last() -> None:

@@ -952,13 +952,16 @@ async def test_async_fetch_station_name_returns_none_on_generic_exception() -> N
 
 
 async def test_async_list_stations_returns_empty_on_gather_exception() -> None:
-    """async_list_stations returns [] when asyncio.gather raises unexpectedly (lines 412-414)."""
+    """async_list_stations returns [] when both gather coroutines raise (lines 412-414)."""
     provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
     session = MagicMock()
 
-    with patch(
-        "custom_components.fuelcompare_ie.providers.lu_carbu.asyncio.gather",
-        side_effect=RuntimeError("unexpected gather failure"),
+    # Patch _fetch_fuel_stations to return coroutines that raise, so gather
+    # catches exceptions via return_exceptions=True and the provider returns [].
+    with patch.object(
+        provider,
+        "_fetch_fuel_stations",
+        side_effect=RuntimeError("fetch failure"),
     ):
         results = await provider.async_list_stations(
             session, lat=49.617, lng=6.076, radius_km=10.0
