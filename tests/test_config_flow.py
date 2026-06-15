@@ -2053,6 +2053,7 @@ async def test_async_step_location_postal_code_extracted(
         CONFIG_MODE = "location"
         STATION_LOOKUP_MODE = "location_search"
         CURRENCY = "EUR"
+        NEEDS_POSTAL_CODE = True
         CAPABILITIES: frozenset = frozenset()
 
         def __init__(
@@ -2118,6 +2119,7 @@ async def test_async_step_location_shows_postal_code_field_in_schema(
         CONFIG_MODE = "location"
         STATION_LOOKUP_MODE = "location_search"
         CURRENCY = "EUR"
+        NEEDS_POSTAL_CODE = True
         CAPABILITIES: frozenset = frozenset()
 
         def __init__(
@@ -2218,7 +2220,7 @@ async def test_async_step_name_stores_postal_code_in_entry_data(
 async def test_options_flow_station_entry_no_api_key(
     hass: HomeAssistant,
 ) -> None:
-    """Options flow for a plain station entry (no API key) shows dummy schema (lines 755-792)."""
+    """Options flow for a plain station entry (no API key, no location) creates entry immediately."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=f"{DOMAIN}_{DEFAULT_PROVIDER}_opts_no_key_77",
@@ -2228,13 +2230,8 @@ async def test_options_flow_station_entry_no_api_key(
     entry.add_to_hass(hass)
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert result["type"] == "form"
-    assert result["step_id"] == "init"
-
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"], user_input={}
-    )
     assert result["type"] == "create_entry"
+    assert result["data"] == {}
 
 
 async def test_options_flow_location_entry_with_radius(

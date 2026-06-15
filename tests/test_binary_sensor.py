@@ -586,11 +586,21 @@ def test_day_matches_single_day_spec_matches_exact_day() -> None:
     assert _day_matches("sa", 0) is False
 
 
-def test_day_matches_unparseable_spec_returns_true() -> None:
-    """Unparseable day spec returns True as fallback (line 164)."""
+def test_day_matches_unparseable_spec_returns_false() -> None:
+    """Unparseable day spec returns False (safe fallback — don't assume open)."""
     from custom_components.fuelcompare_ie.binary_sensor import _day_matches
 
-    assert _day_matches("xx-yy", 3) is True
+    assert _day_matches("xx-yy", 3) is False
+
+
+def test_day_matches_comma_separated_list() -> None:
+    """Comma-separated OSM ranges like 'Tu-Th,Sa' match correctly."""
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    assert _day_matches("tu-th,sa", 1) is True  # Tuesday (idx=1)
+    assert _day_matches("tu-th,sa", 3) is True  # Thursday (idx=3)
+    assert _day_matches("tu-th,sa", 5) is True  # Saturday (idx=5)
+    assert _day_matches("tu-th,sa", 4) is False  # Friday not in list
 
 
 # ---------------------------------------------------------------------------

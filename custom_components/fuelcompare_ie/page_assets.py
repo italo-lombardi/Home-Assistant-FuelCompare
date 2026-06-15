@@ -24,6 +24,7 @@ State (build_id, decrypt_key) is held on the instance and updated in place.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from typing import Final
@@ -165,7 +166,7 @@ class PageAssets:
                 if response.status != 200:
                     return None
                 return await response.text()
-        except ClientError as err:
+        except (ClientError, asyncio.TimeoutError) as err:
             _LOGGER.debug(
                 "Failed to fetch chunk %s for station %s: %s",
                 chunk_url,

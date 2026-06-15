@@ -292,14 +292,6 @@ class MdFuelProvider(BaseProvider):
         _LOGGER.debug("Fetching ANRE Moldova price page: %s (%s)", url, fuel_label)
         try:
             async with session.get(url, headers=_HEADERS, timeout=_TIMEOUT) as resp:
-                if resp.status != 200:
-                    _LOGGER.warning(
-                        "ANRE Moldova returned HTTP %s for %s (%s)",
-                        resp.status,
-                        url,
-                        fuel_label,
-                    )
-                    return None
                 resp.raise_for_status()
                 html = await resp.text(encoding="utf-8", errors="replace")
         except ClientResponseError as err:

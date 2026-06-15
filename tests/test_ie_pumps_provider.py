@@ -128,7 +128,7 @@ def test_provider_capabilities_include_fuel_types() -> None:
     """CAPABILITIES includes diesel, petrol, and unleaded."""
     caps = IePumpsProvider.CAPABILITIES
     assert "diesel" in caps
-    assert "petrol" in caps
+    # petrol alias removed from CAPABILITIES (issue 29): only unleaded now
     assert "unleaded" in caps
 
 
@@ -307,7 +307,7 @@ def test_build_station_data_fuel_price_mapping() -> None:
     data = _build_station_data(_STATION_ID, diesel_record, prices_by_fuel)
 
     assert data["diesel"] == pytest.approx(1.739, abs=1e-4)
-    assert data["petrol"] == pytest.approx(1.759, abs=1e-4)
+    assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)
     assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)  # alias for petrol
 
 
@@ -357,7 +357,7 @@ def test_build_station_data_missing_fuel_returns_none() -> None:
     # Only diesel provided — petrol should be None
     data = _build_station_data(_STATION_ID, record, {"diesel": record})
 
-    assert data["petrol"] is None
+    assert data["unleaded"] is None
     assert data["unleaded"] is None
 
 
@@ -387,7 +387,7 @@ async def test_async_fetch_success_diesel_and_petrol() -> None:
     data = await provider.async_fetch(session, _STATION_ID)
 
     assert data["diesel"] == pytest.approx(1.739, abs=1e-4)
-    assert data["petrol"] == pytest.approx(1.759, abs=1e-4)
+    assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)
     assert data["name"] == "Test Station"
     assert data["brand"] == "Circle K"
 
@@ -402,7 +402,7 @@ async def test_async_fetch_success_diesel_only() -> None:
     data = await provider.async_fetch(session, _STATION_ID)
 
     assert data["diesel"] == pytest.approx(1.739, abs=1e-4)
-    assert data["petrol"] is None
+    assert data["unleaded"] is None
 
 
 # ---------------------------------------------------------------------------
@@ -473,7 +473,7 @@ async def test_async_fetch_continues_on_single_fuel_http_error() -> None:
 
     # diesel should be None (request failed), petrol should be populated
     assert data["diesel"] is None
-    assert data["petrol"] == pytest.approx(1.759, abs=1e-4)
+    assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)
 
 
 # ---------------------------------------------------------------------------

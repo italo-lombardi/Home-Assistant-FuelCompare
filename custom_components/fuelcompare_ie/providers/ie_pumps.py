@@ -155,7 +155,6 @@ class IePumpsProvider(BaseProvider):
             # Fuel prices
             "diesel",
             "unleaded",
-            "petrol",
             # Station identity
             "name",
             "brand",
@@ -593,8 +592,7 @@ def _build_station_data(
     data: StationData = {
         # Fuel prices
         "diesel": diesel_price,
-        "unleaded": petrol_price,  # petrol → unleaded for fuelcompare.ie sensor compat
-        "petrol": petrol_price,  # also stored under 'petrol' key
+        "unleaded": petrol_price,
         # Station identity
         "name": name,
         "brand": brand,

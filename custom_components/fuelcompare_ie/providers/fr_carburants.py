@@ -147,7 +147,9 @@ def _parse_pdv(element: ET.Element) -> dict[str, Any]:
         elif tag == "horaires":
             # automate-24-24 is "1" for true, "" (empty string) for false
             auto = child.attrib.get("automate-24-24", "")
-            is_open = auto == "1"
+            if auto == "1":
+                is_open = True
+            # else: leave is_open as None — staffed stations have no real-time status
 
         elif tag == "prix":
             nom = child.attrib.get("nom", "")

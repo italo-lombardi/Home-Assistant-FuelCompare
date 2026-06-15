@@ -488,13 +488,13 @@ def test_parse_pdv_address_combines_street_and_city() -> None:
     assert result["address"] == "1 RUE DES FLEURS, MONTPELLIER"
 
 
-def test_parse_pdv_is_open_false_when_empty_attribute() -> None:
-    """_parse_pdv returns is_open=False when automate-24-24 is empty string."""
+def test_parse_pdv_is_open_none_when_empty_attribute() -> None:
+    """_parse_pdv returns is_open=None for staffed stations (no real-time status)."""
     xml_str = _PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24="")
     root = ET.fromstring(xml_str.encode("iso-8859-1"))
     pdv = next(root.iter("pdv"))
     result = _parse_pdv(pdv)
-    assert result["is_open"] is False
+    assert result["is_open"] is None
 
 
 def test_parse_pdv_is_open_true_when_attribute_is_1() -> None:
@@ -670,7 +670,7 @@ def test_build_station_data_all_fuel_keys_present() -> None:
         "name": "MONTPELLIER (34150)",
         "county": "Dept. 34",
         "address": "1 RUE DES FLEURS, MONTPELLIER",
-        "is_open": False,
+        "is_open": None,
         "lastupdated": "2024-03-15 10:30:00",
         "prices": {
             "diesel": 1.799,
@@ -697,7 +697,7 @@ def test_build_station_data_prices_correct() -> None:
         "name": "MONTPELLIER (34150)",
         "county": "Dept. 34",
         "address": "1 RUE DES FLEURS, MONTPELLIER",
-        "is_open": False,
+        "is_open": None,
         "lastupdated": "2024-03-15 10:30:00",
         "prices": {"diesel": 1.799, "unleaded": 1.849},
     }
@@ -715,7 +715,7 @@ def test_build_station_data_missing_fuel_is_none() -> None:
         "name": "MONTPELLIER (34150)",
         "county": "Dept. 34",
         "address": "1 RUE DES FLEURS, MONTPELLIER",
-        "is_open": False,
+        "is_open": None,
         "lastupdated": "2024-03-15 10:30:00",
         "prices": {"diesel": 1.799},
     }
@@ -1002,8 +1002,8 @@ async def test_async_fetch_field_longitude() -> None:
     assert data["longitude"] == pytest.approx(3.547)
 
 
-async def test_async_fetch_field_is_open_false() -> None:
-    """async_fetch returns is_open=False when automate-24-24 is empty."""
+async def test_async_fetch_field_is_open_none_for_staffed() -> None:
+    """async_fetch returns is_open=None for staffed stations (no real-time status)."""
     zip_bytes = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
     resp = _make_mock_response(200, body=zip_bytes)
     session = _make_session(resp)
@@ -1011,7 +1011,7 @@ async def test_async_fetch_field_is_open_false() -> None:
     provider = FrCarburantsProvider(_STATION_ID)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["is_open"] is False
+    assert data["is_open"] is None
 
 
 async def test_async_fetch_field_is_open_true() -> None:

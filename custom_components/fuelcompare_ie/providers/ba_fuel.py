@@ -85,9 +85,9 @@ _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
 _HEADER_TO_KEY: dict[str, str] = {
     "diesel": "diesel",
     "dizel": "diesel",
-    "super 95": "petrol",
-    "eurosuper 95": "petrol",
-    "benz": "petrol",  # fallback: any "benz*" column
+    "super 95": "unleaded",
+    "eurosuper 95": "unleaded",
+    "benz": "unleaded",  # fallback: any "benz*" column
     "super 98": "premium_unleaded",
     "eurosuper 98": "premium_unleaded",
     "lpg": "lpg",
@@ -135,7 +135,7 @@ class BaFuelProvider(BaseProvider):
     CAPABILITIES: frozenset[str] = frozenset(
         {
             "diesel",
-            "petrol",
+            "unleaded",
             "premium_unleaded",
             "lpg",
             "name",
@@ -286,13 +286,13 @@ class BaFuelProvider(BaseProvider):
             display_name = f"{name} ({address})" if address else name
 
             diesel_val = raw.get("diesel")
-            petrol_val = raw.get("petrol")
+            unleaded_val = raw.get("unleaded")
 
             price_parts: list[str] = []
             if diesel_val is not None:
                 price_parts.append(f"Diesel {diesel_val:.3f} KM")
-            if petrol_val is not None:
-                price_parts.append(f"Petrol {petrol_val:.3f} KM")
+            if unleaded_val is not None:
+                price_parts.append(f"Unleaded {unleaded_val:.3f} KM")
 
             label = (
                 f"{display_name} — {' / '.join(price_parts)}"
@@ -555,7 +555,7 @@ def _parse_stations_div(html: str) -> list[dict[str, Any]]:
                 "name": current_block.get("name"),
                 "address": current_block.get("address"),
                 "diesel": prices_found[0] if len(prices_found) > 0 else None,
-                "petrol": prices_found[1] if len(prices_found) > 1 else None,
+                "unleaded": prices_found[1] if len(prices_found) > 1 else None,
                 "premium_unleaded": prices_found[2] if len(prices_found) > 2 else None,
                 "lpg": prices_found[3] if len(prices_found) > 3 else None,
             }
@@ -662,7 +662,7 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
             "name": name_raw,
             "address": address_raw,
             "diesel": _parse_price(_cell(fuel_cols.get("diesel"))),
-            "petrol": _parse_price(_cell(fuel_cols.get("petrol"))),
+            "unleaded": _parse_price(_cell(fuel_cols.get("unleaded"))),
             "premium_unleaded": _parse_price(_cell(fuel_cols.get("premium_unleaded"))),
             "lpg": _parse_price(_cell(fuel_cols.get("lpg"))),
         }
@@ -697,7 +697,7 @@ def _build_station_data(
 
     data: StationData = {
         "diesel": raw.get("diesel"),
-        "petrol": raw.get("petrol"),
+        "unleaded": raw.get("unleaded"),
         "premium_unleaded": raw.get("premium_unleaded"),
         "lpg": raw.get("lpg"),
         "name": name,
@@ -712,11 +712,11 @@ def _build_station_data(
 
     _LOGGER.debug(
         "cijenegoriva.ba parsed data for station %s: diesel=%s lpg=%s "
-        "petrol=%s premium_unleaded=%s",
+        "unleaded=%s premium_unleaded=%s",
         station_id,
         data.get("diesel"),
         data.get("lpg"),
-        data.get("petrol"),
+        data.get("unleaded"),
         data.get("premium_unleaded"),
     )
 

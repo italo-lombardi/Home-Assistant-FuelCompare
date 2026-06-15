@@ -94,6 +94,12 @@ def _make_mock_response(
     mock_resp.text = AsyncMock(return_value=text)
     if raise_for_status_exc is not None:
         mock_resp.raise_for_status = MagicMock(side_effect=raise_for_status_exc)
+    elif status >= 400:
+        mock_resp.raise_for_status = MagicMock(
+            side_effect=ClientResponseError(
+                request_info=MagicMock(), history=(), status=status
+            )
+        )
     else:
         mock_resp.raise_for_status = MagicMock()
     mock_resp.__aenter__ = AsyncMock(return_value=mock_resp)

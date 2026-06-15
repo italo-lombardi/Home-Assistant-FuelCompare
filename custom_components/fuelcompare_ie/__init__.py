@@ -12,6 +12,7 @@ from .const import (
     CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
+    CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
     CONF_STATION_COUNTY,
@@ -84,7 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # the station_county value if it looks like a postal code, or any explicit
     # postal_code field stored in entry.data.
     if "postal_code" in sig.parameters:
-        postal_code = entry.data.get("postal_code")
+        postal_code = entry.data.get(CONF_POSTAL_CODE)
         if not postal_code and county and str(county).isdigit():
             postal_code = county
         if postal_code:

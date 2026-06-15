@@ -363,6 +363,7 @@ class BeCarbuProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — carbu.com rate-limit guidance
+    NEEDS_POSTAL_CODE = True
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

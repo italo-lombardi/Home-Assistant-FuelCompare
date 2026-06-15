@@ -231,9 +231,9 @@ def test_capabilities_includes_location_fields() -> None:
     assert "longitude" in caps
 
 
-def test_capabilities_includes_timing_field() -> None:
-    """CAPABILITIES includes lastupdated."""
-    assert "lastupdated" in SiGorivaProvider.CAPABILITIES
+def test_capabilities_excludes_lastupdated() -> None:
+    """CAPABILITIES does not include lastupdated (API has no per-station timestamps)."""
+    assert "lastupdated" not in SiGorivaProvider.CAPABILITIES
 
 
 def test_capabilities_includes_coordinator_sentinels() -> None:

@@ -18,7 +18,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_STATION_ID, DOMAIN
+from .const import DOMAIN
 from .coordinator import FuelCompareIECoordinator
 from .sensor import _device_info
 
@@ -154,21 +154,29 @@ def _day_matches(day_spec: str, today_idx: int) -> bool:
     """Return True if today_idx (0=Mon..6=Sun) is in the OSM day spec."""
     if not day_spec:
         return True  # no day spec → applies all days
-    # Handle ranges like 'mo-su', 'mo-fr', single days 'sa'
-    parts = day_spec.lower().split("-")
-    if len(parts) == 2:
-        start = _OSM_DAY_MAP.get(parts[0][:2])
-        end = _OSM_DAY_MAP.get(parts[1][:2])
-        if start is not None and end is not None:
-            if start <= end:
-                return start <= today_idx <= end
-            # wraps: e.g. 'fr-mo'
-            return today_idx >= start or today_idx <= end
-    elif len(parts) == 1:
-        day = _OSM_DAY_MAP.get(parts[0][:2])
-        if day is not None:
-            return today_idx == day
-    return True  # unparseable day spec → assume applies
+    # Handle comma-separated lists like 'Tu-Th,Sa'
+    for segment in day_spec.lower().split(","):
+        segment = segment.strip()
+        if not segment:
+            continue
+        # Handle ranges like 'mo-su', 'mo-fr'
+        parts = segment.split("-")
+        if len(parts) == 2:
+            start = _OSM_DAY_MAP.get(parts[0][:2])
+            end = _OSM_DAY_MAP.get(parts[1][:2])
+            if start is not None and end is not None:
+                if start <= end:
+                    if start <= today_idx <= end:
+                        return True
+                else:
+                    # wraps: e.g. 'fr-mo'
+                    if today_idx >= start or today_idx <= end:
+                        return True
+        elif len(parts) == 1:
+            day = _OSM_DAY_MAP.get(parts[0][:2])
+            if day is not None and today_idx == day:
+                return True
+    return False  # unparseable or no matching segment
 
 
 async def async_setup_entry(
@@ -178,7 +186,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Fuel Compare binary sensor based on a config entry."""
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
-    station_id = entry.data.get(CONF_STATION_ID, "")
+    station_id = coordinator.station_id
     station_name = entry.title
     caps = coordinator._provider.CAPABILITIES
 

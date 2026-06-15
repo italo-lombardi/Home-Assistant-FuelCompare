@@ -286,6 +286,13 @@ class BaseProvider(ABC):
     The config flow uses this flag to conditionally show the API key input step.
     """
 
+    NEEDS_POSTAL_CODE: ClassVar[bool] = False
+    """Whether this provider requires a postal code for location-based lookups.
+
+    Set to True in subclasses whose __init__ accepts a postal_code parameter.
+    The config flow uses this flag instead of inspect.signature() detection.
+    """
+
     API_KEY_REGISTRATION_URL: ClassVar[str] = ""
     """URL where the user can register for an API key.
 

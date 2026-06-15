@@ -20,7 +20,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_STATION_ID, DOMAIN
+from .const import DOMAIN
 from .coordinator import FuelCompareIECoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -211,7 +211,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Fuel Compare sensor based on a config entry."""
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
-    station_id = entry.data.get(CONF_STATION_ID, "")
+    station_id = coordinator.station_id
     station_name = entry.title
     caps = coordinator._provider.CAPABILITIES
 
@@ -528,8 +528,12 @@ class StationOpeningHoursSensor(
     def extra_state_attributes(self) -> dict:
         base = {"station_id": self._station_id}
         if self.coordinator.data:
-            base["phone"] = self.coordinator.data.get("phone")
-            base["website"] = self.coordinator.data.get("website")
+            phone = self.coordinator.data.get("phone")
+            website = self.coordinator.data.get("website")
+            if phone is not None:
+                base["phone"] = phone
+            if website is not None:
+                base["website"] = website
         return base
 
 
@@ -649,16 +653,23 @@ class StationAboutCategorySensor(
         if not self.coordinator.data:
             return {}
         raw = self.coordinator.data.get("about")
-        if not raw:
-            return {}
-        try:
-            about = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return about.get(self._category) or {}
-        except (ValueError, TypeError) as err:
-            _LOGGER.debug(
-                "Failed to parse about data for category %s: %s", self._category, err
-            )
-            return {}
+        if raw:
+            try:
+                about = json_lib.loads(raw) if isinstance(raw, str) else raw
+                cat = about.get(self._category)
+                if cat:
+                    return cat
+            except (ValueError, TypeError) as err:
+                _LOGGER.debug(
+                    "Failed to parse about data for category %s: %s",
+                    self._category,
+                    err,
+                )
+        # Fall back to flat key if about dict doesn't have the category
+        flat = self.coordinator.data.get(self._category)
+        if isinstance(flat, dict):
+            return flat
+        return {}
 
     @property
     def available(self) -> bool:
