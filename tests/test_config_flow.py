@@ -2465,7 +2465,6 @@ async def test_async_setup_entry_unknown_provider_raises_config_entry_not_ready(
 
 async def test_async_step_user_aborts_when_no_countries(hass: HomeAssistant) -> None:
     """async_step_user aborts with no_providers_for_country when registry is empty."""
-    from custom_components.fuelcompare_ie import config_flow as cf
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
 
     saved = dict(PROVIDER_REGISTRY)
@@ -2487,7 +2486,6 @@ async def test_async_step_user_aborts_when_no_countries(hass: HomeAssistant) -> 
 
 async def test_async_step_county_aborts_when_no_counties(hass: HomeAssistant) -> None:
     """async_step_county aborts with no_counties_for_country when country has no county map."""
-    from custom_components.fuelcompare_ie import config_flow as cf
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
 
