@@ -81,10 +81,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     kwargs: dict = {}
     if county and "county" in sig.parameters:
         kwargs["county"] = county
-    # postal_code: for providers that accept it (e.g. BeCarbuProvider), pass
-    # the station_county value if it looks like a postal code, or any explicit
-    # postal_code field stored in entry.data.
-    if "postal_code" in sig.parameters:
+    # postal_code: use NEEDS_POSTAL_CODE ClassVar (inspect.signature breaks for **kwargs).
+    if getattr(provider_cls, "NEEDS_POSTAL_CODE", False):
         postal_code = entry.data.get(CONF_POSTAL_CODE)
         if not postal_code and county and str(county).isdigit():
             postal_code = county
