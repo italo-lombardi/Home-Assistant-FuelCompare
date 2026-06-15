@@ -309,12 +309,9 @@ def test_parse_price_does_not_divide_cents() -> None:
 
 
 def test_parse_price_returns_none_for_true() -> None:
-    """_parse_price returns None for boolean True (unexpected but must not crash)."""
-    # True coerces to 1.0 via float(), which is > 0, so it returns 1.0 — not None.
-    # This is acceptable behaviour; the key contract is False → None.
+    """_parse_price returns None for boolean True (isinstance guard catches all bools)."""
     result = _parse_price(True)
-    # Either None or 1.0 is acceptable; the important thing is no exception.
-    assert result is None or isinstance(result, float)
+    assert result is None
 
 
 # ---------------------------------------------------------------------------

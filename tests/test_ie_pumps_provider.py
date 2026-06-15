@@ -308,7 +308,6 @@ def test_build_station_data_fuel_price_mapping() -> None:
 
     assert data["diesel"] == pytest.approx(1.739, abs=1e-4)
     assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)
-    assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)  # alias for petrol
 
 
 def test_build_station_data_identity_fields() -> None:
@@ -357,7 +356,6 @@ def test_build_station_data_missing_fuel_returns_none() -> None:
     # Only diesel provided — petrol should be None
     data = _build_station_data(_STATION_ID, record, {"diesel": record})
 
-    assert data["unleaded"] is None
     assert data["unleaded"] is None
 
 

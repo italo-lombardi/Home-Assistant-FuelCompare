@@ -187,7 +187,6 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            "lastupdated",
         }
     )
 
