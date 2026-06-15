@@ -5,26 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.1] - 2026-06-15
+## [0.7.0] - 2026-06-15
 
-### Fixed
-- `__init__.py`: raise `ConfigEntryNotReady` when provider key missing instead of bare `KeyError`
-- `__init__.py`: store coordinator in `hass.data` before `async_config_entry_first_refresh` to prevent `KeyError` in `async_unload_entry` on first-refresh failure
-- `binary_sensor.py`: fix `24/7` detection — no longer false-positive on strings like `Mo-Fr 07:00-24:00`
-- `binary_sensor.py`: normalize `24:00` closing time in OSM hours to prevent `ValueError`
-- `binary_sensor.py`: set `_attr_device_class = None` on `StationIsOpenBinarySensor` (was incorrectly `CONNECTIVITY`)
-- `providers/de_tankerkoenig.py`: let `aiohttp.ClientError` propagate from `async_fetch` for stale-data retention
-- `providers/gb_fuelfinder.py`: fix `CURRENCY` from `"GBP/L"` to `"£"`
-- `providers/ie_fuelcompare.py`: remove 4 facility keys from CAPABILITIES that were never populated; add `tablename`
-- `providers/hr_mzoe.py`: remove `is_open` from CAPABILITIES (never set); remove spurious `tablename` from result dict; wrap gzip/json parse in `ProviderError`
-- `providers/mt_fuel.py`: remove duplicate `petrol_95`/`heating_oil` passthrough keys
-- `providers/pl_benzyna.py`: remove aviation fuel passthrough (`jeta1`/`avgas100ll`) not in StationData
-- `providers/ba_fuel.py`: remove `latitude`/`longitude` from CAPABILITIES (always `None`)
-- `crypto.py`: validate `Salted__` magic header before decryption
-- `translations/uk.json`: fix `unleaded` translation (`"Безсвинцевий"` instead of duplicate `"Бензин"`)
-- `translations/bg.json`: fix `name` data label from Croatian `"Ime"` to Bulgarian `"Име"`
-- `translations/da.json`: fix `price_confidence` translation from invalid `"Prisconfidentiality"` to `"Pristilforlidelighed"`
+### Context
+fuelcompare.ie announced closure at end of June 2025. This release restructures the integration to decouple data-fetching from the coordinator, adds 36 providers across 27 countries, and ships a large wave of correctness fixes. The fuelcompare.ie scraper continues to work as before.
 
+### Changed (BREAKING)
+- **Integration display name** changed from `"FuelCompare.ie"` to `"Fuel Compare"`. Internal domain (`fuelcompare_ie`), entity IDs, device registry entries, and all existing config entries are unchanged — no migration required.
+- `manufacturer` field in the HA device registry now comes from the active provider's `LABEL` attribute instead of being hardcoded to `"FuelCompare.ie"`.
+- `source` extra state attribute on fuel price sensors now comes from the provider's `LABEL` instead of the hardcoded string `"fuelcompare.ie"`.
+- `ba_fuel.py`: `"petrol"` key renamed to `"unleaded"` for 95-octane consistency across all providers — existing `sensor.<name>_petrol` entities will be recreated as `sensor.<name>_unleaded`.
 
 ### Added
 - **Multi-country provider support**: 36 providers across 27 countries — Albania, Austria, Australia (WA/NSW/QLD/VIC), Bosnia & Herzegovina, Belgium, Canada (Quebec), Croatia, Czech Republic, Denmark, Finland, France, Germany, Greece, Iceland, Ireland (3 providers), Italy, Lithuania, Luxembourg, Malta, Moldova, Montenegro, Netherlands, Norway, Poland, Portugal, Slovenia, Spain, Sweden, Switzerland, United Kingdom, European Union (Oil Bulletin)
@@ -36,60 +26,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Concurrent fuel-type fetching** via `asyncio.gather` for AT, DE, FR providers
 - **`FuelCompareIEOptionsFlow`**: radius change for location-based entries
 - **`CONTRIBUTING.md`**: 6-step guide for adding new providers
+- **`NEEDS_POSTAL_CODE: ClassVar[bool]`** on `BaseProvider` — replaces `inspect.signature` postal-code detection in config flow
+- **`CONF_POSTAL_CODE`** constant in `const.py` — replaces all raw `"postal_code"` string literals
+- **FuelFinder.ie provider** (`providers/ie_fuelfinder.py`) — second Ireland data source backed by the crowd-sourced [FuelFinder.ie](https://www.fuelfinder.ie/) platform (Conjora Limited). Covers diesel, petrol, kerosene, and CNG prices for ~1,000+ Irish stations. No API key required.
+- **New fuel types** — `kerosene` and `cng` price sensors
+- `BaseProvider.CONFIG_MODE` — `"station_id"` (default) or `"location"` (lat/lng + radius)
+- `providers/base.py`: `ProviderError` exception class
+- Config flow: country selector step + provider selector step (auto-skip when only one option)
+- Config flow: `async_step_location` — collects latitude, longitude, and search radius
+- `CONF_COUNTRY`, `CONF_PROVIDER`, `CONF_LATITUDE`, `CONF_LONGITUDE`, `CONF_RADIUS_KM` stored in config entry data
+- 25 translation files: added `"station"`, `"provider"`, `"location"` step keys
+
+### Fixed
+- `__init__.py`: raise `ConfigEntryNotReady` when provider key missing instead of bare `KeyError`
+- `__init__.py`: store coordinator in `hass.data` before `async_config_entry_first_refresh` to prevent `KeyError` on first-refresh failure
+- `sensor.py` / `binary_sensor.py`: read `coordinator.station_id` instead of `entry.data` — fixes unique_id collision for location-mode entries
+- `binary_sensor.py`: `_day_matches()` now returns `False` for unparseable day specs; handles comma-separated OSM day lists (`Tu-Th,Sa`)
+- `binary_sensor.py`: fix `24/7` detection — no longer false-positive on strings like `Mo-Fr 07:00-24:00`
+- `binary_sensor.py`: normalize `24:00` closing time in OSM hours to prevent `ValueError`
+- `binary_sensor.py`: `StationIsOpenBinarySensor._attr_device_class = None` (was incorrectly `CONNECTIVITY`)
+- `config_flow.py`: error-path schema helper preserves `postal_code` field on re-render
+- `config_flow.py`: `_abort_if_unique_id_configured()` now called unconditionally after unique_id set
+- `config_flow.py`: `_countries_from_registry` uses `set` not dict for deduplication
+- `config_flow.py`: options flow returns `create_entry(data={})` immediately when no options to configure (removes `_dummy` key pollution)
+- `config_flow.py`: `is_location_entry` detection uses `CONF_LATITUDE` (was fragile `CONF_RADIUS_KM` proxy)
+- `coordinator.py`: strip credentials from `UpdateFailed` message — `type(err).__name__` only, not `str(err)`
+- `coordinator.py`: `DataUpdateCoordinator[StationData]` generic type (was `dict`)
+- `sensor.py`: `StationOpeningHoursSensor` omits null `phone`/`website` attributes
+- `sensor.py`: `StationAboutCategorySensor._get_category_data()` falls back to flat key when `about` dict absent
+- `providers/fr_carburants.py`: staffed stations set `is_open = None` instead of `False`
+- `providers/ie_fuelfinder.py`: remove `is_open` from CAPABILITIES (never set); fix falsy-zero `min()` filter; remove stale `type: ignore` on `price_confidence`/`has_price`
+- `providers/lu_carbu.py` / `au_nsw.py` / `pt_dgeg.py` / `se_bensinpriser.py`: fix falsy-zero lat/lng/radius checks
+- `providers/md_fuel.py`: remove unreachable `raise_for_status` after manual status check
+- `providers/page_assets.py`: catch `asyncio.TimeoutError` in `_fetch_chunk`
+- `providers/si_goriva.py` / `se_bensinpriser.py` / `lt_saurida.py`: remove `lastupdated` from CAPABILITIES (always `None`)
+- `providers/ie_pumps.py`: remove duplicate `"petrol"` alias from CAPABILITIES
+- `providers/de_tankerkoenig.py`: let `aiohttp.ClientError` propagate from `async_fetch` for stale-data retention
+- `providers/gb_fuelfinder.py`: fix `CURRENCY` from `"GBP/L"` to `"£"`
+- `providers/ie_fuelcompare.py`: remove 4 facility keys from CAPABILITIES that were never populated; add `tablename`
+- `providers/hr_mzoe.py`: remove `is_open` from CAPABILITIES (never set); wrap gzip/json parse in `ProviderError`
+- `providers/mt_fuel.py`: remove duplicate `petrol_95`/`heating_oil` passthrough keys
+- `providers/pl_benzyna.py`: remove aviation fuel passthrough not in `StationData`
+- `providers/ba_fuel.py`: remove `latitude`/`longitude` from CAPABILITIES (always `None`)
+- `crypto.py`: validate `Salted__` magic header before decryption
+- `async_step_location` now correctly routes to station picker for all location-search providers
+- `StationIsOpenBinarySensor` supports boolean, JSON dict, and OSM `opening_hours` string formats
+- AU providers: prices divided by 100 (cents → AUD/litre)
+- CodeQL: removed sensitive coordinate/API-key data from debug logs
+- `translations/uk.json`: fix `unleaded` translation
+- `translations/bg.json`: fix `name` label (was Croatian `"Ime"`)
+- `translations/da.json`: fix `price_confidence` translation
+- All 24 non-EN translation descriptions for the station-ID setup step repaired
+- `hu.json`: fixed double-article grammatical error
 
 ### Changed
 - Config flow now shows country selector → provider selector → location/county/station steps
-- Entity IDs in all 26 translation files and `strings.json` sorted alphabetically within groups (fuel prices, station identity, status/info; facilities, payments)
+- Entity IDs in all 26 translation files and `strings.json` sorted alphabetically within groups
 - Country list in config flow sorted fully alphabetically
-
-### Fixed
-- `async_step_location` now correctly routes to station picker for all location-search providers (was permanently skipping picker, leaving all ~30 location-search providers with empty `station_id`)
-- `StationIsOpenBinarySensor` supports boolean, JSON dict, and OSM `opening_hours` string formats
-- EUR currency hardcoded to provider-level `CURRENCY` ClassVar
-- AU providers: prices divided by 100 (cents → AUD/litre)
-- CodeQL: removed sensitive coordinate/API-key data from debug logs (de_tankerkoenig, lu_carbu, no_drivstoff)
-
-## [0.8.0] - 2026-06-14
-
-### Added
-- **FuelFinder.ie provider** (`providers/ie_fuelfinder.py`, `IEFuelFinderProvider`) — second Ireland data source backed by the crowd-sourced [FuelFinder.ie](https://www.fuelfinder.ie/) platform (Conjora Limited). Covers diesel, petrol, kerosene, and CNG prices for ~1,000+ Irish stations sourced from the OpenStreetMap dataset with community price submissions. Requires no API key — authentication is a static set of browser-origin headers (`Sec-Fetch-Site: same-origin`, `Referer`, and a non-blocked User-Agent; see `IEFuelFinderProvider._HEADERS`).
-- **New fuel types** — `kerosene` and `cng` price sensors are new entity types that have no fuelcompare.ie equivalent. They are created per station but shown as `unavailable` if the station has no community submissions for that fuel.
-- **`FuelFinderConfidenceSensor`** (`sensor.<name>_price_confidence`) — string sensor exposing FuelFinder's freshness tier for the station's crowd-sourced price: `fresh` (sub-24 h), `likely` (recent), or `outdated` (stale). Gives automations a data-age signal without requiring timestamp arithmetic.
-- **`FuelFinderLocationSensor`** (`sensor.<name>_location`) — exposes the station's WGS84 coordinates as `"{lat},{lng}"` (same convention as HA zone entities), with `latitude` and `longitude` as attributes. Useful for distance automations and map cards.
-- **`FuelFinderHasPriceBinarySensor`** (`binary_sensor.<name>_has_price`) — `on` when at least one community price submission exists for the station; `off` for OSM placeholder stations with no submitted prices. Device class `connectivity`.
-- **`FuelFinderIsOpenBinarySensor`** (`binary_sensor.<name>_is_open`) — open/closed state parsed from OSM `opening_hours` format strings (e.g. `"Mo-Su 07:00-23:00"`, `"24/7"`). Backed by a new `_parse_osm_opening_hours()` function; the existing `_parse_time()` logic (fuelcompare.ie `"6a.m."` format) is not reused.
-- **`FuelFinderOpeningHoursSensor`** (`sensor.<name>_opening_hours`) — exposes the raw OSM `opening_hours` string as the sensor state; attributes carry `phone` and `website` from the station record. Replaces `StationWorkingHoursSensor` for this provider (format is incompatible).
-- Each FuelFinder station creates **15 entities** (12 sensors + 3 binary sensors) vs 14 for fuelcompare.ie. The four fuelcompare.ie `about` category sensors (Accessibility, Offerings, Amenities, Payments) are absent — FuelFinder has no facility data.
-- Config flow: selecting the FuelFinder.ie provider routes to a county-picker step followed by a station-picker step (station resolved by UUID from `/api/fuelfinder/stations`). The station UUID is stored as `CONF_STATION_ID`; no leading-zero stripping is applied.
-- Poll interval remains **30 minutes** (`DEFAULT_SCAN_INTERVAL = 1800`). The FuelFinder `/api/fuelfinder/init` endpoint is CDN-cached at `s-maxage=300` (5 min) and `/api/fuelfinder/stations` is `no-store`; polling more frequently than 5 minutes provides no benefit for national stats.
-
-### Changed
-- `sensor.py`: `FuelPriceSensor` now uses `SensorStateClass.MEASUREMENT` (was `TOTAL`) for the FuelFinder provider. `MEASUREMENT` is the correct HA state class for a point-in-time price reading. The fuelcompare.ie provider is unchanged to avoid entity history migration for existing users.
-- Roadmap section in README updated — FuelFinder.ie marked as integrated; fuelcompare.ie closure notice adjusted.
-
-## [0.7.0] - 2026-06-14
-
-### Context
-fuelcompare.ie announced closure at end of June 2025. This release restructures the integration to decouple data-fetching from the coordinator so alternative sources (FuelFinder.ie, future countries) can be added without breaking existing installs. The fuelcompare.ie scraper continues to work as before until a replacement source is integrated.
-
-### Changed (BREAKING)
-- **Integration display name** changed from `"FuelCompare.ie"` to `"Fuel Compare"`. The internal domain (`fuelcompare_ie`), entity IDs, device registry entries, and all existing config entries are unchanged — no migration required for existing users.
-- `manufacturer` field in the HA device registry now comes from the active provider's `LABEL` attribute instead of being hardcoded to `"FuelCompare.ie"`.
-- `source` extra state attribute on fuel price sensors now comes from the provider's `LABEL` instead of the hardcoded string `"fuelcompare.ie"`.
-
-### Added
-- **Provider abstraction layer** (`providers/`): all data-fetching logic moved to `providers/ie_fuelcompare.py` (`IEFuelCompareProvider`), implementing a `BaseProvider` ABC. Adding a new data source requires only a new provider file and one registry entry — no changes to sensors, binary sensors, or the coordinator.
-- `BaseProvider.CONFIG_MODE` — `"station_id"` (default, current behaviour) or `"location"` (lat/lng + radius, for government open-data APIs). The config flow routes to the appropriate step automatically.
-- `providers/base.py`: `ProviderError` exception class — providers raise this; the coordinator catches it and converts to `UpdateFailed`.
-- Config flow: country selector step + provider selector step. Both auto-skip when only one option is available — setup experience is identical to previous versions for existing Ireland users.
-- Config flow: `async_step_location` — collects latitude, longitude, and search radius for location-based providers; defaults to the HA home location.
-- `CONF_COUNTRY`, `CONF_PROVIDER`, `CONF_LATITUDE`, `CONF_LONGITUDE`, `CONF_RADIUS_KM` stored in config entry data. Existing entries without these keys default to `IE` / `ie_fuelcompare`.
-- `requirements_test.txt`: updated `pytest-homeassistant-custom-component` to `>=0.13.338,<0.13.339`.
-- 25 translation files: added `"station"`, `"provider"`, `"location"` step keys; corrected 24 non-EN station-step descriptions that were truncated after a previous edit removed the `fuelcompare.ie` URL.
-
-### Fixed
-- All 24 non-EN translation descriptions for the station-ID setup step were grammatically truncated (missing "from the station URL" equivalent). Now repaired per locale.
-- `hu.json`: fixed double-article grammatical error (`"a az állomás"` → `"az állomás"`).
 
 ## [0.6.0] - 2026-06-08
 
