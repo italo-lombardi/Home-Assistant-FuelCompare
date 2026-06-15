@@ -12,7 +12,8 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Zdroj dát"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "county": {
         "title": "Vyberte okres",
@@ -29,7 +30,7 @@
         }
       },
       "station": {
-        "title": "Pridať stanicu Fuel Compare",
+        "title": "Pridať stanicu",
         "description": "{hint}",
         "data": {
           "station_id": "ID Stanice"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Prijíma bezkontaktné platby"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie sa vypína",
+      "description": "Webová stránka fuelcompare.ie je naplánovaná na vypnutie **30. júna 2026**. Vaša stanica **{entry_title}** prestane dostávať aktualizácie cien po tomto dátume. Zvážte prechod na iný írsky zdroj cien palív, napríklad FuelFinder IE alebo IE Pumps."
     }
   }
 }

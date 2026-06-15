@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Zgjidhni Vendin",
+        "data": {
+          "country": "Vendi"
+        }
+      },
+      "provider": {
+        "title": "Zgjidhni Burimin e të Dhënave",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Burimi i të dhënave"
+        }
+      },
+      "county": {
+        "title": "Zgjidhni Rrethin",
+        "description": "Zgjidhni rrethin tuaj për të gjetur stacionet e afërta.",
+        "data": {
+          "station_county": "Rrethi"
+        }
+      },
+      "api_key": {
+        "title": "Çelësi API",
+        "description": "Shkruani çelësin tuaj falas API. [Merrni një këtu]({registration_url}) nëse kërkohet.",
+        "data": {
+          "api_key": "Çelësi API"
+        }
+      },
+      "station": {
+        "title": "Shtoni Stacionin",
+        "description": "{hint}",
+        "data": {
+          "station_id": "ID e Stacionit"
+        }
+      },
+      "station_picker": {
+        "title": "Zgjidhni Stacionin",
+        "description": "Zgjidhni një stacion karburanti. Çmimet e shfaqura janë për naftë/benzinë.",
+        "data": {
+          "station_id": "Stacioni"
+        }
+      },
+      "location": {
+        "title": "Vendosni Vendndodhjen",
+        "description": "Shkruani vendndodhjen tuaj dhe rrezën e kërkimit. Stacionet brenda rrezes do të monitorohen.",
+        "data": {
+          "latitude": "Gjerësia gjeografike",
+          "longitude": "Gjatësia gjeografike",
+          "radius_km": "Rrezja (km)",
+          "postal_code": "Kodi postar"
+        }
+      },
+      "name": {
+        "title": "Emri i Stacionit",
+        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.",
+        "data": {
+          "name": "Emri"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "ID-ja e stacionit nuk mund të jetë e zbrazët.",
+      "invalid_location": "Koordinata të pavlefshme. Shkruani vlera të vlefshme të gjerësisë dhe gjatësisë gjeografike.",
+      "no_stations_found": "Nuk u gjetën stacione për këtë rreth. Provoni një rreth tjetër.",
+      "invalid_api_key": "Çelësi API nuk mund të jetë i zbrazët."
+    },
+    "abort": {
+      "already_configured": "Ky stacion është konfiguruar tashmë.",
+      "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie po mbyllet",
+      "description": "Faqja e internetit fuelcompare.ie është planifikuar të mbyllet më **30 qershor 2026**. Stacioni juaj **{entry_title}** do të ndalojë marrjen e përditësimeve të çmimeve pas kësaj date. Konsideroni kalimin në një burim tjetër të çmimeve të karburantit në Irlandë, si FuelFinder IE ose IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Naftë"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Vajguri"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzinë"
+      },
+      "premium_diesel": {
+        "name": "Naftë Premium"
+      },
+      "premium_unleaded": {
+        "name": "Benzinë Premium pa Plumb"
+      },
+      "unleaded": {
+        "name": "Pa Plumb"
+      },
+      "address": {
+        "name": "Adresa"
+      },
+      "brand": {
+        "name": "Marka"
+      },
+      "county": {
+        "name": "Rrethi"
+      },
+      "latitude": {
+        "name": "Gjerësia gjeografike"
+      },
+      "location": {
+        "name": "Vendndodhja"
+      },
+      "longitude": {
+        "name": "Gjatësia gjeografike"
+      },
+      "station_name": {
+        "name": "Emri i Stacionit"
+      },
+      "accessibility": {
+        "name": "Aksesueshmëria"
+      },
+      "amenities": {
+        "name": "Shërbimet"
+      },
+      "last_successful_fetch": {
+        "name": "Marrja e Fundit e Suksesshme"
+      },
+      "offerings": {
+        "name": "Oferta"
+      },
+      "opening_hours": {
+        "name": "Orari i Hapjes (OSM)"
+      },
+      "payments": {
+        "name": "Metodat e Pagesës"
+      },
+      "phone": {
+        "name": "Telefoni"
+      },
+      "price_confidence": {
+        "name": "Besueshmëria e Çmimit"
+      },
+      "price_last_updated": {
+        "name": "Çmimi i Përditësuar së Fundi"
+      },
+      "website": {
+        "name": "Faqja e Internetit"
+      },
+      "working_hours": {
+        "name": "Orari i Punës"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Problem me Marrjen e të Dhënave"
+      },
+      "has_price": {
+        "name": "Ka Çmim"
+      },
+      "is_open": {
+        "name": "Është i Hapur"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "Larje Makinash"
+      },
+      "has_disabled_access": {
+        "name": "Akses për Personat me Aftësi të Kufizuara"
+      },
+      "has_electric_charging": {
+        "name": "Karikues për Automjete Elektrike"
+      },
+      "has_shop": {
+        "name": "Dyqan"
+      },
+      "has_toilet": {
+        "name": "Tualet"
+      },
+      "accepts_cards": {
+        "name": "Pranon Kartela"
+      },
+      "accepts_cash": {
+        "name": "Pranon Para Kesh"
+      },
+      "accepts_contactless": {
+        "name": "Pranon Pagesë Kontaktsore"
+      }
+    }
+  }
+}

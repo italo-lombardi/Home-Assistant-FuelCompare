@@ -2,18 +2,31 @@
   "config": {
     "step": {
       "user": {
-        "title": "Velg land",
+        "title": "Vel land",
         "data": {
           "country": "Land"
         }
       },
       "provider": {
-        "title": "Velg datakilde",
+        "title": "Vel datakjelde",
         "description": "{deprecation_notice}",
         "data": {
-          "provider": "Datakilde"
-        },
-        "description": "{deprecation_notice}"
+          "provider": "Datakjelde"
+        }
+      },
+      "county": {
+        "title": "Vel fylke",
+        "description": "Vel fylket ditt for å finna nærliggjande stasjonar.",
+        "data": {
+          "station_county": "Fylke"
+        }
+      },
+      "api_key": {
+        "title": "API-nøkkel",
+        "description": "Skriv inn den gratis API-nøkkelen din. [Skaf deg ein her]({registration_url}) om nødvendig.",
+        "data": {
+          "api_key": "API-nøkkel"
+        }
       },
       "station": {
         "title": "Legg til stasjon",
@@ -22,60 +35,46 @@
           "station_id": "Stasjons-ID"
         }
       },
-      "name": {
-        "title": "Stasjonsnavn",
-        "description": "Bekreft eller rediger navnet på denne stasjonen.",
-        "data": {
-          "name": "Navn"
-        }
-      },
-      "county": {
-        "title": "Velg fylke",
-        "description": "Velg ditt fylke for å finne nærliggende stasjoner.",
-        "data": {
-          "station_county": "Fylke"
-        }
-      },
-      "api_key": {
-        "title": "API-nøkkel",
-        "description": "Skriv inn din gratis API-nøkkel. [Få en her]({registration_url}) om nødvendig.",
-        "data": {
-          "api_key": "API-nøkkel"
-        }
-      },
       "station_picker": {
-        "title": "Velg stasjon",
-        "description": "Velg en bensinstasjon. Prisene som vises er for diesel/bensin.",
+        "title": "Vel stasjon",
+        "description": "Vel ein bensinstasjon. Prisane som vert viste er for diesel/bensin.",
         "data": {
           "station_id": "Stasjon"
         }
       },
       "location": {
-        "title": "Angi plassering",
-        "description": "Skriv inn plasseringen din og søkeradius. Stasjoner innenfor radiusen vil bli sporet.",
+        "title": "Set plassering",
+        "description": "Skriv inn plasseringa di og søkjeradius. Stasjonar innanfor radiusen vert sporda.",
         "data": {
-          "latitude": "Breddegrad",
+          "latitude": "Breiddegrad",
           "longitude": "Lengdegrad",
           "radius_km": "Radius (km)",
           "postal_code": "Postnummer"
         }
+      },
+      "name": {
+        "title": "Stasjonsnamn",
+        "description": "Stadfest eller endra namnet på denne stasjonen.",
+        "data": {
+          "name": "Namn"
+        }
       }
     },
     "error": {
-      "invalid_station_id": "Stasjons-ID kan ikke være tom.",
-      "invalid_api_key": "API-nøkkelen kan ikke være tom.",
-      "invalid_location": "Ugyldige koordinater. Skriv inn gyldige verdier for breddegrad og lengdegrad.",
-      "no_stations_found": "Ingen stasjoner funnet for dette fylket. Prøv et annet fylke."
+      "invalid_station_id": "Stasjons-ID kan ikkje vera tom.",
+      "invalid_location": "Ugyldige koordinatar. Skriv inn gyldige breidde- og lengdegradsverdiar.",
+      "no_stations_found": "Ingen stasjonar funne for dette fylket. Prøv eit anna fylke.",
+      "invalid_api_key": "API-nøkkelen kan ikkje vera tom."
     },
     "abort": {
-      "already_configured": "Denne stasjonen er allerede konfigurert.",
-      "no_providers_for_country": "Ingen dataleverandører er tilgjengelige for dette landet."
+      "already_configured": "Denne stasjonen er allereie konfigurert.",
+      "no_providers_for_country": "Ingen dataleverandørar er tilgjengelege for dette landet."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stenger",
-      "description": "Nettstedet fuelcompare.ie er planlagt å stenge **30. juni 2026**. Stasjonen din **{entry_title}** vil slutte å motta prisoppdateringer etter denne datoen. Vurder å bytte til en annen irsk kilde for drivstoffpriser, for eksempel FuelFinder IE eller IE Pumps."
+      "title": "fuelcompare.ie legg ned drifta",
+      "description": "Nettstaden fuelcompare.ie er planlagd for nedlegging **30. juni 2026**. Stasjonen din **{entry_title}** vil slutta å motta prisoppdateringar etter den datoen. Vurder å byta til ei anna irsk drivstoffpriskjelde, til dømes FuelFinder IE eller IE Pumps."
     }
   },
   "entity": {
@@ -123,7 +122,7 @@
         "name": "Fylke"
       },
       "latitude": {
-        "name": "Breddegrad"
+        "name": "Breiddegrad"
       },
       "location": {
         "name": "Plassering"
@@ -132,37 +131,37 @@
         "name": "Lengdegrad"
       },
       "station_name": {
-        "name": "Stasjonsnavn"
+        "name": "Stasjonsnamn"
       },
       "accessibility": {
-        "name": "Tilgjengelighet"
+        "name": "Tilgjengelegheit"
       },
       "amenities": {
-        "name": "Fasiliteter"
+        "name": "Fasilitetar"
       },
       "last_successful_fetch": {
-        "name": "Siste vellykkede henting"
+        "name": "Siste vellukkast henting"
       },
       "offerings": {
-        "name": "Tjenester"
+        "name": "Tenester"
       },
       "opening_hours": {
-        "name": "Åpningstider (OSM)"
+        "name": "Opningstider (OSM)"
       },
       "payments": {
-        "name": "Betalinger"
+        "name": "Betalingar"
       },
       "phone": {
         "name": "Telefon"
       },
       "price_confidence": {
-        "name": "Prispålitelighet"
+        "name": "Pristillit"
       },
       "price_last_updated": {
         "name": "Pris sist oppdatert"
       },
       "website": {
-        "name": "Nettsted"
+        "name": "Nettstad"
       },
       "working_hours": {
         "name": "Arbeidstider"
@@ -176,7 +175,7 @@
         "name": "Har pris"
       },
       "is_open": {
-        "name": "Er åpen"
+        "name": "Er open"
       },
       "has_atm": {
         "name": "Minibank"
@@ -185,7 +184,7 @@
         "name": "Bilvask"
       },
       "has_disabled_access": {
-        "name": "Tilgang for funksjonshemmede"
+        "name": "Tilgang for funksjonshemma"
       },
       "has_electric_charging": {
         "name": "Elbillading"
@@ -197,20 +196,14 @@
         "name": "Toalett"
       },
       "accepts_cards": {
-        "name": "Godtar kort"
+        "name": "Godtek kort"
       },
       "accepts_cash": {
-        "name": "Godtar kontanter"
+        "name": "Godtek kontantar"
       },
       "accepts_contactless": {
-        "name": "Godtar kontaktløs betaling"
+        "name": "Godtek kontaktlaus betaling"
       }
-    }
-  },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stenger",
-      "description": "Nettstedet fuelcompare.ie er planlagt å stenge **30. juni 2026**. Stasjonen din **{entry_title}** vil slutte å motta prisoppdateringer etter denne datoen. Vurder å bytte til en annen irsk drivstoffpriskilde, for eksempel FuelFinder IE eller IE Pumps."
     }
   }
 }

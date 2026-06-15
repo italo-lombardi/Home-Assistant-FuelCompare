@@ -12,10 +12,11 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Datakilde"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Tilføj Fuel Compare-station",
+        "title": "Tilføj station",
         "description": "{hint}",
         "data": {
           "station_id": "Stations-ID"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Accepterer kontaktløs betaling"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie lukker ned",
+      "description": "Hjemmesiden fuelcompare.ie er planlagt til at lukke ned den **30. juni 2026**. Din station **{entry_title}** vil stoppe med at modtage prisopdateringer efter denne dato. Overvej at skifte til en anden irsk brændstofpriskoilde, f.eks. FuelFinder IE eller IE Pumps."
     }
   }
 }

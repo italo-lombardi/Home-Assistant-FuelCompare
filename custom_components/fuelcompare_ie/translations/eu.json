@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hautatu herrialdea",
+        "data": {
+          "country": "Herrialdea"
+        }
+      },
+      "provider": {
+        "title": "Hautatu datu-iturria",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Datu-iturria"
+        }
+      },
+      "county": {
+        "title": "Hautatu konderria",
+        "description": "Hautatu zure konderria hurbileko gasolindegiak bilatzeko.",
+        "data": {
+          "station_county": "Konderria"
+        }
+      },
+      "api_key": {
+        "title": "API gakoa",
+        "description": "Idatzi zure doako API gakoa. [Lortu hemen]({registration_url}) eskatzen bazaizu.",
+        "data": {
+          "api_key": "API gakoa"
+        }
+      },
+      "station": {
+        "title": "Gehitu gasolindegia",
+        "description": "{hint}",
+        "data": {
+          "station_id": "Gasolindegiaren IDa"
+        }
+      },
+      "station_picker": {
+        "title": "Hautatu gasolindegia",
+        "description": "Hautatu erregai-gasolindegia. Erakutsitako prezioak diesel/gasolinarenak dira.",
+        "data": {
+          "station_id": "Gasolindegia"
+        }
+      },
+      "location": {
+        "title": "Ezarri kokapena",
+        "description": "Sartu zure kokapena eta bilaketa-erradioa. Erradioko gasolindegiak jarraipena izango dute.",
+        "data": {
+          "latitude": "Latitudea",
+          "longitude": "Longitudea",
+          "radius_km": "Erradioa (km)",
+          "postal_code": "Posta kodea"
+        }
+      },
+      "name": {
+        "title": "Gasolindegiaren izena",
+        "description": "Berretsi edo editatu gasolindegiaren izena.",
+        "data": {
+          "name": "Izena"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Gasolindegiaren IDa ezin da hutsik egon.",
+      "invalid_location": "Koordinatu baliogabeak. Sartu latitudea eta longitudea balio baliozkoak.",
+      "no_stations_found": "Ez da gasolindegirik aurkitu konderri honetan. Saiatu beste konderri batekin.",
+      "invalid_api_key": "API gakoa ezin da hutsik egon."
+    },
+    "abort": {
+      "already_configured": "Gasolindegia dagoeneko konfiguratuta dago.",
+      "no_providers_for_country": "Ez dago datu-hornitzailerik herrialde honetarako."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie ixten ari da",
+      "description": "fuelcompare.ie webgunea **2026ko ekainaren 30ean** ixtekotan dago. Zure **{entry_title}** gasolindegiak ez du prezio-eguneratzarik jasoko data horren ostean. Kontuan hartu Irlandako beste erregai-prezio iturri batera aldatzea, hala nola FuelFinder IE edo IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Diesela"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Kerosenoa"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Gasolina"
+      },
+      "premium_diesel": {
+        "name": "Diesel premium"
+      },
+      "premium_unleaded": {
+        "name": "Berun gabeko premiuma"
+      },
+      "unleaded": {
+        "name": "Berun gabea"
+      },
+      "address": {
+        "name": "Helbidea"
+      },
+      "brand": {
+        "name": "Marka"
+      },
+      "county": {
+        "name": "Konderria"
+      },
+      "latitude": {
+        "name": "Latitudea"
+      },
+      "location": {
+        "name": "Kokapena"
+      },
+      "longitude": {
+        "name": "Longitudea"
+      },
+      "station_name": {
+        "name": "Gasolindegiaren izena"
+      },
+      "accessibility": {
+        "name": "Irisgarritasuna"
+      },
+      "amenities": {
+        "name": "Zerbitzuak"
+      },
+      "last_successful_fetch": {
+        "name": "Azken datu-eskuratze arrakastatsua"
+      },
+      "offerings": {
+        "name": "Eskaintzak"
+      },
+      "opening_hours": {
+        "name": "Irekitze-ordutegia (OSM)"
+      },
+      "payments": {
+        "name": "Ordainketak"
+      },
+      "phone": {
+        "name": "Telefonoa"
+      },
+      "price_confidence": {
+        "name": "Prezioaren fidagarritasuna"
+      },
+      "price_last_updated": {
+        "name": "Prezioaren azken eguneraketa"
+      },
+      "website": {
+        "name": "Webgunea"
+      },
+      "working_hours": {
+        "name": "Lan-ordutegia"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Datu-eskuratze arazoa"
+      },
+      "has_price": {
+        "name": "Prezioa du"
+      },
+      "is_open": {
+        "name": "Irekita dago"
+      },
+      "has_atm": {
+        "name": "Kutxazaina"
+      },
+      "has_car_wash": {
+        "name": "Auto-garbiketa"
+      },
+      "has_disabled_access": {
+        "name": "Desgaitasunen duten pertsonentzako sarbidea"
+      },
+      "has_electric_charging": {
+        "name": "Ibilgailu elektrikoen karga"
+      },
+      "has_shop": {
+        "name": "Denda"
+      },
+      "has_toilet": {
+        "name": "Komunak"
+      },
+      "accepts_cards": {
+        "name": "Txartelak onartzen ditu"
+      },
+      "accepts_cash": {
+        "name": "Dirua onartzen du"
+      },
+      "accepts_contactless": {
+        "name": "Kontakturik gabeko ordainketa onartzen du"
+      }
+    }
+  }
+}

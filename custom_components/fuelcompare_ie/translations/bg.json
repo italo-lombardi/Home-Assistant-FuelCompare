@@ -12,10 +12,11 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Източник на данни"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Добавяне на станция Fuel Compare",
+        "title": "Добавяне на станция",
         "description": "{hint}",
         "data": {
           "station_id": "ID на Станция"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Приема безконтактно плащане"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie спира работа",
+      "description": "Сайтът fuelcompare.ie е планиран да спре работа на **30 юни 2026 г.** Вашата станция **{entry_title}** ще спре да получава актуализации на цените след тази дата. Помислете за преминаване към друг ирландски източник на горивни цени, като FuelFinder IE или IE Pumps."
     }
   }
 }

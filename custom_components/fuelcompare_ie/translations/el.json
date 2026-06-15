@@ -12,7 +12,8 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Πηγή δεδομένων"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "county": {
         "title": "Επιλογή νομού",
@@ -29,7 +30,7 @@
         }
       },
       "station": {
-        "title": "Προσθήκη σταθμού Fuel Compare",
+        "title": "Προσθήκη σταθμού",
         "description": "{hint}",
         "data": {
           "station_id": "Αναγνωριστικό Σταθμού"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Δέχεται ανέπαφη πληρωμή"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "Το fuelcompare.ie τερματίζει τη λειτουργία του",
+      "description": "Ο ιστότοπος fuelcompare.ie είναι προγραμματισμένο να τερματίσει τη λειτουργία του στις **30 Ιουνίου 2026**. Ο σταθμός σας **{entry_title}** θα σταματήσει να λαμβάνει ενημερώσεις τιμών μετά από αυτήν την ημερομηνία. Σκεφτείτε να μεταβείτε σε διαφορετική ιρλανδική πηγή τιμών καυσίμων, όπως το FuelFinder IE ή το IE Pumps."
     }
   }
 }

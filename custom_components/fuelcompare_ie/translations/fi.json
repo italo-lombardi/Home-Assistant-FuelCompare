@@ -12,7 +12,8 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Tietolähde"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "county": {
         "title": "Valitse lääni",
@@ -29,7 +30,7 @@
         }
       },
       "station": {
-        "title": "Lisää Fuel Compare-asema",
+        "title": "Lisää asema",
         "description": "{hint}",
         "data": {
           "station_id": "Aseman tunnus"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Hyväksyy lähimaksun"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie suljetaan",
+      "description": "Verkkosivusto fuelcompare.ie on suunniteltu suljettavaksi **30. kesäkuuta 2026**. Asemasi **{entry_title}** lopettaa hinnapäivitysten vastaanottamisen sen jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
     }
   }
 }

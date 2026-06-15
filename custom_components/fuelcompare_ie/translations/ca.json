@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Seleccioneu el país",
+        "data": {
+          "country": "País"
+        }
+      },
+      "provider": {
+        "title": "Seleccioneu la font de dades",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Font de dades"
+        }
+      },
+      "county": {
+        "title": "Seleccioneu el comtat",
+        "description": "Seleccioneu el vostre comtat per trobar estacions properes.",
+        "data": {
+          "station_county": "Comtat"
+        }
+      },
+      "api_key": {
+        "title": "Clau d'API",
+        "description": "Introduïu la vostra clau d'API gratuïta. [Obteniu-ne una aquí]({registration_url}) si se us sol·licita.",
+        "data": {
+          "api_key": "Clau d'API"
+        }
+      },
+      "station": {
+        "title": "Afegiu una estació",
+        "description": "{hint}",
+        "data": {
+          "station_id": "ID de l'estació"
+        }
+      },
+      "station_picker": {
+        "title": "Seleccioneu l'estació",
+        "description": "Seleccioneu una estació de combustible. Els preus mostrats corresponen a dièsel/gasolina.",
+        "data": {
+          "station_id": "Estació"
+        }
+      },
+      "location": {
+        "title": "Establiu la ubicació",
+        "description": "Introduïu la vostra ubicació i el radi de cerca. Es faran el seguiment de les estacions dins del radi.",
+        "data": {
+          "latitude": "Latitud",
+          "longitude": "Longitud",
+          "radius_km": "Radi (km)",
+          "postal_code": "Codi postal"
+        }
+      },
+      "name": {
+        "title": "Nom de l'estació",
+        "description": "Confirmeu o editeu el nom d'aquesta estació.",
+        "data": {
+          "name": "Nom"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "L'ID de l'estació no pot estar buit.",
+      "invalid_location": "Coordenades no vàlides. Introduïu valors de latitud i longitud vàlids.",
+      "no_stations_found": "No s'han trobat estacions per a aquest comtat. Proveu amb un comtat diferent.",
+      "invalid_api_key": "La clau d'API no pot estar buida."
+    },
+    "abort": {
+      "already_configured": "Aquesta estació ja està configurada.",
+      "no_providers_for_country": "No hi ha proveïdors de dades disponibles per a aquest país."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie tancarà",
+      "description": "El lloc web fuelcompare.ie té previst tancar el **30 de juny de 2026**. La vostra estació **{entry_title}** deixarà de rebre actualitzacions de preus després d'aquesta data. Considereu canviar a una altra font de preus de combustible irlandesa, com ara FuelFinder IE o IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Dièsel"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Querosè"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Gasolina"
+      },
+      "premium_diesel": {
+        "name": "Dièsel premium"
+      },
+      "premium_unleaded": {
+        "name": "Sense plom premium"
+      },
+      "unleaded": {
+        "name": "Sense plom"
+      },
+      "address": {
+        "name": "Adreça"
+      },
+      "brand": {
+        "name": "Marca"
+      },
+      "county": {
+        "name": "Comtat"
+      },
+      "latitude": {
+        "name": "Latitud"
+      },
+      "location": {
+        "name": "Ubicació"
+      },
+      "longitude": {
+        "name": "Longitud"
+      },
+      "station_name": {
+        "name": "Nom de l'estació"
+      },
+      "accessibility": {
+        "name": "Accessibilitat"
+      },
+      "amenities": {
+        "name": "Serveis"
+      },
+      "last_successful_fetch": {
+        "name": "Darrera obtenció correcta"
+      },
+      "offerings": {
+        "name": "Ofertes"
+      },
+      "opening_hours": {
+        "name": "Horari d'obertura (OSM)"
+      },
+      "payments": {
+        "name": "Pagaments"
+      },
+      "phone": {
+        "name": "Telèfon"
+      },
+      "price_confidence": {
+        "name": "Fiabilitat del preu"
+      },
+      "price_last_updated": {
+        "name": "Darrera actualització del preu"
+      },
+      "website": {
+        "name": "Lloc web"
+      },
+      "working_hours": {
+        "name": "Horari d'atenció"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Problema en l'obtenció de dades"
+      },
+      "has_price": {
+        "name": "Té preu"
+      },
+      "is_open": {
+        "name": "Obert"
+      },
+      "has_atm": {
+        "name": "Caixer automàtic"
+      },
+      "has_car_wash": {
+        "name": "Rentat de cotxes"
+      },
+      "has_disabled_access": {
+        "name": "Accés per a persones amb discapacitat"
+      },
+      "has_electric_charging": {
+        "name": "Càrrega de vehicles elèctrics"
+      },
+      "has_shop": {
+        "name": "Botiga"
+      },
+      "has_toilet": {
+        "name": "Lavabo"
+      },
+      "accepts_cards": {
+        "name": "Accepta targetes"
+      },
+      "accepts_cash": {
+        "name": "Accepta efectiu"
+      },
+      "accepts_contactless": {
+        "name": "Accepta pagament sense contacte"
+      }
+    }
+  }
+}

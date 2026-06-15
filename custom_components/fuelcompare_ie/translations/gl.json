@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Seleccionar país",
+        "data": {
+          "country": "País"
+        }
+      },
+      "provider": {
+        "title": "Seleccionar fonte de datos",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Fonte de datos"
+        }
+      },
+      "county": {
+        "title": "Seleccionar condado",
+        "description": "Seleccione o seu condado para atopar estacións próximas.",
+        "data": {
+          "station_county": "Condado"
+        }
+      },
+      "api_key": {
+        "title": "Clave de API",
+        "description": "Introduza a súa clave de API gratuíta. [Obtéñaa aquí]({registration_url}) se lla solicitan.",
+        "data": {
+          "api_key": "Clave de API"
+        }
+      },
+      "station": {
+        "title": "Engadir estación",
+        "description": "{hint}",
+        "data": {
+          "station_id": "ID da estación"
+        }
+      },
+      "station_picker": {
+        "title": "Seleccionar estación",
+        "description": "Seleccione unha estación de combustible. Os prezos mostrados corresponden a diésel/gasolina.",
+        "data": {
+          "station_id": "Estación"
+        }
+      },
+      "location": {
+        "title": "Definir localización",
+        "description": "Introduza a súa localización e o radio de busca. Farase o seguimento das estacións dentro do radio.",
+        "data": {
+          "latitude": "Latitude",
+          "longitude": "Lonxitude",
+          "radius_km": "Radio (km)",
+          "postal_code": "Código postal"
+        }
+      },
+      "name": {
+        "title": "Nome da estación",
+        "description": "Confirme ou edite o nome desta estación.",
+        "data": {
+          "name": "Nome"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "O ID da estación non pode estar baleiro.",
+      "invalid_location": "Coordenadas non válidas. Introduza valores de latitude e lonxitude válidos.",
+      "no_stations_found": "Non se atoparon estacións para este condado. Probe con outro condado.",
+      "invalid_api_key": "A clave de API non pode estar baleira."
+    },
+    "abort": {
+      "already_configured": "Esta estación xa está configurada.",
+      "no_providers_for_country": "Non hai provedores de datos dispoñibles para este país."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie vai pechar",
+      "description": "O sitio web fuelcompare.ie ten previsto pechar o **30 de xuño de 2026**. A súa estación **{entry_title}** deixará de recibir actualizacións de prezos despois desa data. Considere cambiar a outra fonte de prezos de combustible irlandesa, como FuelFinder IE ou IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Diésel"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Queroseno"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Gasolina"
+      },
+      "premium_diesel": {
+        "name": "Diésel premium"
+      },
+      "premium_unleaded": {
+        "name": "Sen chumbo premium"
+      },
+      "unleaded": {
+        "name": "Sen chumbo"
+      },
+      "address": {
+        "name": "Enderezo"
+      },
+      "brand": {
+        "name": "Marca"
+      },
+      "county": {
+        "name": "Condado"
+      },
+      "latitude": {
+        "name": "Latitude"
+      },
+      "location": {
+        "name": "Localización"
+      },
+      "longitude": {
+        "name": "Lonxitude"
+      },
+      "station_name": {
+        "name": "Nome da estación"
+      },
+      "accessibility": {
+        "name": "Accesibilidade"
+      },
+      "amenities": {
+        "name": "Servizos"
+      },
+      "last_successful_fetch": {
+        "name": "Última obtención exitosa"
+      },
+      "offerings": {
+        "name": "Ofertas"
+      },
+      "opening_hours": {
+        "name": "Horario de apertura (OSM)"
+      },
+      "payments": {
+        "name": "Pagamentos"
+      },
+      "phone": {
+        "name": "Teléfono"
+      },
+      "price_confidence": {
+        "name": "Fiabilidade do prezo"
+      },
+      "price_last_updated": {
+        "name": "Última actualización do prezo"
+      },
+      "website": {
+        "name": "Sitio web"
+      },
+      "working_hours": {
+        "name": "Horario de atención"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Problema na obtención de datos"
+      },
+      "has_price": {
+        "name": "Ten prezo"
+      },
+      "is_open": {
+        "name": "Está aberto"
+      },
+      "has_atm": {
+        "name": "Caixeiro automático"
+      },
+      "has_car_wash": {
+        "name": "Lavado de coches"
+      },
+      "has_disabled_access": {
+        "name": "Acceso para persoas con discapacidade"
+      },
+      "has_electric_charging": {
+        "name": "Carga de vehículos eléctricos"
+      },
+      "has_shop": {
+        "name": "Tenda"
+      },
+      "has_toilet": {
+        "name": "Aseo"
+      },
+      "accepts_cards": {
+        "name": "Acepta tarxetas"
+      },
+      "accepts_cash": {
+        "name": "Acepta efectivo"
+      },
+      "accepts_contactless": {
+        "name": "Acepta pagamento sen contacto"
+      }
+    }
+  }
+}

@@ -12,10 +12,11 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Sorgente dati"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Aggiungi stazione Fuel Compare",
+        "title": "Aggiungi stazione",
         "description": "{hint}",
         "data": {
           "station_id": "ID Stazione"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Accetta pagamento contactless"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie sta chiudendo",
+      "description": "Il sito fuelcompare.ie è previsto per la chiusura il **30 giugno 2026**. La tua stazione **{entry_title}** smetterà di ricevere aggiornamenti sui prezzi dopo tale data. Considera di passare a un'altra fonte di prezzi del carburante irlandese, come FuelFinder IE o IE Pumps."
     }
   }
 }

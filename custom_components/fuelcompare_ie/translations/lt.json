@@ -12,7 +12,8 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Duomenų šaltinis"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "county": {
         "title": "Pasirinkite apskritį",
@@ -29,7 +30,7 @@
         }
       },
       "station": {
-        "title": "Pridėti Fuel Compare stotį",
+        "title": "Pridėti stotį",
         "description": "{hint}",
         "data": {
           "station_id": "Stoties ID"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Priima bekontaktį mokėjimą"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie baigia darbą",
+      "description": "Svetainė fuelcompare.ie planuoja baigti darbą **2026 m. birželio 30 d.** Jūsų stotis **{entry_title}** nustops gauti kainų atnaujinimus po tos datos. Apsvarstykite galimybę pereiti prie kito Airijos degalų kainų šaltinio, pvz., FuelFinder IE arba IE Pumps."
     }
   }
 }

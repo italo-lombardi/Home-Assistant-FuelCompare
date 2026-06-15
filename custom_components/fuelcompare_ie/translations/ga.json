@@ -12,10 +12,11 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Foinse Sonraí"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Cuir Stáisiún Fuel Compare Leis",
+        "title": "Cuir Stáisiún Leis",
         "description": "{hint}",
         "data": {
           "station_id": "Aitheantas Stáisiúin"
@@ -146,7 +147,7 @@
         "name": "Seirbhísí"
       },
       "opening_hours": {
-        "name": "Uaireanta oscailte"
+        "name": "Uaireanta oscailte (OSM)"
       },
       "payments": {
         "name": "Íocaíochtaí"
@@ -204,6 +205,12 @@
       "accepts_contactless": {
         "name": "Glacann le híocaíocht gan teagmháil"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "Tá fuelcompare.ie ag dúnadh",
+      "description": "Tá sé beartaithe go ndúnfar suíomh fuelcompare.ie ar **30 Meitheamh 2026**. Stopfaidh do stáisiún **{entry_title}** ag fáil nuashonruithe praghsanna tar éis an dáta sin. Smaoinigh ar aistriú go foinse eile praghas breosla Éireannach, amhail FuelFinder IE nó IE Pumps."
     }
   }
 }
