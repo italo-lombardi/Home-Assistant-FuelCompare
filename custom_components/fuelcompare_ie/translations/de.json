@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie wird eingestellt",
       "description": "Die Website fuelcompare.ie soll am **30. Juni 2026** eingestellt werden. Ihre Tankstelle **{entry_title}** erhält nach diesem Datum keine Preisaktualisierungen mehr. Erwägen Sie einen Wechsel zu einer anderen irischen Kraftstoffpreisquelle, wie z. B. FuelFinder IE oder IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-Zertifikatsüberprüfung deaktiviert",
+      "description": "Der pumps.ie-Anbieter für **{entry_title}** hat die TLS-Zertifikatsüberprüfung deaktiviert, da das Zertifikat der Website derzeit ungültig ist. Die Daten werden weiterhin verschlüsselt übertragen, die Serveridentität wird jedoch nicht überprüft."
     }
   },
   "entity": {

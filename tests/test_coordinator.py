@@ -1015,6 +1015,45 @@ def test_cryptojs_decrypt_missing_magic_header() -> None:
         _cryptojs_decrypt(bad_payload, _TEST_DECRYPT_KEY)
 
 
+def test_cryptojs_decrypt_invalid_base64() -> None:
+    """Non-base64 input raises ValueError wrapping binascii.Error."""
+    with pytest.raises(ValueError, match="Invalid base64 ciphertext"):
+        _cryptojs_decrypt("not-valid-base64!!!", _TEST_DECRYPT_KEY)
+
+
+def test_cryptojs_decrypt_payload_too_short() -> None:
+    """Payload with valid magic but fewer than 32 bytes raises ValueError."""
+    # 8-byte magic + 7 bytes = 15 bytes total (<32)
+    short = base64.b64encode(b"Salted__" + b"\x00" * 7).decode()
+    with pytest.raises(ValueError, match="Payload too short"):
+        _cryptojs_decrypt(short, _TEST_DECRYPT_KEY)
+
+
+def test_cryptojs_decrypt_non_list_json() -> None:
+    """Decrypted payload that is valid JSON but not a list raises ValueError."""
+    import os
+
+    evp_key = _TEST_DECRYPT_KEY
+    salt = os.urandom(8)
+    raw_data = b'{"key": "value"}'
+    pad_len = 16 - (len(raw_data) % 16)
+    plaintext = raw_data + bytes([pad_len] * pad_len)
+
+    d, d_i = b"", b""
+    while len(d) < 48:
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt, usedforsecurity=False).digest()
+        d += d_i
+    key, iv = d[:32], d[32:48]
+
+    cipher = _Cipher(_algorithms.AES(key), _modes.CBC(iv))
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+    payload = base64.b64encode(b"Salted__" + salt + ciphertext).decode()
+    with pytest.raises(ValueError, match="Expected list"):
+        _cryptojs_decrypt(payload, evp_key)
+
+
 # ---------------------------------------------------------------------------
 # last_successful_fetch stamping
 # ---------------------------------------------------------------------------

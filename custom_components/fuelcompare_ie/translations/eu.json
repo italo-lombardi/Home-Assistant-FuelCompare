@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie ixten ari da",
       "description": "fuelcompare.ie webgunea **2026ko ekainaren 30ean** ixtekotan dago. Zure **{entry_title}** gasolindegiak ez du prezio-eguneratzarik jasoko data horren ostean. Kontuan hartu Irlandako beste erregai-prezio iturri batera aldatzea, hala nola FuelFinder IE edo IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS ziurtagiriaren egiaztapena desgaituta",
+      "description": "**{entry_title}**-ren pumps.ie hornitzaileak TLS ziurtagiriaren egiaztapena desgaituta du guneko ziurtagiria une honetan baliogabea delako. Datuak transmisioan enkriptatuta jarraitzen dute, baina zerbitzariaren nortasuna ez da egiaztatzen."
     }
   },
   "entity": {

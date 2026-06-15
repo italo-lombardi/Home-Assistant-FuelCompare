@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie se gasi",
       "description": "Web stranica fuelcompare.ie planira prestati s radom **30. lipnja 2026.** Vaša postaja **{entry_title}** prestat će primati ažuriranja cijena nakon tog datuma. Razmislite o prelasku na drugi irski izvor cijena goriva, kao što su FuelFinder IE ili IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Provjera TLS certifikata za pumps.ie onemogućena",
+      "description": "Davatelj pumps.ie za **{entry_title}** ima onemogućenu provjeru TLS certifikata jer trenutačni certifikat stranice nije valjan. Podaci su i dalje šifrirani u prijenosu, ali identitet poslužitelja nije provjeren."
     }
   },
   "entity": {

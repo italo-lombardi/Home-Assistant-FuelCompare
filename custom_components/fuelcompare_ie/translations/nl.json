@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie sluit",
       "description": "De website fuelcompare.ie staat gepland om te sluiten op **30 juni 2026**. Uw station **{entry_title}** stopt na die datum met het ontvangen van prijsupdates. Overweeg over te stappen naar een andere Ierse brandstofprijsbron, zoals FuelFinder IE of IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-certificaatverificatie uitgeschakeld",
+      "description": "De pumps.ie-provider voor **{entry_title}** heeft TLS-certificaatverificatie uitgeschakeld omdat het certificaat van de site momenteel ongeldig is. De gegevens zijn nog steeds versleuteld tijdens verzending, maar de identiteit van de server wordt niet geverifieerd."
     }
   },
   "entity": {

@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie kończy działalność",
       "description": "Witryna fuelcompare.ie ma zakończyć działalność **30 czerwca 2026 r.** Twoja stacja **{entry_title}** przestanie otrzymywać aktualizacje cen po tej dacie. Rozważ przejście do innego irlandzkiego źródła cen paliw, takiego jak FuelFinder IE lub IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Weryfikacja certyfikatu TLS pumps.ie wyłączona",
+      "description": "Dostawca pumps.ie dla **{entry_title}** ma wyłączoną weryfikację certyfikatu TLS, ponieważ certyfikat strony jest obecnie nieważny. Dane są nadal szyfrowane podczas transmisji, ale tożsamość serwera nie jest weryfikowana."
     }
   },
   "entity": {

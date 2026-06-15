@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie suljetaan",
       "description": "Verkkosivusto fuelcompare.ie on suunniteltu suljettavaksi **30. kesäkuuta 2026**. Asemasi **{entry_title}** lopettaa hinnapäivitysten vastaanottamisen sen jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-varmenteen tarkistus poistettu käytöstä",
+      "description": "pumps.ie-palveluntarjoajan TLS-varmenteen tarkistus on poistettu käytöstä kohteelle **{entry_title}**, koska sivuston varmenne on tällä hetkellä virheellinen. Tiedot ovat edelleen salattuja siirron aikana, mutta palvelimen henkilöllisyyttä ei varmenneta."
     }
   },
   "entity": {

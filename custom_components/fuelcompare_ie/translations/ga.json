@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "Tá fuelcompare.ie ag dúnadh",
       "description": "Tá sé beartaithe go ndúnfar suíomh fuelcompare.ie ar **30 Meitheamh 2026**. Stopfaidh do stáisiún **{entry_title}** ag fáil nuashonruithe praghsanna tar éis an dáta sin. Smaoinigh ar aistriú go foinse eile praghas breosla Éireannach, amhail FuelFinder IE nó IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Fíordheimhniú deimhnithe TLS pumps.ie díchumasaithe",
+      "description": "Tá fíordheimhniú deimhnithe TLS díchumasaithe ag soláthraí pumps.ie do **{entry_title}** toisc go bhfuil deimhniú an tsuímh neamhbhailí faoi láthair. Tá na sonraí fós criptithe le linn tarchurtha, ach ní fíordheimhnítear céannacht an fhreastalaí."
     }
   },
   "entity": {

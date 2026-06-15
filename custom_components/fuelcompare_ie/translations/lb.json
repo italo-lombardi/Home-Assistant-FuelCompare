@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie stellt säi Betrib an",
       "description": "D'Websäit fuelcompare.ie ass geplangt fir den **30. Juni 2026** zouzemaachen. Är Statioun **{entry_title}** wäert no deem Datum keng Präisupdates méi kréien. Iwwerdenkt op eng aner iresch Benzinpräisquell ëmzestellen, wéi FuelFinder IE oder IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-Zertifikaatsprüfung deaktivéiert",
+      "description": "Den pumps.ie-Ubidder fir **{entry_title}** huet d'TLS-Zertifikaatsprüfung deaktivéiert, well d'Zertifikat vun der Säit am Moment net gëlteg ass. D'Daten gi weiderhin verschlësselt iwwerdroe, mä d'Identitéit vum Server gëtt net iwwerpréift."
     }
   },
   "entity": {

@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "A fuelcompare.ie leáll",
       "description": "A fuelcompare.ie weboldal **2026. június 30-án** tervezi a leállást. Az Ön állomása **{entry_title}** az adott dátum után nem kap több árfrissítést. Fontolja meg az átváltást egy másik ír üzemanyagár-forrásra, például a FuelFinder IE-re vagy az IE Pumps-ra."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS tanúsítvány-ellenőrzés letiltva",
+      "description": "A **{entry_title}** pumps.ie szolgáltatójánál a TLS tanúsítvány-ellenőrzés le van tiltva, mert a webhely tanúsítványa jelenleg érvénytelen. Az adatok továbbra is titkosítva kerülnek átvitelre, azonban a szerver személyazonossága nincs ellenőrizve."
     }
   },
   "entity": {

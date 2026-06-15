@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie stänger",
       "description": "Webbplatsen fuelcompare.ie planeras att stänga **30 juni 2026**. Din station **{entry_title}** slutar ta emot prisuppdateringar efter det datumet. Överväg att byta till en annan irländsk bränslekälla, till exempel FuelFinder IE eller IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-certifikatverifiering inaktiverad",
+      "description": "Leverantören pumps.ie för **{entry_title}** har TLS-certifikatverifiering inaktiverad eftersom webbplatsens certifikat för närvarande är ogiltigt. Data är fortfarande krypterad under överföring, men serverns identitet verifieras inte."
     }
   },
   "entity": {

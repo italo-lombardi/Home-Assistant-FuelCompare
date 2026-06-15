@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie se vypíná",
       "description": "Webová stránka fuelcompare.ie je naplánována k vypnutí **30. června 2026**. Vaše stanice **{entry_title}** přestane přijímat aktualizace cen po tomto datu. Zvažte přechod na jiný irský zdroj cen paliv, jako je FuelFinder IE nebo IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Ověření TLS certifikátu pumps.ie je zakázáno",
+      "description": "Poskytovatel pumps.ie pro **{entry_title}** má zakázáno ověřování TLS certifikátu, protože certifikát webu je momentálně neplatný. Data jsou při přenosu stále šifrována, ale identita serveru není ověřena."
     }
   },
   "entity": {

@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie se închide",
       "description": "Site-ul fuelcompare.ie este programat să se închidă la **30 iunie 2026**. Stația dvs. **{entry_title}** va înceta să primească actualizări de prețuri după această dată. Luați în considerare trecerea la o altă sursă de prețuri pentru combustibili din Irlanda, cum ar fi FuelFinder IE sau IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Verificarea certificatului TLS pumps.ie dezactivată",
+      "description": "Furnizorul pumps.ie pentru **{entry_title}** are verificarea certificatului TLS dezactivată deoarece certificatul site-ului este momentan invalid. Datele sunt în continuare criptate în tranzit, însă identitatea serverului nu este verificată."
     }
   },
   "entity": {

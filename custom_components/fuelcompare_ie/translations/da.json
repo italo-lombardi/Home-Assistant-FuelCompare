@@ -76,6 +76,10 @@
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie lukker ned",
       "description": "Hjemmesiden fuelcompare.ie er planlagt til at lukke ned den **30. juni 2026**. Din station **{entry_title}** vil stoppe med at modtage prisopdateringer efter denne dato. Overvej at skifte til en anden irsk brændstofpriskoilde, f.eks. FuelFinder IE eller IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-certifikatbekræftelse deaktiveret",
+      "description": "pumps.ie-udbyderen for **{entry_title}** har TLS-certifikatbekræftelse deaktiveret, fordi webstedets certifikat i øjeblikket er ugyldigt. Data er stadig krypteret under overførslen, men serverens identitet bekræftes ikke."
     }
   },
   "entity": {
