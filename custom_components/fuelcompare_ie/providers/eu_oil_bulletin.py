@@ -302,15 +302,15 @@ class EuOilBulletinProvider(BaseProvider):
             if sheet is None:
                 raise ProviderError("EC Oil Bulletin Excel file has no active sheet.")
 
-            # Extract week date: row 2 col A has the reference date string.
-            # Row 1 col A is the "in EUR" units header — skip it.
+            # Extract week date: row 1 col A has the reference date string.
+            # Row 2 col A is the "Country" column header — skip it.
             week_label: str | None = None
             try:
-                for row_idx, col_idx in ((2, 1), (1, 2)):
+                for row_idx, col_idx in ((1, 1), (2, 1)):
                     header_val = sheet.cell(row=row_idx, column=col_idx).value
                     if header_val:
                         candidate = str(header_val).strip()
-                        if candidate and candidate.lower() != "in eur":
+                        if candidate and candidate.lower() not in ("in eur", "country"):
                             week_label = candidate
                             break
             except Exception:  # noqa: BLE001

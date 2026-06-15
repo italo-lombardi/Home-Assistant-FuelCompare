@@ -450,6 +450,13 @@ def _parse_station_base(
         "lastupdated": date_str,
         "is_open": _parse_is_open(site_features),
         "source_station_id": station_id,
+        # Fuel price keys initialised to None so stations that only appear in
+        # a subset of product feeds still have all expected CAPABILITIES keys.
+        "unleaded": None,
+        "premium_unleaded": None,
+        "diesel": None,
+        "lpg": None,
+        "e10": None,
     }
 
 
