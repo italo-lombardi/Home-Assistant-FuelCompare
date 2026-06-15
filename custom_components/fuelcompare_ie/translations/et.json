@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "See jaam on juba seadistatud.",
-      "no_providers_for_country": "Selle riigi jaoks ei ole andmeallikaid saadaval."
+      "no_providers_for_country": "Selle riigi jaoks ei ole andmeallikaid saadaval.",
+      "no_counties_for_country": "Valitud riigi jaoks pole maakondakondasid seadistatud."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie lõpetab töö",
       "description": "Veebisait fuelcompare.ie on kavandatud sulgeda **30. juunil 2026**. Teie jaam **{entry_title}** lõpetab pärast seda kuupäeva hinnavärskenduste saamise. Kaaluge üleminekut mõnele teisele Iiri kütusehindade allikale, näiteks FuelFinder IE või IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS sertifikaadi kontrollimine on keelatud",
+      "description": "Kirje **{entry_title}** pumps.ie pakkuja jaoks on TLS sertifikaadi kontrollimine keelatud, kuna saidi sertifikaat on praegu kehtetu. Andmed on edastuse ajal endiselt krüpteeritud, kuid serveri identiteeti ei kontrollita."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Aktsepteerib kontaktivaba makset"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Seaded",
+        "data": {
+          "api_key": "API võti",
+          "radius_km": "Otsinguraadius (km)"
+        }
       }
     }
   }

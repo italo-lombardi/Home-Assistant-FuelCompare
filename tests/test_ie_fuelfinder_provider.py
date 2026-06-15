@@ -208,7 +208,7 @@ async def test_async_fetch_success_national_search() -> None:
     assert data["has_price"] is True
 
 
-def test_async_fetch_caches_county_after_first_fetch() -> None:
+async def test_async_fetch_caches_county_after_first_fetch() -> None:
     """async_fetch caches the county from the API response for future polls."""
     provider = IEFuelFinderProvider(_STATION_ID)
     assert provider._cached_county is None
@@ -218,13 +218,9 @@ def test_async_fetch_caches_county_after_first_fetch() -> None:
             return [_DIESEL_RECORD]
         return []
 
-    import asyncio
-
     with patch.object(provider, "_fetch_stations", side_effect=_mock_fetch):
         session = MagicMock()
-        asyncio.get_event_loop().run_until_complete(
-            provider.async_fetch(session, _STATION_ID)
-        )
+        await provider.async_fetch(session, _STATION_ID)
 
     # County is lowercased from the title-cased API value
     assert provider._cached_county == _STATION_COUNTY.lower()

@@ -1782,26 +1782,27 @@ async def test_fetch_and_parse_xml_returns_cached_element_on_cache_hit() -> None
 
 
 async def test_fetch_xml_raises_provider_error_when_xml_exceeds_size_limit() -> None:
-    """_fetch_xml raises ProviderError when the ZIP entry's uncompressed size exceeds 50 MB."""
-    # Build a valid ZIP, then patch the uncompressed-size field in the central
-    # directory so ZipInfo.file_size reports > 50_000_000.
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("data.xml", b"<pdv_liste/>")
-    z = bytearray(buf.getvalue())
+    """_fetch_xml raises ProviderError when the extracted XML content exceeds 50 MB."""
+    from unittest.mock import patch
 
-    # Patch uncompressed size (4-byte LE at offset +24 in the central directory header).
-    cd_idx = z.find(b"PK\x01\x02")
-    assert cd_idx != -1, "central directory signature not found"
-    us_offset = cd_idx + 24
-    z[us_offset : us_offset + 4] = (60_000_000).to_bytes(4, "little")
+    # Make _extract_xml return data that is actually > 50 MB by patching zf.read
+    import zipfile as _zipfile
 
-    resp = _make_mock_response(200, body=bytes(z))
+    valid_zip = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
+    resp = _make_mock_response(200, body=valid_zip)
     session = _make_session(resp)
 
     provider = FrCarburantsProvider(_STATION_ID)
-    with pytest.raises(ProviderError, match="exceeds size limit"):
-        await provider._fetch_xml(session)
+
+    # Patch zipfile.ZipFile.read so the returned bytes are > 50 MB
+    _orig_read = _zipfile.ZipFile.read
+
+    def _oversized_read(self, name, *args, **kwargs):
+        return b"x" * 51_000_000
+
+    with patch.object(_zipfile.ZipFile, "read", _oversized_read):
+        with pytest.raises(ProviderError, match="exceeds size limit"):
+            await provider._fetch_xml(session)
 
 
 # ---------------------------------------------------------------------------

@@ -408,18 +408,19 @@ async def test_unknown_provider_key_falls_back_to_default(
 
 
 # ---------------------------------------------------------------------------
-# test_coordinator_2arg_compat
+# test_coordinator_provider_instance
 # ---------------------------------------------------------------------------
 
 
-async def test_coordinator_2arg_compat(hass: HomeAssistant) -> None:
-    """FuelCompareIECoordinator(hass, station_id_str) creates IEFuelCompareProvider."""
+async def test_coordinator_provider_instance(hass: HomeAssistant) -> None:
+    """FuelCompareIECoordinator correctly stores provider and station_id."""
     from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
     from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
         IEFuelCompareProvider,
     )
 
-    coordinator = FuelCompareIECoordinator(hass, "42")
+    provider = IEFuelCompareProvider("42")
+    coordinator = FuelCompareIECoordinator(hass, provider, "42")
     assert coordinator.station_id == "42"
     assert isinstance(coordinator._provider, IEFuelCompareProvider)
 
@@ -519,7 +520,10 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
         assert result["title"] == "Dublin Area"
         assert CONF_LATITUDE in result["data"]
         assert CONF_LONGITUDE in result["data"]
-        assert CONF_RADIUS_KM in result["data"]
+        # radius_km is stored in options (not data) for location-mode entries
+        assert CONF_RADIUS_KM in result["data"] or CONF_RADIUS_KM in result.get(
+            "options", {}
+        )
         assert result["data"].get("station_id", "") == "fake-station-001"
     finally:
         PROVIDER_REGISTRY.pop("ie_fake_location", None)
@@ -806,6 +810,9 @@ async def test_async_setup_entry_postal_code_explicit(hass: HomeAssistant) -> No
         async def async_fetch_station_name(self, session, station_id):
             return None
 
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
     PROVIDER_REGISTRY[_FakeBeCarbu.PROVIDER_KEY] = _FakeBeCarbu
     try:
         entry = MockConfigEntry(
@@ -863,6 +870,9 @@ async def test_async_setup_entry_postal_code_from_numeric_county(
 
         async def async_fetch_station_name(self, session, station_id):
             return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
 
     PROVIDER_REGISTRY[_FakeBeCarbuCounty.PROVIDER_KEY] = _FakeBeCarbuCounty
     try:
@@ -922,6 +932,9 @@ async def test_async_setup_entry_postal_code_non_numeric_county_not_used(
         async def async_fetch_station_name(self, session, station_id):
             return None
 
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
     PROVIDER_REGISTRY[_FakeBeCarbuNonNumeric.PROVIDER_KEY] = _FakeBeCarbuNonNumeric
     try:
         entry = MockConfigEntry(
@@ -980,6 +993,9 @@ async def test_async_setup_entry_prefecture_id_valid(hass: HomeAssistant) -> Non
         async def async_fetch_station_name(self, session, station_id):
             return None
 
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
     PROVIDER_REGISTRY[_FakeGrProvider.PROVIDER_KEY] = _FakeGrProvider
     try:
         entry = MockConfigEntry(
@@ -1032,6 +1048,9 @@ async def test_async_setup_entry_prefecture_id_invalid_skipped(
 
         async def async_fetch_station_name(self, session, station_id):
             return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
 
     PROVIDER_REGISTRY[_FakeGrProviderBadId.PROVIDER_KEY] = _FakeGrProviderBadId
     try:
@@ -1105,6 +1124,9 @@ async def test_async_setup_entry_geo_params_passed(hass: HomeAssistant) -> None:
 
         async def async_fetch_station_name(self, session, station_id):
             return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
 
     PROVIDER_REGISTRY[_FakeDEGeoProvider.PROVIDER_KEY] = _FakeDEGeoProvider
     try:
@@ -2434,3 +2456,293 @@ async def test_async_setup_entry_unknown_provider_raises_config_entry_not_ready(
     finally:
         if saved_default is not None:
             PROVIDER_REGISTRY[DEFAULT_PROVIDER] = saved_default
+
+
+# ---------------------------------------------------------------------------
+# no_providers_for_country abort (config_flow.py line 406)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_user_aborts_when_no_countries(hass: HomeAssistant) -> None:
+    """async_step_user aborts with no_providers_for_country when registry is empty."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+
+    saved = dict(PROVIDER_REGISTRY)
+    try:
+        PROVIDER_REGISTRY.clear()
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": "user"}
+        )
+        assert result["type"] == "abort"
+        assert result["reason"] == "no_providers_for_country"
+    finally:
+        PROVIDER_REGISTRY.update(saved)
+
+
+# ---------------------------------------------------------------------------
+# no_counties_for_country abort (config_flow.py line 558)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_county_aborts_when_no_counties(hass: HomeAssistant) -> None:
+    """async_step_county aborts with no_counties_for_country when country has no county map."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _FakeCountyProvider(BaseProvider):
+        COUNTRY = "XX"
+        PROVIDER_KEY = "xx_fake_county_test"
+        LABEL = "XX Fake County Test"
+        STATION_LOOKUP_MODE = "county_search"
+        CAPABILITIES = frozenset({"name"})
+
+        async def async_fetch(self, session, station_id):  # type: ignore[override]
+            return {}  # type: ignore[return-value]
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["xx_fake_county_test"] = _FakeCountyProvider
+    try:
+        with (
+            _PATCH_FETCH_NAME,
+            _PATCH_FIRST_REFRESH,
+            patch(
+                "custom_components.fuelcompare_ie.config_flow._countries_from_registry",
+                return_value=[("XX", "XX Country")],
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": "user"}
+            )
+            if result.get("step_id") == "user":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_COUNTRY: "XX"}
+                )
+            if result.get("step_id") == "provider":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_PROVIDER: "xx_fake_county_test"}
+                )
+            assert result["type"] == "abort"
+            assert result["reason"] == "no_counties_for_country"
+    finally:
+        PROVIDER_REGISTRY.pop("xx_fake_county_test", None)
+
+
+# ---------------------------------------------------------------------------
+# Options flow invalid_api_key on location entry (config_flow.py lines 792-794)
+# ---------------------------------------------------------------------------
+
+
+async def test_options_flow_location_entry_invalid_api_key_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a location+API-key entry shows error on empty API key."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _FakeDEProviderLocKey(BaseProvider):
+        COUNTRY = "DE"
+        PROVIDER_KEY = "de_fake_loc_key_test"
+        LABEL = "DE Fake Loc Key Test"
+        REQUIRES_API_KEY = True
+        STATION_LOOKUP_MODE = "location_search"
+        CAPABILITIES = frozenset({"name"})
+
+        async def async_fetch(self, session, station_id):  # type: ignore[override]
+            return {}  # type: ignore[return-value]
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["de_fake_loc_key_test"] = _FakeDEProviderLocKey
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_de_fake_loc_key_test_opts_err",
+            data={
+                CONF_PROVIDER: "de_fake_loc_key_test",
+                CONF_LATITUDE: 52.5,
+                CONF_LONGITUDE: 13.4,
+                CONF_RADIUS_KM: 10.0,
+            },
+            options={CONF_API_KEY: "existing-key"},
+            title="DE Fake Loc Key",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"
+
+        # Submit empty api_key to trigger validation error on location entry branch
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"],
+            user_input={CONF_API_KEY: "  ", CONF_RADIUS_KM: 10.0},
+        )
+        assert result["type"] == "form"
+        assert result["errors"].get(CONF_API_KEY) == "invalid_api_key"
+    finally:
+        PROVIDER_REGISTRY.pop("de_fake_loc_key_test", None)
+
+
+# ---------------------------------------------------------------------------
+# Options flow invalid_api_key on non-location API-key entry (config_flow.py lines 792-794)
+# ---------------------------------------------------------------------------
+
+
+async def test_options_flow_station_entry_invalid_api_key_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a non-location API-key entry shows error on empty API key."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _FakeDEProviderStatKey(BaseProvider):
+        COUNTRY = "DE"
+        PROVIDER_KEY = "de_fake_stat_key_test"
+        LABEL = "DE Fake Stat Key Test"
+        REQUIRES_API_KEY = True
+        STATION_LOOKUP_MODE = "manual_id"
+        CAPABILITIES = frozenset({"name"})
+
+        async def async_fetch(self, session, station_id):  # type: ignore[override]
+            return {}  # type: ignore[return-value]
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY["de_fake_stat_key_test"] = _FakeDEProviderStatKey
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_de_fake_stat_key_test_opts_err",
+            data={
+                CONF_PROVIDER: "de_fake_stat_key_test",
+                CONF_STATION_ID: "42",
+            },
+            options={CONF_API_KEY: "existing-key"},
+            title="DE Fake Stat Key",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"
+
+        # Submit empty api_key to trigger validation error on non-location entry branch
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"],
+            user_input={CONF_API_KEY: ""},
+        )
+        assert result["type"] == "form"
+        assert result["errors"].get(CONF_API_KEY) == "invalid_api_key"
+    finally:
+        PROVIDER_REGISTRY.pop("de_fake_stat_key_test", None)
+
+
+# ---------------------------------------------------------------------------
+# async_setup_entry — ie_pumps creates TLS repair issue (line 170)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_setup_entry_ie_pumps_creates_tls_issue(
+    hass: HomeAssistant,
+) -> None:
+    """async_setup_entry creates ie_pumps_tls_disabled repair issue for ie_pumps entries."""
+    from unittest.mock import patch
+
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_ie_pumps_tls_issue_test",
+        data={CONF_STATION_ID: "99", CONF_PROVIDER: "ie_pumps"},
+        title="IE Pumps TLS Test",
+    )
+    entry.add_to_hass(hass)
+
+    created_issues: list[str] = []
+
+    def _capture_issue(hass, domain, issue_id, **kwargs):  # noqa: ANN001
+        created_issues.append(issue_id)
+
+    with (
+        patch.object(
+            FuelCompareIECoordinator,
+            "async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.async_create_issue",
+            side_effect=_capture_issue,
+        ),
+    ):
+        result = await async_setup_entry(hass, entry)
+
+    assert result is True
+    assert any("ie_pumps_tls_disabled" in issue_id for issue_id in created_issues)
+
+
+# ---------------------------------------------------------------------------
+# async_setup_entry — entry_id fallback when no station_id and no lat/lng (line 60)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_setup_entry_uses_entry_id_when_no_station_and_no_coords(
+    hass: HomeAssistant,
+) -> None:
+    """station_id defaults to entry.entry_id when neither station_id nor lat/lng present."""
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_entry_id_fallback_test",
+        data={CONF_PROVIDER: "ie_fuelcompare"},  # no station_id, no lat/lng
+        title="Entry ID Fallback Test",
+    )
+    entry.add_to_hass(hass)
+
+    captured_ids: list[str] = []
+
+    original_init = FuelCompareIECoordinator.__init__
+
+    def _capture_init(self, hass, provider, station_id, **kwargs):
+        captured_ids.append(station_id)
+        original_init(self, hass, provider, station_id, **kwargs)
+
+    with (
+        patch.object(FuelCompareIECoordinator, "__init__", _capture_init),
+        patch.object(
+            FuelCompareIECoordinator,
+            "async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+    ):
+        result = await async_setup_entry(hass, entry)
+
+    assert result is True
+    assert captured_ids and captured_ids[0] == entry.entry_id

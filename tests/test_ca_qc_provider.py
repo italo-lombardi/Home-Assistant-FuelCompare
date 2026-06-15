@@ -404,10 +404,10 @@ def test_build_station_data_source_station_id() -> None:
     assert result["source_station_id"] == _STATION_ID
 
 
-def test_build_station_data_lastupdated_is_none() -> None:
-    """lastupdated is None (API provides no per-station timestamp)."""
+def test_build_station_data_lastupdated_not_in_result() -> None:
+    """lastupdated is not included (API provides no per-station timestamp)."""
     result = _build_station_data(_BASE_FEATURE, _STATION_ID)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 def test_build_station_data_unavailable_price_is_none() -> None:
@@ -1164,12 +1164,13 @@ async def test_fetch_geojson_returns_cached_data_without_http_call() -> None:
     import time
 
     cached_features = [_BASE_FEATURE]
-    CaQcProvider._geojson_cache = cached_features
-    CaQcProvider._geojson_cache_ts = time.monotonic()  # just set → within TTL
 
     session = MagicMock()
 
     p = _provider()
+    # Pre-populate the instance-level cache directly
+    p._geojson_cache = cached_features
+    p._geojson_cache_ts = time.monotonic()  # just set → within TTL
     result = await p._fetch_geojson(session)
 
     assert result is cached_features

@@ -70,7 +70,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ _WHOLESALE_URL = f"{_BASE_URL}/wholesalefuelprices"
 _AUTOGAS_URL = f"{_BASE_URL}/autogasprices"
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Referer": "https://tool.orlen.pl/",
 }
@@ -466,8 +466,6 @@ class PlBenzynaProvider(BaseProvider):
             "county": "PL",
             # Timing
             "lastupdated": latest_date,
-            # Meta
-            "source_station_id": _NATIONAL_STATION_ID,
         }
 
         _LOGGER.debug(

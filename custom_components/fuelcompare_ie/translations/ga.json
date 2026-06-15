@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Foinse Sonraí"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Cuir Stáisiún Leis",
@@ -69,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Tá an stáisiún seo cumraithe cheana féin.",
-      "no_providers_for_country": "Níl aon soláthraithe sonraí ar fáil don tír seo."
+      "no_providers_for_country": "Níl aon soláthraithe sonraí ar fáil don tír seo.",
+      "no_counties_for_country": "Níl aon chontae cumraithe don tír roghnaithe."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "Tá fuelcompare.ie ag dúnadh síos",
-      "description": "Tá suíomh gréasáin fuelcompare.ie le dúnadh ar **30 Meitheamh 2026**. Stopfaidh do stáisiún **{entry_title}** ag fáil nuashonruithe praghsanna tar éis an dáta sin. Smaoinigh ar aistriú go foinse praghsanna breosla Éireannaigh eile, mar shampla FuelFinder IE nó IE Pumps."
+      "title": "Tá fuelcompare.ie ag dúnadh",
+      "description": "Tá sé beartaithe go ndúnfar suíomh fuelcompare.ie ar **30 Meitheamh 2026**. Stopfaidh do stáisiún **{entry_title}** ag fáil nuashonruithe praghsanna tar éis an dáta sin. Smaoinigh ar aistriú go foinse eile praghas breosla Éireannach, amhail FuelFinder IE nó IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Fíordheimhniú deimhnithe TLS pumps.ie díchumasaithe",
+      "description": "Tá fíordheimhniú deimhnithe TLS díchumasaithe ag soláthraí pumps.ie do **{entry_title}** toisc go bhfuil deimhniú an tsuímh neamhbhailí faoi láthair. Tá na sonraí fós criptithe le linn tarchurtha, ach ní fíordheimhnítear céannacht an fhreastalaí."
     }
   },
   "entity": {
@@ -207,10 +211,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "Tá fuelcompare.ie ag dúnadh",
-      "description": "Tá sé beartaithe go ndúnfar suíomh fuelcompare.ie ar **30 Meitheamh 2026**. Stopfaidh do stáisiún **{entry_title}** ag fáil nuashonruithe praghsanna tar éis an dáta sin. Smaoinigh ar aistriú go foinse eile praghas breosla Éireannach, amhail FuelFinder IE nó IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Roghanna",
+        "data": {
+          "api_key": "Eochair API",
+          "radius_km": "Raidias cuardaigh (km)"
+        }
+      }
     }
   }
 }

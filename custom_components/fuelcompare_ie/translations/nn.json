@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Denne stasjonen er allereie konfigurert.",
-      "no_providers_for_country": "Ingen dataleverandørar er tilgjengelege for dette landet."
+      "no_providers_for_country": "Ingen dataleverandørar er tilgjengelege for dette landet.",
+      "no_counties_for_country": "Ingen fylke er konfigurert for det valde landet."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie legg ned drifta",
       "description": "Nettstaden fuelcompare.ie er planlagd for nedlegging **30. juni 2026**. Stasjonen din **{entry_title}** vil slutta å motta prisoppdateringar etter den datoen. Vurder å byta til ei anna irsk drivstoffpriskjelde, til dømes FuelFinder IE eller IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-sertifikatverifisering deaktivert",
+      "description": "pumps.ie-leverandøren for **{entry_title}** har TLS-sertifikatverifisering deaktivert fordi nettstaden sitt sertifikat er ugyldig for tida. Data er framleis kryptert under overføring, men serveridentiteten vert ikkje stadfesta."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Godtek kontaktlaus betaling"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Alternativ",
+        "data": {
+          "api_key": "API-nøkkel",
+          "radius_km": "Søkeradius (km)"
+        }
       }
     }
   }

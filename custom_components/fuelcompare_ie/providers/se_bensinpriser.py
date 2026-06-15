@@ -71,7 +71,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ _DATA_URL = "https://bensinpriser.nu/karta/data"
 _STATION_BASE_URL = "https://bensinpriser.nu"
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Referer": "https://bensinpriser.nu/karta/",
 }
@@ -145,7 +145,6 @@ def _parse_station(station: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "website": website,
-        "source_station_id": str(station.get("id", "")),
     }
 
 
@@ -188,7 +187,6 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            "lastupdated",
         }
     )
 

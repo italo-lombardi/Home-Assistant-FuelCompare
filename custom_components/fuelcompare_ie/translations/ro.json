@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Sursă de date"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Adăugare stație",
@@ -69,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Această stație este deja configurată.",
-      "no_providers_for_country": "Nu există furnizori de date disponibili pentru această țară."
+      "no_providers_for_country": "Nu există furnizori de date disponibili pentru această țară.",
+      "no_counties_for_country": "Nu sunt configurate județe pentru țara selectată."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie se închide",
-      "description": "Site-ul fuelcompare.ie este programat să se închidă pe **30 iunie 2026**. Stația dvs. **{entry_title}** va înceta să primească actualizări de prețuri după această dată. Luați în considerare trecerea la o altă sursă irlandeză de prețuri la combustibil, cum ar fi FuelFinder IE sau IE Pumps."
+      "description": "Site-ul fuelcompare.ie este programat să se închidă la **30 iunie 2026**. Stația dvs. **{entry_title}** va înceta să primească actualizări de prețuri după această dată. Luați în considerare trecerea la o altă sursă de prețuri pentru combustibili din Irlanda, cum ar fi FuelFinder IE sau IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Verificarea certificatului TLS pumps.ie dezactivată",
+      "description": "Furnizorul pumps.ie pentru **{entry_title}** are verificarea certificatului TLS dezactivată deoarece certificatul site-ului este momentan invalid. Datele sunt în continuare criptate în tranzit, însă identitatea serverului nu este verificată."
     }
   },
   "entity": {
@@ -207,10 +211,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie se închide",
-      "description": "Site-ul fuelcompare.ie este programat să se închidă la **30 iunie 2026**. Stația dvs. **{entry_title}** va înceta să primească actualizări de prețuri după această dată. Luați în considerare trecerea la o altă sursă de prețuri pentru combustibili din Irlanda, cum ar fi FuelFinder IE sau IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opțiuni",
+        "data": {
+          "api_key": "Cheie API",
+          "radius_km": "Raza de căutare (km)"
+        }
+      }
     }
   }
 }

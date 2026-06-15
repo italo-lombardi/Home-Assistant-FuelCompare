@@ -84,7 +84,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ _API_URL = (
 # Headers recommended to avoid rejection by the Cloud Function.
 # The function validates Origin/Referer against benzin.tcs.ch.
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Content-Type": "application/json",
     "Origin": "https://benzin.tcs.ch",

@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Mae'r orsaf hon eisoes wedi'i ffurfweddu.",
-      "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon."
+      "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon.",
+      "no_counties_for_country": "Nid oes siroedd wedi'u ffurfweddu ar gyfer y wlad a ddewiswyd."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "Mae fuelcompare.ie yn cau",
       "description": "Mae gwefan fuelcompare.ie wedi'i threfnu i gau ar **30 Mehefin 2026**. Bydd eich gorsaf **{entry_title}** yn rhoi'r gorau i dderbyn diweddariadau prisiau ar ôl y dyddiad hwnnw. Ystyriwch newid i ffynhonnell prisiau tanwydd Gwyddelig wahanol, fel FuelFinder IE neu IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Dilysu tystysgrif TLS pumps.ie wedi'i analluogi",
+      "description": "Mae darparwr pumps.ie ar gyfer **{entry_title}** wedi analluogi dilysu tystysgrif TLS oherwydd bod tystysgrif y wefan yn annilys ar hyn o bryd. Mae'r data yn dal i gael ei amgryptio wrth ei drosglwyddo, ond nid yw hunaniaeth y gweinydd yn cael ei dilysu."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Yn Derbyn Taliad Di-gyffwrdd"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsiynau",
+        "data": {
+          "api_key": "Allwedd API",
+          "radius_km": "Radiws chwilio (km)"
+        }
       }
     }
   }

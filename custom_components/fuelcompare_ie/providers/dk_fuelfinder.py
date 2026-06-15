@@ -315,7 +315,6 @@ class DkFuelFinderProvider(BaseProvider):
             "premium_diesel",
             "name",
             "brand",
-            "lastupdated",
         }
     )
 
@@ -515,7 +514,6 @@ class DkFuelFinderProvider(BaseProvider):
             "premium_diesel": prices.get("premium_diesel"),
             "name": brand,
             "brand": brand,
-            "lastupdated": None,  # listprices.php does not expose a timestamp
             "source_station_id": brand,
         }
 

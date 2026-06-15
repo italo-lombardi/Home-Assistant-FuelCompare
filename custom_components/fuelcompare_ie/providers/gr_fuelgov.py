@@ -74,7 +74,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ _LOGGER = logging.getLogger(__name__)
 _API_URL = "https://nireas.iee.ihu.gr/fuel/api/v1/prices/latest"
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
 }
 
@@ -256,9 +256,17 @@ class GrFuelgovProvider(BaseProvider):
 
             price_parts: list[str] = []
             if diesel is not None:
-                price_parts.append(f"Diesel €{diesel:.3f}")
+                try:
+                    diesel_val = float(diesel)
+                    price_parts.append(f"Diesel €{diesel_val:.3f}")
+                except (ValueError, TypeError):
+                    pass
             if unleaded is not None:
-                price_parts.append(f"Unleaded €{unleaded:.3f}")
+                try:
+                    unleaded_val = float(unleaded)
+                    price_parts.append(f"Unleaded €{unleaded_val:.3f}")
+                except (ValueError, TypeError):
+                    pass
 
             if price_parts:
                 label = f"{pref_name} — {' / '.join(price_parts)}"

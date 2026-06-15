@@ -585,10 +585,10 @@ def test_parse_station_brand_maps_provider_enum() -> None:
     assert result["brand"] == "Circle K"
 
 
-def test_parse_station_tablename_same_as_brand() -> None:
-    """_parse_station sets tablename equal to brand."""
+def test_parse_station_tablename_not_in_data() -> None:
+    """_parse_station does not set tablename (injected by coordinator from brand)."""
     result = _parse_station(_BASE_STATION)
-    assert result["tablename"] == result["brand"]
+    assert "tablename" not in result
 
 
 def test_parse_station_county_maps_from_city() -> None:

@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Datakälla"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Lägg till station",
@@ -69,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Denna station är redan konfigurerad.",
-      "no_providers_for_country": "Inga dataleverantörer finns tillgängliga för detta land."
+      "no_providers_for_country": "Inga dataleverantörer finns tillgängliga för detta land.",
+      "no_counties_for_country": "Inga län är konfigurerade för det valda landet."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stänger ned",
-      "description": "Webbplatsen fuelcompare.ie är planerad att stänga ned den **30 juni 2026**. Din station **{entry_title}** kommer att sluta ta emot prisuppdateringar efter det datumet. Överväg att byta till en annan irländsk bränslekälla, till exempel FuelFinder IE eller IE Pumps."
+      "title": "fuelcompare.ie stänger",
+      "description": "Webbplatsen fuelcompare.ie planeras att stänga **30 juni 2026**. Din station **{entry_title}** slutar ta emot prisuppdateringar efter det datumet. Överväg att byta till en annan irländsk bränslekälla, till exempel FuelFinder IE eller IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-certifikatverifiering inaktiverad",
+      "description": "Leverantören pumps.ie för **{entry_title}** har TLS-certifikatverifiering inaktiverad eftersom webbplatsens certifikat för närvarande är ogiltigt. Data är fortfarande krypterad under överföring, men serverns identitet verifieras inte."
     }
   },
   "entity": {
@@ -207,10 +211,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stänger",
-      "description": "Webbplatsen fuelcompare.ie planeras att stänga **30 juni 2026**. Din station **{entry_title}** slutar ta emot prisuppdateringar efter det datumet. Överväg att byta till en annan irländsk bränslekälla, till exempel FuelFinder IE eller IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Alternativ",
+        "data": {
+          "api_key": "API-nyckel",
+          "radius_km": "Sökradie (km)"
+        }
+      }
     }
   }
 }

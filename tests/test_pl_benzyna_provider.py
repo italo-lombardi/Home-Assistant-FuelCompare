@@ -416,8 +416,8 @@ async def test_async_fetch_lastupdated_is_most_recent_date() -> None:
     assert data["lastupdated"] == "2026-06-13"
 
 
-async def test_async_fetch_source_station_id_is_pl() -> None:
-    """async_fetch sets source_station_id to 'PL'."""
+async def test_async_fetch_source_station_id_not_in_data() -> None:
+    """async_fetch does not set source_station_id (injected by coordinator)."""
     resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
     resp_lpg = _make_mock_response(200, json_data=_AUTOGAS_PAYLOAD)
     session = _make_session(resp_wholesale, resp_lpg)
@@ -425,7 +425,7 @@ async def test_async_fetch_source_station_id_is_pl() -> None:
     provider = _make_provider()
     data = await provider.async_fetch(session, "PL")
 
-    assert data["source_station_id"] == "PL"
+    assert "source_station_id" not in data
 
 
 async def test_async_fetch_name_is_set() -> None:

@@ -217,10 +217,10 @@ def test_capabilities_includes_lpg() -> None:
 
 
 def test_capabilities_includes_identity_fields() -> None:
-    """CAPABILITIES includes name, brand, address, county."""
+    """CAPABILITIES includes name, address, county (brand always None — removed from CAPABILITIES)."""
     caps = BaFuelProvider.CAPABILITIES
     assert "name" in caps
-    assert "brand" in caps
+    assert "brand" not in caps
     assert "address" in caps
     assert "county" in caps
 
@@ -592,8 +592,8 @@ def test_build_station_data_county_from_city_slug() -> None:
     assert data["county"] == "Banja Luka"
 
 
-def test_build_station_data_source_station_id() -> None:
-    """_build_station_data sets source_station_id to the composite key."""
+def test_build_station_data_does_not_set_source_station_id() -> None:
+    """_build_station_data does not set source_station_id (injected by coordinator)."""
     raw = {
         "name": "Test",
         "address": None,
@@ -603,11 +603,11 @@ def test_build_station_data_source_station_id() -> None:
         "lpg": None,
     }
     data = _build_station_data("tuzla:4", raw, "tuzla")
-    assert data["source_station_id"] == "tuzla:4"
+    assert "source_station_id" not in data
 
 
-def test_build_station_data_brand_is_none() -> None:
-    """_build_station_data sets brand=None (site has no brand field)."""
+def test_build_station_data_brand_not_set() -> None:
+    """_build_station_data does not set brand (site has no brand field)."""
     raw = {
         "name": "Test",
         "address": None,
@@ -617,7 +617,7 @@ def test_build_station_data_brand_is_none() -> None:
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data["brand"] is None
+    assert "brand" not in data
 
 
 def test_build_station_data_latitude_is_none() -> None:
@@ -648,8 +648,8 @@ def test_build_station_data_longitude_is_none() -> None:
     assert data.get("longitude") is None
 
 
-def test_build_station_data_lastupdated_is_none() -> None:
-    """_build_station_data sets lastupdated=None (no per-station timestamps)."""
+def test_build_station_data_lastupdated_not_in_result() -> None:
+    """_build_station_data does not include lastupdated (no per-station timestamps)."""
     raw = {
         "name": "Test",
         "address": None,
@@ -659,7 +659,7 @@ def test_build_station_data_lastupdated_is_none() -> None:
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data["lastupdated"] is None
+    assert "lastupdated" not in data
 
 
 def test_build_station_data_petrol_passthrough() -> None:
@@ -765,15 +765,15 @@ async def test_async_fetch_sets_county_from_city_slug() -> None:
 
 
 @pytest.mark.asyncio
-async def test_async_fetch_source_station_id_correct() -> None:
-    """async_fetch sets source_station_id to the composite key."""
+async def test_async_fetch_source_station_id_not_in_data() -> None:
+    """async_fetch does not set source_station_id (injected by coordinator)."""
     resp = _make_mock_response(200, text=_SAMPLE_HTML)
     session = _make_session(resp)
 
     provider = _default_provider(station_id="sarajevo:0")
     data = await provider.async_fetch(session, "sarajevo:0")
 
-    assert data["source_station_id"] == "sarajevo:0"
+    assert "source_station_id" not in data
 
 
 # ---------------------------------------------------------------------------

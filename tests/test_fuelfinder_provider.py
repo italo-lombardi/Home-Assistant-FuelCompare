@@ -300,7 +300,7 @@ async def test_async_fetch_price_not_divided_by_100() -> None:
 
 
 async def test_async_fetch_normalises_station_identity_fields() -> None:
-    """async_fetch populates name, brand, county, osm_id, slug from API response."""
+    """async_fetch populates name, brand, county from API response."""
     diesel_resp = _make_mock_response(200, json_data=_stations_response(fuel="diesel"))
     petrol_resp = _make_mock_response(
         200, json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "petrol"}
@@ -321,12 +321,13 @@ async def test_async_fetch_normalises_station_identity_fields() -> None:
     assert data["name"] == "Circle K Mulhuddart"
     assert data["brand"] == "Circle K"
     assert data["county"] == "Dublin"
-    assert data["osm_id"] == _OSM_ID
-    assert data["slug"] == "circle-k-circle-k-mulhuddart-huddart"
+    # osm_id and slug are no longer passed through (H12 fix)
+    assert "osm_id" not in data
+    assert "slug" not in data
 
 
 async def test_async_fetch_normalises_location_fields() -> None:
-    """async_fetch populates lat, lng, street, phone, website from API response."""
+    """async_fetch populates latitude, longitude, street, phone, website from API response."""
     diesel_resp = _make_mock_response(200, json_data=_stations_response(fuel="diesel"))
     petrol_resp = _make_mock_response(
         200, json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "petrol"}
@@ -344,13 +345,17 @@ async def test_async_fetch_normalises_location_fields() -> None:
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
 
-    assert data["lat"] == pytest.approx(53.399)
-    assert data["lng"] == pytest.approx(-6.433)
+    # lat/lng are no longer separate passthrough keys (H12 fix); use latitude/longitude
+    assert data["latitude"] == pytest.approx(53.399)
+    assert data["longitude"] == pytest.approx(-6.433)
     assert data["address"] == "Mulhuddart Village"
+    # raw lat/lng passthrough keys removed
+    assert "lat" not in data
+    assert "lng" not in data
 
 
 async def test_async_fetch_normalises_fuelfinder_specific_fields() -> None:
-    """async_fetch populates confidence, has_price, updated_at, opening_hours."""
+    """async_fetch populates price_confidence, has_price, updated_at, opening_hours."""
     diesel_resp = _make_mock_response(200, json_data=_stations_response(fuel="diesel"))
     petrol_resp = _make_mock_response(
         200, json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "petrol"}
@@ -368,7 +373,9 @@ async def test_async_fetch_normalises_fuelfinder_specific_fields() -> None:
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
 
-    assert data["confidence"] == "likely"
+    # confidence alias removed (H12 fix); use price_confidence
+    assert data["price_confidence"] == "likely"
+    assert "confidence" not in data
     assert data["has_price"] is True
     assert data["lastupdated"] == "2026-06-13T16:04:01.754194+00:00"
     assert data["opening_hours"] == "Mo-Su 07:00-23:00"
@@ -476,7 +483,9 @@ async def test_async_fetch_has_price_false_when_no_submissions() -> None:
 
     assert data["has_price"] is False
     assert data["diesel"] is None
-    assert data["confidence"] is None
+    # confidence alias removed (H12 fix); use price_confidence
+    assert data["price_confidence"] is None
+    assert "confidence" not in data
 
 
 # ---------------------------------------------------------------------------
@@ -708,13 +717,15 @@ def test_parse_station_brand_empty_string_becomes_none() -> None:
 
 
 def test_parse_station_confidence_preserved() -> None:
-    """_build_station_data passes confidence through unchanged."""
+    """_build_station_data passes confidence through as price_confidence (H12 fix)."""
     for confidence_val in ("fresh", "likely", "outdated", None):
         station = {**_BASE_STATION, "confidence": confidence_val}
         provider = IEFuelFinderProvider(_STATION_UUID)
         prices_by_fuel = {"diesel": {**station, "price": 1.828}}
         result = provider._build_station_data(_STATION_UUID, station, prices_by_fuel)
-        assert result["confidence"] == confidence_val
+        # confidence alias removed; use price_confidence
+        assert result["price_confidence"] == confidence_val
+        assert "confidence" not in result
 
 
 def test_parse_station_has_price_false() -> None:
@@ -732,7 +743,10 @@ def test_parse_station_lat_lng_none_for_user_submitted() -> None:
     prices_by_fuel = {"diesel": {**station, "price": 1.828}}
     result = provider._build_station_data(_STATION_UUID, station, prices_by_fuel)
     assert result["latitude"] is None
-    assert result["lng"] is None
+    assert result["longitude"] is None
+    # raw lat/lng passthrough keys no longer set (H12 fix)
+    assert "lat" not in result
+    assert "lng" not in result
 
 
 def test_parse_station_updated_at_mirrored_to_lastupdated() -> None:

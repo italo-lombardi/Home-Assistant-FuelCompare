@@ -65,7 +65,7 @@ from urllib.parse import urlparse
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ _DOWNLOAD_HREF_PATTERN = re.compile(
 
 # User-Agent header for both the landing page and XLSX download.
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "*/*",
 }
 
@@ -356,13 +356,25 @@ class MtFuelProvider(BaseProvider):
         match = _XLSX_HREF_PATTERN.search(html)
         if match:
             href = match.group(1)
-            return _make_absolute(href)
+            try:
+                return _make_absolute(href)
+            except ProviderError as err:
+                _LOGGER.debug(
+                    "MtFuelProvider: SSRF guard rejected href %r: %s", href, err
+                )
 
         # Fallback: any document/download link that looks like an XLSX
         for m in _DOWNLOAD_HREF_PATTERN.finditer(html):
             href = m.group(1)
             if "xlsx" in href.lower() or "Weekly" in href:
-                return _make_absolute(href)
+                try:
+                    return _make_absolute(href)
+                except ProviderError as err:
+                    _LOGGER.debug(
+                        "MtFuelProvider: SSRF guard rejected fallback href %r: %s",
+                        href,
+                        err,
+                    )
 
         _LOGGER.debug("MtFuelProvider: no XLSX link found on landing page")
         return None
@@ -434,8 +446,12 @@ def _make_absolute(href: str) -> str:
 
     expected_host = "energy.ec.europa.eu"
     parsed = urlparse(resolved_url)
-    if parsed.netloc not in (expected_host, ""):
-        raise ProviderError(f"SSRF guard: unexpected download host {parsed.netloc}")
+    if parsed.scheme not in ("http", "https"):
+        raise ProviderError(
+            f"SSRF guard: unexpected URL scheme {parsed.scheme!r} in {resolved_url!r}"
+        )
+    if parsed.netloc != expected_host:
+        raise ProviderError(f"SSRF guard: unexpected download host {parsed.netloc!r}")
     return resolved_url
 
 

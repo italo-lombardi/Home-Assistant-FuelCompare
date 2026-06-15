@@ -82,7 +82,7 @@ from typing import ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ _DOWNLOAD_URL = _BASE_URL.format(uuid=_UUID_WITH_TAXES)
 _TIMEOUT = ClientTimeout(total=max(API_TIMEOUT, 30))  # Excel download may be slow
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, */*",
 }
 

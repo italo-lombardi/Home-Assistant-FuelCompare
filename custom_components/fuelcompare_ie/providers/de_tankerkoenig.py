@@ -49,7 +49,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ _LOGGER = logging.getLogger(__name__)
 _BASE_URL = "https://creativecommons.tankerkoenig.de/json"
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
 }
 
@@ -135,7 +135,6 @@ def _parse_station(station: dict[str, Any]) -> StationData:
         "is_open": bool(station.get("isOpen"))
         if station.get("isOpen") is not None
         else None,
-        "lastupdated": None,  # Tankerkoenig does not return per-station timestamps
         "source_station_id": str(station.get("id", "")),
     }
 
@@ -171,7 +170,6 @@ class DeTankerkoenigProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
-            "lastupdated",
         }
     )
 

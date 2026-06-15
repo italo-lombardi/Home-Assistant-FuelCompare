@@ -51,6 +51,7 @@ CONFIG_MODE = "station_id"
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import re
@@ -58,7 +59,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ _LOGGER = logging.getLogger(__name__)
 _GEOJSON_URL = "https://regieessencequebec.ca/stations.geojson.gz"
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/geo+json, application/json, */*",
     "Accept-Encoding": "gzip, deflate",
 }
@@ -206,7 +207,6 @@ def _build_station_data(feature: dict[str, Any], station_id: str) -> StationData
         "latitude": latitude,
         "longitude": longitude,
         "source_station_id": station_id,
-        "lastupdated": None,  # endpoint has no per-station timestamp
     }
 
 
@@ -239,10 +239,6 @@ class CaQcProvider(BaseProvider):
     CURRENCY: ClassVar[str] = "CA$"
     # hourly polling is sufficient and respectful of the CDN.
 
-    # Class-level GeoJSON cache — shared across all instances so async_fetch
-    # and async_list_stations within the same poll cycle share one download.
-    _geojson_cache: ClassVar[list | None] = None
-    _geojson_cache_ts: ClassVar[float] = 0
     _GEOJSON_CACHE_TTL: ClassVar[int] = 3600
 
     REQUIRES_API_KEY = False
@@ -258,7 +254,6 @@ class CaQcProvider(BaseProvider):
             "county",
             "latitude",
             "longitude",
-            "lastupdated",
         }
     )
 
@@ -289,6 +284,12 @@ class CaQcProvider(BaseProvider):
         self._latitude = latitude
         self._longitude = longitude
         self._radius_km = radius_km
+        # Instance-level GeoJSON cache — avoids shared mutable state across
+        # config entries.  Two entries with different radii/locations will not
+        # race to populate or invalidate each other's cache.
+        self._geojson_cache: list | None = None
+        self._geojson_cache_ts: float = 0.0
+        self._geojson_lock: asyncio.Lock = asyncio.Lock()
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -451,26 +452,27 @@ class CaQcProvider(BaseProvider):
         import time
 
         now = time.monotonic()
-        if (
-            CaQcProvider._geojson_cache is not None
-            and (now - CaQcProvider._geojson_cache_ts) < CaQcProvider._GEOJSON_CACHE_TTL
-        ):
-            _LOGGER.debug("Régie Essence Québec: serving GeoJSON from cache")
-            return CaQcProvider._geojson_cache
+        async with self._geojson_lock:
+            if (
+                self._geojson_cache is not None
+                and (now - self._geojson_cache_ts) < self._GEOJSON_CACHE_TTL
+            ):
+                _LOGGER.debug("Régie Essence Québec: serving GeoJSON from cache")
+                return self._geojson_cache
 
-        _LOGGER.debug("Fetching Régie Essence Québec GeoJSON feed")
-        async with session.get(
-            _GEOJSON_URL,
-            headers=_HEADERS,
-            timeout=_TIMEOUT,
-        ) as response:
-            response.raise_for_status()
-            payload: dict[str, Any] = await response.json(content_type=None)
+            _LOGGER.debug("Fetching Régie Essence Québec GeoJSON feed")
+            async with session.get(
+                _GEOJSON_URL,
+                headers=_HEADERS,
+                timeout=_TIMEOUT,
+            ) as response:
+                response.raise_for_status()
+                payload: dict[str, Any] = await response.json(content_type=None)
 
-        features = payload.get("features") or []
-        _LOGGER.debug(
-            "Régie Essence Québec: received %d station features", len(features)
-        )
-        CaQcProvider._geojson_cache = features
-        CaQcProvider._geojson_cache_ts = now
-        return features
+            features = payload.get("features") or []
+            _LOGGER.debug(
+                "Régie Essence Québec: received %d station features", len(features)
+            )
+            self._geojson_cache = features
+            self._geojson_cache_ts = now
+            return features

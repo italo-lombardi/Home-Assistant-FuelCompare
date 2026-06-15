@@ -100,7 +100,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ _BASE_URL = "https://carbu.com/luxembourg/index.php/liste"
 
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json, text/javascript, */*",
     "Referer": "https://carbu.com/luxembourg/",
     "Accept-Language": "en-US,en;q=0.9",
@@ -391,7 +391,7 @@ class LuCarbuProvider(BaseProvider):
             return []
 
         try:
-            diesel_resp, sp95_resp = await asyncio.gather(
+            results = await asyncio.gather(
                 self._fetch_fuel_stations(
                     session,
                     fuel_key="diesel",
@@ -408,10 +408,14 @@ class LuCarbuProvider(BaseProvider):
                     lng=lng,
                     radius_km=radius_km,
                 ),
+                return_exceptions=True,
             )
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
+
+        diesel_resp = results[0] if not isinstance(results[0], BaseException) else None
+        sp95_resp = results[1] if not isinstance(results[1], BaseException) else None
 
         # Merge per-fuel results into one dict keyed by station ID
         merged: dict[str, dict] = {}
@@ -567,7 +571,6 @@ class LuCarbuProvider(BaseProvider):
             "latitude": lat,
             "longitude": lng,
             "lastupdated": lastupdated,
-            "source_station_id": station_id,
         }
 
         _LOGGER.debug(

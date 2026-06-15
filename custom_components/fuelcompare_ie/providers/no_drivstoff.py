@@ -120,7 +120,7 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ _STATIONS_PATH = "/stations"
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Content-Type": "application/json",
 }
@@ -675,7 +675,6 @@ def _parse_station(station: dict) -> StationData:
         # Station identity
         "name": name,
         "brand": brand,
-        "tablename": brand,
         "address": address,
         "county": city,
         "latitude": lat,

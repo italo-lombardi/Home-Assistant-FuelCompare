@@ -309,12 +309,9 @@ def test_parse_price_does_not_divide_cents() -> None:
 
 
 def test_parse_price_returns_none_for_true() -> None:
-    """_parse_price returns None for boolean True (unexpected but must not crash)."""
-    # True coerces to 1.0 via float(), which is > 0, so it returns 1.0 — not None.
-    # This is acceptable behaviour; the key contract is False → None.
+    """_parse_price returns None for boolean True (isinstance guard catches all bools)."""
     result = _parse_price(True)
-    # Either None or 1.0 is acceptable; the important thing is no exception.
-    assert result is None or isinstance(result, float)
+    assert result is None
 
 
 # ---------------------------------------------------------------------------
@@ -402,7 +399,6 @@ def test_parse_station_returns_all_required_keys() -> None:
         "latitude",
         "longitude",
         "is_open",
-        "lastupdated",
         "source_station_id",
     }
     for key in required_keys:
@@ -506,10 +502,10 @@ def test_parse_station_is_open_none_when_absent() -> None:
     assert result["is_open"] is None
 
 
-def test_parse_station_lastupdated_is_none() -> None:
-    """_parse_station returns lastupdated=None (Tankerkoenig has no per-station timestamp)."""
+def test_parse_station_lastupdated_not_in_result() -> None:
+    """_parse_station does not include lastupdated (Tankerkoenig has no per-station timestamp)."""
     result = _parse_station(_BASE_STATION)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 def test_parse_station_source_station_id() -> None:
@@ -1367,8 +1363,13 @@ async def test_async_list_stations_label_omits_price_section_when_all_prices_fal
 # ---------------------------------------------------------------------------
 
 
-async def test_async_list_stations_skips_station_with_missing_lat() -> None:
-    """async_list_stations skips stations whose 'lat' field is absent."""
+async def test_async_list_stations_handles_station_with_missing_lat() -> None:
+    """async_list_stations does not crash when a station has no 'lat' field.
+
+    DeTankerkoenig does not filter stations by lat/lng; all returned stations
+    are included regardless of their coordinates.  A station with a missing lat
+    key must not cause an exception, and valid stations must still appear.
+    """
     no_lat_station = {k: v for k, v in _BASE_STATION.items() if k != "lat"}
     valid_station = {**_BASE_STATION, "id": "valid-uuid-lat"}
     payload = {"ok": True, "stations": [no_lat_station, valid_station]}

@@ -32,7 +32,7 @@ cached and used in subsequent polls to keep response payloads small
 Auth headers
 ------------
 All requests carry:
-  User-Agent:     HomeAssistant/2025.1 aiohttp/3.9.1
+  User-Agent:     HomeAssistant/<HA_VERSION> aiohttp/<AIOHTTP_VERSION>  (see const.UA_HEADER)
   Accept:         application/json
   Referer:        https://www.fuelfinder.ie/fuelfinder
   Sec-Fetch-Site: same-origin
@@ -91,7 +91,7 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ _BASE_URL = "https://www.fuelfinder.ie/api/fuelfinder"
 # All read endpoints require these; sending a subset may work on cached
 # responses but will fail on cache misses and no-store endpoints.
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Referer": "https://www.fuelfinder.ie/fuelfinder",
     "Sec-Fetch-Site": "same-origin",
@@ -531,9 +531,6 @@ class IEFuelFinderProvider(BaseProvider):
         street: str | None = meta.get("street") or None
         phone: str | None = meta.get("phone") or None
         website: str | None = meta.get("website") or None
-        osm_id: str | None = meta.get("osm_id") or None
-        slug: str | None = meta.get("slug") or None
-        logo_url: str | None = meta.get("logo_url") or None
 
         lat_raw = meta.get("lat")
         lng_raw = meta.get("lng")
@@ -548,17 +545,19 @@ class IEFuelFinderProvider(BaseProvider):
 
         # ── Timing ────────────────────────────────────────────────────────
 
-        # Take updated_at from whichever fuel record was found; prefer the
-        # most recently updated one so the timestamp reflects the freshest
-        # crowd-sourced submission for this station.
+        # Take updated_at from whichever fuel record was found.
+        # Use max() over all non-None timestamps so the lastupdated value reflects
+        # the most recently crowd-sourced submission for this station across all fuel types.
         updated_at: str | None = None
+        ts_candidates: list[str] = []
         for fuel in _FUEL_TYPES:
             record = prices_by_fuel.get(fuel)
             if record is not None:
                 ts = record.get("updated_at")
                 if ts:
-                    updated_at = ts
-                    break  # records are sorted cheapest-first; all same station
+                    ts_candidates.append(ts)
+        if ts_candidates:
+            updated_at = max(ts_candidates)
 
         # ── Confidence (freshness tier) ───────────────────────────────────
 
@@ -601,17 +600,9 @@ class IEFuelFinderProvider(BaseProvider):
         # coordinator.data in templates and custom extra_state_attributes.
 
         data["price_confidence"] = confidence
-        data["confidence"] = confidence  # alias used by tests and templates
         data["has_price"] = has_price
         data["kerosene"] = _price("kerosene")
         data["cng"] = _price("cng")
-        # Raw lat/lng passthrough (alongside normalised latitude/longitude)
-        data["lat"] = lat
-        data["lng"] = lng
-        # Extra identity passthrough
-        data["osm_id"] = osm_id
-        data["slug"] = slug
-        data["logo_url"] = logo_url
 
         _LOGGER.debug(
             "FuelFinder parsed data for station %s: diesel=%s unleaded=%s "

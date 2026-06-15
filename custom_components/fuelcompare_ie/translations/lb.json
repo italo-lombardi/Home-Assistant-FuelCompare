@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Dës Statioun ass schon configuréiert.",
-      "no_providers_for_country": "Keng Dateequellen sinn fir dëst Land verfügbar."
+      "no_providers_for_country": "Keng Dateequellen sinn fir dëst Land verfügbar.",
+      "no_counties_for_country": "Et sinn keng Kantone fir dat gewielten Land konfiguriert."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie stellt säi Betrib an",
       "description": "D'Websäit fuelcompare.ie ass geplangt fir den **30. Juni 2026** zouzemaachen. Är Statioun **{entry_title}** wäert no deem Datum keng Präisupdates méi kréien. Iwwerdenkt op eng aner iresch Benzinpräisquell ëmzestellen, wéi FuelFinder IE oder IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-Zertifikaatsprüfung deaktivéiert",
+      "description": "Den pumps.ie-Ubidder fir **{entry_title}** huet d'TLS-Zertifikaatsprüfung deaktivéiert, well d'Zertifikat vun der Säit am Moment net gëlteg ass. D'Daten gi weiderhin verschlësselt iwwerdroe, mä d'Identitéit vum Server gëtt net iwwerpréift."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Acceptéiert kontaktlos Bezuelen"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Astellungen",
+        "data": {
+          "api_key": "API-Schlëssel",
+          "radius_km": "Sichradius (km)"
+        }
       }
     }
   }

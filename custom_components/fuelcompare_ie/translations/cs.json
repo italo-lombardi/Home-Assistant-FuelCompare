@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Zdroj dat"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "county": {
         "title": "Vyberte okres",
@@ -69,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Tato stanice je již nakonfigurována.",
-      "no_providers_for_country": "Pro tuto zemi nejsou k dispozici žádní poskytovatelé dat."
+      "no_providers_for_country": "Pro tuto zemi nejsou k dispozici žádní poskytovatelé dat.",
+      "no_counties_for_country": "Pro vybranou zemi nejsou nastaveny žádné okresy."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie se zavírá",
-      "description": "Web fuelcompare.ie je naplánován k ukončení **30. června 2026**. Vaše stanice **{entry_title}** přestane po tomto datu dostávat aktualizace cen. Zvažte přechod na jiný irský zdroj cen paliv, například FuelFinder IE nebo IE Pumps."
+      "title": "fuelcompare.ie se vypíná",
+      "description": "Webová stránka fuelcompare.ie je naplánována k vypnutí **30. června 2026**. Vaše stanice **{entry_title}** přestane přijímat aktualizace cen po tomto datu. Zvažte přechod na jiný irský zdroj cen paliv, jako je FuelFinder IE nebo IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Ověření TLS certifikátu pumps.ie je zakázáno",
+      "description": "Poskytovatel pumps.ie pro **{entry_title}** má zakázáno ověřování TLS certifikátu, protože certifikát webu je momentálně neplatný. Data jsou při přenosu stále šifrována, ale identita serveru není ověřena."
     }
   },
   "entity": {
@@ -207,10 +211,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie se vypíná",
-      "description": "Webová stránka fuelcompare.ie je naplánována k vypnutí **30. června 2026**. Vaše stanice **{entry_title}** přestane přijímat aktualizace cen po tomto datu. Zvažte přechod na jiný irský zdroj cen paliv, jako je FuelFinder IE nebo IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti",
+        "data": {
+          "api_key": "API klíč",
+          "radius_km": "Poloměr hledání (km)"
+        }
+      }
     }
   }
 }

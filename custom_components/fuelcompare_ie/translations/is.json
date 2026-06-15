@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Þessi stöð er þegar stillt.",
-      "no_providers_for_country": "Engir gagnaveitendur eru tiltækir fyrir þetta land."
+      "no_providers_for_country": "Engir gagnaveitendur eru tiltækir fyrir þetta land.",
+      "no_counties_for_country": "Engar sýslur eru stilltar fyrir valið land."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie er að loka",
       "description": "Vefsíðan fuelcompare.ie er áætluð til að loka **30. júní 2026**. Stöðin þín **{entry_title}** mun hætta að fá verðuppfærslur eftir þann dag. Íhugaðu að skipta yfir í annan írskan eldsneytisverðgjafa, eins og FuelFinder IE eða IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS-vottorðsstaðfesting óvirk",
+      "description": "pumps.ie-veitandinn fyrir **{entry_title}** er með TLS-vottorðsstaðfestingu óvirka vegna þess að vottorð síðunnar er ekki gilt að svo stöddu. Gögn eru enn dulkóðuð við flutning, en auðkenni þjónsins er ekki staðfest."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Tekur við snertilausri greiðslu"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Valkostir",
+        "data": {
+          "api_key": "API-lykill",
+          "radius_km": "Leitarradíus (km)"
+        }
       }
     }
   }

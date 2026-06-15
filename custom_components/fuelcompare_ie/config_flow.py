@@ -696,7 +696,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._postal_code = str(user_input.get(CONF_POSTAL_CODE) or "").strip()
             self._station_id = ""
             # 4 decimal places ≈ 11 m precision; stations closer than ~11 m share an entry_id
-            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
+            unique = f"{DOMAIN}_{self._provider_key}_{self._latitude:.4f}_{self._longitude:.4f}"
             await self.async_set_unique_id(unique)
             self._abort_if_unique_id_configured()
             self._suggested_name = (
@@ -718,7 +718,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Confirm or edit the entry display name."""
         if user_input is not None:
-            title = user_input.get(CONF_NAME) or self._suggested_name
+            title = (user_input.get(CONF_NAME) or "").strip() or self._suggested_name
             data: dict[str, Any] = {
                 CONF_COUNTRY: self._country,
                 CONF_PROVIDER: self._provider_key,
@@ -735,7 +735,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if self._latitude is not None and self._longitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
-                data[CONF_RADIUS_KM] = self._radius_km
+                options[CONF_RADIUS_KM] = self._radius_km
             return self.async_create_entry(title=title, data=data, options=options)
 
         return self.async_show_form(

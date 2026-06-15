@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Source de données"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "county": {
         "title": "Sélectionner le comté",
@@ -54,7 +53,7 @@
         }
       },
       "name": {
-        "title": "Nom de la Station",
+        "title": "Nom de la station",
         "description": "Confirmez ou modifiez le nom de cette station.",
         "data": {
           "name": "Nom"
@@ -69,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Cette station est déjà configurée.",
-      "no_providers_for_country": "Aucun fournisseur de données n'est disponible pour ce pays."
+      "no_providers_for_country": "Aucun fournisseur de données n'est disponible pour ce pays.",
+      "no_counties_for_country": "Aucun comté n'est configuré pour le pays sélectionné."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie ferme ses portes",
-      "description": "Le site fuelcompare.ie est prévu de fermer le **30 juin 2026**. Votre station **{entry_title}** ne recevra plus de mises à jour de prix après cette date. Envisagez de passer à une autre source irlandaise de prix de carburant, comme FuelFinder IE ou IE Pumps."
+      "title": "fuelcompare.ie va fermer",
+      "description": "Le site fuelcompare.ie est prévu de fermer le **30 juin 2026**. Votre station **{entry_title}** ne recevra plus de mises à jour de prix après cette date. Envisagez de passer à une autre source irlandaise de prix des carburants, comme FuelFinder IE ou IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Vérification du certificat TLS de pumps.ie désactivée",
+      "description": "Le fournisseur pumps.ie pour **{entry_title}** a la vérification du certificat TLS désactivée car le certificat du site est actuellement invalide. Les données restent chiffrées en transit, mais l'identité du serveur n'est pas vérifiée."
     }
   },
   "entity": {
@@ -132,7 +136,7 @@
         "name": "Longitude"
       },
       "station_name": {
-        "name": "Nom de la Station"
+        "name": "Nom de la station"
       },
       "accessibility": {
         "name": "Accessibilité"
@@ -200,17 +204,22 @@
         "name": "Accepte les cartes"
       },
       "accepts_cash": {
-        "name": "Accepte espèces"
+        "name": "Accepte les espèces"
       },
       "accepts_contactless": {
         "name": "Accepte le sans contact"
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie va fermer",
-      "description": "Le site fuelcompare.ie est prévu de fermer le **30 juin 2026**. Votre station **{entry_title}** ne recevra plus de mises à jour de prix après cette date. Envisagez de passer à une autre source irlandaise de prix des carburants, comme FuelFinder IE ou IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "api_key": "Clé API",
+          "radius_km": "Rayon de recherche (km)"
+        }
+      }
     }
   }
 }

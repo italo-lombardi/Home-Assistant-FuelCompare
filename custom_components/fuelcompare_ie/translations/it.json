@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Sorgente dati"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Aggiungi stazione",
@@ -69,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Questa stazione è già configurata.",
-      "no_providers_for_country": "Nessun fornitore di dati disponibile per questo paese."
+      "no_providers_for_country": "Nessun fornitore di dati disponibile per questo paese.",
+      "no_counties_for_country": "Non ci sono contee configurate per il paese selezionato."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie sta chiudendo",
-      "description": "Il sito fuelcompare.ie è programmato per chiudere il **30 giugno 2026**. La tua stazione **{entry_title}** smetterà di ricevere aggiornamenti dei prezzi dopo quella data. Considera di passare a un'altra fonte irlandese di prezzi del carburante, come FuelFinder IE o IE Pumps."
+      "description": "Il sito fuelcompare.ie è previsto per la chiusura il **30 giugno 2026**. La tua stazione **{entry_title}** smetterà di ricevere aggiornamenti sui prezzi dopo tale data. Considera di passare a un'altra fonte di prezzi del carburante irlandese, come FuelFinder IE o IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Verifica del certificato TLS di pumps.ie disabilitata",
+      "description": "Il provider pumps.ie per **{entry_title}** ha la verifica del certificato TLS disabilitata perché il certificato del sito non è attualmente valido. I dati sono comunque cifrati durante la trasmissione, ma l'identità del server non è verificata."
     }
   },
   "entity": {
@@ -207,10 +211,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie sta chiudendo",
-      "description": "Il sito fuelcompare.ie è previsto per la chiusura il **30 giugno 2026**. La tua stazione **{entry_title}** smetterà di ricevere aggiornamenti sui prezzi dopo tale data. Considera di passare a un'altra fonte di prezzi del carburante irlandese, come FuelFinder IE o IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni",
+        "data": {
+          "api_key": "Chiave API",
+          "radius_km": "Raggio di ricerca (km)"
+        }
+      }
     }
   }
 }

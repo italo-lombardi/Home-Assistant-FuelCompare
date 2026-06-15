@@ -42,11 +42,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ _URL_MOTORINA = "https://anre.md/motorina-3-3"
 # ── HTTP settings ─────────────────────────────────────────────────────────────
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "text/html,application/xhtml+xml",
 }
 
@@ -185,7 +185,6 @@ class MdFuelProvider(BaseProvider):
             "diesel": motorina_price,  # Motorina in MDL/litre
             "name": "ANRE Moldova — National Reference Price",
             "lastupdated": None,  # ANRE does not expose a last-updated timestamp
-            "source_station_id": _NATIONAL_STATION_ID,
         }
 
     async def async_fetch_station_name(
@@ -210,7 +209,7 @@ class MdFuelProvider(BaseProvider):
     async def async_list_stations(
         self,
         session: ClientSession,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> list[tuple[str, str]]:
         """Return the single national reference entry for the station picker.
 

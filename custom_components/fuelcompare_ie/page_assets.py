@@ -31,7 +31,6 @@ import urllib.parse
 from typing import Final
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
-from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .const import API_TIMEOUT, BASE_URL
 
@@ -45,7 +44,7 @@ _HEADERS: Final = {
 _BUILD_ID_RE: Final = re.compile(r'"buildId":"([^"]+)"')
 _STATION_CHUNK_RE: Final = re.compile(r'(/_next/static/chunks/pages/station/[^"]+\.js)')
 _ANY_CHUNK_FINDALL_RE: Final = re.compile(r'/_next/static/chunks/[^"]+\.js')
-_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,["\']([a-fA-F0-9]{64})["\']')
+_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\([^,]+,["\']([a-fA-F0-9]{64})["\']')
 
 
 class PageAssets:
@@ -81,13 +80,13 @@ class PageAssets:
             return await response.text()
 
     def _extract_build_id(self, html: str) -> None:
-        """Set ``self.build_id`` from the HTML; raise UpdateFailed if missing."""
+        """Set ``self.build_id`` from the HTML; raise ValueError if missing."""
         match = _BUILD_ID_RE.search(html)
         if not match:
             _LOGGER.debug(
                 "buildId pattern not found in HTML for station %s", self.station_id
             )
-            raise UpdateFailed("buildId not found in page")
+            raise ValueError("buildId not found in page")
         self.build_id = match.group(1)
         _LOGGER.debug(
             "Extracted buildId for station %s: %s", self.station_id, self.build_id
@@ -106,8 +105,9 @@ class PageAssets:
             return
 
         chunk_path = chunk_match.group(1)
-        if ".." in chunk_path or not re.match(
-            r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
+        decoded = urllib.parse.unquote(chunk_path)
+        if ".." in decoded or not re.match(
+            r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", decoded
         ):
             _LOGGER.debug(
                 "Station JS chunk path failed validation for station %s: %s",
@@ -144,11 +144,18 @@ class PageAssets:
             )
 
     async def _extract_key_broad(self, session: ClientSession, html: str) -> None:
-        """Iterate every chunk in the HTML until the AES key regex matches."""
+        """Iterate every chunk in the HTML until the AES key regex matches.
+
+        A 3-chunk ceiling caps the scan at ~30 s worst-case (3 × 10 s timeout).
+        Without this guard, 50–100 chunks × 10 s each could block the coordinator
+        for up to 500–1000 seconds on a slow/unreachable CDN.
+        """
+        _MAX_CHUNKS = 3
+
         station_chunks = _STATION_CHUNK_RE.findall(html)
         all_chunks = _ANY_CHUNK_FINDALL_RE.findall(html)
         # Try the station chunk first (legacy fast path), then the rest.
-        ordered = list(dict.fromkeys(station_chunks + all_chunks))
+        ordered = list(dict.fromkeys(station_chunks + all_chunks))[:_MAX_CHUNKS]
 
         if not ordered:
             _LOGGER.debug(

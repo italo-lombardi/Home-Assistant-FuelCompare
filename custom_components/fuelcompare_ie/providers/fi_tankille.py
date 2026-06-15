@@ -69,7 +69,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ _FI_LAT = 60.1699
 _FI_LNG = 24.9384
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Content-Type": "application/json",
 }
@@ -348,7 +348,12 @@ class FiTankilleProvider(BaseProvider):
         )
 
         data: StationData = {
-            "e10": prices.get("A"),  # 95 E10 — Finland standard name
+            # NOTE: Finland uses E10 (10% ethanol blend) as its standard petrol grade.
+            # The key "e10" is intentional here — it IS technically E10 petrol in Finland,
+            # NOT the generic "unleaded" key used by other providers for standard petrol.
+            "e10": prices.get(
+                "A"
+            ),  # 95 E10 — Finland standard name (intentional, not "unleaded")
             "diesel": prices.get("B"),
             "kerosene": prices.get("D"),
             "premium_diesel": prices.get("E"),

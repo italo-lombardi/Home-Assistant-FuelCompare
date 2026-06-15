@@ -375,12 +375,9 @@ class BeCarbuProvider(BaseProvider):
             "cng",  # CNG
             # Station identity
             "name",
-            "brand",
             "address",
             "latitude",
             "longitude",
-            # Timing
-            "lastupdated",
         }
     )
 
@@ -838,7 +835,6 @@ class BeCarbuProvider(BaseProvider):
             lng = None
 
         name: str | None = meta.get("name") or None
-        brand: str | None = meta.get("brand") or None
         address: str | None = meta.get("address") or None
 
         data: StationData = {
@@ -848,11 +844,9 @@ class BeCarbuProvider(BaseProvider):
             "lpg": prices.get("lpg"),
             "cng": prices.get("cng"),
             "name": name,
-            "brand": brand,
             "address": address,
             "latitude": lat,
             "longitude": lng,
-            "lastupdated": None,  # carbu.com does not expose per-station timestamps
             "source_station_id": station_id,
         }
 

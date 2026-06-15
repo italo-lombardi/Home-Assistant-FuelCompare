@@ -15,25 +15,15 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DAYS, DOMAIN
 from .coordinator import FuelCompareIECoordinator
+from .helpers import _device_info
 
 _LOGGER = logging.getLogger(__name__)
-
-_DAYS = (
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-)
 
 # ── Price sensor registry ─────────────────────────────────────────────────────
 #
@@ -169,16 +159,6 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-def _device_info(station_id: str, station_name: str, manufacturer: str) -> DeviceInfo:
-    """Return shared device info for all sensors of a station."""
-    return DeviceInfo(
-        identifiers={(DOMAIN, station_id)},
-        name=station_name,
-        manufacturer=manufacturer,
-        entry_type=DeviceEntryType.SERVICE,
-    )
-
-
 # ── Fuel price sensors ────────────────────────────────────────────────────────
 
 
@@ -215,7 +195,10 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         if self.coordinator.data:
             value = self.coordinator.data.get(self._fuel_type)
             if value is not None:
-                return round(value, 3)
+                try:
+                    return round(float(value), 3)
+                except (ValueError, TypeError):
+                    return None
         return None
 
     @property
@@ -406,7 +389,7 @@ class StationWorkingHoursSensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = _DAYS[dt_util.now().weekday()]
+            today = DAYS[dt_util.now().weekday()]
             return hours.get(today)
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours for native_value: %s", err)
@@ -501,9 +484,8 @@ class StationSimpleStrSensor(CoordinatorEntity[FuelCompareIECoordinator], Sensor
 
     @property
     def available(self) -> bool:
-        return (
-            self.coordinator.data is not None
-            and self.coordinator.data.get(self._data_key) is not None
+        return self.coordinator.data is not None and bool(
+            self.coordinator.data.get(self._data_key)
         )
 
     @property
@@ -582,8 +564,17 @@ class StationAboutCategorySensor(
         self._attr_device_info = _device_info(
             station_id, station_name, coordinator.provider_label
         )
+        self._cached_category_data: dict | None = None
+
+    def _handle_coordinator_update(self) -> None:
+        """Invalidate the category-data cache on each coordinator update."""
+        self._cached_category_data = None
+        super()._handle_coordinator_update()
 
     def _get_category_data(self) -> dict:
+        cached = getattr(self, "_cached_category_data", None)
+        if cached is not None:
+            return cached
         if not self.coordinator.data:
             return {}
         raw = self.coordinator.data.get("about")
@@ -592,6 +583,7 @@ class StationAboutCategorySensor(
                 about = json_lib.loads(raw) if isinstance(raw, str) else raw
                 cat = about.get(self._category)
                 if cat:
+                    self._cached_category_data = cat
                     return cat
             except (ValueError, TypeError) as err:
                 _LOGGER.debug(
@@ -602,7 +594,9 @@ class StationAboutCategorySensor(
         # Fall back to flat key if about dict doesn't have the category
         flat = self.coordinator.data.get(self._category)
         if isinstance(flat, dict):
+            self._cached_category_data = flat
             return flat
+        self._cached_category_data = {}
         return {}
 
     @property

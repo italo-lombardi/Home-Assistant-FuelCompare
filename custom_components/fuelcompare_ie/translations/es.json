@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Esta estación ya está configurada.",
-      "no_providers_for_country": "No hay proveedores de datos disponibles para este país."
+      "no_providers_for_country": "No hay proveedores de datos disponibles para este país.",
+      "no_counties_for_country": "No hay condados configurados para el país seleccionado."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie cierra",
       "description": "El sitio web fuelcompare.ie tiene previsto cerrar el **30 de junio de 2026**. Su estación **{entry_title}** dejará de recibir actualizaciones de precios después de esa fecha. Considere cambiar a otra fuente de precios de combustible irlandesa, como FuelFinder IE o IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Verificación de certificado TLS de pumps.ie desactivada",
+      "description": "El proveedor pumps.ie para **{entry_title}** tiene la verificación del certificado TLS desactivada porque el certificado del sitio no es válido actualmente. Los datos siguen cifrados en tránsito, pero no se verifica la identidad del servidor."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Acepta pago sin contacto"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones",
+        "data": {
+          "api_key": "Clave API",
+          "radius_km": "Radio de búsqueda (km)"
+        }
       }
     }
   }

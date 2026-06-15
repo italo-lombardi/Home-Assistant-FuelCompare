@@ -198,8 +198,11 @@ def test_provider_capabilities_include_cng() -> None:
 def test_provider_capabilities_include_station_fields() -> None:
     """CAPABILITIES includes standard station identity and location fields."""
     caps = BeCarbuProvider.CAPABILITIES
-    for field in ("name", "brand", "address", "latitude", "longitude", "lastupdated"):
+    for field in ("name", "address", "latitude", "longitude"):
         assert field in caps, f"Field '{field}' missing from CAPABILITIES"
+    # brand and lastupdated are always None from carbu.com scraping — excluded
+    assert "brand" not in caps
+    assert "lastupdated" not in caps
 
 
 def test_provider_capabilities_include_coordinator_sentinels() -> None:
@@ -888,7 +891,11 @@ def test_build_station_data_maps_prices() -> None:
 
 
 def test_build_station_data_maps_identity_fields() -> None:
-    """_build_station_data maps name, brand, address, lat, lng into StationData."""
+    """_build_station_data maps name, address, lat, lng into StationData.
+
+    Note: brand is always None from carbu.com scraping so it is excluded from
+    CAPABILITIES and the StationData return dict.
+    """
     provider = _make_provider()
     meta = {
         "station_id": _STATION_ID,
@@ -902,7 +909,7 @@ def test_build_station_data_maps_identity_fields() -> None:
     data = provider._build_station_data(_STATION_ID, meta, {})
 
     assert data["name"] == "My Station"
-    assert data["brand"] == "Q8"
+    assert "brand" not in data
     assert data["address"] == "Rue de la Paix 10, Brussels"
     assert data["latitude"] == pytest.approx(50.85)
     assert data["longitude"] == pytest.approx(4.35)

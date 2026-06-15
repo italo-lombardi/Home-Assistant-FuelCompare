@@ -65,7 +65,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ _LOGGER = logging.getLogger(__name__)
 _BASE_URL = "https://cijenegoriva.ba"
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
 }
@@ -139,10 +139,8 @@ class BaFuelProvider(BaseProvider):
             "premium_unleaded",
             "lpg",
             "name",
-            "brand",
             "address",
             "county",
-            "lastupdated",
         }
     )
 
@@ -189,6 +187,9 @@ class BaFuelProvider(BaseProvider):
             ProviderError: station_id malformed or row index out of range.
         """
         city_slug, row_index = _parse_station_id(station_id)
+
+        if city_slug not in _CITY_SLUGS:
+            raise ProviderError(f"Unknown city slug: {city_slug!r}")
 
         html = await self._fetch_city_html(session, city_slug)
         if html is None:
@@ -687,11 +688,8 @@ def _build_station_data(
         "premium_unleaded": raw.get("premium_unleaded"),
         "lpg": raw.get("lpg"),
         "name": name,
-        "brand": None,  # cijenegoriva.ba does not expose a brand field
         "address": address,
         "county": county,
-        "lastupdated": None,  # site does not return per-station timestamps
-        "source_station_id": station_id,
     }
 
     _LOGGER.debug(

@@ -308,7 +308,6 @@ def test_build_station_data_fuel_price_mapping() -> None:
 
     assert data["diesel"] == pytest.approx(1.739, abs=1e-4)
     assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)
-    assert data["unleaded"] == pytest.approx(1.759, abs=1e-4)  # alias for petrol
 
 
 def test_build_station_data_identity_fields() -> None:
@@ -358,18 +357,17 @@ def test_build_station_data_missing_fuel_returns_none() -> None:
     data = _build_station_data(_STATION_ID, record, {"diesel": record})
 
     assert data["unleaded"] is None
-    assert data["unleaded"] is None
 
 
 def test_build_station_data_source_station_id() -> None:
-    """_build_station_data sets source_station_id to the given station ID."""
+    """_build_station_data does not set source_station_id (injected by coordinator)."""
     diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
     assert diesel_stations
     record = _find_station(diesel_stations, _STATION_ID)
     assert record
     data = _build_station_data(_STATION_ID, record, {"diesel": record})
 
-    assert data["source_station_id"] == _STATION_ID
+    assert "source_station_id" not in data
 
 
 # ---------------------------------------------------------------------------

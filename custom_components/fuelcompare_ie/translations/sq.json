@@ -68,13 +68,18 @@
     },
     "abort": {
       "already_configured": "Ky stacion është konfiguruar tashmë.",
-      "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend."
+      "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend.",
+      "no_counties_for_country": "Nuk ka bashki të konfiguruara për vendin e zgjedhur."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie po mbyllet",
       "description": "Faqja e internetit fuelcompare.ie është planifikuar të mbyllet më **30 qershor 2026**. Stacioni juaj **{entry_title}** do të ndalojë marrjen e përditësimeve të çmimeve pas kësaj date. Konsideroni kalimin në një burim tjetër të çmimeve të karburantit në Irlandë, si FuelFinder IE ose IE Pumps."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Verifikimi i certifikatës TLS të pumps.ie është çaktivizuar",
+      "description": "Ofruesi pumps.ie për **{entry_title}** ka verifikimin e certifikatës TLS të çaktivizuar sepse certifikata e faqes është aktualisht e pavlefshme. Të dhënat janë ende të enkriptuara gjatë transmetimit, por identiteti i serverit nuk verifikohet."
     }
   },
   "entity": {
@@ -203,6 +208,17 @@
       },
       "accepts_contactless": {
         "name": "Pranon Pagesë Kontaktsore"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsionet",
+        "data": {
+          "api_key": "Çelës API",
+          "radius_km": "Rrezja e kërkimit (km)"
+        }
       }
     }
   }
