@@ -466,6 +466,14 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     ),
                 }
             ),
+            description_placeholders={
+                "deprecation_notice": (
+                    "⚠️ fuelcompare.ie is scheduled to shut down soon. "
+                    "If you select FuelCompare IE, data may stop updating."
+                )
+                if any(key == "ie_fuelcompare" for key, _ in providers)
+                else "",
+            },
         )
 
     # ---- Step 3a: station ID (manual_id mode) -----------------------------------

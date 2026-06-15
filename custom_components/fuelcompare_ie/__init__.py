@@ -5,6 +5,7 @@ from __future__ import annotations
 import inspect
 import logging
 
+from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -111,6 +112,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     else:
         provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
+
+    # Warn users of ie_fuelcompare (fuelcompare.ie) that the service is ending.
+    if provider_key == "ie_fuelcompare":
+        async_create_issue(
+            hass,
+            DOMAIN,
+            f"fuelcompare_ie_deprecation_{entry.entry_id}",
+            is_fixable=False,
+            severity=IssueSeverity.WARNING,
+            translation_key="fuelcompare_ie_deprecation",
+            translation_placeholders={"entry_title": entry.title},
+        )
 
     hass.data.setdefault(DOMAIN, {})
 
