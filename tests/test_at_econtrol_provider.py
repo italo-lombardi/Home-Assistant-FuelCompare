@@ -1051,24 +1051,34 @@ async def test_async_list_stations_returns_empty_when_api_empty() -> None:
 
 
 async def test_async_list_stations_sorted_by_cheapest_diesel() -> None:
-    """async_list_stations sorts results alphabetically by station name."""
-    cheap_station = {
+    """async_list_stations sorts results alphabetically by station name.
+
+    Station names are chosen so that alphabetical order differs from price order:
+      - "Cheap Zeta Station"    (id 22222): alphabetically FIRST (C < E), but expensive
+      - "Expensive Alpha Station" (id 11111): alphabetically SECOND (E > C), but cheapest
+
+    A price-sort implementation would return id 11111 first.
+    A correct alpha-sort implementation must return id 22222 first.
+    """
+    expensive_alpha_station = {
         "id": 11111,
-        "name": "Cheap Station",
+        "name": "Expensive Alpha Station",  # starts with E — alphabetically second
         "location": {**_BASE_LOCATION, "city": "Graz"},
         "open": True,
-        "prices": [{"fuelType": "DIE", "amount": 1.499}],
+        "prices": [{"fuelType": "DIE", "amount": 1.499}],  # cheapest
     }
-    expensive_station = {
+    cheap_zeta_station = {
         "id": 22222,
-        "name": "Expensive Station",
+        "name": "Cheap Zeta Station",  # starts with C — alphabetically first
         "location": {**_BASE_LOCATION, "city": "Salzburg"},
         "open": True,
-        "prices": [{"fuelType": "DIE", "amount": 1.799}],
+        "prices": [{"fuelType": "DIE", "amount": 1.799}],  # most expensive
     }
 
-    # DIE response has both stations; SUP and GAS return them without diesel prices
-    die_resp = _make_mock_response(200, json_data=[expensive_station, cheap_station])
+    # DIE response has both stations; SUP and GAS return empty lists
+    die_resp = _make_mock_response(
+        200, json_data=[expensive_alpha_station, cheap_zeta_station]
+    )
     sup_resp = _make_mock_response(200, json_data=[])
     gas_resp = _make_mock_response(200, json_data=[])
     session = _make_session(die_resp, sup_resp, gas_resp)
@@ -1078,8 +1088,9 @@ async def test_async_list_stations_sorted_by_cheapest_diesel() -> None:
 
     assert len(result) == 2
     first_id, _ = result[0]
-    assert first_id == "11111", (
-        "Alphabetically first station ('Cheap') should be listed first"
+    assert first_id == "22222", (
+        "Alphabetically first station ('Cheap Zeta', C < E) should be listed first, "
+        "not the cheaper station ('Expensive Alpha')"
     )
 
 

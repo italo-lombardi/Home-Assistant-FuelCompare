@@ -143,7 +143,7 @@ async def async_setup_entry(
     coordinator: FuelCompareIECoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = coordinator.station_id
     station_name = entry.title
-    caps = coordinator._provider.CAPABILITIES
+    caps = coordinator.provider_capabilities
 
     entities: list[SensorEntity] = []
 
@@ -500,7 +500,10 @@ class StationSimpleStrSensor(CoordinatorEntity[FuelCompareIECoordinator], Sensor
 
     @property
     def available(self) -> bool:
-        return self.coordinator.data is not None
+        return (
+            self.coordinator.data is not None
+            and self.coordinator.data.get(self._data_key) is not None
+        )
 
     @property
     def extra_state_attributes(self) -> dict:

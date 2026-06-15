@@ -95,7 +95,7 @@ class SiGorivaProvider(BaseProvider):
     fetches the full paginated dataset on each poll, finds the matching
     station by pk, and returns its normalised prices.  async_list_stations
     fetches all pages, filters by distance from the supplied coordinates,
-    and returns a list sorted cheapest-first by diesel price.
+    and returns a list sorted alphabetically by station label.
     """
 
     COUNTRY = "SI"
@@ -117,7 +117,6 @@ class SiGorivaProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "source_station_id",
         }
     )
 

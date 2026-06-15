@@ -455,7 +455,6 @@ def test_build_station_data_returns_all_capability_keys() -> None:
         "latitude",
         "longitude",
         "price_confidence",
-        "lastupdated",
         "source_station_id",
     }
     for key in required:
@@ -507,10 +506,10 @@ def test_build_station_data_price_confidence_from_fiability() -> None:
     assert result["price_confidence"] == "CONFIDENT"
 
 
-def test_build_station_data_lastupdated_is_none() -> None:
-    """TCS API does not provide per-station timestamps."""
+def test_build_station_data_lastupdated_not_in_result() -> None:
+    """TCS API does not provide timestamps; lastupdated not in result (M-24)."""
     result = _build_station_data(_STATION_ID, _MERGED_RAW)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 def test_build_station_data_source_station_id() -> None:
@@ -620,12 +619,12 @@ async def test_async_fetch_returns_price_confidence() -> None:
     assert data["price_confidence"] == "CONFIDENT"
 
 
-async def test_async_fetch_lastupdated_is_none() -> None:
-    """async_fetch sets lastupdated=None (TCS API has no timestamps)."""
+async def test_async_fetch_lastupdated_not_in_result() -> None:
+    """async_fetch does not set lastupdated (TCS API has no timestamps; M-24)."""
     session = _make_session_always(_PAYLOAD_SP95)
     p = _provider()
     data = await p.async_fetch(session, _STATION_ID)
-    assert data["lastupdated"] is None
+    assert "lastupdated" not in data
 
 
 # ---------------------------------------------------------------------------

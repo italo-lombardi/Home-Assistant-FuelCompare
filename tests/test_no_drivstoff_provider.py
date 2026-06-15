@@ -493,6 +493,7 @@ def test_display_name_maps_all_known_providers() -> None:
         "DRIV": "Driv",
         "ESSO": "Esso",
         "HALTBAKK_EXPRESS": "Haltbakk Express",
+        "OLJELEVERANDØREN": "Oljeleverandøren",
         "ST1": "St1",
         "TANKEN": "Tanken",
         "TRONDER_OIL": "Trønder Oil",

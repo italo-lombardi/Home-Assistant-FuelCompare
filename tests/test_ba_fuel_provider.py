@@ -631,7 +631,7 @@ def test_build_station_data_latitude_is_none() -> None:
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data["latitude"] is None
+    assert data.get("latitude") is None
 
 
 def test_build_station_data_longitude_is_none() -> None:
@@ -645,7 +645,7 @@ def test_build_station_data_longitude_is_none() -> None:
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data["longitude"] is None
+    assert data.get("longitude") is None
 
 
 def test_build_station_data_lastupdated_is_none() -> None:

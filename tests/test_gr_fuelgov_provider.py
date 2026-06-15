@@ -143,10 +143,13 @@ def test_provider_capabilities_fuel_types() -> None:
 
 
 def test_provider_capabilities_identity_fields() -> None:
-    """CAPABILITIES includes name, county, lastupdated, and source_station_id."""
+    """CAPABILITIES includes name, county, and lastupdated."""
     caps = GrFuelgovProvider.CAPABILITIES
-    for field in ("name", "county", "lastupdated", "source_station_id"):
+    for field in ("name", "county", "lastupdated"):
         assert field in caps, f"Field '{field}' missing from CAPABILITIES"
+    assert "source_station_id" not in caps, (
+        "source_station_id must not be in CAPABILITIES (M-29)"
+    )
 
 
 def test_provider_capabilities_coordinator_sentinels() -> None:

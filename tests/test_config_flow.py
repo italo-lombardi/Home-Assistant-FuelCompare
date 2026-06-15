@@ -664,8 +664,10 @@ async def test_async_step_api_key_valid_key_stored_and_advances(
 
     # The key must be stored
     assert flow._api_key == "my-test-api-key"
-    # Step must have advanced (not still showing api_key form without error)
-    assert result.get("step_id") != "api_key" or result.get("errors") == {}
+    # Step must have advanced past the api_key form — no longer on "api_key" step
+    assert result.get("step_id") != "api_key"
+    # And the advanced step must not have errors
+    assert result.get("errors", {}) == {}
 
 
 async def test_async_step_api_key_initial_display_no_user_input(

@@ -157,7 +157,7 @@ class PtDgegProvider(BaseProvider):
                 f"DGEG: failed to fetch station {station_id}: {err}"
             ) from err
 
-        if not data.get("status"):
+        if data.get("status") is not True:
             raise ProviderError(
                 f"DGEG: API returned failure for station {station_id}: "
                 f"{data.get('mensagem', 'unknown error')}"

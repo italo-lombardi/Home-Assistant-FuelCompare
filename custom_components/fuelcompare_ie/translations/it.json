@@ -139,7 +139,7 @@
         "name": "Servizi"
       },
       "opening_hours": {
-        "name": "Orario"
+        "name": "Orario di apertura (OSM)"
       },
       "payments": {
         "name": "Pagamenti"
@@ -157,7 +157,7 @@
         "name": "Sito web"
       },
       "working_hours": {
-        "name": "Orari di apertura"
+        "name": "Orario lavorativo"
       }
     },
     "binary_sensor": {

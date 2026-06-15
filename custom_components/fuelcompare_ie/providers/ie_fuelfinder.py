@@ -154,10 +154,9 @@ class IEFuelFinderProvider(BaseProvider):
         {
             # Fuel prices
             "diesel",
-            "petrol",
             "kerosene",
             "cng",
-            "unleaded",  # alias: petrol stored here for fuelcompare.ie sensor compat
+            "unleaded",  # petrol maps to unleaded
             # Station identity
             "name",
             "brand",
@@ -585,7 +584,6 @@ class IEFuelFinderProvider(BaseProvider):
             "unleaded": _price(
                 "petrol"
             ),  # petrol → unleaded for fuelcompare.ie sensor compat
-            "petrol": _price("petrol"),  # also store as 'petrol' for FuelFinder sensors
             # Station identity
             "name": name,
             "brand": brand,

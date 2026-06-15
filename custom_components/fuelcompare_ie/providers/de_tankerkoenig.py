@@ -233,7 +233,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 url, params=params, headers=_HEADERS, timeout=_TIMEOUT
             ) as resp:
                 resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json()
+                payload: dict[str, Any] = await resp.json(content_type=None)
         except ClientError:
             raise
         except Exception as err:
@@ -280,7 +280,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 url, params=params, headers=_HEADERS, timeout=_TIMEOUT
             ) as resp:
                 resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json()
+                payload: dict[str, Any] = await resp.json(content_type=None)
 
             if not payload.get("ok"):
                 return None
@@ -360,7 +360,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 url, params=params, headers=_HEADERS, timeout=_TIMEOUT
             ) as resp:
                 resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json()
+                payload: dict[str, Any] = await resp.json(content_type=None)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations HTTP error: %s", type(err).__name__)
             return []

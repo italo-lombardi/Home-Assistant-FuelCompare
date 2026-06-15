@@ -690,8 +690,6 @@ def _build_station_data(
         "brand": None,  # cijenegoriva.ba does not expose a brand field
         "address": address,
         "county": county,
-        "latitude": None,  # site does not expose station coordinates
-        "longitude": None,
         "lastupdated": None,  # site does not return per-station timestamps
         "source_station_id": station_id,
     }

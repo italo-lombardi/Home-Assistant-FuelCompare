@@ -612,8 +612,8 @@ async def test_async_fetch_raises_provider_error_for_unknown_country() -> None:
 
 
 @_skip_if_no_openpyxl
-async def test_async_fetch_raises_provider_error_on_http_error() -> None:
-    """async_fetch raises ProviderError when the HTTP request fails."""
+async def test_async_fetch_raises_client_error_on_http_error() -> None:
+    """async_fetch raises ClientResponseError when the HTTP request fails (propagates unwrapped)."""
     from aiohttp import ClientResponseError
 
     resp = _make_mock_response(404)
@@ -625,7 +625,7 @@ async def test_async_fetch_raises_provider_error_on_http_error() -> None:
     session = _make_session(resp)
 
     provider = _make_provider("DE")
-    with pytest.raises(ProviderError):
+    with pytest.raises(ClientResponseError):
         await provider.async_fetch(session, "DE")
 
 

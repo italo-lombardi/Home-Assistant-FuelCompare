@@ -392,9 +392,11 @@ def test_parse_station_company_maps_to_brand() -> None:
 
 
 def test_parse_station_tablename_same_as_brand() -> None:
-    """_parse_station sets tablename equal to brand."""
+    """_parse_station sets tablename equal to brand (a non-None known value)."""
     result = _parse_station(_BASE_STATION)
-    assert result["tablename"] == result["brand"]
+    # _BASE_STATION.company == "Atlantsolía", so both fields must equal that string.
+    assert result["brand"] == "Atlantsolía"
+    assert result["tablename"] == "Atlantsolía"
 
 
 def test_parse_station_latitude_from_geo() -> None:

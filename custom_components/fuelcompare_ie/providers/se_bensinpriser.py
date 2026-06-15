@@ -189,7 +189,6 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            "source_station_id",
             "lastupdated",
         }
     )

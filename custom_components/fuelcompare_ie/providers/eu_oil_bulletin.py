@@ -204,8 +204,6 @@ class EuOilBulletinProvider(BaseProvider):
             "county",  # Country name (region context)
             # Timing
             "lastupdated",  # Week date from Excel header
-            # Source reference
-            "source_station_id",
         }
     )
 
@@ -281,10 +279,23 @@ class EuOilBulletinProvider(BaseProvider):
                     data_only=True,
                 ),
             )
-        except Exception as err:
+        except (
+            openpyxl.utils.exceptions.InvalidFileException,
+            ValueError,
+            KeyError,
+            TypeError,
+        ) as err:
             raise ProviderError(
                 f"Failed to parse EC Oil Bulletin Excel file: {err}"
             ) from err
+        except Exception as err:  # noqa: BLE001 — catches BadZipFile and other parse errors
+            from zipfile import BadZipFile
+
+            if isinstance(err, BadZipFile):
+                raise ProviderError(
+                    f"Failed to parse EC Oil Bulletin Excel file: {err}"
+                ) from err
+            raise
 
         try:
             sheet = wb.active
@@ -482,7 +493,7 @@ class EuOilBulletinProvider(BaseProvider):
                 response.raise_for_status()
                 content_type = response.headers.get("Content-Type", "")
                 data = await response.read()
-        except Exception as err:
+        except (OSError, ValueError, TypeError) as err:
             raise ProviderError(
                 f"EU Oil Bulletin: network error downloading Excel file: {err}"
             ) from err

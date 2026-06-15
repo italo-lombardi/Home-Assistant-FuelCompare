@@ -5,7 +5,11 @@ from __future__ import annotations
 import inspect
 import logging
 
-from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
+from homeassistant.helpers.issue_registry import (
+    IssueSeverity,
+    async_create_issue,
+    async_delete_issue,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -104,7 +108,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             kwargs["prefecture_id"] = int(station_id)
         except (ValueError, TypeError):
             pass
-    if api_key and "api_key" in sig.parameters:
+    if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
         kwargs["api_key"] = api_key
     if latitude is not None and "latitude" in sig.parameters:
         kwargs["latitude"] = latitude
@@ -118,6 +122,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
 
+    hass.data.setdefault(DOMAIN, {})
+
+    await coordinator.async_config_entry_first_refresh()
+
     # Warn users of ie_fuelcompare (fuelcompare.ie) that the service is ending.
     if provider_key == "ie_fuelcompare":
         async_create_issue(
@@ -129,10 +137,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_key="fuelcompare_ie_deprecation",
             translation_placeholders={"entry_title": entry.title},
         )
-
-    hass.data.setdefault(DOMAIN, {})
-
-    await coordinator.async_config_entry_first_refresh()
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
@@ -151,5 +155,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     hass.data[DOMAIN].pop(entry.entry_id, None)
+    async_delete_issue(hass, DOMAIN, f"fuelcompare_ie_deprecation_{entry.entry_id}")
 
     return unload_ok

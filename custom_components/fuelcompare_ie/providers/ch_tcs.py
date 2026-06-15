@@ -192,7 +192,6 @@ class ChTcsProvider(BaseProvider):
             "latitude",
             "longitude",
             "price_confidence",
-            "lastupdated",
         }
     )
 
@@ -556,6 +555,5 @@ def _build_station_data(station_id: str, raw: dict[str, Any]) -> StationData:
         "latitude": lat,
         "longitude": lng,
         "price_confidence": fiability,
-        "lastupdated": None,  # TCS API does not expose per-station timestamps
         "source_station_id": station_id,
     }

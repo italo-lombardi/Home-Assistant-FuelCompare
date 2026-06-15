@@ -9,7 +9,8 @@ from .au_nsw import AuNswProvider
 from .au_qld import AuQldProvider
 from .au_vic import AuVicProvider
 from .ba_fuel import BaFuelProvider
-from .base import BaseProvider, ProviderError, StationData
+from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import ALL_SENSOR_KEYS
 from .be_carbu import BeCarbuProvider
 from .ca_qc import CaQcProvider
 from .ch_tcs import ChTcsProvider
@@ -101,9 +102,11 @@ def get_provider_or_default(key: str, default_key: str) -> type[BaseProvider]:
 
 
 __all__ = [
+    "ALL_SENSOR_KEYS",
     "BaseProvider",
     "ProviderError",
     "StationData",
+    "haversine_km",
     "PROVIDER_REGISTRY",
     "get_provider_class",
     "get_provider_or_default",
