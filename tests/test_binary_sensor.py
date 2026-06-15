@@ -140,9 +140,13 @@ async def test_binary_sensor_today_hours_attribute() -> None:
     hours = {"Monday": "6a.m.-10p.m.", "Tuesday": "7a.m.-9p.m."}
     sensor = _make_binary_sensor({"working_hours": json.dumps(hours)})
 
-    with patch(
-        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
-    ) as mock_now:
+    with (
+        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
+        patch(
+            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
+            side_effect=lambda x: x,
+        ),
+    ):
         mock_now.return_value.strftime.return_value = "Monday"
         attrs = sensor.extra_state_attributes
 
@@ -178,9 +182,13 @@ async def test_binary_sensor_today_not_in_hours() -> None:
     hours = {"Sunday": "10a.m.-6p.m."}
     sensor = _make_binary_sensor({"working_hours": json.dumps(hours)})
 
-    with patch(
-        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
-    ) as mock_now:
+    with (
+        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
+        patch(
+            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
+            side_effect=lambda x: x,
+        ),
+    ):
         mock_now.return_value.strftime.return_value = "Monday"
         result = sensor.is_on
 
@@ -192,9 +200,13 @@ async def test_binary_sensor_is_on_from_dict_hours() -> None:
     hours = {"Monday": "6a.m.-10p.m."}
     sensor = _make_binary_sensor({"working_hours": hours})
 
-    with patch(
-        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
-    ) as mock_now:
+    with (
+        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
+        patch(
+            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
+            side_effect=lambda x: x,
+        ),
+    ):
         mock_now.return_value.strftime.return_value = "Monday"
         mock_now.return_value.time.return_value = dt_time(9, 0)
         result = sensor.is_on

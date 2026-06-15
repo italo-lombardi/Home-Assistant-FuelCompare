@@ -45,13 +45,21 @@ def _make_xlsx_bytes(
     ws = wb.active
 
     # Row 1 — date row (date in col A)
-    ws.append([bulletin_date, "", "", "", "", ""])
+    ws.append([bulletin_date, "", "", "", "", "", ""])
     # Row 2 — units
     ws.append(
-        ["Country", "Euro/1000L", "Euro/1000L", "Euro/1000L", "change", "Euro/1000L"]
+        [
+            "Country",
+            "Euro/1000L",
+            "Euro/1000L",
+            "Euro/1000L",
+            "change",
+            "Euro/1000L",
+            "Euro/1000L",
+        ]
     )
     # Row 3 — Germany (filler)
-    ws.append(["Germany", 1900.0, 1750.0, 850.0, 5.0, 1100.0])
+    ws.append(["Germany", 1900.0, 1750.0, 1100.0, 5.0, 800.0, 850.0])
     # Row 4 — Netherlands (optional)
     if include_nl:
         ws.append(
@@ -59,9 +67,10 @@ def _make_xlsx_bytes(
                 "Netherlands",
                 nl_benzine,
                 nl_diesel,
-                nl_lpg,
-                0.0,  # col 4 is a change column, skipped
-                nl_heating,
+                nl_heating,  # col 3 = heating gas oil
+                0.0,  # col 4 = weekly change (skipped)
+                None,  # col 5 = fuel oil low-sulphur (skipped)
+                nl_lpg,  # col 6 = LPG
             ]
         )
 

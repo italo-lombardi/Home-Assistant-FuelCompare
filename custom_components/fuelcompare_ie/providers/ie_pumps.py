@@ -80,6 +80,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+import ssl
 import xml.etree.ElementTree as ET
 from typing import Any
 
@@ -89,6 +90,18 @@ from ..const import API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
+
+# pumps.ie has an expired TLS certificate — verification is disabled.
+# Use HTTPS anyway so the connection is encrypted (just not verified).
+# An explicit SSLContext is safer than ssl=False as it still uses TLS.
+_SSL_UNVERIFIED = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+_SSL_UNVERIFIED.check_hostname = False
+_SSL_UNVERIFIED.verify_mode = ssl.CERT_NONE
+_LOGGER.warning(
+    "ie_pumps: pumps.ie TLS certificate is expired — certificate verification "
+    "is disabled. MITM attacks on fuel price data are theoretically possible. "
+    "This will be resolved when pumps.ie renews their certificate."
+)
 
 # pumps.ie has an expired TLS certificate — ssl=False is required.
 # Use HTTPS anyway so the connection is encrypted (just not verified).
@@ -396,7 +409,7 @@ class IePumpsProvider(BaseProvider):
                 params=params,
                 headers=_HEADERS,
                 timeout=_TIMEOUT,
-                ssl=False,  # pumps.ie TLS certificate is expired
+                ssl=_SSL_UNVERIFIED,
             ) as response:
                 response.raise_for_status()
                 xml_text: str = await response.text(encoding="utf-8", errors="replace")

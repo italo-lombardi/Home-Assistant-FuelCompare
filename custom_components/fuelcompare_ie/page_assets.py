@@ -182,15 +182,13 @@ class PageAssets:
         self.decrypt_key = match.group(1)
         if source is None:
             _LOGGER.debug(
-                "Extracted decrypt key for station %s: %s…",
+                "Extracted decrypt key for station %s: <extracted>",
                 self.station_id,
-                self.decrypt_key[:8],
             )
         else:
             _LOGGER.debug(
-                "Extracted decrypt key for station %s from %s: %s…",
+                "Extracted decrypt key for station %s from %s: <extracted>",
                 self.station_id,
                 source,
-                self.decrypt_key[:8],
             )
         return True

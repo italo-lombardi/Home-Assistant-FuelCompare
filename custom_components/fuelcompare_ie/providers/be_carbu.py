@@ -33,13 +33,8 @@ carbu.com uses short slugs in the station listing URL path:
   unleaded          E10          Super 95 (E10)
   premium_unleaded  E5           Super 98 (E5)
   diesel            D            Diesel (B7)
-  diesel_b10        B10          Diesel (B10)   (extra field, not in base TypedDict)
-  diesel_hvo        HVO          Diesel XTL/HVO (extra field)
   lpg               LPG          LPG / Autogas
   cng               CNG          CNG
-  lng               LNG          LNG            (extra field)
-  hydrogen          H2           Hydrogen       (extra field)
-  electric          ELEC         Electricity    (extra field)
 
 Bot protection
 --------------
@@ -158,15 +153,6 @@ _FUEL_KEY_TO_SLUG: dict[str, str] = {
     "cng": "CNG",  # Compressed Natural Gas
 }
 
-# Extra fuel slugs not in the StationData TypedDict — stored as pass-through keys.
-_EXTRA_SLUG_TO_KEY: dict[str, str] = {
-    "B10": "diesel_b10",  # Diesel B10
-    "HVO": "diesel_hvo",  # Diesel XTL/HVO
-    "LNG": "lng_fuel",  # Liquefied Natural Gas (renamed from "lng" to avoid confusion with longitude)
-    "H2": "hydrogen",  # Hydrogen
-    "ELEC": "electric",  # Electric charging
-}
-
 # All slugs we ever fan-out to during a station listing
 _ALL_SLUGS: tuple[str, ...] = (
     "E10",
@@ -174,13 +160,10 @@ _ALL_SLUGS: tuple[str, ...] = (
     "GO",
     "LPG",
     "CNG",
-    "B10",
-    "HVO",
 )
 
 # Reverse lookup: slug → StationData key (for the keys that have one)
 _SLUG_TO_FUEL_KEY: dict[str, str] = {v: k for k, v in _FUEL_KEY_TO_SLUG.items()}
-_SLUG_TO_FUEL_KEY.update(_EXTRA_SLUG_TO_KEY)
 
 # Primary fan-out slugs for async_list_stations display (cheaper + faster)
 _DISPLAY_SLUGS: tuple[str, ...] = ("GO", "E10")

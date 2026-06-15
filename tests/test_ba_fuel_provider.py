@@ -307,9 +307,9 @@ def test_header_to_key_maps_diesel() -> None:
     assert _HEADER_TO_KEY.get("dizel") == "diesel"
 
 
-def test_header_to_key_maps_super95() -> None:
-    """_HEADER_TO_KEY maps 'super 95' to 'super95'."""
-    assert _HEADER_TO_KEY.get("super 95") == "super95"
+def test_header_to_key_maps_petrol() -> None:
+    """_HEADER_TO_KEY maps 'super 95' to 'petrol'."""
+    assert _HEADER_TO_KEY.get("super 95") == "petrol"
 
 
 def test_header_to_key_maps_lpg() -> None:
@@ -463,16 +463,16 @@ def test_parse_station_table_diesel_price_comma_decimal() -> None:
     assert stations[0]["diesel"] == pytest.approx(2.750)
 
 
-def test_parse_station_table_super95_price() -> None:
+def test_parse_station_table_petrol_price() -> None:
     """_parse_station_table parses Super 95 price."""
     stations = _parse_station_table(_SAMPLE_HTML)
-    assert stations[0]["super95"] == pytest.approx(2.800)
+    assert stations[0]["petrol"] == pytest.approx(2.800)
 
 
-def test_parse_station_table_super98_price() -> None:
+def test_parse_station_table_premium_unleaded_price() -> None:
     """_parse_station_table parses Super 98 price."""
     stations = _parse_station_table(_SAMPLE_HTML)
-    assert stations[0]["super98"] == pytest.approx(2.950)
+    assert stations[0]["premium_unleaded"] == pytest.approx(2.950)
 
 
 def test_parse_station_table_lpg_price() -> None:
@@ -492,8 +492,8 @@ def test_parse_station_table_empty_cells_return_none_prices() -> None:
     stations = _parse_station_table(_SAMPLE_HTML_NULL_PRICES)
     assert len(stations) == 1
     assert stations[0]["diesel"] is None
-    assert stations[0]["super95"] is None
-    assert stations[0]["super98"] is None
+    assert stations[0]["petrol"] is None
+    assert stations[0]["premium_unleaded"] is None
     assert stations[0]["lpg"] is None
 
 
@@ -513,7 +513,7 @@ def test_parse_station_table_second_station_prices() -> None:
     """_parse_station_table correctly parses second station row."""
     stations = _parse_station_table(_SAMPLE_HTML)
     assert stations[1]["diesel"] == pytest.approx(2.720)
-    assert stations[1]["super95"] == pytest.approx(2.780)
+    assert stations[1]["petrol"] == pytest.approx(2.780)
     assert stations[1]["lpg"] == pytest.approx(1.230)
 
 
@@ -528,8 +528,8 @@ def test_build_station_data_sets_diesel() -> None:
         "name": "Test",
         "address": "Street 1",
         "diesel": 2.75,
-        "super95": 2.80,
-        "super98": 2.95,
+        "petrol": 2.80,
+        "premium_unleaded": 2.95,
         "lpg": 1.25,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -542,8 +542,8 @@ def test_build_station_data_sets_lpg() -> None:
         "name": "Test",
         "address": "Street 1",
         "diesel": 2.75,
-        "super95": 2.80,
-        "super98": 2.95,
+        "petrol": 2.80,
+        "premium_unleaded": 2.95,
         "lpg": 1.25,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -556,8 +556,8 @@ def test_build_station_data_sets_name() -> None:
         "name": "OMV Sarajevo",
         "address": "Street 1",
         "diesel": 2.75,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -570,8 +570,8 @@ def test_build_station_data_sets_address() -> None:
         "name": "Test",
         "address": "Zmaja od Bosne 1",
         "diesel": 2.75,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -584,8 +584,8 @@ def test_build_station_data_county_from_city_slug() -> None:
         "name": "Test",
         "address": None,
         "diesel": None,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("banja-luka:1", raw, "banja-luka")
@@ -598,8 +598,8 @@ def test_build_station_data_source_station_id() -> None:
         "name": "Test",
         "address": None,
         "diesel": None,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("tuzla:4", raw, "tuzla")
@@ -612,8 +612,8 @@ def test_build_station_data_brand_is_none() -> None:
         "name": "Test",
         "address": None,
         "diesel": None,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -626,8 +626,8 @@ def test_build_station_data_latitude_is_none() -> None:
         "name": "Test",
         "address": None,
         "diesel": None,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -640,8 +640,8 @@ def test_build_station_data_longitude_is_none() -> None:
         "name": "Test",
         "address": None,
         "diesel": None,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -654,40 +654,40 @@ def test_build_station_data_lastupdated_is_none() -> None:
         "name": "Test",
         "address": None,
         "diesel": None,
-        "super95": None,
-        "super98": None,
+        "petrol": None,
+        "premium_unleaded": None,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
     assert data["lastupdated"] is None
 
 
-def test_build_station_data_super95_passthrough() -> None:
-    """_build_station_data stores super95 as extra passthrough field."""
+def test_build_station_data_petrol_passthrough() -> None:
+    """_build_station_data stores petrol as extra passthrough field."""
     raw = {
         "name": "Test",
         "address": None,
         "diesel": 2.75,
-        "super95": 2.80,
-        "super98": 2.95,
+        "petrol": 2.80,
+        "premium_unleaded": 2.95,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data.get("super95") == pytest.approx(2.80)  # type: ignore[typeddict-item]
+    assert data.get("petrol") == pytest.approx(2.80)  # type: ignore[typeddict-item]
 
 
-def test_build_station_data_super98_passthrough() -> None:
-    """_build_station_data stores super98 as extra passthrough field."""
+def test_build_station_data_premium_unleaded_passthrough() -> None:
+    """_build_station_data stores premium_unleaded as extra passthrough field."""
     raw = {
         "name": "Test",
         "address": None,
         "diesel": 2.75,
-        "super95": 2.80,
-        "super98": 2.95,
+        "petrol": 2.80,
+        "premium_unleaded": 2.95,
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data.get("super98") == pytest.approx(2.95)  # type: ignore[typeddict-item]
+    assert data.get("premium_unleaded") == pytest.approx(2.95)  # type: ignore[typeddict-item]
 
 
 def test_build_station_data_all_capability_keys_present() -> None:
@@ -696,8 +696,8 @@ def test_build_station_data_all_capability_keys_present() -> None:
         "name": "Test",
         "address": "Street",
         "diesel": 2.75,
-        "super95": 2.80,
-        "super98": 2.95,
+        "petrol": 2.80,
+        "premium_unleaded": 2.95,
         "lpg": 1.25,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
@@ -1183,7 +1183,7 @@ def test_parse_station_table_div_layout_single_station() -> None:
     assert len(stations) >= 1
     assert stations[0]["name"] == "OMV Sarajevo Main"
     assert stations[0]["diesel"] == pytest.approx(2.75)
-    assert stations[0]["super95"] == pytest.approx(2.80)
+    assert stations[0]["petrol"] == pytest.approx(2.80)
 
 
 def test_parse_station_table_div_layout_two_stations() -> None:
@@ -1203,7 +1203,7 @@ def test_parse_station_table_div_layout_address_field() -> None:
 
 
 def test_parse_station_table_div_layout_all_four_fuels() -> None:
-    """_parse_stations_div fills diesel/super95/super98/lpg from price sequence (lines 562-565).
+    """_parse_stations_div fills diesel/petrol/premium_unleaded/lpg from price sequence (lines 562-565).
 
     When four prices appear before the station name in the HTML, all four
     price slots are populated because the flush is deferred until the name
@@ -1213,8 +1213,8 @@ def test_parse_station_table_div_layout_all_four_fuels() -> None:
     assert len(stations) >= 1
     s = stations[0]
     assert s["diesel"] == pytest.approx(2.75)
-    assert s["super95"] == pytest.approx(2.80)
-    assert s["super98"] == pytest.approx(2.95)
+    assert s["petrol"] == pytest.approx(2.80)
+    assert s["premium_unleaded"] == pytest.approx(2.95)
     assert s["lpg"] == pytest.approx(1.25)
 
 

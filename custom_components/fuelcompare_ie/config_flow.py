@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import logging
 from typing import Any
 
@@ -340,7 +341,7 @@ def _counties_for_country(country: str) -> dict[str, str]:
 
 
 async def _fetch_station_name(
-    hass, station_id: str, provider_key: str = DEFAULT_PROVIDER
+    hass, station_id: str, provider_key: str = DEFAULT_PROVIDER, api_key: str = ""
 ) -> str | None:
     """Resolve station display name via the selected provider.
 
@@ -352,7 +353,11 @@ async def _fetch_station_name(
         return None
     try:
         session = async_get_clientsession(hass)
-        provider = provider_cls(station_id)
+        sig = inspect.signature(provider_cls.__init__)
+        if api_key and "api_key" in sig.parameters:
+            provider = provider_cls(station_id, api_key=api_key)
+        else:
+            provider = provider_cls(station_id)
         return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
@@ -514,7 +519,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
-                    self.hass, station_id, self._provider_key
+                    self.hass, station_id, self._provider_key, self._api_key
                 )
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
@@ -571,7 +576,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
-                    self.hass, station_id, self._provider_key
+                    self.hass, station_id, self._provider_key, self._api_key
                 )
                 self._suggested_name = fetched or f"Station {station_id}"
                 return await self.async_step_name()
@@ -589,6 +594,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     init_kwargs["api_key"] = self._api_key
                 provider_instance = provider_cls("", **init_kwargs)
                 list_kwargs: dict[str, Any] = {"county": self._station_county}
+                if self._postal_code:
+                    list_kwargs["postal_code"] = self._postal_code
                 if self._latitude is not None:
                     list_kwargs["lat"] = self._latitude
                 if self._longitude is not None:
@@ -637,12 +644,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         default_lon = self.hass.config.longitude
 
         # Detect if the selected provider needs a postal code (e.g. be_carbu).
-        import inspect as _inspect
-
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
         needs_postal = (
             provider_cls is not None
-            and "postal_code" in _inspect.signature(provider_cls.__init__).parameters
+            and "postal_code" in inspect.signature(provider_cls.__init__).parameters
         )
 
         if user_input is not None:
@@ -753,7 +758,7 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
     ) -> ConfigFlowResult:
         """Manage options, pre-filling the existing API key and radius."""
         is_location_entry = CONF_RADIUS_KM in self.config_entry.data
-        provider_key = self.config_entry.data.get("provider", DEFAULT_PROVIDER)
+        provider_key = self.config_entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_key)
         requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
 

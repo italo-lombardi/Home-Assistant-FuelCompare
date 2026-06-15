@@ -212,7 +212,7 @@ class StationIsOpenBinarySensor(
 ):
     """Binary sensor indicating whether the station is currently open."""
 
-    _attr_device_class = BinarySensorDeviceClass.OPENING
+    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
     _attr_icon = "mdi:store-clock"
     _attr_has_entity_name = True
     _attr_translation_key = "is_open"
@@ -256,7 +256,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(dt_util.now().strftime("%A"))
+            return hours.get(dt_util.as_local(dt_util.now()).strftime("%A"))
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None

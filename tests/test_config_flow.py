@@ -2399,3 +2399,46 @@ async def test_options_flow_station_entry_with_api_key(
         assert result["data"][CONF_API_KEY] == "updated-key"
     finally:
         PROVIDER_REGISTRY.pop("de_fake_keyed_station_opts", None)
+
+
+async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> None:
+    """_reload_entry inner function awaits async_reload when options change."""
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_reload_test_99",
+        data={CONF_STATION_ID: "99", CONF_PROVIDER: "ie_fuelcompare"},
+        title="Reload Test",
+    )
+    entry.add_to_hass(hass)
+
+    reload_called_with: list = []
+
+    async def _spy_reload(entry_id):
+        reload_called_with.append(entry_id)
+
+    hass.config_entries.async_reload = _spy_reload
+
+    with (
+        patch.object(
+            FuelCompareIECoordinator,
+            "async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+    ):
+        result = await async_setup_entry(hass, entry)
+
+    assert result is True
+    # Trigger options update — HA calls the listener
+    hass.config_entries.async_update_entry(entry, options={CONF_API_KEY: "newkey"})
+    import asyncio
+
+    await asyncio.sleep(0)
+    assert entry.entry_id in reload_called_with

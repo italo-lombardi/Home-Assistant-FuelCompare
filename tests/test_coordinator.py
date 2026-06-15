@@ -970,6 +970,33 @@ def test_cryptojs_decrypt_invalid_padding() -> None:
         _cryptojs_decrypt(bad_payload, evp_key)
 
 
+def test_cryptojs_decrypt_invalid_pkcs7_bytes() -> None:
+    """Payload with valid pad_len but wrong padding bytes raises ValueError."""
+    import os
+
+    evp_key = _TEST_DECRYPT_KEY
+    salt = os.urandom(8)
+    # Last byte = 3 (pad_len=3 is valid) but remaining padding bytes are wrong (0x01 instead of 0x03)
+    plaintext = (
+        b"A" * 13 + b"\x01\x01\x03"
+    )  # last byte=3, but bytes[-3:] != b'\x03\x03\x03'
+
+    d, d_i = b"", b""
+    while len(d) < 48:
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt, usedforsecurity=False).digest()
+        d += d_i
+    key, iv = d[:32], d[32:48]
+
+    cipher = _Cipher(_algorithms.AES(key), _modes.CBC(iv))
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+    bad_payload = base64.b64encode(b"Salted__" + salt + ciphertext).decode()
+
+    with pytest.raises(ValueError, match="Invalid PKCS7 padding bytes"):
+        _cryptojs_decrypt(bad_payload, evp_key)
+
+
 # ---------------------------------------------------------------------------
 # last_successful_fetch stamping
 # ---------------------------------------------------------------------------

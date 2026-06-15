@@ -24,8 +24,8 @@ Columns (0-based):
   0 — Country name (string, e.g. "Netherlands")
   1 — Euro-super 95 (E10 / benzine) price per 1000 L with taxes
   2 — Automotive diesel price per 1000 L with taxes
-  3 — LPG (autogas) price per 1000 L with taxes
-  5 — Heating gas oil price per 1000 L with taxes (column 4 is a diff column)
+  3 — Heating gas oil price per 1000 L with taxes
+  6 — LPG (autogas) price per 1000 L with taxes
 
 All price values are EUR/1000 L.  Divide by 1000 to obtain EUR/litre.
 Values above 10 000 are treated as data errors (realistic ceiling is ~3 000).
@@ -94,14 +94,15 @@ _STATION_ID = "NL"
 #   0  Country name
 #   1  Euro-super 95 (E10 / benzine) EUR/1000 L with taxes
 #   2  Automotive diesel EUR/1000 L with taxes
-#   3  LPG (autogas) EUR/1000 L with taxes
+#   3  Heating gas oil EUR/1000 L with taxes
 #   4  Heating gas oil weekly change (skip)
-#   5  Heating gas oil EUR/1000 L with taxes
+#   5  Fuel oil (low sulphur) EUR/1000 L (skip)
+#   6  LPG (autogas) EUR/1000 L with taxes
 _COL_COUNTRY = 0
 _COL_BENZINE = 1
 _COL_DIESEL = 2
-_COL_LPG = 3
-_COL_HEATING = 5
+_COL_LPG = 6
+_COL_HEATING = 3
 
 # Maximum plausible price per 1000 L in EUR.  Used to reject obvious data errors.
 _MAX_PRICE_PER_1000L = 10_000.0

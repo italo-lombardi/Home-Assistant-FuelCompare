@@ -588,12 +588,14 @@ async def test_async_list_stations_returns_empty_on_network_error() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 11. ssl=False is used for all requests
+# 11. SSLContext with verification disabled is used for all requests
 # ---------------------------------------------------------------------------
 
 
 async def test_async_fetch_passes_ssl_false() -> None:
-    """Every GET request to pumps.ie is made with ssl=False (expired cert)."""
+    """Every GET request to pumps.ie uses an SSLContext with cert verification disabled."""
+    import ssl  # noqa: PLC0415
+
     diesel_resp = _make_mock_response(200, _DIESEL_XML)
     petrol_resp = _make_mock_response(200, _PETROL_XML)
     session = _make_session(diesel_resp, petrol_resp)
@@ -603,9 +605,10 @@ async def test_async_fetch_passes_ssl_false() -> None:
 
     for call in session.get.call_args_list:
         ssl_kwarg = call.kwargs.get("ssl")
-        assert ssl_kwarg is False, (
-            f"Expected ssl=False in GET call but got ssl={ssl_kwarg!r}"
+        assert isinstance(ssl_kwarg, ssl.SSLContext), (
+            f"Expected ssl.SSLContext in GET call but got ssl={ssl_kwarg!r}"
         )
+        assert ssl_kwarg.verify_mode == ssl.CERT_NONE
 
 
 # ---------------------------------------------------------------------------

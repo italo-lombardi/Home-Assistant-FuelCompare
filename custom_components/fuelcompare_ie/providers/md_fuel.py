@@ -41,6 +41,7 @@ HTML scraping with no formal API stability guarantee.
 from __future__ import annotations
 
 import logging
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -97,6 +98,7 @@ class MdFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 43200  # 12 hours — ANRE updates at most once daily
+    CURRENCY: ClassVar[str] = "MDL/L"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

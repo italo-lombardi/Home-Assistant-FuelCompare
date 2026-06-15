@@ -474,7 +474,7 @@ class StationWorkingHoursSensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = dt_util.now().strftime("%A")
+            today = dt_util.as_local(dt_util.now()).strftime("%A")
             return hours.get(today)
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours for native_value: %s", err)

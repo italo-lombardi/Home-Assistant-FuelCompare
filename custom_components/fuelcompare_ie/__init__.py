@@ -111,11 +111,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Reload when options change (e.g. radius, api_key) so the new values take effect.
-    entry.async_on_unload(
-        entry.add_update_listener(
-            lambda h, e: h.config_entries.async_reload(e.entry_id)
-        )
-    )
+    async def _reload_entry(h: HomeAssistant, e: ConfigEntry) -> None:
+        await h.config_entries.async_reload(e.entry_id)
+
+    entry.async_on_unload(entry.add_update_listener(_reload_entry))
 
     return True
 
