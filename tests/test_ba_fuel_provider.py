@@ -429,8 +429,8 @@ def test_parse_price_large_value_divided_by_100() -> None:
 
 
 def test_parse_price_exactly_20_not_divided() -> None:
-    """_parse_price does NOT divide value 20.0 (boundary: > 20 only)."""
-    assert _parse_price(20.0) == pytest.approx(20.0)
+    """_parse_price rejects value 20.0 — exceeds the 6.0 KM/L upper bound."""
+    assert _parse_price(20.0) is None
 
 
 # ---------------------------------------------------------------------------
@@ -1077,18 +1077,18 @@ async def test_fetch_city_html_calls_correct_url() -> None:
 
 
 def test_parse_price_european_format_both_dot_and_comma() -> None:
-    """_parse_price handles '1.234,56' (European thousand-sep + decimal, line 432)."""
+    """_parse_price rejects '1.234,56' — after /100 gives 12.346 which exceeds 6.0 bound."""
     # "1.234,56" → remove '.' → "1234,56" → replace ',' with '.' → "1234.56"
-    # 1234.56 > 20 → / 100 = 12.3456 → round to 3dp = 12.346
+    # 1234.56 > 20 → / 100 = 12.3456 → exceeds 6.0 upper bound → None
     result = _parse_price("1.234,56")
-    assert result == pytest.approx(12.346)
+    assert result is None
 
 
 def test_parse_price_european_format_typical_fuel_price() -> None:
-    """_parse_price handles '2.750,00' European format (both dot and comma, line 432)."""
-    # "2.750,00" → "2750.00" → 2750.0 > 20 → / 100 = 27.5
+    """_parse_price rejects '2.750,00' — after /100 gives 27.5 which exceeds 6.0 bound."""
+    # "2.750,00" → "2750.00" → 2750.0 > 20 → / 100 = 27.5 → exceeds 6.0 → None
     result = _parse_price("2.750,00")
-    assert result == pytest.approx(27.5)
+    assert result is None
 
 
 # ---------------------------------------------------------------------------

@@ -74,7 +74,7 @@ from typing import ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km  # noqa: F401
+from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -121,7 +121,7 @@ class CzCcsProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
     CURRENCY: ClassVar[str] = "CZK/L"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices (CZK/litre, government-capped maximum)
             "unleaded",  # Natural95 cap price
@@ -287,7 +287,8 @@ def _safe_price(raw: object) -> float | None:
     """Parse and validate a CZK/litre price value.
 
     Czech fuel prices are in the range ~30–60 CZK/litre.  Values outside
-    the plausible 5–500 CZK/litre range are rejected.
+    the plausible 0–500 CZK/litre range (i.e. non-positive or > 500) are
+    rejected.
 
     Args:
         raw: Raw value from the JSON (float, int, str, or None).

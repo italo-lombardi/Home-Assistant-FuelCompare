@@ -564,6 +564,8 @@ def _parse_price(raw: object) -> float | None:
         return None
     if val <= 0:
         return None
+    if val > 100:
+        return None
     return round(val, 2)
 
 

@@ -158,7 +158,7 @@ class DeTankerkoenigProvider(BaseProvider):
     REQUIRES_API_KEY: ClassVar[bool] = True
     API_KEY_REGISTRATION_URL: ClassVar[str] = "https://onboarding.tankerkoenig.de/"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "diesel",

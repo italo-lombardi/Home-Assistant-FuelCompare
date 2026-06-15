@@ -101,9 +101,6 @@ _HEADERS: dict[str, str] = {
 # Generous timeout: ~7.7 MB CSV, GitHub CDN should serve compressed (~1–2 MB).
 _TIMEOUT = ClientTimeout(total=max(API_TIMEOUT * 6, 60))
 
-# Timestamp format used by the JS Date.toString() representation in the CSV.
-_TS_FORMAT = "%a %b %d %Y %H:%M:%S GMT+0000 (Coordinated Universal Time)"
-
 # Maximum price in pence/litre to accept as valid (outlier guard).
 # Anything above 300 p/L (~£3.00/L) is almost certainly a data error.
 _MAX_PENCE_PER_LITRE: float = 300.0
@@ -258,8 +255,12 @@ class GbFuelfinderProvider(BaseProvider):
         Returns a list sorted cheapest-first by the best available fuel price
         (diesel or unleaded).  Stations with no prices are appended at the end.
         """
-        lat = float(kwargs.get("lat", self._latitude or 0.0))
-        lng = float(kwargs.get("lng", self._longitude or 0.0))
+        lat = kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        lng = kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        if lat is None or lng is None:
+            return []
+        lat = float(lat)
+        lng = float(lng)
         radius_km = float(kwargs.get("radius_km", self._radius_km))
 
         try:
@@ -415,12 +416,18 @@ def _parse_js_timestamp(ts: str | None) -> str | None:
     if not ts or not ts.strip():
         return None
     ts = ts.strip()
-    try:
-        dt = datetime.strptime(ts, _TS_FORMAT).replace(tzinfo=timezone.utc)
-        return dt.isoformat()
-    except ValueError:
-        _LOGGER.debug("Could not parse timestamp: %r", ts)
-        return None
+    # JS Date.toString() may zero-pad or space-pad single-digit days.
+    for fmt in (
+        "%a %b %d %Y %H:%M:%S GMT+0000 (Coordinated Universal Time)",
+        "%a %b  %d %Y %H:%M:%S GMT+0000 (Coordinated Universal Time)",
+    ):
+        try:
+            dt = datetime.strptime(ts, fmt).replace(tzinfo=timezone.utc)
+            return dt.isoformat()
+        except ValueError:
+            continue
+    _LOGGER.debug("Could not parse timestamp: %r", ts)
+    return None
 
 
 def _safe_float(value: str | None) -> float | None:

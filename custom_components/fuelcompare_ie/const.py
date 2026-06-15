@@ -22,6 +22,3 @@ DEFAULT_RADIUS_KM = 10.0
 # API
 BASE_URL = "https://fuelcompare.ie"
 API_TIMEOUT = 10
-
-# Fuel types available
-FUEL_TYPES = ["unleaded", "diesel"]

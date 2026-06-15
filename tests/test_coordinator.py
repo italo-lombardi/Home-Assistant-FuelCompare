@@ -20,8 +20,8 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from custom_components.fuelcompare_ie.coordinator import (
     FuelCompareIECoordinator,
-    _cryptojs_decrypt,
 )
+from custom_components.fuelcompare_ie.crypto import cryptojs_decrypt as _cryptojs_decrypt
 
 
 # ---------------------------------------------------------------------------
@@ -1226,7 +1226,9 @@ def test_non_eur_providers_override_currency() -> None:
     """All non-EUR providers declare a CURRENCY override (not the '€' default)."""
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
 
-    # Countries that are EUR-zone (CURRENCY should be "€")
+    # Countries that use EUR as their official currency (CURRENCY should be "€").
+    # AL is included: al_fuel.py reports prices in EUR/litre (cargopedia.net source),
+    # though Albania's national currency is ALL (lek).
     _EUR_COUNTRIES = {
         "AL",
         "AT",

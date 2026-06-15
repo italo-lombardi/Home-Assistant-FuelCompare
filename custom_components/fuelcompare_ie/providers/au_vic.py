@@ -94,7 +94,7 @@ import logging
 import uuid
 from typing import Any, ClassVar
 
-from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
@@ -348,27 +348,22 @@ class AuVicProvider(BaseProvider):
         }
 
         _LOGGER.debug("Fetching Service Victoria fuel prices")
-        try:
-            async with session.get(
-                _API_URL,
-                headers=headers,
-                timeout=_TIMEOUT,
-            ) as resp:
-                if resp.status == 403:
-                    _LOGGER.warning(
-                        "Service Victoria API returned HTTP 403.  "
-                        "The consumer-id may not be registered or may have expired.  "
-                        "Register at https://developer.service.vic.gov.au/  "
-                        "Please open an issue at "
-                        "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues "
-                        "if you believe your consumer-id is valid."
-                    )
-                resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json(content_type=None)
-        except ClientResponseError:
-            raise
-        except Exception:
-            raise
+        async with session.get(
+            _API_URL,
+            headers=headers,
+            timeout=_TIMEOUT,
+        ) as resp:
+            if resp.status == 403:
+                _LOGGER.warning(
+                    "Service Victoria API returned HTTP 403.  "
+                    "The consumer-id may not be registered or may have expired.  "
+                    "Register at https://developer.service.vic.gov.au/  "
+                    "Please open an issue at "
+                    "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues "
+                    "if you believe your consumer-id is valid."
+                )
+            resp.raise_for_status()
+            payload: dict[str, Any] = await resp.json(content_type=None)
 
         if "fuelPriceDetails" not in payload:
             raise ProviderError(

@@ -160,9 +160,13 @@ def _parse_price(raw: Any) -> float | None:
         return None
     if val <= 0:
         return None
-    # API returns prices in cents/litre (e.g. 193 = 1.93 EUR/L)
+    # API returns prices in cents/litre (e.g. 193 = 1.93 EUR/L).
+    # Values <= 10 are already in EUR/L (should not happen in practice).
     if val > 10:
         val = val / 100.0
+    # Sanity guard: Finnish fuel prices are 1–4 EUR/L.
+    if val > 10.0:
+        return None
     return round(val, 4)
 
 
@@ -476,8 +480,5 @@ class FiTankilleProvider(BaseProvider):
             raise
         except ClientResponseError as exc:
             raise ProviderError(f"Statistics Finland API HTTP error: {exc}") from exc
-        except Exception:  # noqa: BLE001
-            # Re-raise network errors so the coordinator can apply stale-retention.
-            raise
 
         return payload

@@ -582,7 +582,6 @@ class StationSimpleFloatSensor(
     """Generic float sensor reading one StationData key (e.g. latitude, longitude)."""
 
     _attr_has_entity_name = True
-    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
         self,

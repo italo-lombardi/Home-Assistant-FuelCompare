@@ -436,6 +436,8 @@ def _parse_price(raw: Any) -> float | None:
     # Values > 20 are probably a parsing artefact; divide by 100.
     if val > 20:
         val = val / 100.0
+    if val > 6.0:
+        return None
     return round(val, 3)
 
 
