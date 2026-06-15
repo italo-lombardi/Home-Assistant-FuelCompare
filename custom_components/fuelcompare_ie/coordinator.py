@@ -58,7 +58,8 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     # ---- Update cycle -----------------------------------------------------------
 
     async def async_shutdown(self) -> None:
-        """Cancel any pending tasks and release resources."""
+        """Cancel pending tasks and release resources."""
+        await super().async_shutdown()
 
     async def _async_update_data(self) -> StationData:
         try:
