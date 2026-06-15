@@ -348,7 +348,12 @@ class FiTankilleProvider(BaseProvider):
         )
 
         data: StationData = {
-            "e10": prices.get("A"),  # 95 E10 — Finland standard name
+            # NOTE: Finland uses E10 (10% ethanol blend) as its standard petrol grade.
+            # The key "e10" is intentional here — it IS technically E10 petrol in Finland,
+            # NOT the generic "unleaded" key used by other providers for standard petrol.
+            "e10": prices.get(
+                "A"
+            ),  # 95 E10 — Finland standard name (intentional, not "unleaded")
             "diesel": prices.get("B"),
             "kerosene": prices.get("D"),
             "premium_diesel": prices.get("E"),

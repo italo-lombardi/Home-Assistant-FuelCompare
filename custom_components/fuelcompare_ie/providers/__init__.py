@@ -85,6 +85,57 @@ PROVIDER_REGISTRY: dict[str, type[BaseProvider]] = {
     EuOilBulletinProvider.PROVIDER_KEY: EuOilBulletinProvider,
 }
 
+# Duplicate PROVIDER_KEY detection — if two providers share the same key, the
+# second entry silently overwrites the first in the dict literal above, making
+# the registry smaller than the number of registered providers.  Assert early
+# so the error surfaces at import time rather than as a hard-to-diagnose bug.
+_all_provider_keys = [
+    IEFuelCompareProvider.PROVIDER_KEY,
+    IEFuelFinderProvider.PROVIDER_KEY,
+    IePumpsProvider.PROVIDER_KEY,
+    AlFuelProvider.PROVIDER_KEY,
+    AtEcontrolProvider.PROVIDER_KEY,
+    BaFuelProvider.PROVIDER_KEY,
+    BeCarbuProvider.PROVIDER_KEY,
+    HRMzoeProvider.PROVIDER_KEY,
+    CzCcsProvider.PROVIDER_KEY,
+    DkFuelFinderProvider.PROVIDER_KEY,
+    FiTankilleProvider.PROVIDER_KEY,
+    FrCarburantsProvider.PROVIDER_KEY,
+    DeTankerkoenigProvider.PROVIDER_KEY,
+    GrFuelgovProvider.PROVIDER_KEY,
+    IsFuelProvider.PROVIDER_KEY,
+    ItMaseProvider.PROVIDER_KEY,
+    LtSauridaProvider.PROVIDER_KEY,
+    LuCarbuProvider.PROVIDER_KEY,
+    MtFuelProvider.PROVIDER_KEY,
+    MdFuelProvider.PROVIDER_KEY,
+    MeFuelProvider.PROVIDER_KEY,
+    NlAnwbProvider.PROVIDER_KEY,
+    NoDrivstoffProvider.PROVIDER_KEY,
+    PlBenzynaProvider.PROVIDER_KEY,
+    PtDgegProvider.PROVIDER_KEY,
+    SiGorivaProvider.PROVIDER_KEY,
+    EsMineturProvider.PROVIDER_KEY,
+    SEBensinpriserProvider.PROVIDER_KEY,
+    ChTcsProvider.PROVIDER_KEY,
+    GbFuelfinderProvider.PROVIDER_KEY,
+    AuFuelwatchProvider.PROVIDER_KEY,
+    AuNswProvider.PROVIDER_KEY,
+    AuQldProvider.PROVIDER_KEY,
+    AuVicProvider.PROVIDER_KEY,
+    CaQcProvider.PROVIDER_KEY,
+    EuOilBulletinProvider.PROVIDER_KEY,
+]
+assert len(_all_provider_keys) == len(set(_all_provider_keys)), (
+    f"Duplicate PROVIDER_KEY detected: "
+    f"{[k for k in _all_provider_keys if _all_provider_keys.count(k) > 1]}"
+)
+assert len(PROVIDER_REGISTRY) == len(_all_provider_keys), (
+    "PROVIDER_REGISTRY size mismatch — duplicate PROVIDER_KEY silently overwrote an entry"
+)
+del _all_provider_keys
+
 
 def get_provider_class(key: str) -> type[BaseProvider] | None:
     """Look up a provider class by key. Returns None if not found."""

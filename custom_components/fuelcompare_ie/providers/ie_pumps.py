@@ -608,15 +608,12 @@ def _build_station_data(
         # Station identity
         "name": name,
         "brand": brand,
-        "tablename": brand,  # StationBrandSensor reads tablename
         "address": address,
         "county": county,
         "latitude": lat,
         "longitude": lng,
         # Timing
         "lastupdated": dateupdated,
-        # Meta
-        "source_station_id": station_id,
     }
 
     _LOGGER.debug(

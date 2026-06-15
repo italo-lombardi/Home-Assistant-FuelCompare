@@ -567,7 +567,6 @@ class LuCarbuProvider(BaseProvider):
             "latitude": lat,
             "longitude": lng,
             "lastupdated": lastupdated,
-            "source_station_id": station_id,
         }
 
         _LOGGER.debug(

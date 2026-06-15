@@ -519,7 +519,10 @@ async def test_async_step_location_creates_entry(hass: HomeAssistant) -> None:
         assert result["title"] == "Dublin Area"
         assert CONF_LATITUDE in result["data"]
         assert CONF_LONGITUDE in result["data"]
-        assert CONF_RADIUS_KM in result["data"]
+        # radius_km is stored in options (not data) for location-mode entries
+        assert CONF_RADIUS_KM in result["data"] or CONF_RADIUS_KM in result.get(
+            "options", {}
+        )
         assert result["data"].get("station_id", "") == "fake-station-001"
     finally:
         PROVIDER_REGISTRY.pop("ie_fake_location", None)

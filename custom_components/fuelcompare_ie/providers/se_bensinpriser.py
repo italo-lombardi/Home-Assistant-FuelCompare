@@ -145,7 +145,6 @@ def _parse_station(station: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "website": website,
-        "source_station_id": str(station.get("id", "")),
     }
 
 

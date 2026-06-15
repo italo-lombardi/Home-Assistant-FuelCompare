@@ -144,9 +144,9 @@ def test_provider_poll_interval_is_daily() -> None:
     assert NlAnwbProvider.POLL_INTERVAL_SECONDS >= 3600
 
 
-def test_provider_capabilities_include_e10() -> None:
-    """CAPABILITIES includes 'e10' (benzine / Euro-super 95 E10)."""
-    assert "e10" in NlAnwbProvider.CAPABILITIES
+def test_provider_capabilities_include_unleaded() -> None:
+    """CAPABILITIES includes 'unleaded' (benzine / Euro-super 95 E10)."""
+    assert "unleaded" in NlAnwbProvider.CAPABILITIES
 
 
 def test_provider_capabilities_include_diesel() -> None:
@@ -328,11 +328,11 @@ def test_extract_price_rejects_non_numeric_string() -> None:
 
 
 @pytest.mark.asyncio
-async def test_parse_bulletin_returns_e10_price() -> None:
-    """_parse_bulletin returns correct EUR/L benzine (e10) price."""
+async def test_parse_bulletin_returns_unleaded_price() -> None:
+    """_parse_bulletin returns correct EUR/L benzine (unleaded) price."""
     raw = _make_xlsx_bytes(nl_benzine=2255.94)
     data = await _parse_bulletin(raw)
-    assert data["e10"] == pytest.approx(2.25594, rel=1e-4)
+    assert data["unleaded"] == pytest.approx(2.25594, rel=1e-4)
 
 
 @pytest.mark.asyncio
@@ -380,7 +380,7 @@ async def test_parse_bulletin_sets_lastupdated() -> None:
     """_parse_bulletin populates lastupdated from the date row."""
     raw = _make_xlsx_bytes(bulletin_date="2026-06-08")
     data = await _parse_bulletin(raw)
-    assert data.get("lastupdated") is not None
+    assert data.get("lastupdated") == "2026-06-08"
 
 
 @pytest.mark.asyncio
@@ -396,7 +396,7 @@ async def test_parse_bulletin_handles_none_prices() -> None:
     """_parse_bulletin returns None for price cells that are None."""
     raw = _make_xlsx_bytes(nl_benzine=None, nl_diesel=None)
     data = await _parse_bulletin(raw)
-    assert data["e10"] is None
+    assert data["unleaded"] is None
     assert data["diesel"] is None
 
 
@@ -421,11 +421,11 @@ async def test_async_fetch_returns_station_data() -> None:
     provider = NlAnwbProvider()
     data = await provider.async_fetch(session, "NL")
 
-    assert data.get("e10") is not None
-    assert data.get("diesel") is not None
+    assert data.get("unleaded") == pytest.approx(2.25594, rel=1e-4)
+    assert data.get("diesel") == pytest.approx(2.15059, rel=1e-4)
 
 
-async def test_async_fetch_e10_price() -> None:
+async def test_async_fetch_unleaded_price() -> None:
     """async_fetch returns correct EUR/L benzine price."""
     raw = _make_xlsx_bytes(nl_benzine=2255.94)
     resp = _make_mock_response(200, body=raw)
@@ -434,7 +434,7 @@ async def test_async_fetch_e10_price() -> None:
     provider = NlAnwbProvider()
     data = await provider.async_fetch(session, "NL")
 
-    assert data["e10"] == pytest.approx(2.25594, rel=1e-4)
+    assert data["unleaded"] == pytest.approx(2.25594, rel=1e-4)
 
 
 async def test_async_fetch_diesel_price() -> None:
@@ -459,7 +459,7 @@ async def test_async_fetch_prices_in_eur_per_litre() -> None:
     data = await provider.async_fetch(session, "NL")
 
     # EUR/1000L ÷ 1000 → EUR/litre; a typical price is around 1.5–3.0 EUR/L
-    assert data["e10"] == pytest.approx(2.0, rel=1e-4)
+    assert data["unleaded"] == pytest.approx(2.0, rel=1e-4)
     assert data["diesel"] == pytest.approx(1.8, rel=1e-4)
 
 
@@ -598,7 +598,7 @@ async def test_parse_bulletin_skips_row_with_none_country_cell() -> None:
     buf = io.BytesIO()
     wb.save(buf)
     data = await _parse_bulletin(buf.getvalue())
-    assert data.get("e10") is not None
+    assert data.get("unleaded") == pytest.approx(2.25594, rel=1e-4)
 
 
 @pytest.mark.asyncio

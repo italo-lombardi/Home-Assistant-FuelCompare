@@ -135,7 +135,6 @@ def _parse_station(station: dict[str, Any]) -> StationData:
         "is_open": bool(station.get("isOpen"))
         if station.get("isOpen") is not None
         else None,
-        "lastupdated": None,  # Tankerkoenig does not return per-station timestamps
         "source_station_id": str(station.get("id", "")),
     }
 
@@ -171,7 +170,6 @@ class DeTankerkoenigProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
-            "lastupdated",
         }
     )
 

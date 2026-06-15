@@ -466,8 +466,6 @@ class PlBenzynaProvider(BaseProvider):
             "county": "PL",
             # Timing
             "lastupdated": latest_date,
-            # Meta
-            "source_station_id": _NATIONAL_STATION_ID,
         }
 
         _LOGGER.debug(

@@ -567,7 +567,7 @@ async def test_async_fetch_lastupdated_field() -> None:
 
 
 async def test_async_fetch_source_station_id_populated() -> None:
-    """async_fetch stores station ID in source_station_id."""
+    """async_fetch does not set source_station_id (injected by coordinator)."""
     fuel_map = {
         "diesel": [{**_STATION_STRASSEN, "price": "1.753"}],
         "unleaded": [],
@@ -580,7 +580,7 @@ async def test_async_fetch_source_station_id_populated() -> None:
     provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["source_station_id"] == _STATION_ID
+    assert "source_station_id" not in data
 
 
 async def test_async_fetch_missing_fuel_is_none() -> None:

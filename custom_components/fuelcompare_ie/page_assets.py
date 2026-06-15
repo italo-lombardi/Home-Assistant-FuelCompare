@@ -45,7 +45,7 @@ _HEADERS: Final = {
 _BUILD_ID_RE: Final = re.compile(r'"buildId":"([^"]+)"')
 _STATION_CHUNK_RE: Final = re.compile(r'(/_next/static/chunks/pages/station/[^"]+\.js)')
 _ANY_CHUNK_FINDALL_RE: Final = re.compile(r'/_next/static/chunks/[^"]+\.js')
-_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,["\']([a-fA-F0-9]{64})["\']')
+_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\([^,]+,["\']([a-fA-F0-9]{64})["\']')
 
 
 class PageAssets:
@@ -144,11 +144,18 @@ class PageAssets:
             )
 
     async def _extract_key_broad(self, session: ClientSession, html: str) -> None:
-        """Iterate every chunk in the HTML until the AES key regex matches."""
+        """Iterate every chunk in the HTML until the AES key regex matches.
+
+        A 20-chunk ceiling caps the scan at ~200 s worst-case (20 × 10 s timeout).
+        Without this guard, 50–100 chunks × 10 s each could block the coordinator
+        for up to 500–1000 seconds on a slow/unreachable CDN.
+        """
+        _MAX_CHUNKS = 20
+
         station_chunks = _STATION_CHUNK_RE.findall(html)
         all_chunks = _ANY_CHUNK_FINDALL_RE.findall(html)
         # Try the station chunk first (legacy fast path), then the rest.
-        ordered = list(dict.fromkeys(station_chunks + all_chunks))
+        ordered = list(dict.fromkeys(station_chunks + all_chunks))[:_MAX_CHUNKS]
 
         if not ordered:
             _LOGGER.debug(

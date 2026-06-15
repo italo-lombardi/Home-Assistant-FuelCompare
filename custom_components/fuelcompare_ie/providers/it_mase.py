@@ -322,7 +322,6 @@ def _build_station_data(
         "latitude": lat if isinstance(lat, float) else None,
         "longitude": lon if isinstance(lon, float) else None,
         "lastupdated": last_updated,
-        "source_station_id": station_id,
     }
 
 

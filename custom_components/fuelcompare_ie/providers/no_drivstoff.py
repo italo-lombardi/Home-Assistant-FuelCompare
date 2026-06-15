@@ -675,7 +675,6 @@ def _parse_station(station: dict) -> StationData:
         # Station identity
         "name": name,
         "brand": brand,
-        "tablename": brand,
         "address": address,
         "county": city,
         "latitude": lat,

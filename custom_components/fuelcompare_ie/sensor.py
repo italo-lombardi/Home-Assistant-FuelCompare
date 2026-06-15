@@ -20,20 +20,14 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DAYS, DOMAIN
 from .coordinator import FuelCompareIECoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-_DAYS = (
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-)
+# Keep _DAYS as a module-level alias so that binary_sensor.py can still
+# import it from here without breaking existing references.
+_DAYS = DAYS
 
 # ── Price sensor registry ─────────────────────────────────────────────────────
 #
@@ -215,7 +209,10 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         if self.coordinator.data:
             value = self.coordinator.data.get(self._fuel_type)
             if value is not None:
-                return round(value, 3)
+                try:
+                    return round(float(value), 3)
+                except (ValueError, TypeError):
+                    return None
         return None
 
     @property

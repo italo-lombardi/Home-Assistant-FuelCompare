@@ -147,13 +147,9 @@ async def test_binary_sensor_today_hours_attribute() -> None:
     hours = {"Monday": "6a.m.-10p.m.", "Tuesday": "7a.m.-9p.m."}
     sensor = _make_binary_sensor({"working_hours": json.dumps(hours)})
 
-    with (
-        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
-        patch(
-            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
-            side_effect=lambda x: x,
-        ),
-    ):
+    with patch(
+        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
+    ) as mock_now:
         mock_now.return_value.weekday.return_value = 0
         attrs = sensor.extra_state_attributes
 
@@ -189,13 +185,9 @@ async def test_binary_sensor_today_not_in_hours() -> None:
     hours = {"Sunday": "10a.m.-6p.m."}
     sensor = _make_binary_sensor({"working_hours": json.dumps(hours)})
 
-    with (
-        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
-        patch(
-            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
-            side_effect=lambda x: x,
-        ),
-    ):
+    with patch(
+        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
+    ) as mock_now:
         mock_now.return_value.weekday.return_value = 0
         result = sensor.is_on
 
@@ -207,13 +199,9 @@ async def test_binary_sensor_is_on_from_dict_hours() -> None:
     hours = {"Monday": "6a.m.-10p.m."}
     sensor = _make_binary_sensor({"working_hours": hours})
 
-    with (
-        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
-        patch(
-            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
-            side_effect=lambda x: x,
-        ),
-    ):
+    with patch(
+        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
+    ) as mock_now:
         mock_now.return_value.weekday.return_value = 0
         mock_now.return_value.time.return_value = dt_time(9, 0)
         result = sensor.is_on
@@ -246,7 +234,15 @@ async def test_binary_sensor_extra_attributes_no_raw() -> None:
 
 async def test_is_open_available_with_data_after_failure() -> None:
     """is_open binary sensor stays available with last good working_hours after failure."""
-    hours = {"Monday": "6a.m.-10p.m."}
+    hours = {
+        "Monday": "6a.m.-10p.m.",
+        "Tuesday": "6a.m.-10p.m.",
+        "Wednesday": "6a.m.-10p.m.",
+        "Thursday": "6a.m.-10p.m.",
+        "Friday": "6a.m.-10p.m.",
+        "Saturday": "6a.m.-10p.m.",
+        "Sunday": "6a.m.-10p.m.",
+    }
     coord = MagicMock()
     coord.data = {"working_hours": json.dumps(hours)}
     coord.last_update_success = False
@@ -256,13 +252,9 @@ async def test_is_open_available_with_data_after_failure() -> None:
 
     # Stale retention: entities stay available and keep last value during coordinator outages
     assert sensor.available is True
-    with (
-        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
-        patch(
-            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
-            side_effect=lambda x: x,
-        ),
-    ):
+    with patch(
+        "custom_components.fuelcompare_ie.binary_sensor.dt_util.now"
+    ) as mock_now:
         mock_now.return_value.weekday.return_value = 0  # Monday
         mock_now.return_value.time.return_value = dt_time(9, 0)
         result = sensor.is_on

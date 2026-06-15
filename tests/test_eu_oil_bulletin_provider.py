@@ -588,8 +588,7 @@ async def test_async_fetch_sets_lastupdated_from_header() -> None:
     provider = _make_provider("DE")
     data = await provider.async_fetch(session, "DE")
 
-    assert data["lastupdated"] is not None
-    assert len(data["lastupdated"]) > 0
+    assert data["lastupdated"] == "Oil Bulletin 2026-06-08"
 
 
 # ---------------------------------------------------------------------------

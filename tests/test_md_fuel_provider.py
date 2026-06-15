@@ -357,11 +357,11 @@ async def test_async_fetch_prices_in_mdl_per_litre() -> None:
 
 
 async def test_async_fetch_source_station_id_is_md() -> None:
-    """async_fetch sets source_station_id to 'MD'."""
+    """async_fetch does not set source_station_id (injected by coordinator)."""
     session = _make_session()
     provider = MdFuelProvider()
     data = await provider.async_fetch(session, "MD")
-    assert data["source_station_id"] == "MD"
+    assert "source_station_id" not in data
 
 
 async def test_async_fetch_name_is_set() -> None:

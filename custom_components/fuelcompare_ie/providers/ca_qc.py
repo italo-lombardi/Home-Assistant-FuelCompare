@@ -206,7 +206,6 @@ def _build_station_data(feature: dict[str, Any], station_id: str) -> StationData
         "latitude": latitude,
         "longitude": longitude,
         "source_station_id": station_id,
-        "lastupdated": None,  # endpoint has no per-station timestamp
     }
 
 
@@ -258,7 +257,6 @@ class CaQcProvider(BaseProvider):
             "county",
             "latitude",
             "longitude",
-            "lastupdated",
         }
     )
 

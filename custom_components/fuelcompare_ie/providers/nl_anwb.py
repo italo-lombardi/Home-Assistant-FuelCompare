@@ -136,7 +136,7 @@ class NlAnwbProvider(BaseProvider):
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
-            "e10",  # Euro-super 95 / benzine (E10 blend) EUR/litre
+            "unleaded",  # Euro-super 95 / benzine (E10 blend) EUR/litre
             "diesel",  # Automotive diesel EUR/litre
             "lpg",  # Autogas / LPG EUR/litre
             "kerosene",  # Heating gas oil EUR/litre (closest StationData key)
@@ -182,7 +182,7 @@ class NlAnwbProvider(BaseProvider):
             station_id: Ignored; always fetches Netherlands national average.
 
         Returns:
-            StationData with e10, diesel, lpg, kerosene in EUR/litre.
+            StationData with unleaded, diesel, lpg, kerosene in EUR/litre.
 
         Raises:
             ProviderError: Netherlands row not found in the workbook, or the
@@ -302,7 +302,7 @@ async def _parse_bulletin(raw: bytes) -> StationData:
         raw: Raw bytes of the XLSX workbook.
 
     Returns:
-        StationData with e10, diesel, lpg, kerosene prices in EUR/litre.
+        StationData with unleaded, diesel, lpg, kerosene prices in EUR/litre.
 
     Raises:
         ProviderError: openpyxl is not installed, the workbook cannot be
@@ -380,7 +380,7 @@ async def _parse_bulletin(raw: bytes) -> StationData:
     heating = _extract_price(nl_row, _COL_HEATING)
 
     _LOGGER.debug(
-        "EU Oil Bulletin NL: e10=%.3f diesel=%.3f lpg=%s heating=%s date=%s",
+        "EU Oil Bulletin NL: unleaded=%.3f diesel=%.3f lpg=%s heating=%s date=%s",
         e10 if e10 is not None else 0.0,
         diesel if diesel is not None else 0.0,
         f"{lpg:.3f}" if lpg is not None else "None",
@@ -389,7 +389,7 @@ async def _parse_bulletin(raw: bytes) -> StationData:
     )
 
     data: StationData = {
-        "e10": e10,
+        "unleaded": e10,
         "diesel": diesel,
         "lpg": lpg,
         "kerosene": heating,

@@ -482,10 +482,10 @@ def test_parse_station_lastupdated_none_when_no_timestamps() -> None:
     assert result["lastupdated"] is None
 
 
-def test_parse_station_source_station_id_stored() -> None:
-    """_parse_station stores source_station_id from the station_id argument."""
+def test_parse_station_source_station_id_not_in_data() -> None:
+    """_parse_station does not set source_station_id (injected by coordinator)."""
     result = _parse_station(_STATION_ID, _RESULTADO)
-    assert result["source_station_id"] == _STATION_ID
+    assert "source_station_id" not in result
 
 
 def test_parse_station_ignores_unknown_fuel_types() -> None:

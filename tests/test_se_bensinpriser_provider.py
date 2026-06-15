@@ -380,11 +380,10 @@ def test_parse_station_website_none_when_link_absent() -> None:
     assert result["website"] is None
 
 
-def test_parse_station_source_station_id_is_string() -> None:
-    """_parse_station stores source_station_id as a string."""
+def test_parse_station_source_station_id_not_in_data() -> None:
+    """_parse_station does not set source_station_id (injected by coordinator)."""
     result = _parse_station(_BASE_STATION)
-    assert result["source_station_id"] == "13"
-    assert isinstance(result["source_station_id"], str)
+    assert "source_station_id" not in result
 
 
 def test_parse_station_lastupdated_is_none() -> None:

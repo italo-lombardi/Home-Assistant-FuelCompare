@@ -506,9 +506,12 @@ class FrCarburantsProvider(BaseProvider):
                         "Prix Carburants ZIP archive is empty — "
                         "cannot extract XML data."
                     )
-                if zf.getinfo(names[0]).file_size > 50_000_000:
+                xml_data = zf.read(names[0])
+                # Check the actual extracted size, not the central-directory metadata
+                # (which is server-controlled and could be manipulated by a malicious server).
+                if len(xml_data) > 50_000_000:
                     raise ProviderError("FR carburants XML response exceeds size limit")
-                return zf.read(names[0])
+                return xml_data
 
         try:
             xml_bytes: bytes = await asyncio.get_running_loop().run_in_executor(

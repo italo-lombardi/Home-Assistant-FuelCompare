@@ -251,7 +251,7 @@ class BaseProvider(ABC):
     * 'data_fetch_problem' (binary_sensor) — always created unconditionally
       by the coordinator; it is never gated by CAPABILITIES.
     * 'last_successful_fetch' (sensor) — IS gated by CAPABILITIES; list it
-      here only if your provider wants to expose it as an entity.
+      here if your provider wants to expose it as an entity.
 
     Keys 'source_station_id' and 'tablename' are also injected automatically
     by the coordinator as entity attributes and should not be listed here.
@@ -340,7 +340,6 @@ class BaseProvider(ABC):
                 "source_station_id",
                 "tablename",
                 "data_fetch_problem",
-                "last_successful_fetch",
             }
             forbidden = cls.CAPABILITIES & FORBIDDEN_CAPS
             if forbidden:

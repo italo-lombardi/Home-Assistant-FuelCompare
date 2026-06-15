@@ -1404,7 +1404,5 @@ async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
         await coordinator.async_refresh()
 
         assert coordinator.data == expected
-        assert coordinator.data["unleaded"] == pytest.approx(1.85)
-        assert coordinator.data["diesel"] == pytest.approx(1.75)
     finally:
         await coordinator.async_shutdown()

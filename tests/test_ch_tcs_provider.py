@@ -575,8 +575,8 @@ async def test_async_fetch_returns_diesel_price() -> None:
     session = _make_session_cycle(_PAYLOAD_SP95, _PAYLOAD_SP98, _PAYLOAD_DIESEL)
     p = _provider()
     data = await p.async_fetch(session, _STATION_ID)
-    # SP95 is in payload for first fuel batch, DIESEL in third
-    assert data["unleaded"] is not None or data["diesel"] is not None
+    # DIESEL payload carries price=1.699 for the target station
+    assert data["diesel"] == pytest.approx(1.699)
 
 
 async def test_async_fetch_returns_name() -> None:

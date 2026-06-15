@@ -185,7 +185,6 @@ class MdFuelProvider(BaseProvider):
             "diesel": motorina_price,  # Motorina in MDL/litre
             "name": "ANRE Moldova — National Reference Price",
             "lastupdated": None,  # ANRE does not expose a last-updated timestamp
-            "source_station_id": _NATIONAL_STATION_ID,
         }
 
     async def async_fetch_station_name(

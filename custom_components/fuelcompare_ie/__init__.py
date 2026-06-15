@@ -79,9 +79,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     county = entry.data.get(CONF_STATION_COUNTY)
     # API key is stored in entry.options (not entry.data) for security; fall back
     # to entry.data for entries created before this change was introduced.
-    # Use truthy check — empty string is treated as absent so we fall back to entry.data.
+    # Use is-not-None check — empty string ("") is a deliberate key clear and must NOT
+    # fall back to entry.data.  A truthy check would revert a cleared key to the old value.
     _api_key_options = entry.options.get(CONF_API_KEY)
-    api_key = _api_key_options if _api_key_options else entry.data.get(CONF_API_KEY)
+    api_key = (
+        _api_key_options
+        if _api_key_options is not None
+        else entry.data.get(CONF_API_KEY)
+    )
     latitude = entry.data.get(CONF_LATITUDE)
     longitude = entry.data.get(CONF_LONGITUDE)
     _radius_options = entry.options.get(CONF_RADIUS_KM)
@@ -111,7 +116,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if postal_code:
             kwargs["postal_code"] = postal_code
     # prefecture_id: for gr_fuelgov — station_id stores the prefecture numeric id.
-    if "prefecture_id" in sig.parameters and station_id:
+    if ("prefecture_id" in sig.parameters or has_var_kwargs) and station_id:
         try:
             kwargs["prefecture_id"] = int(station_id)
         except (ValueError, TypeError):

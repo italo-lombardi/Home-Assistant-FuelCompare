@@ -18,9 +18,9 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DAYS, DOMAIN
 from .coordinator import FuelCompareIECoordinator
-from .sensor import _DAYS, _device_info
+from .sensor import _device_info
 
 _LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
@@ -127,8 +127,8 @@ def _is_open_osm(hours_str: str) -> bool | None:
         rule = rule.strip()
         # Check if today is covered by this rule's day range
         day_part = rule.split()[0] if rule.split() else ""
-        # Handle explicit "closed" keyword (e.g. "Mo closed")
-        if "closed" in rule.lower():
+        # Handle explicit "closed" or "off" keyword (e.g. "Mo closed", "Sa-Su off")
+        if "closed" in rule.lower() or re.search(r"\boff\b", rule.lower()):
             if _day_matches(day_part, today_idx):
                 return False
             continue
@@ -297,7 +297,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(_DAYS[dt_util.now().weekday()])
+            return hours.get(DAYS[dt_util.now().weekday()])
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None

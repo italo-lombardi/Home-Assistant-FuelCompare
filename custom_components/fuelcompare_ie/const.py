@@ -21,3 +21,14 @@ DEFAULT_RADIUS_KM = 10.0
 # API
 BASE_URL = "https://fuelcompare.ie"
 API_TIMEOUT = 10
+
+# Day name tuple used by working_hours sensors (index matches datetime.weekday())
+DAYS = (
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+)

@@ -589,7 +589,6 @@ def test_build_station_data_all_keys_present() -> None:
         "latitude",
         "longitude",
         "lastupdated",
-        "source_station_id",
     }
     for key in required_keys:
         assert key in result, f"Key '{key}' missing from _build_station_data output"
@@ -799,7 +798,7 @@ def test_build_station_data_lastupdated_none_when_not_provided() -> None:
 
 
 def test_build_station_data_source_station_id() -> None:
-    """_build_station_data stores the source station ID."""
+    """_build_station_data does not set source_station_id (injected by coordinator)."""
     meta = {
         "bandiera": "ENI",
         "nome": "Test",
@@ -810,7 +809,7 @@ def test_build_station_data_source_station_id() -> None:
         "lon": 12.5,
     }
     result = _build_station_data("3464", meta, {}, None)
-    assert result["source_station_id"] == "3464"
+    assert "source_station_id" not in result
 
 
 # ---------------------------------------------------------------------------
@@ -1008,11 +1007,11 @@ async def test_async_fetch_lastupdated_iso_from_dtcomu() -> None:
 
 
 async def test_async_fetch_source_station_id() -> None:
-    """async_fetch sets source_station_id to the requested station ID."""
+    """async_fetch does not set source_station_id (injected by coordinator)."""
     session = _make_session_with_csvs()
     provider = ItMaseProvider("3464")
     data = await provider.async_fetch(session, "3464")
-    assert data["source_station_id"] == "3464"
+    assert "source_station_id" not in data
 
 
 async def test_async_fetch_prices_are_eur_per_litre() -> None:

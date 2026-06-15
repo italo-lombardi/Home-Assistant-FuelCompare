@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import ClassVar
 
-from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from aiohttp import ClientError, ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT, BASE_URL
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
@@ -236,24 +237,32 @@ class IEFuelCompareProvider(BaseProvider):
 
         try:
             sid = int(self._station_id)
-        except ValueError:
+        except ValueError as err:
             raise ProviderError(
-                f"Station ID {self._station_id!r} must be numeric for the encrypted API"
-            ) from None
+                f"Station ID {self._station_id!r} must be numeric"
+            ) from err
 
-        async with session.post(
-            url,
-            json={"id": sid},
-            timeout=_TIMEOUT,
-            headers={**_HEADERS, "Content-Type": "application/json"},
-        ) as response:
+        try:
+            async with session.post(
+                url,
+                json={"id": sid},
+                timeout=_TIMEOUT,
+                headers={**_HEADERS, "Content-Type": "application/json"},
+            ) as response:
+                _LOGGER.debug(
+                    "Encrypted API HTTP status for station %s: %s",
+                    self._station_id,
+                    response.status,
+                )
+                response.raise_for_status()
+                payload = await response.json()
+        except (ClientError, asyncio.TimeoutError) as err:
             _LOGGER.debug(
-                "Encrypted API HTTP status for station %s: %s",
+                "Network/HTTP error in _post_encrypted for station %s: %s",
                 self._station_id,
-                response.status,
+                err,
             )
-            response.raise_for_status()
-            payload = await response.json()
+            return None
 
         _LOGGER.debug(
             "Encrypted API raw payload for station %s: %s", self._station_id, payload
@@ -358,6 +367,8 @@ class IEFuelCompareProvider(BaseProvider):
         fuel_data["lastupdated"] = station.get("lastupdated")
         for field in ["name", "tablename", "working_hours", "county"]:
             fuel_data[field] = station.get(field)
+        # brand is declared in CAPABILITIES; populate from the tablename slug
+        fuel_data["brand"] = station.get("tablename")
 
         _LOGGER.debug(
             "Final parsed data for station %s: %s", self._station_id, fuel_data

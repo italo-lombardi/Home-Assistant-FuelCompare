@@ -172,13 +172,7 @@ async def test_working_hours_from_json_string() -> None:
     data = {"working_hours": json.dumps(hours)}
     sensor = _make_working_hours_sensor(data)
 
-    with (
-        patch("custom_components.fuelcompare_ie.sensor.dt_util.now") as mock_now,
-        patch(
-            "custom_components.fuelcompare_ie.sensor.dt_util.as_local",
-            side_effect=lambda x: x,
-        ),
-    ):
+    with patch("custom_components.fuelcompare_ie.sensor.dt_util.now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
         result = sensor.native_value
 
@@ -191,13 +185,7 @@ async def test_working_hours_from_dict() -> None:
     data = {"working_hours": hours}
     sensor = _make_working_hours_sensor(data)
 
-    with (
-        patch("custom_components.fuelcompare_ie.sensor.dt_util.now") as mock_now,
-        patch(
-            "custom_components.fuelcompare_ie.sensor.dt_util.as_local",
-            side_effect=lambda x: x,
-        ),
-    ):
+    with patch("custom_components.fuelcompare_ie.sensor.dt_util.now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
         result = sensor.native_value
 

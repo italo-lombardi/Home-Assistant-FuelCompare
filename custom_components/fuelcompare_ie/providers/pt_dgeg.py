@@ -367,5 +367,4 @@ def _parse_station(station_id: str, resultado: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "lastupdated": latest_update,
-        "source_station_id": station_id,
     }
