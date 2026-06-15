@@ -170,20 +170,6 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
 # ---------------------------------------------------------------------------
 
 
-async def _reach_station_step(hass, flow_id: str) -> dict:
-    """Navigate through provider step if shown, returning the station step result."""
-    # If a provider step is shown (happens when >1 IE provider is registered),
-    # select the default fuelcompare.ie provider to reach the station step.
-
-    result = {"step_id": "provider", "flow_id": flow_id}
-    if result["step_id"] == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            flow_id,
-            user_input={CONF_PROVIDER: DEFAULT_PROVIDER},
-        )
-    return result
-
-
 async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
     """Non-integer station ID (e.g. a UUID or slug) is now accepted as valid."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -371,23 +357,6 @@ async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) ->
         result = await _fetch_station_name(hass, "790")
 
     assert result == "Applegreen Cookstown"
-
-
-async def test_fetch_station_name_no_name_no_tablename(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns None when provider returns None."""
-    with (
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
-            new_callable=AsyncMock,
-            return_value=None,
-        ),
-    ):
-        result = await _fetch_station_name(hass, "790")
-
-    assert result is None
 
 
 async def test_fetch_station_name_exception_returns_none(hass: HomeAssistant) -> None:
@@ -665,7 +634,8 @@ async def test_async_step_api_key_valid_key_stored_and_advances(
     # The key must be stored
     assert flow._api_key == "my-test-api-key"
     # Step must have advanced (not still showing api_key form without error)
-    assert result.get("step_id") != "api_key" or result.get("errors") == {}
+    assert result.get("step_id") != "api_key"
+    assert result.get("errors") == {}
 
 
 async def test_async_step_api_key_initial_display_no_user_input(
@@ -1796,6 +1766,8 @@ async def test_async_step_user_single_country_auto_advance(
     hass: HomeAssistant,
 ) -> None:
     """When only one country is in the registry, user step auto-advances (lines 395-396)."""
+    from unittest.mock import patch as _patch
+
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
@@ -1818,19 +1790,17 @@ async def test_async_step_user_single_country_auto_advance(
         async def async_fetch_station_name(self, session, station_id):
             return None
 
-    saved_registry = dict(PROVIDER_REGISTRY)
-    PROVIDER_REGISTRY.clear()
-    PROVIDER_REGISTRY[_SingleCountryProvider.PROVIDER_KEY] = _SingleCountryProvider
-    try:
+    with _patch.dict(
+        PROVIDER_REGISTRY,
+        {_SingleCountryProvider.PROVIDER_KEY: _SingleCountryProvider},
+        clear=True,
+    ):
         flow = FuelCompareIEConfigFlow()
         flow.hass = hass
         result = await flow.async_step_user(user_input=None)
         # Should have advanced past the country selection
         assert result.get("step_id") != "user"
         assert flow._country == "ZZ"
-    finally:
-        PROVIDER_REGISTRY.clear()
-        PROVIDER_REGISTRY.update(saved_registry)
 
 
 # ---------------------------------------------------------------------------

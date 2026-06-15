@@ -374,9 +374,8 @@ class LtSauridaProvider(BaseProvider):
             # Station identity
             "name",
             "brand",
-            # Per-station source identifier and timestamp
+            # Per-station source identifier
             "source_station_id",
-            "lastupdated",
         }
     )
 
@@ -593,7 +592,6 @@ class LtSauridaProvider(BaseProvider):
             "premium_diesel": station.get("premium_diesel"),
             "name": name,
             "brand": "Saurida",
-            "lastupdated": None,  # saurida.lt does not expose per-price timestamps
             "source_station_id": station_id,
         }
 

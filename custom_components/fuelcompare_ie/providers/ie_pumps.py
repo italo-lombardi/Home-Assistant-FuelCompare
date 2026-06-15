@@ -107,6 +107,11 @@ def _get_ssl_context() -> ssl.SSLContext:
         _SSL_UNVERIFIED = ssl.create_default_context()
         _SSL_UNVERIFIED.check_hostname = False
         _SSL_UNVERIFIED.verify_mode = ssl.CERT_NONE
+        _LOGGER.warning(
+            "pumps.ie TLS certificate verification is disabled — the provider's "
+            "SSL certificate is currently invalid. This is a known issue. "
+            "Data is still encrypted in transit."
+        )
     return _SSL_UNVERIFIED
 
 
@@ -189,10 +194,6 @@ class IePumpsProvider(BaseProvider):
         """
         self._station_id = station_id
         _get_ssl_context()
-        _LOGGER.warning(
-            "ie_pumps: TLS certificate verification is disabled — cert renewal pending. "
-            "See https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues"
-        )
 
     # ── Public interface ──────────────────────────────────────────────────────
 

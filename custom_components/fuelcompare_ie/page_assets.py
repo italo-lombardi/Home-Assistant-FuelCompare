@@ -146,6 +146,10 @@ class PageAssets:
             return
 
         for chunk_path in ordered:
+            if ".." in chunk_path or not re.match(
+                r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
+            ):
+                continue
             chunk_url = BASE_URL + chunk_path
             _LOGGER.debug(
                 "Scanning JS chunk for decrypt key (station %s): %s",

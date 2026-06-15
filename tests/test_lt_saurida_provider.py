@@ -191,7 +191,7 @@ def test_provider_capabilities_include_name_and_brand() -> None:
     assert "brand" in caps
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = LtSauridaProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps
@@ -524,14 +524,14 @@ async def test_async_fetch_source_station_id_populated() -> None:
 
 
 async def test_async_fetch_lastupdated_is_none() -> None:
-    """async_fetch returns lastupdated=None (saurida.lt has no timestamps)."""
+    """async_fetch does not include lastupdated (saurida.lt has no timestamps)."""
     resp = _make_mock_response(200, text_data=_VALID_HTML)
     session = _make_session(resp)
 
     provider = _make_provider(station_id=_STATION_NAME_1)
     data = await provider.async_fetch(session, _STATION_NAME_1)
 
-    assert data["lastupdated"] is None
+    assert "lastupdated" not in data
 
 
 # ---------------------------------------------------------------------------

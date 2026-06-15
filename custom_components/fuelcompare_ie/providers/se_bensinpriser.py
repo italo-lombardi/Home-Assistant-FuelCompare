@@ -145,7 +145,6 @@ def _parse_station(station: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "website": website,
-        "lastupdated": None,  # Bensinpriser.nu does not return per-price timestamps
         "source_station_id": str(station.get("id", "")),
     }
 
@@ -189,8 +188,6 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            "source_station_id",
-            "lastupdated",
         }
     )
 

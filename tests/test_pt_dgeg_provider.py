@@ -204,7 +204,7 @@ def test_provider_capabilities_include_timing_fields() -> None:
     assert "lastupdated" in caps
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = PtDgegProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps

@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Datenquelle auswählen",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Datenquelle"
         }
@@ -60,7 +61,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Ungültige Stations-ID. Bitte geben Sie eine gültige positive Zahl ein.",
+      "invalid_station_id": "Die Stations-ID darf nicht leer sein.",
       "invalid_api_key": "Der API-Schlüssel darf nicht leer sein.",
       "invalid_location": "Ungültige Koordinaten. Bitte geben Sie gültige Breiten- und Längengradwerte ein.",
       "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk."
@@ -68,6 +69,12 @@
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",
       "no_providers_for_country": "Für dieses Land sind keine Datenanbieter verfügbar."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie wird eingestellt",
+      "description": "Die Website fuelcompare.ie wird am **30. Juni 2026** abgeschaltet. Ihre Station **{entry_title}** wird nach diesem Datum keine Preisaktualisierungen mehr erhalten. Erwägen Sie, zu einer anderen irischen Kraftstoffpreisquelle zu wechseln, z. B. FuelFinder IE oder IE Pumps."
     }
   },
   "entity": {

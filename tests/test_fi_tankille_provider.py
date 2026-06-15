@@ -207,11 +207,11 @@ def test_provider_does_not_require_api_key() -> None:
     assert FiTankilleProvider.REQUIRES_API_KEY is False
 
 
-def test_provider_capabilities_include_unleaded_and_e10() -> None:
-    """CAPABILITIES includes unleaded and e10."""
+def test_provider_capabilities_include_e10() -> None:
+    """CAPABILITIES includes e10 (accurate name for Finnish 95 E10)."""
     caps = FiTankilleProvider.CAPABILITIES
-    assert "unleaded" in caps
     assert "e10" in caps
+    assert "unleaded" not in caps
 
 
 def test_provider_capabilities_include_diesel() -> None:
@@ -416,26 +416,26 @@ async def test_async_fetch_returns_station_data() -> None:
     assert isinstance(data, dict)
 
 
-async def test_async_fetch_unleaded_price() -> None:
-    """async_fetch maps 95E10 (code A) to unleaded."""
+async def test_async_fetch_e10_price() -> None:
+    """async_fetch maps 95E10 (code A) to e10."""
     resp = _make_mock_post_response(200, json_data=_JSONSTAT2_RESPONSE)
     session = _make_session(resp)
 
     provider = _make_provider()
     data = await provider.async_fetch(session, _NATIONAL_STATION_ID)
 
-    assert data["unleaded"] == pytest.approx(1.712)
+    assert data["e10"] == pytest.approx(1.712)
 
 
-async def test_async_fetch_e10_equals_unleaded() -> None:
-    """async_fetch stores the same 95E10 price under both 'unleaded' and 'e10'."""
+async def test_async_fetch_e10_not_stored_as_unleaded() -> None:
+    """async_fetch stores 95E10 only under 'e10', not under 'unleaded'."""
     resp = _make_mock_post_response(200, json_data=_JSONSTAT2_RESPONSE)
     session = _make_session(resp)
 
     provider = _make_provider()
     data = await provider.async_fetch(session, _NATIONAL_STATION_ID)
 
-    assert data["e10"] == data["unleaded"]
+    assert "unleaded" not in data
 
 
 async def test_async_fetch_diesel_price() -> None:

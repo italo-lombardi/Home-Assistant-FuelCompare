@@ -123,10 +123,11 @@ def test_provider_metadata() -> None:
 
 
 def test_provider_capabilities_include_fuel_types() -> None:
-    """CAPABILITIES includes all four FuelFinder fuel types."""
+    """CAPABILITIES includes unleaded (mapped from petrol), kerosene, cng, diesel."""
     caps = IEFuelFinderProvider.CAPABILITIES
     assert "diesel" in caps
-    assert "petrol" in caps
+    assert "unleaded" in caps
+    assert "petrol" not in caps  # petrol is a passthrough key, not a CAPABILITIES key
     assert "kerosene" in caps
     assert "cng" in caps
 

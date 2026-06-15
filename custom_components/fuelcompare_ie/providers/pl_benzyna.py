@@ -173,7 +173,7 @@ class PlBenzynaProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
-    CURRENCY: ClassVar[str] = "zl"
+    CURRENCY: ClassVar[str] = "zł"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

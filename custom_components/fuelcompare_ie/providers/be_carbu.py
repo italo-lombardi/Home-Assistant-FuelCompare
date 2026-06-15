@@ -867,7 +867,6 @@ class BeCarbuProvider(BaseProvider):
             "cng": prices.get("cng"),
             "name": name,
             "brand": brand,
-            "tablename": brand,
             "address": address,
             "latitude": lat,
             "longitude": lng,

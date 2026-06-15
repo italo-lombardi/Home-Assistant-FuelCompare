@@ -93,7 +93,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             not postal_code
             and county
             and str(county).isdigit()
-            and CONF_POSTAL_CODE not in entry.data
+            and CONF_POSTAL_CODE
+            not in entry.data  # county key holds a numeric postal code (old entries pre-CONF_POSTAL_CODE); don't double-treat it
         ):
             postal_code = county
         if postal_code:
@@ -103,7 +104,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         try:
             kwargs["prefecture_id"] = int(station_id)
         except (ValueError, TypeError):
-            pass
+            _LOGGER.warning(
+                "Could not parse prefecture_id from station_id %r for provider %r",
+                station_id,
+                provider_key,
+            )
     if api_key and "api_key" in sig.parameters:
         kwargs["api_key"] = api_key
     if latitude is not None and "latitude" in sig.parameters:

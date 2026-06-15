@@ -12,7 +12,6 @@
   "issue_tracker": "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues",
   "quality_scale": "custom",
   "requirements": [
-    "beautifulsoup4>=4.12",
     "cryptography>=41.0.0",
     "openpyxl>=3.1.0"
   ],

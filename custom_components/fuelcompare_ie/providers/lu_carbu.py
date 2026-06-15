@@ -267,9 +267,10 @@ class LuCarbuProvider(BaseProvider):
         # Use stored lat/lng if available; otherwise fall back to Luxembourg centre
         search_lat = self._latitude if self._latitude is not None else _LU_CENTRE_LAT
         search_lng = self._longitude if self._longitude is not None else _LU_CENTRE_LNG
-        # Use the user-configured radius; default to the national radius if unset.
+        # When using the national-centre fallback, widen the radius so edge
+        # stations across the ~20 km diagonal of Luxembourg are found.
         search_radius = (
-            self._radius_km if self._radius_km is not None else _NATIONAL_RADIUS_KM
+            _NATIONAL_RADIUS_KM if self._latitude is None else self._radius_km
         )
 
         tasks = [

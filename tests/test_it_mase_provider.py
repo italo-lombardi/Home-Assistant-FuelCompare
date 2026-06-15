@@ -161,7 +161,7 @@ def test_provider_capabilities_include_station_fields() -> None:
     assert "lastupdated" in caps
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = ItMaseProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps

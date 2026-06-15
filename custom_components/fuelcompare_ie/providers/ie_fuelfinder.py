@@ -154,7 +154,6 @@ class IEFuelFinderProvider(BaseProvider):
         {
             # Fuel prices
             "diesel",
-            "petrol",
             "kerosene",
             "cng",
             "unleaded",  # alias: petrol stored here for fuelcompare.ie sensor compat
@@ -169,7 +168,6 @@ class IEFuelFinderProvider(BaseProvider):
             "website",
             # Timing
             "lastupdated",
-            "working_hours",
             "opening_hours",
             # FuelFinder-specific
             "price_confidence",
@@ -571,12 +569,8 @@ class IEFuelFinderProvider(BaseProvider):
 
         # ── Opening hours ─────────────────────────────────────────────────
 
-        # Store the raw OSM opening_hours string in the working_hours key.
-        # The existing StationWorkingHoursSensor will attempt json.loads()
-        # on it; that will fail silently (logs a debug message and returns
-        # None as state) which is correct — the sensor stays available but
-        # shows None until a FuelFinder-specific opening-hours sensor is
-        # added in a future release.
+        # Store the raw OSM opening_hours string under the opening_hours key.
+        # The binary_sensor platform reads opening_hours for the is_open sensor.
         opening_hours: str | None = meta.get("opening_hours") or None
 
         # ── Assemble dict ─────────────────────────────────────────────────
@@ -591,7 +585,6 @@ class IEFuelFinderProvider(BaseProvider):
             # Station identity
             "name": name,
             "brand": brand,
-            "tablename": brand,  # StationBrandSensor reads tablename
             "address": street,
             "county": county,
             "latitude": lat,
@@ -600,8 +593,7 @@ class IEFuelFinderProvider(BaseProvider):
             "website": website,
             # Timing
             "lastupdated": updated_at,
-            "working_hours": opening_hours,  # OSM string stored here for compat
-            "opening_hours": opening_hours,  # also stored under opening_hours key
+            "opening_hours": opening_hours,
             # Passthrough
             "source_station_id": station_id,
         }

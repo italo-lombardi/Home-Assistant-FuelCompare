@@ -142,7 +142,7 @@ class AuNswProvider(BaseProvider):
     )
     CURRENCY: ClassVar[str] = "A$"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "e10",
             "unleaded",

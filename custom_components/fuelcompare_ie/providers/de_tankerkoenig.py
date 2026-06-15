@@ -169,6 +169,7 @@ class DeTankerkoenigProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
+            "lastupdated",
         }
     )
 

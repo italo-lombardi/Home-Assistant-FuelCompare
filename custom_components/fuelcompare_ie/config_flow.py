@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import logging
 from typing import Any
 
@@ -353,8 +352,7 @@ async def _fetch_station_name(
         return None
     try:
         session = async_get_clientsession(hass)
-        sig = inspect.signature(provider_cls.__init__)
-        if api_key and "api_key" in sig.parameters:
+        if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
             provider = provider_cls(station_id, api_key=api_key)
         else:
             provider = provider_cls(station_id)
@@ -404,6 +402,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             self._country = user_input[CONF_COUNTRY]
             return await self._async_step_provider()
 
+        if not countries:
+            return self.async_abort(reason="no_providers_for_country")
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -440,10 +441,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
-        if (
-            getattr(provider_cls, "CONFIG_MODE", None) == "location"
-            or getattr(provider_cls, "STATION_LOOKUP_MODE", None) == "location_search"
-        ):
+        if getattr(provider_cls, "STATION_LOOKUP_MODE", None) == "location_search":
             return await self.async_step_location()
         return await self.async_step_station()
 
@@ -553,6 +551,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # Build county list from the country. For IE use the 26 counties + all-Ireland.
         county_options = _counties_for_country(self._country)
+        if not county_options:
+            return self.async_abort(reason="no_counties_for_country")
         return self.async_show_form(
             step_id="county",
             data_schema=vol.Schema(
@@ -692,7 +692,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if needs_postal:
                 self._postal_code = str(user_input.get(CONF_POSTAL_CODE) or "").strip()
             self._station_id = ""
-            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
+            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}_{self._radius_km}"
             await self.async_set_unique_id(unique)
             self._abort_if_unique_id_configured()
             self._suggested_name = (

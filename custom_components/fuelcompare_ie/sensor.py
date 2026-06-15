@@ -238,7 +238,8 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
         if self.coordinator.data:
             if self.coordinator.data.get("lastupdated") is not None:
                 parsed = _parse_lastupdated(self.coordinator.data.get("lastupdated"))
-                attrs["price_last_updated"] = parsed.isoformat() if parsed else None
+                if parsed is not None:
+                    attrs["price_last_updated"] = parsed.isoformat()
         return attrs
 
 

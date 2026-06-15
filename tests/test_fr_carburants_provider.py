@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import time
 import zipfile
 import xml.etree.ElementTree as ET
 from unittest.mock import AsyncMock, MagicMock
@@ -1767,8 +1768,8 @@ async def test_fetch_and_parse_xml_returns_cached_element_on_cache_hit() -> None
     """_fetch_and_parse_xml returns cached element and skips HTTP when cache is fresh."""
     cached_root = ET.fromstring("<pdv_liste/>")
     FrCarburantsProvider._xml_cache = cached_root
-    # A far-future timestamp means (now - ts) is negative, always less than TTL.
-    FrCarburantsProvider._xml_cache_ts = 1e18
+    # Set timestamp to now so (now - ts) ≈ 0 — always less than TTL.
+    FrCarburantsProvider._xml_cache_ts = time.monotonic()
 
     session = MagicMock()
     provider = FrCarburantsProvider(_STATION_ID)

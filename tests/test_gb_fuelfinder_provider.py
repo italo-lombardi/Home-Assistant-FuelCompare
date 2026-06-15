@@ -82,6 +82,7 @@ def _reset_csv_cache() -> None:
     """
     GbFuelfinderProvider._csv_cache = None
     GbFuelfinderProvider._csv_cache_ts = 0.0
+    GbFuelfinderProvider._csv_etag = None
 
 
 def _make_csv_text(*rows: dict[str, str]) -> str:
@@ -1205,7 +1206,7 @@ async def test_async_list_stations_returns_empty_on_garbled_body() -> None:
         session, lat=51.5074, lng=-0.1278, radius_km=10.0
     )
     # Should not crash; garbled body produces no parseable rows within radius
-    assert isinstance(result, list)
+    assert result == []
 
 
 async def test_async_list_stations_returns_empty_on_completely_empty_body() -> None:
@@ -1216,7 +1217,7 @@ async def test_async_list_stations_returns_empty_on_completely_empty_body() -> N
     result = await provider.async_list_stations(
         session, lat=51.5074, lng=-0.1278, radius_km=10.0
     )
-    assert isinstance(result, list)
+    assert result == []
 
 
 async def test_async_list_stations_returns_empty_when_lat_lng_none() -> None:

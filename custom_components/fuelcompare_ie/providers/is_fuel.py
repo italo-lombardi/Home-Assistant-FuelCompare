@@ -157,9 +157,6 @@ def _parse_station(station: dict[str, Any]) -> StationData:
         "tablename": company,
         "latitude": latitude,
         "longitude": longitude,
-        # Timing — Gasvaktin does not provide per-station timestamps in the
-        # min.json snapshot; the file itself is updated every 15 minutes.
-        "lastupdated": None,
         # Passthrough
         "source_station_id": station.get("key") or "",
     }
@@ -235,8 +232,6 @@ class IsFuelProvider(BaseProvider):
             "brand",
             "latitude",
             "longitude",
-            # Timing
-            "lastupdated",
         }
     )
 

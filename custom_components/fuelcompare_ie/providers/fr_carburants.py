@@ -256,7 +256,7 @@ class FrCarburantsProvider(BaseProvider):
     _xml_cache: ClassVar[ET.Element | None] = None
     _xml_cache_ts: ClassVar[float] = 0
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "diesel",
             "unleaded",
@@ -271,7 +271,6 @@ class FrCarburantsProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
-            "source_station_id",
         }
     )
 

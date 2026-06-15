@@ -161,7 +161,7 @@ class GbFuelfinderProvider(BaseProvider):
     )
     _CSV_CACHE_TTL: ClassVar[int] = 21600
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",

@@ -453,6 +453,18 @@ def test_is_open_legacy_24_hours() -> None:
     assert _is_open("Open 24 hours") is True
 
 
+def test_is_open_osm_day_closed_keyword_on_matching_day() -> None:
+    """'Mo closed; Tu-Su 08:00-18:00' returns False on Monday (I-01)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
+    import homeassistant.util.dt as _dt
+
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0  # Monday
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open("Mo closed; Tu-Su 08:00-18:00")
+    assert result is False
+
+
 # ---------------------------------------------------------------------------
 # _is_open_osm — OSM parser robustness (lines 127-128, 132-133, 143)
 # ---------------------------------------------------------------------------

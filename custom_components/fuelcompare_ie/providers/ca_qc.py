@@ -258,6 +258,7 @@ class CaQcProvider(BaseProvider):
             "county",
             "latitude",
             "longitude",
+            "lastupdated",
         }
     )
 

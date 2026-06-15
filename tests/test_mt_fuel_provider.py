@@ -290,7 +290,6 @@ def test_make_absolute_relative_path() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_returns_petrol_price() -> None:
     """_parse_malta_row extracts petrol_95 from the Malta row."""
     xlsx = _malta_xlsx(petrol=1340.0)
@@ -299,7 +298,6 @@ async def test_parse_malta_row_returns_petrol_price() -> None:
     assert result["petrol_95"] == pytest.approx(1.340)
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_returns_diesel_price() -> None:
     """_parse_malta_row extracts diesel from the Malta row."""
     xlsx = _malta_xlsx(diesel=1210.0)
@@ -308,7 +306,6 @@ async def test_parse_malta_row_returns_diesel_price() -> None:
     assert result["diesel"] == pytest.approx(1.210)
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_returns_lpg_price() -> None:
     """_parse_malta_row extracts lpg from the Malta row."""
     xlsx = _malta_xlsx(lpg=1000.0)
@@ -317,7 +314,6 @@ async def test_parse_malta_row_returns_lpg_price() -> None:
     assert result["lpg"] == pytest.approx(1.000)
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_returns_heating_oil_price() -> None:
     """_parse_malta_row extracts heating_oil from the Malta row."""
     xlsx = _malta_xlsx(heating_oil=980.0)
@@ -326,7 +322,6 @@ async def test_parse_malta_row_returns_heating_oil_price() -> None:
     assert result["heating_oil"] == pytest.approx(0.980)
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_returns_none_when_malta_absent() -> None:
     """_parse_malta_row returns None when no Malta row is found."""
     rows = [
@@ -339,7 +334,6 @@ async def test_parse_malta_row_returns_none_when_malta_absent() -> None:
     assert result is None
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_matches_malta_with_asterisk() -> None:
     """_parse_malta_row matches 'Malta *' (footnote variant) as the Malta row."""
     rows = [
@@ -352,7 +346,6 @@ async def test_parse_malta_row_matches_malta_with_asterisk() -> None:
     assert result["petrol_95"] == pytest.approx(1.340)
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_handles_none_price_cells() -> None:
     """_parse_malta_row returns None prices when cells are empty."""
     rows = [
@@ -654,7 +647,6 @@ def test_provider_registered_in_registry() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_async_fetch_raises_provider_error_on_parse_exception() -> None:
     """async_fetch wraps XLSX parse exceptions in ProviderError (lines 218-219)."""
     provider = MtFuelProvider()
@@ -667,7 +659,6 @@ async def test_async_fetch_raises_provider_error_on_parse_exception() -> None:
         await provider.async_fetch(session, "MT")
 
 
-@pytest.mark.asyncio
 async def test_scrape_xlsx_url_returns_none_on_network_error() -> None:
     """_scrape_xlsx_url returns None when session.get raises (lines 354-356)."""
     provider = MtFuelProvider()
@@ -678,7 +669,6 @@ async def test_scrape_xlsx_url_returns_none_on_network_error() -> None:
     assert result is None
 
 
-@pytest.mark.asyncio
 async def test_scrape_xlsx_url_fallback_download_href_xlsx_in_href() -> None:
     """_scrape_xlsx_url uses fallback pattern when href contains 'xlsx' (lines 365-368)."""
     provider = MtFuelProvider()
@@ -694,7 +684,6 @@ async def test_scrape_xlsx_url_fallback_download_href_xlsx_in_href() -> None:
     assert "abcdef01" in result
 
 
-@pytest.mark.asyncio
 async def test_scrape_xlsx_url_fallback_download_href_weekly_in_href() -> None:
     """_scrape_xlsx_url uses fallback pattern when href contains 'Weekly' (lines 365-368)."""
     provider = MtFuelProvider()
@@ -710,7 +699,6 @@ async def test_scrape_xlsx_url_fallback_download_href_weekly_in_href() -> None:
     assert "bbbbbbbb" in result
 
 
-@pytest.mark.asyncio
 async def test_download_xlsx_returns_none_on_client_response_error() -> None:
     """_download_xlsx returns None on ClientResponseError (lines 404-406)."""
     provider = MtFuelProvider()
@@ -726,7 +714,6 @@ async def test_download_xlsx_returns_none_on_client_response_error() -> None:
     assert result is None
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_raises_import_error_when_openpyxl_missing() -> None:
     """_parse_malta_row logs warning and re-raises ImportError when openpyxl absent (lines 495-500)."""
     with patch.dict(sys.modules, {"openpyxl": None}):
@@ -734,7 +721,6 @@ async def test_parse_malta_row_raises_import_error_when_openpyxl_missing() -> No
             await _parse_malta_row(b"irrelevant")
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_skips_empty_rows() -> None:
     """_parse_malta_row skips rows where 'not row' is True (line 518)."""
     openpyxl = pytest.importorskip("openpyxl")
@@ -752,7 +738,6 @@ async def test_parse_malta_row_skips_empty_rows() -> None:
     assert result["petrol_95"] == pytest.approx(1.340)
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_skips_rows_with_none_country_cell() -> None:
     """_parse_malta_row skips rows where country_cell is None (line 521)."""
     rows = [
@@ -765,7 +750,6 @@ async def test_parse_malta_row_skips_rows_with_none_country_cell() -> None:
     assert result["petrol_95"] == pytest.approx(1.340)
 
 
-@pytest.mark.asyncio
 async def test_scrape_xlsx_url_returns_none_when_no_matching_link() -> None:
     """_scrape_xlsx_url returns None and logs debug when download link exists
     but matches neither xlsx nor Weekly criteria (lines 370-371)."""
@@ -787,7 +771,6 @@ async def test_scrape_xlsx_url_returns_none_when_no_matching_link() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_parse_malta_row_skips_empty_row_and_none_country_cell() -> None:
     """_parse_malta_row skips empty rows (line 517-518) and None country cell (line 520-521)."""
     from unittest.mock import MagicMock, patch
