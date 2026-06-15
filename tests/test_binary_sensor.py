@@ -256,7 +256,17 @@ async def test_is_open_available_with_data_after_failure() -> None:
 
     # Stale retention: entities stay available and keep last value during coordinator outages
     assert sensor.available is True
-    assert sensor.is_on is not None  # retains last known open/closed state
+    with (
+        patch("custom_components.fuelcompare_ie.binary_sensor.dt_util.now") as mock_now,
+        patch(
+            "custom_components.fuelcompare_ie.binary_sensor.dt_util.as_local",
+            side_effect=lambda x: x,
+        ),
+    ):
+        mock_now.return_value.weekday.return_value = 0  # Monday
+        mock_now.return_value.time.return_value = dt_time(9, 0)
+        result = sensor.is_on
+    assert result is not None  # retains last known open/closed state
 
 
 async def test_is_open_unavailable_when_no_data() -> None:
@@ -451,6 +461,18 @@ def test_is_open_legacy_24_hours() -> None:
     from custom_components.fuelcompare_ie.binary_sensor import _is_open
 
     assert _is_open("Open 24 hours") is True
+
+
+def test_is_open_osm_day_closed_keyword_on_matching_day() -> None:
+    """'Mo closed; Tu-Su 08:00-18:00' returns False on Monday (I-01)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
+    import homeassistant.util.dt as _dt
+
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0  # Monday
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open("Mo closed; Tu-Su 08:00-18:00")
+    assert result is False
 
 
 # ---------------------------------------------------------------------------

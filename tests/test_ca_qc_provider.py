@@ -207,8 +207,8 @@ def test_capabilities_include_longitude() -> None:
     assert "longitude" in CaQcProvider.CAPABILITIES
 
 
-def test_capabilities_include_coordinator_sentinels() -> None:
-    """CAPABILITIES includes coordinator sentinel keys."""
+def test_capabilities_exclude_coordinator_sentinels() -> None:
+    """CAPABILITIES excludes coordinator sentinel keys."""
     assert "last_successful_fetch" not in CaQcProvider.CAPABILITIES
     assert "data_fetch_problem" not in CaQcProvider.CAPABILITIES
 
@@ -750,7 +750,7 @@ async def test_async_list_stations_label_contains_station_name() -> None:
 
 
 async def test_async_list_stations_label_contains_price() -> None:
-    """Each label includes at least one fuel price."""
+    """Each label includes the short station ID in (#...) format."""
     geojson = {"type": "FeatureCollection", "features": [_BASE_FEATURE]}
     resp = _make_mock_response(200, json_data=geojson)
     session = _make_session(resp)
@@ -761,8 +761,8 @@ async def test_async_list_stations_label_contains_price() -> None:
     )
 
     _, label = result[0]
-    # Should contain a price indicator
-    assert "$" in label or "¢" in label or "1." in label
+    # Should contain the short station ID marker
+    assert "(#" in label
 
 
 async def test_async_list_stations_filters_by_radius() -> None:
@@ -849,7 +849,7 @@ async def test_async_list_stations_uses_constructor_coordinates_as_fallback() ->
 
 
 async def test_async_list_stations_sorted_by_distance() -> None:
-    """async_list_stations sorts results by distance (nearest first)."""
+    """async_list_stations sorts results alphabetically by label."""
     # Two stations, both near Montréal but at different distances
     near_feature = {
         **_BASE_FEATURE,
@@ -884,8 +884,9 @@ async def test_async_list_stations_sorted_by_distance() -> None:
 
     assert len(result) == 2
     first_sid, _ = result[0]
-    near_id = _make_station_id("Near Station", "1 Rue Near, Montréal")
-    assert first_sid == near_id, "Nearest station should be listed first"
+    far_id = _make_station_id("Far Station", "2 Rue Far, Montréal")
+    # Alphabetical: "Far Station" < "Near Station"
+    assert first_sid == far_id, "Alphabetically first station should be listed first"
 
 
 async def test_async_list_stations_multiple_stations_all_returned() -> None:
@@ -915,7 +916,7 @@ async def test_async_list_stations_multiple_stations_all_returned() -> None:
 
 
 async def test_async_list_stations_station_with_no_prices_included() -> None:
-    """Stations with no available prices still appear in list (sorted to end)."""
+    """Stations with no available prices still appear in list, sorted alphabetically."""
     no_price_feature = {
         **_BASE_FEATURE,
         "properties": {
@@ -941,9 +942,9 @@ async def test_async_list_stations_station_with_no_prices_included() -> None:
 
     # Both stations are within radius and should appear
     assert len(result) == 2
-    # No-price station should come after the priced station
-    last_sid, _ = result[-1]
-    assert last_sid == _make_station_id("Closed Pump", "999 Rue Fermée, Montréal")
+    # Alphabetical: "Closed Pump" < "Petro-Canada Centre-Ville" → no-price station is first
+    first_sid, _ = result[0]
+    assert first_sid == _make_station_id("Closed Pump", "999 Rue Fermée, Montréal")
 
 
 async def test_async_list_stations_skips_features_with_missing_coords() -> None:
@@ -1089,7 +1090,7 @@ async def test_async_list_stations_skips_features_with_non_numeric_coords() -> N
 
 
 async def test_async_list_stations_skips_unknown_gas_type_in_price_summary() -> None:
-    """Unmapped GasType entries are skipped when building the price summary label."""
+    """Unmapped GasType entries are skipped; label still contains short station ID."""
     feature_with_unknown = {
         **_BASE_FEATURE,
         "properties": {
@@ -1114,8 +1115,8 @@ async def test_async_list_stations_skips_unknown_gas_type_in_price_summary() -> 
 
     assert len(result) == 1
     _, label = result[0]
-    # Régulier is mapped → price must appear; E85 is unmapped → silently skipped
-    assert "Reg" in label
+    # Label contains short station ID marker; no price in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------
@@ -1124,7 +1125,7 @@ async def test_async_list_stations_skips_unknown_gas_type_in_price_summary() -> 
 
 
 async def test_async_list_stations_skips_unparseable_price_in_summary() -> None:
-    """Price entries where _parse_price returns None are skipped in the summary."""
+    """Price entries where _parse_price returns None are skipped; label still has short ID."""
     feature_bad_price = {
         **_BASE_FEATURE,
         "properties": {
@@ -1149,9 +1150,8 @@ async def test_async_list_stations_skips_unparseable_price_in_summary() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    # Diesel price appears; Régulier (None price) is absent from label
-    assert "Diesel" in label
-    assert "Reg" not in label
+    # Label contains short station ID marker; no price strings in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------

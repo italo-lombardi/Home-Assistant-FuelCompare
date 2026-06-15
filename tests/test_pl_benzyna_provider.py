@@ -175,7 +175,7 @@ def test_provider_capabilities_include_e85() -> None:
     assert "e85" in PlBenzynaProvider.CAPABILITIES
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = PlBenzynaProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps

@@ -192,7 +192,6 @@ class ChTcsProvider(BaseProvider):
             "latitude",
             "longitude",
             "price_confidence",
-            "lastupdated",
         }
     )
 
@@ -296,7 +295,7 @@ class ChTcsProvider(BaseProvider):
         """Return (station_id, display_label) pairs for stations near the user.
 
         Filters stations within radius_km of the supplied coordinates and
-        returns them sorted cheapest-SP95-first (stations with no price last).
+        returns them sorted alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -331,7 +330,7 @@ class ChTcsProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
 
         for sid, raw in merged.items():
             meta = raw.get("_meta", {})
@@ -350,34 +349,15 @@ class ChTcsProvider(BaseProvider):
 
             name = meta.get("displayName") or meta.get("brand") or f"Station {sid}"
             address = meta.get("formattedAddress") or ""
-            label_name = f"{name} — {address}" if address else name
-
-            prices = raw.get("prices", {})
-            unleaded = prices.get("unleaded")
-            diesel = prices.get("diesel")
-
-            price_parts: list[str] = []
-            if unleaded is not None:
-                price_parts.append(f"SP95 CHF{unleaded:.3f}")
-            if diesel is not None:
-                price_parts.append(f"Diesel CHF{diesel:.3f}")
-
-            if price_parts:
-                label = f"{label_name} — {' / '.join(price_parts)}"
-                # Sort by SP95 price; fall back to diesel; no price → end
-                sort_key = (
-                    unleaded
-                    if unleaded is not None
-                    else (diesel if diesel is not None else 9999.0)
-                )
+            if address:
+                label = f"{name}, {address} (#{sid[:8]})"
             else:
-                label = label_name
-                sort_key = 9999.0
+                label = f"{name} (#{sid[:8]})"
 
-            result.append((sid, label, sort_key))
+            result.append((sid, label))
 
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1].lower())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -570,11 +550,9 @@ def _build_station_data(station_id: str, raw: dict[str, Any]) -> StationData:
         "diesel": prices.get("diesel"),
         "name": meta.get("displayName") or None,
         "brand": meta.get("brand") or None,
-        "tablename": meta.get("brand") or None,
         "address": meta.get("formattedAddress") or None,
         "latitude": lat,
         "longitude": lng,
         "price_confidence": fiability,
-        "lastupdated": None,  # TCS API does not expose per-station timestamps
         "source_station_id": station_id,
     }

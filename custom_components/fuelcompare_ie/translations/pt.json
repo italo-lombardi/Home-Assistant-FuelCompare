@@ -9,13 +9,13 @@
       },
       "provider": {
         "title": "Selecionar fonte de dados",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Fonte de dados"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
-        "title": "Adicionar Estação",
+        "title": "Adicionar Estação Fuel Compare",
         "description": "{hint}",
         "data": {
           "station_id": "ID da Estação"
@@ -61,7 +61,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "ID da estação inválido. Introduza um número positivo válido.",
+      "invalid_station_id": "O ID da estação não pode estar vazio.",
       "invalid_api_key": "A chave de API não pode estar vazia.",
       "invalid_location": "Coordenadas inválidas. Introduza valores válidos de latitude e longitude.",
       "no_stations_found": "Nenhuma estação encontrada para este condado. Tente um condado diferente."
@@ -69,6 +69,12 @@
     "abort": {
       "already_configured": "Esta estação já está configurada.",
       "no_providers_for_country": "Não existem fornecedores de dados disponíveis para este país."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie está a encerrar",
+      "description": "O site fuelcompare.ie está programado para encerrar no dia **30 de junho de 2026**. A sua estação **{entry_title}** deixará de receber atualizações de preços após essa data. Considere mudar para outra fonte irlandesa de preços de combustível, como o FuelFinder IE ou o IE Pumps."
     }
   },
   "entity": {
@@ -140,7 +146,7 @@
         "name": "Serviços"
       },
       "opening_hours": {
-        "name": "Horário de abertura (OSM)"
+        "name": "Horário de funcionamento (OSM)"
       },
       "payments": {
         "name": "Pagamentos"
@@ -158,7 +164,7 @@
         "name": "Site"
       },
       "working_hours": {
-        "name": "Horário de Funcionamento"
+        "name": "Horário de trabalho"
       }
     },
     "binary_sensor": {
@@ -198,12 +204,6 @@
       "accepts_contactless": {
         "name": "Aceita pagamento contactless"
       }
-    }
-  },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie vai encerrar",
-      "description": "O website fuelcompare.ie está agendado para encerrar a **30 de junho de 2026**. A sua estação **{entry_title}** deixará de receber atualizações de preços após essa data. Considere mudar para outra fonte de preços de combustível irlandesa, como FuelFinder IE ou IE Pumps."
     }
   }
 }

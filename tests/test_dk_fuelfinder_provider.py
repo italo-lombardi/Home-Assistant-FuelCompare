@@ -749,36 +749,36 @@ async def test_async_list_stations_returns_id_label_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_price() -> None:
-    """async_list_stations labels include price information for priced brands."""
+    """async_list_stations labels include the short station ID suffix."""
     resp = _make_mock_response(200, _TABLE_HTML)
     session = _make_session(resp)
     provider = DkFuelFinderProvider("Circle K")
     results = await provider.async_list_stations(
         session, lat=55.67, lng=12.57, radius_km=10.0
     )
-    priced = {brand: label for brand, label in results if "DKK" in label}
-    assert len(priced) > 0
+    for brand, label in results:
+        assert "(#" in label
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations sorts brands cheapest-first by best available price."""
+    """async_list_stations sorts brands alphabetically by label."""
     resp = _make_mock_response(200, _TABLE_HTML)
     session = _make_session(resp)
     provider = DkFuelFinderProvider("Circle K")
     results = await provider.async_list_stations(
         session, lat=55.67, lng=12.57, radius_km=10.0
     )
-    # Q8 diesel=13.79, Circle K diesel=13.89 → Q8 should appear first
+    # Alphabetical order: Circle K < Q8 < Shell
     assert len(results) >= 2
     brand_ids = [r[0] for r in results]
-    q8_idx = brand_ids.index("Q8")
     circk_idx = brand_ids.index("Circle K")
-    assert q8_idx < circk_idx
+    q8_idx = brand_ids.index("Q8")
+    assert circk_idx < q8_idx
 
 
 async def test_async_list_stations_no_price_brand_appended_last() -> None:
-    """async_list_stations appends brands with no recognised prices at the end."""
-    # Minimal HTML: one brand with prices, one without.
+    """async_list_stations sorts brands alphabetically regardless of price presence."""
+    # Minimal HTML: one brand with prices, one without — "NoPrices" > "Priced" alphabetically
     html = """\
 <html><body><table>
   <tr>
@@ -795,9 +795,10 @@ async def test_async_list_stations_no_price_brand_appended_last() -> None:
     provider = DkFuelFinderProvider("Priced")
     results = await provider.async_list_stations(session, lat=55.67, lng=12.57)
     brand_ids = [r[0] for r in results]
-    priced_idx = brand_ids.index("Priced")
+    # Alphabetically "NoPrices" < "Priced" (N < P), so NoPrices comes first
     no_price_idx = brand_ids.index("NoPrices")
-    assert priced_idx < no_price_idx
+    priced_idx = brand_ids.index("Priced")
+    assert no_price_idx < priced_idx
 
 
 async def test_async_list_stations_returns_empty_on_network_error() -> None:

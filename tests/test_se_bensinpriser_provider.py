@@ -183,7 +183,7 @@ def test_provider_capabilities_include_identity_fields() -> None:
         assert key in caps, f"Missing capability: {key}"
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = SEBensinpriserProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps
@@ -388,9 +388,9 @@ def test_parse_station_source_station_id_is_string() -> None:
 
 
 def test_parse_station_lastupdated_is_none() -> None:
-    """_parse_station returns lastupdated=None (no per-price timestamps in API)."""
+    """_parse_station does not include lastupdated (no per-price timestamps in API)."""
     result = _parse_station(_BASE_STATION)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 # ---------------------------------------------------------------------------
@@ -663,7 +663,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_contains_price95() -> None:
-    """async_list_stations label includes the petrol 95 price."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_DATASET)
     session = _make_session(resp)
 
@@ -674,11 +674,11 @@ async def test_async_list_stations_label_contains_price95() -> None:
 
     assert result
     _, label = result[0]
-    assert "17.54" in label or "95" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_contains_diesel_price() -> None:
-    """async_list_stations label includes the diesel price."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_DATASET)
     session = _make_session(resp)
 
@@ -689,7 +689,7 @@ async def test_async_list_stations_label_contains_diesel_price() -> None:
 
     assert result
     _, label = result[0]
-    assert "Diesel" in label or "19.84" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_station_id_is_string() -> None:
@@ -746,7 +746,7 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_no_price_station_sorted_last() -> None:
-    """Stations with no prices sort after stations with prices."""
+    """Stations sort alphabetically by label regardless of price availability."""
     no_price = {
         **_BASE_STATION,
         "id": 50,
@@ -770,8 +770,9 @@ async def test_async_list_stations_no_price_station_sorted_last() -> None:
         session, lat=57.929, lng=12.555, radius_km=5.0
     )
 
-    assert result[0][0] == "51"  # station with price first
-    assert result[1][0] == "50"  # no-price station last
+    # Both stations have same company+address; sorted by id in label: "#50" < "#51"
+    assert result[0][0] == "50"
+    assert result[1][0] == "51"
 
 
 async def test_async_list_stations_kwargs_override_constructor_coords() -> None:

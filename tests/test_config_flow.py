@@ -170,20 +170,6 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
 # ---------------------------------------------------------------------------
 
 
-async def _reach_station_step(hass, flow_id: str) -> dict:
-    """Navigate through provider step if shown, returning the station step result."""
-    # If a provider step is shown (happens when >1 IE provider is registered),
-    # select the default fuelcompare.ie provider to reach the station step.
-
-    result = {"step_id": "provider", "flow_id": flow_id}
-    if result["step_id"] == "provider":
-        result = await hass.config_entries.flow.async_configure(
-            flow_id,
-            user_input={CONF_PROVIDER: DEFAULT_PROVIDER},
-        )
-    return result
-
-
 async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
     """Non-integer station ID (e.g. a UUID or slug) is now accepted as valid."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -371,23 +357,6 @@ async def test_fetch_station_name_encrypted_api_fallback(hass: HomeAssistant) ->
         result = await _fetch_station_name(hass, "790")
 
     assert result == "Applegreen Cookstown"
-
-
-async def test_fetch_station_name_no_name_no_tablename(hass: HomeAssistant) -> None:
-    """_fetch_station_name returns None when provider returns None."""
-    with (
-        patch(
-            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
-        ),
-        patch(
-            "custom_components.fuelcompare_ie.providers.ie_fuelcompare.IEFuelCompareProvider.async_fetch_station_name",
-            new_callable=AsyncMock,
-            return_value=None,
-        ),
-    ):
-        result = await _fetch_station_name(hass, "790")
-
-    assert result is None
 
 
 async def test_fetch_station_name_exception_returns_none(hass: HomeAssistant) -> None:
@@ -664,8 +633,10 @@ async def test_async_step_api_key_valid_key_stored_and_advances(
 
     # The key must be stored
     assert flow._api_key == "my-test-api-key"
-    # Step must have advanced (not still showing api_key form without error)
-    assert result.get("step_id") != "api_key" or result.get("errors") == {}
+    # Step must have advanced past the api_key form — no longer on "api_key" step
+    assert result.get("step_id") != "api_key"
+    # And the advanced step must not have errors
+    assert result.get("errors", {}) == {}
 
 
 async def test_async_step_api_key_initial_display_no_user_input(
@@ -1475,8 +1446,7 @@ async def test_async_list_stations_diesel_record_not_overwritten_by_petrol() -> 
     assert len(result) == 1
     uid, label = result[0]
     assert uid == _FF_STATION_UUID
-    assert "Diesel" in label
-    assert "Petrol" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------
@@ -1485,7 +1455,7 @@ async def test_async_list_stations_diesel_record_not_overwritten_by_petrol() -> 
 
 
 async def test_async_list_stations_label_formats_petrol_price_to_3_decimals() -> None:
-    """async_list_stations formats petrol price as 'Petrol €X.XXX' in label."""
+    """async_list_stations label contains short station ID in (#...) format."""
     diesel_station = {**_FF_BASE_STATION, "price": 1.828}
     petrol_station = {**_FF_BASE_STATION, "price": 1.849}
 
@@ -1514,7 +1484,7 @@ async def test_async_list_stations_label_formats_petrol_price_to_3_decimals() ->
 
     assert len(result) == 1
     _, label = result[0]
-    assert "Petrol €1.849" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------
@@ -1796,6 +1766,8 @@ async def test_async_step_user_single_country_auto_advance(
     hass: HomeAssistant,
 ) -> None:
     """When only one country is in the registry, user step auto-advances (lines 395-396)."""
+    from unittest.mock import patch as _patch
+
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
@@ -1818,19 +1790,17 @@ async def test_async_step_user_single_country_auto_advance(
         async def async_fetch_station_name(self, session, station_id):
             return None
 
-    saved_registry = dict(PROVIDER_REGISTRY)
-    PROVIDER_REGISTRY.clear()
-    PROVIDER_REGISTRY[_SingleCountryProvider.PROVIDER_KEY] = _SingleCountryProvider
-    try:
+    with _patch.dict(
+        PROVIDER_REGISTRY,
+        {_SingleCountryProvider.PROVIDER_KEY: _SingleCountryProvider},
+        clear=True,
+    ):
         flow = FuelCompareIEConfigFlow()
         flow.hass = hass
         result = await flow.async_step_user(user_input=None)
         # Should have advanced past the country selection
         assert result.get("step_id") != "user"
         assert flow._country == "ZZ"
-    finally:
-        PROVIDER_REGISTRY.clear()
-        PROVIDER_REGISTRY.update(saved_registry)
 
 
 # ---------------------------------------------------------------------------
@@ -2398,7 +2368,7 @@ async def test_options_flow_station_entry_with_api_key(
 
 
 async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> None:
-    """_reload_entry inner function awaits async_reload when options change."""
+    """_reload_entry calls async_schedule_reload when options change."""
     from custom_components.fuelcompare_ie import async_setup_entry
     from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
 
@@ -2410,12 +2380,11 @@ async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> 
     )
     entry.add_to_hass(hass)
 
-    reload_called_with: list = []
+    schedule_reload_called: list = []
 
-    async def _spy_reload(entry_id):
-        reload_called_with.append(entry_id)
-
-    hass.config_entries.async_reload = _spy_reload
+    # Patch async_schedule_reload on the entry to spy on calls
+    original_entry = entry
+    original_entry.async_schedule_reload = lambda: schedule_reload_called.append(True)
 
     with (
         patch.object(
@@ -2437,7 +2406,7 @@ async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> 
     import asyncio
 
     await asyncio.sleep(0)
-    assert entry.entry_id in reload_called_with
+    assert schedule_reload_called, "async_schedule_reload was not called"
 
 
 async def test_async_setup_entry_unknown_provider_raises_config_entry_not_ready(

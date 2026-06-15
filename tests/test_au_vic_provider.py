@@ -788,7 +788,7 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_label_includes_price() -> None:
-    """async_list_stations labels include formatted A$ price."""
+    """async_list_stations labels include station name and short ID suffix."""
     raw = {"fuelPriceDetails": [_BASE_ENTRY]}
     resp = _make_mock_response(200, json_data=raw)
     session = _make_session(resp)
@@ -805,11 +805,11 @@ async def test_async_list_stations_label_includes_price() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    assert "A$" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_unleaded() -> None:
-    """async_list_stations label includes Unleaded when present."""
+    """async_list_stations label includes station name when unleaded present."""
     raw = {"fuelPriceDetails": [_BASE_ENTRY]}
     resp = _make_mock_response(200, json_data=raw)
     session = _make_session(resp)
@@ -825,7 +825,7 @@ async def test_async_list_stations_label_includes_unleaded() -> None:
     )
 
     _, label = result[0]
-    assert "Unleaded" in label
+    assert "7-Eleven Melbourne CBD" in label
 
 
 async def test_async_list_stations_returns_empty_without_lat_lng() -> None:
@@ -1181,37 +1181,36 @@ def test_build_station_data_empty_name_becomes_none() -> None:
 
 def test_build_display_label_includes_name() -> None:
     """_build_display_label includes the station name."""
-    prices = {"unleaded": 1.759, "diesel": 1.839}
-    label, _ = _build_display_label(_BASE_STATION, prices)
+    label = _build_display_label(_BASE_STATION, _STATION_ID)
     assert "7-Eleven Melbourne CBD" in label
 
 
 def test_build_display_label_includes_suburb() -> None:
-    """_build_display_label includes suburb when not already in name."""
+    """_build_display_label includes suburb when not already in address."""
     station = {**_BASE_STATION, "name": "7-Eleven", "suburb": "Melbourne"}
-    prices = {"unleaded": 1.759}
-    label, _ = _build_display_label(station, prices)
+    label = _build_display_label(station, _STATION_ID)
     assert "Melbourne" in label
 
 
 def test_build_display_label_sort_key_is_cheapest_price() -> None:
-    """_build_display_label sort key equals the cheapest fuel price."""
-    prices = {"unleaded": 1.759, "diesel": 1.839}
-    _, sort_key = _build_display_label(_BASE_STATION, prices)
-    assert sort_key == pytest.approx(1.759)
+    """_build_display_label returns a string containing the station name."""
+    label = _build_display_label(_BASE_STATION, _STATION_ID)
+    assert isinstance(label, str)
+    assert "7-Eleven Melbourne CBD" in label
 
 
 def test_build_display_label_no_prices_sort_key_is_9999() -> None:
-    """_build_display_label sort key is 9999.0 when no prices are available."""
-    _, sort_key = _build_display_label(_BASE_STATION, {})
-    assert sort_key == pytest.approx(9999.0)
+    """_build_display_label returns a string with the station UUID prefix."""
+    label = _build_display_label(_BASE_STATION, _STATION_ID)
+    assert "(#" in label
+    assert _STATION_ID[:8] in label
 
 
 def test_build_display_label_includes_aud_currency() -> None:
-    """_build_display_label includes A$ in the price string."""
-    prices = {"unleaded": 1.759}
-    label, _ = _build_display_label(_BASE_STATION, prices)
-    assert "A$" in label
+    """_build_display_label includes the station name in the label."""
+    label = _build_display_label(_BASE_STATION, _STATION_ID)
+    assert "7-Eleven Melbourne CBD" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------

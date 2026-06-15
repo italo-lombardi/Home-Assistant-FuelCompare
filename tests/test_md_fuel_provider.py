@@ -167,7 +167,7 @@ def test_provider_capabilities_include_fuel_types() -> None:
     assert "diesel" in caps
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes last_successful_fetch and data_fetch_problem."""
     caps = MdFuelProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps

@@ -4,8 +4,14 @@ from __future__ import annotations
 
 import inspect
 import logging
+import re
+from typing import Any
 
-from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
+from homeassistant.helpers.issue_registry import (
+    IssueSeverity,
+    async_create_issue,
+    async_delete_issue,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -52,14 +58,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             station_id = f"{provider_key}_{_lat:.4f}_{_lng:.4f}"
     if not station_id:
         station_id = entry.entry_id
+
     provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
-        provider_cls = PROVIDER_REGISTRY.get(DEFAULT_PROVIDER)
         _LOGGER.warning(
             "Unknown provider key %r, falling back to %r",
             provider_key,
             DEFAULT_PROVIDER,
         )
+        provider_cls = PROVIDER_REGISTRY.get(DEFAULT_PROVIDER)
         if provider_cls is None:
             raise ConfigEntryNotReady(
                 f"Provider '{provider_key}' not found and default provider '{DEFAULT_PROVIDER}' is also missing."
@@ -84,8 +91,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         else entry.data.get(CONF_RADIUS_KM)
     )
     sig = inspect.signature(provider_cls.__init__)
-    kwargs: dict = {}
-    if county and "county" in sig.parameters:
+    kwargs: dict[str, Any] = {}
+    has_var_kwargs = any(
+        p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+    )
+    if county and (has_var_kwargs or "county" in sig.parameters):
         kwargs["county"] = county
     # postal_code: use NEEDS_POSTAL_CODE ClassVar (inspect.signature breaks for **kwargs).
     if getattr(provider_cls, "NEEDS_POSTAL_CODE", False):
@@ -93,8 +103,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if (
             not postal_code
             and county
-            and str(county).isdigit()
-            and CONF_POSTAL_CODE not in entry.data
+            and bool(re.fullmatch(r"\d+", str(county)))
+            and CONF_POSTAL_CODE
+            not in entry.data  # county key holds a numeric postal code (old entries pre-CONF_POSTAL_CODE); don't double-treat it
         ):
             postal_code = county
         if postal_code:
@@ -104,20 +115,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         try:
             kwargs["prefecture_id"] = int(station_id)
         except (ValueError, TypeError):
-            pass
-    if api_key and "api_key" in sig.parameters:
+            _LOGGER.warning(
+                "Could not parse prefecture_id from station_id %r for provider %r",
+                station_id,
+                provider_key,
+            )
+    if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
         kwargs["api_key"] = api_key
-    if latitude is not None and "latitude" in sig.parameters:
+    if latitude is not None and (has_var_kwargs or "latitude" in sig.parameters):
         kwargs["latitude"] = latitude
-    if longitude is not None and "longitude" in sig.parameters:
+    if longitude is not None and (has_var_kwargs or "longitude" in sig.parameters):
         kwargs["longitude"] = longitude
-    if radius_km is not None and "radius_km" in sig.parameters:
+    if radius_km is not None and (has_var_kwargs or "radius_km" in sig.parameters):
         kwargs["radius_km"] = radius_km
     if kwargs:
         provider = provider_cls(station_id, **kwargs)
     else:
         provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
+
+    hass.data.setdefault(DOMAIN, {})
+
+    await coordinator.async_config_entry_first_refresh()
 
     # Warn users of ie_fuelcompare (fuelcompare.ie) that the service is ending.
     if provider_key == "ie_fuelcompare":
@@ -131,17 +150,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_placeholders={"entry_title": entry.title},
         )
 
-    hass.data.setdefault(DOMAIN, {})
-
-    await coordinator.async_config_entry_first_refresh()
-
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Reload when options change (e.g. radius, api_key) so the new values take effect.
     async def _reload_entry(h: HomeAssistant, e: ConfigEntry) -> None:
-        await h.config_entries.async_reload(e.entry_id)
+        e.async_schedule_reload()
 
     entry.async_on_unload(entry.add_update_listener(_reload_entry))
 
@@ -151,6 +166,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    hass.data[DOMAIN].pop(entry.entry_id, None)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+    async_delete_issue(hass, DOMAIN, f"fuelcompare_ie_deprecation_{entry.entry_id}")
 
     return unload_ok

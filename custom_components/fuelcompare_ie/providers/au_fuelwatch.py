@@ -82,7 +82,7 @@ class AuFuelwatchProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = 86400
     CURRENCY: ClassVar[str] = "A$"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",
@@ -188,7 +188,7 @@ class AuFuelwatchProvider(BaseProvider):
         session: ClientSession,
         **kwargs: Any,
     ) -> list[tuple[str, str]]:
-        """Return (station_id, display_label) sorted by unleaded price.
+        """Return (station_id, display_label) sorted alphabetically by label.
 
         Keyword args accepted:
             county (str): WA Region code (e.g. '25'). If absent, fetches
@@ -198,10 +198,11 @@ class AuFuelwatchProvider(BaseProvider):
                                  filtering; use Region codes instead).
 
         Returns:
-            Sorted list of (station_id, label) tuples where label includes
-            brand, trading name and primary prices, e.g.:
+            Alphabetically sorted list of (station_id, label) tuples where the
+            label contains brand/name, address and an 8-char ID prefix but NO
+            price, e.g.:
               '-31.80275800,115.83773700',
-              'Liberty Landsdale — Unleaded 153.3 c/L | Diesel 161.9 c/L'
+              'Liberty Landsdale, 123 Main St (#-31.8027)'
         """
         region_code = (
             str(kwargs.get("county", ""))
@@ -216,17 +217,11 @@ class AuFuelwatchProvider(BaseProvider):
 
         result: list[tuple[str, str]] = []
         for sid, data in merged.items():
-            label = _build_display_label(data)
+            label = _build_station_list_label(data, sid)
             result.append((sid, label))
 
-        # Sort by unleaded price (cheapest first); stations without price go last
-        result.sort(
-            key=lambda x: (
-                merged[x[0]].get("unleaded") is None,
-                merged[x[0]].get("unleaded") or float("inf"),
-                x[1],
-            )
-        )
+        # Sort alphabetically by label
+        result.sort(key=lambda x: x[1].lower())
         return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
@@ -504,3 +499,37 @@ def _build_display_label(data: StationData) -> str:
     if price_parts:
         return f"{identity} — {' | '.join(price_parts)}"
     return identity
+
+
+def _build_station_list_label(data: StationData, sid: str) -> str:
+    """Build a price-free display label for the station picker list.
+
+    Format: '{brand/name}, {address} (#{sid[:8]})'
+
+    The first 8 characters of the station ID (e.g. '-31.8027') give the user
+    enough context to distinguish duplicate names without showing price.
+
+    Args:
+        data: Merged StationData for a station.
+        sid:  Composite '{lat},{lng}' station ID string.
+
+    Returns:
+        Non-empty display string with no price information.
+    """
+    brand = data.get("brand") or ""
+    name = data.get("name") or ""
+    address = data.get("address") or ""
+
+    if brand and name and brand.lower() not in name.lower():
+        identity = f"{brand} {name}"
+    elif name:
+        identity = name
+    elif brand:
+        identity = brand
+    else:
+        identity = "Unknown Station"
+
+    short_id = sid[:8]
+    if address:
+        return f"{identity}, {address} (#{short_id})"
+    return f"{identity} (#{short_id})"

@@ -27,6 +27,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import urllib.parse
 from typing import Final
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
@@ -44,7 +45,7 @@ _HEADERS: Final = {
 _BUILD_ID_RE: Final = re.compile(r'"buildId":"([^"]+)"')
 _STATION_CHUNK_RE: Final = re.compile(r'(/_next/static/chunks/pages/station/[^"]+\.js)')
 _ANY_CHUNK_FINDALL_RE: Final = re.compile(r'/_next/static/chunks/[^"]+\.js')
-_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,"([a-fA-F0-9]{64})"')
+_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,["\']([a-fA-F0-9]{64})["\']')
 
 
 class PageAssets:
@@ -104,7 +105,18 @@ class PageAssets:
             )
             return
 
-        chunk_url = BASE_URL + chunk_match.group(1)
+        chunk_path = chunk_match.group(1)
+        if ".." in chunk_path or not re.match(
+            r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
+        ):
+            _LOGGER.debug(
+                "Station JS chunk path failed validation for station %s: %s",
+                self.station_id,
+                chunk_path,
+            )
+            return
+
+        chunk_url = BASE_URL + chunk_path
         _LOGGER.debug(
             "Fetching station JS chunk for decrypt key (station %s): %s",
             self.station_id,
@@ -146,6 +158,11 @@ class PageAssets:
             return
 
         for chunk_path in ordered:
+            decoded = urllib.parse.unquote(chunk_path)
+            if ".." in decoded or not re.match(
+                r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
+            ):
+                continue
             chunk_url = BASE_URL + chunk_path
             _LOGGER.debug(
                 "Scanning JS chunk for decrypt key (station %s): %s",

@@ -216,8 +216,8 @@ def test_capabilities_include_price_confidence() -> None:
     assert "price_confidence" in ChTcsProvider.CAPABILITIES
 
 
-def test_capabilities_include_coordinator_sentinels() -> None:
-    """CAPABILITIES includes coordinator sentinel keys."""
+def test_capabilities_exclude_coordinator_sentinels() -> None:
+    """CAPABILITIES excludes coordinator sentinel keys."""
     caps = ChTcsProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps
     assert "data_fetch_problem" not in caps
@@ -455,7 +455,6 @@ def test_build_station_data_returns_all_capability_keys() -> None:
         "latitude",
         "longitude",
         "price_confidence",
-        "lastupdated",
         "source_station_id",
     }
     for key in required:
@@ -507,10 +506,10 @@ def test_build_station_data_price_confidence_from_fiability() -> None:
     assert result["price_confidence"] == "CONFIDENT"
 
 
-def test_build_station_data_lastupdated_is_none() -> None:
-    """TCS API does not provide per-station timestamps."""
+def test_build_station_data_lastupdated_not_in_result() -> None:
+    """TCS API does not provide timestamps; lastupdated not in result (M-24)."""
     result = _build_station_data(_STATION_ID, _MERGED_RAW)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 def test_build_station_data_source_station_id() -> None:
@@ -620,12 +619,12 @@ async def test_async_fetch_returns_price_confidence() -> None:
     assert data["price_confidence"] == "CONFIDENT"
 
 
-async def test_async_fetch_lastupdated_is_none() -> None:
-    """async_fetch sets lastupdated=None (TCS API has no timestamps)."""
+async def test_async_fetch_lastupdated_not_in_result() -> None:
+    """async_fetch does not set lastupdated (TCS API has no timestamps; M-24)."""
     session = _make_session_always(_PAYLOAD_SP95)
     p = _provider()
     data = await p.async_fetch(session, _STATION_ID)
-    assert data["lastupdated"] is None
+    assert "lastupdated" not in data
 
 
 # ---------------------------------------------------------------------------
@@ -859,13 +858,13 @@ async def test_async_list_stations_excludes_station_outside_radius() -> None:
 
 
 async def test_async_list_stations_label_contains_sp95_price() -> None:
-    """Each label should contain an SP95/unleaded price string."""
+    """Each label should contain the short station ID in (#...) format."""
     session = _make_session_always(_PAYLOAD_SP95)
     p = _provider()
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
     if result:
         _, label = result[0]
-        assert "SP95" in label or "1.879" in label
+        assert "(#" in label
 
 
 async def test_async_list_stations_returns_empty_when_no_coordinates() -> None:
@@ -942,7 +941,7 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_station_no_price_sorts_last() -> None:
-    """Stations with no price should appear after priced stations."""
+    """Stations are sorted alphabetically by label."""
     priced = {**_BASE_STATION, "id": "priced", "price": 1.799}
     no_price = {**_BASE_STATION, "id": "no-price", "price": None}
     payload = {"data": [no_price, priced]}
@@ -951,7 +950,8 @@ async def test_async_list_stations_station_no_price_sorts_last() -> None:
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
     if len(result) >= 2:
         ids = [sid for sid, _ in result]
-        assert ids.index("priced") < ids.index("no-price")
+        # Both have same display name; alphabetically "(#no-price" < "(#priced" → no-price first
+        assert ids.index("no-price") < ids.index("priced")
 
 
 async def test_async_list_stations_deduplicates_by_station_id() -> None:

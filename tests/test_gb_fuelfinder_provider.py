@@ -82,6 +82,7 @@ def _reset_csv_cache() -> None:
     """
     GbFuelfinderProvider._csv_cache = None
     GbFuelfinderProvider._csv_cache_ts = 0.0
+    GbFuelfinderProvider._csv_etag = None
 
 
 def _make_csv_text(*rows: dict[str, str]) -> str:
@@ -656,7 +657,7 @@ async def test_async_list_stations_returns_id_label_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_distance() -> None:
-    """async_list_stations labels include distance in km."""
+    """async_list_stations labels include short station ID suffix."""
     resp = _make_csv_response(_BASE_ROW)
     session = _make_session(resp)
     provider = GbFuelfinderProvider(_NODE_ID)
@@ -665,11 +666,11 @@ async def test_async_list_stations_label_includes_distance() -> None:
     )
     assert len(results) > 0
     _, label = results[0]
-    assert " km" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_price_info() -> None:
-    """async_list_stations labels include price information for stations with prices."""
+    """async_list_stations labels include station name and address."""
     resp = _make_csv_response(_BASE_ROW)
     session = _make_session(resp)
     provider = GbFuelfinderProvider(_NODE_ID)
@@ -678,8 +679,7 @@ async def test_async_list_stations_label_includes_price_info() -> None:
     )
     assert len(results) > 0
     _, label = results[0]
-    # Should mention diesel or unleaded prices in pence
-    assert "p" in label
+    assert "Shell" in label or "Trafalgar" in label
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
@@ -715,11 +715,11 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_no_price_station_appended_last() -> None:
-    """async_list_stations appends stations with no price after priced stations."""
+    """async_list_stations sorts stations alphabetically by label."""
     priced_row = {
         **_BASE_ROW,
         "forecourts.node_id": "e" * 64,
-        "forecourts.trading_name": "Priced Station",
+        "forecourts.trading_name": "Alpha Priced",
         "forecourts.fuel_price.B7S": "153.9000",
         "forecourts.fuel_price.E10": "149.9000",
         "forecourts.location.latitude": "51.5074",
@@ -728,7 +728,7 @@ async def test_async_list_stations_no_price_station_appended_last() -> None:
     no_price_row = {
         **_BASE_ROW,
         "forecourts.node_id": "f" * 64,
-        "forecourts.trading_name": "No Price Station",
+        "forecourts.trading_name": "Beta No Price",
         "forecourts.fuel_price.B7S": "",
         "forecourts.fuel_price.E10": "",
         "forecourts.fuel_price.E5": "",
@@ -747,6 +747,7 @@ async def test_async_list_stations_no_price_station_appended_last() -> None:
     node_ids = [r[0] for r in results]
     priced_idx = node_ids.index("e" * 64)
     no_price_idx = node_ids.index("f" * 64)
+    # Alphabetically "Alpha Priced" < "Beta No Price"
     assert priced_idx < no_price_idx
 
 
@@ -1205,7 +1206,7 @@ async def test_async_list_stations_returns_empty_on_garbled_body() -> None:
         session, lat=51.5074, lng=-0.1278, radius_km=10.0
     )
     # Should not crash; garbled body produces no parseable rows within radius
-    assert isinstance(result, list)
+    assert result == []
 
 
 async def test_async_list_stations_returns_empty_on_completely_empty_body() -> None:
@@ -1216,7 +1217,7 @@ async def test_async_list_stations_returns_empty_on_completely_empty_body() -> N
     result = await provider.async_list_stations(
         session, lat=51.5074, lng=-0.1278, radius_km=10.0
     )
-    assert isinstance(result, list)
+    assert result == []
 
 
 async def test_async_list_stations_returns_empty_when_lat_lng_none() -> None:

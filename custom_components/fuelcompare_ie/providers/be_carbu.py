@@ -605,15 +605,12 @@ class BeCarbuProvider(BaseProvider):
 
         # Merge results by station_id
         merged: dict[str, dict[str, Any]] = {}
-        diesel_prices: dict[str, float | None] = {}
-        e10_prices: dict[str, float | None] = {}
 
         if isinstance(diesel_result, list):
             for s in diesel_result:
                 sid = s.get("station_id")
                 if sid:
                     merged[sid] = s
-                    diesel_prices[sid] = s.get("price")
 
         if isinstance(e10_result, list):
             for s in e10_result:
@@ -621,7 +618,6 @@ class BeCarbuProvider(BaseProvider):
                 if sid:
                     if sid not in merged:
                         merged[sid] = s
-                    e10_prices[sid] = s.get("price")
 
         if not merged:
             return []
@@ -644,32 +640,18 @@ class BeCarbuProvider(BaseProvider):
         if not merged:
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for sid, station in merged.items():
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
             display_name = f"{brand} {name}".strip() if brand else name
+            address = station.get("address") or ""
+            address_part = f", {address}" if address else ""
+            label = f"{display_name}{address_part} (#{sid[:8]})"
+            result.append((sid, label))
 
-            d_price = diesel_prices.get(sid)
-            e_price = e10_prices.get(sid)
-
-            price_parts: list[str] = []
-            if d_price is not None:
-                price_parts.append(f"Diesel €{d_price:.3f}")
-            if e_price is not None:
-                price_parts.append(f"E10 €{e_price:.3f}")
-
-            if price_parts:
-                label = f"{display_name} — {' / '.join(price_parts)}"
-                sort_key = min(p for p in (d_price, e_price) if p is not None)
-            else:
-                label = display_name
-                sort_key = 9999.0
-
-            result.append((sid, label, sort_key))
-
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -867,7 +849,6 @@ class BeCarbuProvider(BaseProvider):
             "cng": prices.get("cng"),
             "name": name,
             "brand": brand,
-            "tablename": brand,
             "address": address,
             "latitude": lat,
             "longitude": lng,

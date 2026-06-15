@@ -22,7 +22,7 @@ import asyncio
 import logging
 from typing import Any, ClassVar
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
@@ -180,32 +180,12 @@ class AtEcontrolProvider(BaseProvider):
             name = raw.get("name") or f"Station {sid}"
             location = raw.get("location") or {}
             address = _format_address(location)
-            label_parts = [name]
-            if address:
-                label_parts.append(address)
+            label = (
+                f"{name}, {address} (#{sid[:8]})" if address else f"{name} (#{sid[:8]})"
+            )
+            result.append((sid, label))
 
-            prices = _extract_prices(raw.get("prices", []))
-            price_strs: list[str] = []
-            if prices.get("diesel") is not None:
-                price_strs.append(f"Diesel €{prices['diesel']:.3f}")
-            if prices.get("unleaded") is not None:
-                price_strs.append(f"Super 95 €{prices['unleaded']:.3f}")
-            if prices.get("cng") is not None:
-                price_strs.append(f"CNG €{prices['cng']:.3f}")
-
-            if price_strs:
-                label_parts.append(" / ".join(price_strs))
-
-            result.append((sid, " — ".join(label_parts)))
-
-        # Sort by cheapest diesel price, then by name
-        def _sort_key(item: tuple[str, str]) -> tuple[float, str]:
-            raw_station = merged.get(item[0], {})
-            prices = _extract_prices(raw_station.get("prices", []))
-            diesel = prices.get("diesel")
-            return (diesel if diesel is not None else 99.0, item[1])
-
-        result.sort(key=_sort_key)
+        result.sort(key=lambda item: item[1])
         return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
@@ -222,11 +202,21 @@ class AtEcontrolProvider(BaseProvider):
         station dict with a combined 'prices' list from all fuel type queries.
         """
         results = await asyncio.gather(
-            *[self._fetch_fuel_type(session, lat, lng, code) for code, _ in _FUEL_CODES]
+            *[
+                self._fetch_fuel_type(session, lat, lng, code)
+                for code, _ in _FUEL_CODES
+            ],
+            return_exceptions=True,
         )
 
         merged: dict[str, dict[str, Any]] = {}
+        client_errors = [r for r in results if isinstance(r, ClientError)]
+        if client_errors and all(isinstance(r, BaseException) for r in results):
+            raise client_errors[0]
         for stations in results:
+            if isinstance(stations, BaseException):
+                _LOGGER.debug("One fuel-type fetch failed, skipping: %s", stations)
+                continue
             for station in stations:
                 sid = str(station.get("id", ""))
                 if not sid:
@@ -361,6 +351,7 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "is_open": raw.get("open") if "open" in raw else None,
-        "lastupdated": None,
-        "source_station_id": str(raw.get("id") or ""),
+        "source_station_id": str(raw["id"])
+        if "id" in raw and raw["id"] is not None
+        else "",
     }

@@ -161,7 +161,7 @@ class GbFuelfinderProvider(BaseProvider):
     )
     _CSV_CACHE_TTL: ClassVar[int] = 21600
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",
@@ -250,8 +250,9 @@ class GbFuelfinderProvider(BaseProvider):
             lng       — float, reference longitude
             radius_km — float, search radius in km (default: self._radius_km)
 
-        Returns a list sorted cheapest-first by the best available fuel price
-        (diesel or unleaded).  Stations with no prices are appended at the end.
+        Label format: "{brand/name}, {address} (#{node_id[:8]})".
+        No price information is included in the label.
+        Returns a list sorted alphabetically by label.
         """
         lat = kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
         lng = kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
@@ -267,7 +268,7 @@ class GbFuelfinderProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
-        candidates: list[tuple[str, str, float]] = []
+        candidates: list[tuple[str, str]] = []
 
         for row in rows:
             node_id = row.get("forecourts.node_id", "").strip()
@@ -293,30 +294,23 @@ class GbFuelfinderProvider(BaseProvider):
             if not display_name:
                 display_name = node_id[:8]
 
-            diesel_pence = _parse_price_pence(row.get("forecourts.fuel_price.B7S"))
-            petrol_pence = _parse_price_pence(row.get("forecourts.fuel_price.E10"))
+            addr_parts = [
+                (row.get("forecourts.location.address_line_1") or "").strip(),
+                (row.get("forecourts.location.address_line_2") or "").strip(),
+                (row.get("forecourts.location.city") or "").strip(),
+                (row.get("forecourts.location.postcode") or "").strip(),
+            ]
+            address = ", ".join(p for p in addr_parts if p)
 
-            price_parts: list[str] = []
-            if diesel_pence is not None:
-                price_parts.append(f"Diesel {diesel_pence:.1f}p")
-            if petrol_pence is not None:
-                price_parts.append(f"Unleaded {petrol_pence:.1f}p")
-
-            best_price = min(
-                (p for p in [diesel_pence, petrol_pence] if p is not None),
-                default=None,
-            )
-            sort_key = best_price if best_price is not None else 99999.0
-
-            if price_parts:
-                label = f"{display_name} — {' / '.join(price_parts)} ({dist:.1f} km)"
+            if address:
+                label = f"{display_name}, {address} (#{node_id[:8]})"
             else:
-                label = f"{display_name} ({dist:.1f} km)"
+                label = f"{display_name} (#{node_id[:8]})"
 
-            candidates.append((node_id, label, sort_key))
+            candidates.append((node_id, label))
 
-        candidates.sort(key=lambda x: x[2])
-        return [(node_id, label) for node_id, label, _ in candidates]
+        candidates.sort(key=lambda x: x[1])
+        return candidates
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

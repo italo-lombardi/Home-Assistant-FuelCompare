@@ -295,8 +295,8 @@ class AuQldProvider(BaseProvider):
         """Return (site_id, display_label) pairs for stations near a location.
 
         Fetches the full QLD FPPS dataset, filters stations within
-        ``radius_km`` of (``lat``, ``lng``), and returns them sorted by the
-        cheapest available fuel price.
+        ``radius_km`` of (``lat``, ``lng``), and returns them sorted
+        alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -305,8 +305,8 @@ class AuQldProvider(BaseProvider):
             radius_km: Search radius in kilometres (float, default 10.0).
 
         Returns:
-            List of (site_id_str, "Brand Name — Diesel A$1.79 / Unleaded A$1.83")
-            tuples ordered cheapest-first.  Empty list on any failure.
+            List of (site_id_str, "{brand/name}, {address} (#{site_id[:8]})")
+            tuples ordered alphabetically by label.  Empty list on any failure.
         """
         lat: float | None = (
             kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
@@ -328,9 +328,9 @@ class AuQldProvider(BaseProvider):
             _LOGGER.debug("AuQldProvider: async_list_stations fetch failed: %s", err)
             return []
 
-        site_map, prices_map, _ts = _build_index(sites_raw, prices_raw)
+        site_map, _prices_map, _ts = _build_index(sites_raw, prices_raw)
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for site_id_str, site in site_map.items():
             try:
                 s_lat = float(site["Lat"])
@@ -342,42 +342,20 @@ class AuQldProvider(BaseProvider):
             if dist > radius_km:
                 continue
 
-            prices = prices_map.get(site_id_str, {})
             name: str = site.get("N") or "Unknown"
             brand: str = site.get("B") or ""
+            address: str = site.get("A") or ""
+
+            # Use brand when it differs from the station name, else fall back to name.
             display_name = (
-                f"{brand} — {name}"
-                if brand and brand.lower() not in name.lower()
-                else name
+                brand if brand and brand.lower() not in name.lower() else name
             )
 
-            # Build price label; prices are already in AUD/litre.
-            price_parts: list[str] = []
-            sort_price = 9999.0
+            label = f"{display_name}, {address} (#{site_id_str[:8]})"
+            result.append((site_id_str, label))
 
-            diesel_price = prices.get("diesel")
-            unleaded_price = prices.get("unleaded")
-            e10_price = prices.get("e10")
-
-            if diesel_price is not None:
-                price_parts.append(f"Diesel A${diesel_price:.3f}")
-                sort_price = min(sort_price, diesel_price)
-            if unleaded_price is not None:
-                price_parts.append(f"Unleaded A${unleaded_price:.3f}")
-                sort_price = min(sort_price, unleaded_price)
-            elif e10_price is not None:
-                price_parts.append(f"E10 A${e10_price:.3f}")
-                sort_price = min(sort_price, e10_price)
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
-            result.append((site_id_str, label, sort_price))
-
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1].lower())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -584,7 +562,6 @@ def _build_station_data(
         "e85": prices.get("e85"),
         "name": name,
         "brand": brand,
-        "tablename": brand,
         "address": address,
         "county": county,
         "latitude": latitude,

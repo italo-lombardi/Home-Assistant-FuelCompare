@@ -373,8 +373,8 @@ class NoDrivstoffProvider(BaseProvider):
                        supplied).
 
         Returns:
-            List of (uuid, "Name — Brand — Diesel kr20.90 / Bensin kr21.50")
-            tuples sorted nearest-first.  Empty list on any failure.
+            List of (uuid, "Brand/Name, Address (#uuid[:8])")
+            tuples sorted alphabetically by label.  Empty list on any failure.
         """
         raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
         raw_lng = (
@@ -406,7 +406,7 @@ class NoDrivstoffProvider(BaseProvider):
         if not stations:
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for station in stations:
             uid: str | None = station.get("id")
             if not uid:
@@ -428,25 +428,16 @@ class NoDrivstoffProvider(BaseProvider):
                 continue
 
             name = _display_name(station)
-            prices = _extract_prices(station.get("prices") or [])
-
-            price_parts: list[str] = []
-            if prices.get("diesel") is not None:
-                price_parts.append(f"Diesel kr{prices['diesel']:.2f}")
-            if prices.get("unleaded") is not None:
-                price_parts.append(f"Bensin 95 kr{prices['unleaded']:.2f}")
-            if prices.get("premium_unleaded") is not None:
-                price_parts.append(f"Bensin 98 kr{prices['premium_unleaded']:.2f}")
-
-            if price_parts:
-                label = f"{name} — {' / '.join(price_parts)}"
+            address: str = (station.get("address") or "").strip()
+            if address:
+                label = f"{name}, {address} (#{uid[:8]})"
             else:
-                label = name
+                label = f"{name} (#{uid[:8]})"
 
-            result.append((uid, label, dist_km))
+            result.append((uid, label))
 
-        result.sort(key=lambda x: x[2])
-        return [(uid, label) for uid, label, _ in result]
+        result.sort(key=lambda x: x[1].lower())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

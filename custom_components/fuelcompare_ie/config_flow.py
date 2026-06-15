@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import logging
 from typing import Any
 
@@ -353,14 +352,13 @@ async def _fetch_station_name(
         return None
     try:
         session = async_get_clientsession(hass)
-        sig = inspect.signature(provider_cls.__init__)
-        if api_key and "api_key" in sig.parameters:
+        if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
             provider = provider_cls(station_id, api_key=api_key)
         else:
             provider = provider_cls(station_id)
         return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
-        _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
+        _LOGGER.warning("Failed to fetch station name for %s: %s", station_id, err)
     return None
 
 
@@ -404,6 +402,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             self._country = user_input[CONF_COUNTRY]
             return await self._async_step_provider()
 
+        if not countries:
+            return self.async_abort(reason="no_providers_for_country")
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -442,7 +443,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             return await self.async_step_county()
         if (
             getattr(provider_cls, "CONFIG_MODE", None) == "location"
-            or getattr(provider_cls, "STATION_LOOKUP_MODE", None) == "location_search"
+            or mode == "location_search"
         ):
             return await self.async_step_location()
         return await self.async_step_station()
@@ -553,6 +554,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # Build county list from the country. For IE use the 26 counties + all-Ireland.
         county_options = _counties_for_country(self._country)
+        if not county_options:
+            return self.async_abort(reason="no_counties_for_country")
         return self.async_show_form(
             step_id="county",
             data_schema=vol.Schema(
@@ -613,7 +616,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     session, **list_kwargs
                 )
             except Exception as err:  # noqa: BLE001
-                _LOGGER.debug("Failed to load station list: %s", err)
+                _LOGGER.warning("Failed to load station list: %s", err)
 
         self._station_list = station_list
 
@@ -692,6 +695,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if needs_postal:
                 self._postal_code = str(user_input.get(CONF_POSTAL_CODE) or "").strip()
             self._station_id = ""
+            # 4 decimal places ≈ 11 m precision; stations closer than ~11 m share an entry_id
             unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
             await self.async_set_unique_id(unique)
             self._abort_if_unique_id_configured()
@@ -779,6 +783,18 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
             schema_dict: dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            if user_input is not None:
+                errors: dict[str, str] = {}
+                if (
+                    CONF_API_KEY in user_input
+                    and not (user_input[CONF_API_KEY] or "").strip()
+                ):
+                    errors[CONF_API_KEY] = "invalid_api_key"
+                    schema = vol.Schema(schema_dict)
+                    return self.async_show_form(
+                        step_id="init", data_schema=schema, errors=errors
+                    )
+                return self.async_create_entry(data=user_input)
             if not schema_dict:
                 return self.async_create_entry(data={})
             schema = vol.Schema(schema_dict)

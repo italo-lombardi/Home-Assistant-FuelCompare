@@ -1194,7 +1194,7 @@ async def test_async_list_stations_station_id_is_composite_key() -> None:
 
 
 async def test_async_list_stations_sorted_cheapest_unleaded_first() -> None:
-    """async_list_stations sorts stations cheapest-unleaded-first."""
+    """async_list_stations sorts stations alphabetically by station name."""
     # Two stations in the unleaded feed with different prices
     xml = (
         b'<?xml version="1.0" encoding="utf-8"?>'
@@ -1226,8 +1226,8 @@ async def test_async_list_stations_sorted_cheapest_unleaded_first() -> None:
     result = await provider.async_list_stations(session)
 
     assert len(result) == 2
-    # Cheapest (150.0) must come first
-    assert "Cheap Station" in result[0][1]
+    # Alphabetically first ('BP Expensive Station' < 'Caltex Cheap Station') must come first
+    assert "Expensive Station" in result[0][1]
 
 
 async def test_async_list_stations_returns_empty_on_client_error() -> None:

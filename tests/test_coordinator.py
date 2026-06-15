@@ -1070,52 +1070,6 @@ async def test_last_successful_fetch_unchanged_on_failure(
 
 
 # ---------------------------------------------------------------------------
-# Coordinator delegation to provider methods (lines 83, 88, 94)
-# ---------------------------------------------------------------------------
-
-
-async def test_fetch_nextjs_delegates_to_provider(hass: HomeAssistant) -> None:
-    """_fetch_nextjs returns provider._fetch_nextjs() result when method exists."""
-    provider = MagicMock()
-    provider._fetch_nextjs = AsyncMock(return_value={"key": "val"})
-    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    coord._provider = provider
-    result = await coord._provider._fetch_nextjs(MagicMock())
-    assert result == {"key": "val"}
-
-
-async def test_fetch_nextjs_returns_none_without_provider_method(
-    hass: HomeAssistant,
-) -> None:
-    """Coordinator _provider stores the provider object (attribute access test)."""
-    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    provider = MagicMock()
-    coord._provider = provider
-    # _provider is accessible
-    assert coord._provider is provider
-
-
-async def test_fetch_encrypted_api_delegates_to_provider(hass: HomeAssistant) -> None:
-    """_fetch_encrypted_api returns provider._fetch_encrypted_api() result."""
-    provider = MagicMock()
-    provider._fetch_encrypted_api = AsyncMock(return_value={"enc": "val"})
-    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    coord._provider = provider
-    result = await coord._provider._fetch_encrypted_api(MagicMock())
-    assert result == {"enc": "val"}
-
-
-def test_parse_station_delegates_to_provider(hass: HomeAssistant) -> None:
-    """_parse_station returns provider._parse_station() result when method exists."""
-    provider = MagicMock()
-    provider._parse_station = MagicMock(return_value={"parsed": True})
-    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    coord._provider = provider
-    result = coord._provider._parse_station({"raw": True})
-    assert result == {"parsed": True}
-
-
-# ---------------------------------------------------------------------------
 # providers/__init__.py — get_provider_or_default RuntimeError (lines 95-100)
 # ---------------------------------------------------------------------------
 
@@ -1267,17 +1221,6 @@ def test_non_eur_providers_override_currency() -> None:
 # ---------------------------------------------------------------------------
 # Coordinator delegation fallback (lines 89, 94) — no provider method
 # ---------------------------------------------------------------------------
-
-
-async def test_fetch_encrypted_api_returns_none_without_provider_method(
-    hass: HomeAssistant,
-) -> None:
-    """Coordinator stores the provider and exposes it via _provider attribute."""
-    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    provider = MagicMock()
-    coord._provider = provider
-    # _provider is accessible and is the object we set
-    assert coord._provider is provider
 
 
 def test_parse_station_returns_station_without_provider_method(

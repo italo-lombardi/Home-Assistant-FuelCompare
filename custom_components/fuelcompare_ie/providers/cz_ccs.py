@@ -119,7 +119,7 @@ class CzCcsProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
-    CURRENCY: ClassVar[str] = "Kc"
+    CURRENCY: ClassVar[str] = "Kč"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
@@ -128,7 +128,6 @@ class CzCcsProvider(BaseProvider):
             "diesel",  # Diesel cap price
             # Station / source identity
             "name",
-            "source_station_id",
             # Timing
             "lastupdated",
         }

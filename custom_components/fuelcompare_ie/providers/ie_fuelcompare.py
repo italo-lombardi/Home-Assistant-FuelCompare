@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import ClassVar
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT, BASE_URL
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
@@ -40,7 +40,7 @@ class IEFuelCompareProvider(BaseProvider):
             "name",
             "county",
             "working_hours",
-            "tablename",
+            "brand",
         }
     )
 
@@ -137,6 +137,7 @@ class IEFuelCompareProvider(BaseProvider):
             data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self._station_id}.json"
             _LOGGER.debug("Fetching Next.js URL: %s", data_url)
 
+            needs_retry = False
             async with session.get(
                 data_url, timeout=_TIMEOUT, headers=_HEADERS
             ) as response:
@@ -146,16 +147,19 @@ class IEFuelCompareProvider(BaseProvider):
                         response.status,
                         self._station_id,
                     )
-                    await self._fetch_page_assets(session)
-                    data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self._station_id}.json"
-                    _LOGGER.debug("Retrying Next.js URL: %s", data_url)
-                    async with session.get(
-                        data_url, timeout=_TIMEOUT, headers=_HEADERS
-                    ) as retry_response:
-                        retry_response.raise_for_status()
-                        json_data = await retry_response.json()
+                    needs_retry = True
                 else:
                     json_data = await response.json()
+
+            if needs_retry:
+                await self._fetch_page_assets(session)
+                data_url = f"{BASE_URL}/_next/data/{self._build_id}/station/{self._station_id}.json"
+                _LOGGER.debug("Retrying Next.js URL: %s", data_url)
+                async with session.get(
+                    data_url, timeout=_TIMEOUT, headers=_HEADERS
+                ) as retry_response:
+                    retry_response.raise_for_status()
+                    json_data = await retry_response.json()
 
             _LOGGER.debug(
                 "Next.js raw response for station %s: %s", self._station_id, json_data
@@ -172,7 +176,7 @@ class IEFuelCompareProvider(BaseProvider):
 
             return station
 
-        except Exception as err:
+        except (KeyError, ValueError, TypeError, ClientResponseError) as err:
             _LOGGER.debug(
                 "Next.js path failed for station %s: %s", self._station_id, err
             )
@@ -230,9 +234,16 @@ class IEFuelCompareProvider(BaseProvider):
             "Posting to encrypted API for station %s: %s", self._station_id, url
         )
 
+        try:
+            sid = int(self._station_id)
+        except ValueError:
+            raise ProviderError(
+                f"Station ID {self._station_id!r} must be numeric for the encrypted API"
+            ) from None
+
         async with session.post(
             url,
-            json={"id": int(self._station_id)},
+            json={"id": sid},
             timeout=_TIMEOUT,
             headers={**_HEADERS, "Content-Type": "application/json"},
         ) as response:
@@ -268,26 +279,34 @@ class IEFuelCompareProvider(BaseProvider):
     async def _decrypt_with_recovery(
         self, session: ClientSession, encrypted: str
     ) -> list | None:
-        try:
-            return _cryptojs_decrypt(encrypted, self._decrypt_key)
-        except Exception as err:
-            _LOGGER.debug(
-                "Decrypt failed for station %s (stale key?): %s — refreshing key and retrying",
-                self._station_id,
-                err,
-            )
+        if self._decrypt_key is not None:
+            try:
+                return _cryptojs_decrypt(encrypted, self._decrypt_key)
+            except Exception as err:
+                _LOGGER.debug(
+                    "Decrypt failed for station %s (stale key?): %s — refreshing key and retrying",
+                    self._station_id,
+                    err,
+                )
 
         await self._fetch_page_assets(session)
-        try:
-            return _cryptojs_decrypt(encrypted, self._decrypt_key)
-        except Exception as retry_err:
-            _LOGGER.debug(
-                "Decrypt failed again for station %s after standard refresh: %s — retrying with broad chunk scan",
-                self._station_id,
-                retry_err,
-            )
+        if self._decrypt_key is not None:
+            try:
+                return _cryptojs_decrypt(encrypted, self._decrypt_key)
+            except Exception as retry_err:
+                _LOGGER.debug(
+                    "Decrypt failed again for station %s after standard refresh: %s — retrying with broad chunk scan",
+                    self._station_id,
+                    retry_err,
+                )
 
         await self._fetch_page_assets(session, broad=True)
+        if self._decrypt_key is None:
+            _LOGGER.debug(
+                "Decrypt key unavailable for station %s after broad chunk scan",
+                self._station_id,
+            )
+            return None
         try:
             return _cryptojs_decrypt(encrypted, self._decrypt_key)
         except Exception as broad_err:
@@ -301,7 +320,7 @@ class IEFuelCompareProvider(BaseProvider):
     # ---- Shared parser ----------------------------------------------------------
 
     def _parse_station(self, station: dict) -> StationData:
-        fuel_data: StationData = {}  # type: ignore[typeddict-item]
+        fuel_data: StationData = {}
 
         for fuel_type in _FUEL_TYPES:
             raw_value = station.get(fuel_type)
@@ -311,7 +330,7 @@ class IEFuelCompareProvider(BaseProvider):
                 self._station_id,
                 raw_value,
             )
-            if raw_value and raw_value != "":
+            if raw_value is not None and raw_value != "":
                 try:
                     price = float(
                         str(raw_value).replace("€", "").replace(",", "").strip()

@@ -258,6 +258,7 @@ class CaQcProvider(BaseProvider):
             "county",
             "latitude",
             "longitude",
+            "lastupdated",
         }
     )
 
@@ -363,7 +364,7 @@ class CaQcProvider(BaseProvider):
 
         Called by the config flow location_search step.  Fetches the full
         GeoJSON dataset, filters to stations within ``radius_km`` of the
-        supplied coordinates, and returns them sorted by distance.
+        supplied coordinates, and returns them sorted alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -372,8 +373,8 @@ class CaQcProvider(BaseProvider):
             radius_km: Search radius in km (float, default 10).
 
         Returns:
-            List of (station_id, "Name — Brand — Diesel $1.90/L") tuples,
-            sorted by haversine distance from the centre point.
+            List of (station_id, "Name, Address (#shortid)") tuples,
+            sorted alphabetically by label.
             Empty list on any failure.
         """
         lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
@@ -390,7 +391,7 @@ class CaQcProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
 
         for feature in features:
             props = feature.get("properties") or {}
@@ -412,47 +413,19 @@ class CaQcProvider(BaseProvider):
             if dist > radius_km:
                 continue
 
-            name = props.get("Name") or "Unknown"
-            brand = props.get("brand") or ""
+            name: str = props.get("Name") or "Unknown"
+            address: str = props.get("Address") or ""
             station_id = _make_station_id(
                 props.get("Name", ""), props.get("Address", "")
             )
 
-            # Build price summary
-            price_parts: list[str] = []
-            for price_entry in props.get("Prices") or []:
-                gas_type = price_entry.get("GasType", "")
-                is_available = bool(price_entry.get("IsAvailable", False))
-                if not is_available:
-                    continue
-                data_key = _GAS_TYPE_MAP.get(gas_type)
-                if data_key is None:
-                    continue
-                parsed = _parse_price(price_entry.get("Price"))
-                if parsed is None:
-                    continue
-                # Display using short labels
-                label_map = {
-                    "unleaded": "Reg",
-                    "premium_unleaded": "Super",
-                    "diesel": "Diesel",
-                }
-                short = label_map.get(data_key, gas_type)
-                price_parts.append(f"{short} ${parsed:.3f}")  # CAD/L
+            # Compose display label: "Name, Address (#shortid)"
+            label = f"{name}, {address} (#{station_id[:8]})"
 
-            # Compose display label
-            display_name = f"{brand} {name}".strip() if brand else name
-            if price_parts:
-                label = f"{display_name} — {' / '.join(price_parts)} ({dist:.1f} km)"
-                sort_key = dist  # sort by distance
-            else:
-                label = f"{display_name} ({dist:.1f} km)"
-                sort_key = radius_km + dist  # push no-price stations to end
+            result.append((station_id, label))
 
-            result.append((station_id, label, sort_key))
-
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1].casefold())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

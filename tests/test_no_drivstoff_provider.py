@@ -493,6 +493,7 @@ def test_display_name_maps_all_known_providers() -> None:
         "DRIV": "Driv",
         "ESSO": "Esso",
         "HALTBAKK_EXPRESS": "Haltbakk Express",
+        "OLJELEVERANDØREN": "Oljeleverandøren",
         "ST1": "St1",
         "TANKEN": "Tanken",
         "TRONDER_OIL": "Trønder Oil",
@@ -797,7 +798,7 @@ async def test_async_fetch_raises_provider_error_on_401() -> None:
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ProviderError, match=r"api_key|API key|api key"):
         await provider.async_fetch(session, _STATION_UUID)
 
 
@@ -808,7 +809,7 @@ async def test_async_fetch_raises_provider_error_on_403() -> None:
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ProviderError, match=r"api_key|API key|api key"):
         await provider.async_fetch(session, _STATION_UUID)
 
 
@@ -923,7 +924,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes formatted diesel price."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_STATIONS_PAYLOAD_OK)
     session = _make_session(resp)
 
@@ -931,12 +932,11 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "Diesel" in label
-    assert "20.90" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_bensin_price() -> None:
-    """async_list_stations label includes formatted bensin (unleaded/95) price."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_STATIONS_PAYLOAD_OK)
     session = _make_session(resp)
 
@@ -944,8 +944,7 @@ async def test_async_list_stations_label_includes_bensin_price() -> None:
     result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "Bensin" in label
-    assert "21.50" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_passes_distance_in_metres() -> None:
@@ -975,7 +974,7 @@ async def test_async_list_stations_passes_bearer_token() -> None:
 
 
 async def test_async_list_stations_sorted_nearest_first() -> None:
-    """async_list_stations sorts results nearest-first."""
+    """async_list_stations sorts results alphabetically by label."""
     near_station = {
         **_BASE_STATION,
         "id": "near-uuid",
@@ -995,8 +994,9 @@ async def test_async_list_stations_sorted_nearest_first() -> None:
         session, lat=_LAT, lng=_LNG, radius_km=10.0
     )
 
-    assert result[0][0] == "near-uuid"
-    assert result[1][0] == "far-uuid"
+    # "...#far-uui" < "...#near-uu" alphabetically
+    assert result[0][0] == "far-uuid"
+    assert result[1][0] == "near-uuid"
 
 
 async def test_async_list_stations_filters_by_radius() -> None:
@@ -1122,10 +1122,17 @@ async def test_async_list_stations_includes_zero_coordinate_station() -> None:
     station_at_null_island = {
         "id": "zero-island",
         "name": "Station at Null Island",
-        "brand": "Test",
+        "provider": "CIRCLE_K",
+        "address": "Null Island Road 0",
+        "city": "Null Island",
         "location": {"lat": 0.0, "lng": 0.0},
-        "fuel_prices": [{"fuel_name": "Bensin 95", "price": 1.85}],
-        "updated_at": "2026-06-14T12:00:00Z",
+        "prices": [
+            {
+                "fuelType": "DIESEL",
+                "price": "1.85",
+                "registeredAt": "2026-06-14T12:00:00Z",
+            }
+        ],
     }
 
     from unittest.mock import AsyncMock, MagicMock
@@ -1152,6 +1159,9 @@ async def test_async_list_stations_includes_zero_coordinate_station() -> None:
     assert "zero-island" in uids, (
         "Station at lat=0.0/lng=0.0 must not be dropped by falsy check"
     )
+    # Verify the label contains the expected station name from the API 'name' field
+    label = next(label for uid, label in stations if uid == "zero-island")
+    assert "Station at Null Island" in label
 
 
 # ---------------------------------------------------------------------------

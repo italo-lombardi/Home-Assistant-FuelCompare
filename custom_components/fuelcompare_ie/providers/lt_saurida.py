@@ -116,7 +116,6 @@ _HEADER_TO_KEY: dict[str, str] = {
     "lpg": "lpg",
     "dyzelinas_dz": "premium_diesel",
     "dyzelinas dz": "premium_diesel",
-    " dz": "premium_diesel",
 }
 
 
@@ -374,9 +373,6 @@ class LtSauridaProvider(BaseProvider):
             # Station identity
             "name",
             "brand",
-            # Per-station source identifier and timestamp
-            "source_station_id",
-            "lastupdated",
         }
     )
 
@@ -474,7 +470,11 @@ class LtSauridaProvider(BaseProvider):
         Fetches all stations from the saurida.lt HTML table.  The lat/lng/radius
         kwargs are accepted for API symmetry but are not used for filtering
         because the HTML source provides no GPS coordinates.  All stations are
-        returned sorted cheapest-first by diesel price.
+        returned sorted alphabetically by display label.
+
+        Label format: "{name} (#{key[:8]})" where key is the station name used
+        as the station identifier.  No price information is included in the
+        label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -483,8 +483,8 @@ class LtSauridaProvider(BaseProvider):
             radius_km: Search radius in km (accepted but not used).
 
         Returns:
-            List of (station_name, label) tuples sorted cheapest-first by
-            diesel price.  Returns [] on any network or parse failure.
+            List of (station_name, label) tuples sorted alphabetically by
+            label.  Returns [] on any network or parse failure.
         """
         # lat/lng are accepted (is-not-None coord check per spec) but saurida.lt
         # has no GPS data so we cannot filter by location.
@@ -509,34 +509,20 @@ class LtSauridaProvider(BaseProvider):
         if not stations:
             return []
 
-        candidates: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
 
         for station in stations:
             name: str = station.get("name") or ""
             if not name:
                 continue
 
-            diesel = station.get("diesel")
-            unleaded = station.get("unleaded")
+            # key is the station name string used as the station identifier.
+            key: str = name
+            label = f"{name} (#{key[:8]})"
+            result.append((name, label))
 
-            price_parts: list[str] = []
-            if diesel is not None:
-                price_parts.append(f"Diesel €{diesel:.3f}")
-            if unleaded is not None:
-                price_parts.append(f"A95 €{unleaded:.3f}")
-
-            best_price = min(
-                (p for p in [diesel, unleaded] if p is not None),
-                default=None,
-            )
-            sort_key: float = best_price if best_price is not None else 9999.0
-
-            label = f"{name} — {' / '.join(price_parts)}" if price_parts else name
-
-            candidates.append((name, label, sort_key))
-
-        candidates.sort(key=lambda x: x[2])
-        return [(name, label) for name, label, _ in candidates]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -593,8 +579,6 @@ class LtSauridaProvider(BaseProvider):
             "premium_diesel": station.get("premium_diesel"),
             "name": name,
             "brand": "Saurida",
-            "lastupdated": None,  # saurida.lt does not expose per-price timestamps
-            "source_station_id": station_id,
         }
 
         _LOGGER.debug(

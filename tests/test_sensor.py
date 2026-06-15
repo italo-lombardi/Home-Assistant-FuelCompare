@@ -32,6 +32,8 @@ def _make_coordinator(data: dict | None, last_update_success: bool = True) -> Ma
     coord.data = data
     coord.last_update_success = last_update_success
     coord._provider.LABEL = "fuelcompare.ie"
+    coord.provider_label = "fuelcompare.ie"
+    coord.provider_currency = "€"
     return coord
 
 

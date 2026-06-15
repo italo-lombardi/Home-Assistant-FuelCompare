@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Vyberte zdroj dat",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Zdroj dat"
         },
@@ -61,7 +62,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Neplatné ID stanice. Zadejte platné kladné číslo.",
+      "invalid_station_id": "ID stanice nesmí být prázdné.",
       "invalid_api_key": "Klíč API nesmí být prázdný.",
       "invalid_location": "Neplatné souřadnice. Zadejte platné hodnoty zeměpisné šířky a délky.",
       "no_stations_found": "Pro tento okres nebyly nalezeny žádné stanice. Zkuste jiný okres."
@@ -69,6 +70,12 @@
     "abort": {
       "already_configured": "Tato stanice je již nakonfigurována.",
       "no_providers_for_country": "Pro tuto zemi nejsou k dispozici žádní poskytovatelé dat."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie se zavírá",
+      "description": "Web fuelcompare.ie je naplánován k ukončení **30. června 2026**. Vaše stanice **{entry_title}** přestane po tomto datu dostávat aktualizace cen. Zvažte přechod na jiný irský zdroj cen paliv, například FuelFinder IE nebo IE Pumps."
     }
   },
   "entity": {

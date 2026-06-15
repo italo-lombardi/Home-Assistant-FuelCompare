@@ -14,7 +14,6 @@ CONF_API_KEY = "api_key"  # optional API key for providers that require authenti
 CONF_POSTAL_CODE = "postal_code"  # for postal-code-centric providers (e.g. be_carbu)
 
 # Defaults
-DEFAULT_SCAN_INTERVAL = 1800  # 30 minutes
 DEFAULT_COUNTRY = "IE"
 DEFAULT_PROVIDER = "ie_fuelcompare"
 DEFAULT_RADIUS_KM = 10.0

@@ -5,11 +5,12 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+from typing import Any
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
+def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> Any:
     """Decrypt a CryptoJS AES-CBC base64 payload using EvpKDF key derivation.
 
     fuelcompare.ie API responses are encrypted with CryptoJS AES using a key
@@ -17,12 +18,17 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
     format: base64("Salted__" + 8-byte-salt + ciphertext), with key+IV derived via
     iterative MD5 (EvpKDF). The key is extracted dynamically by PageAssets.
     """
-    raw = base64.b64decode(encrypted_b64, validate=True)
+    try:
+        raw = base64.b64decode(encrypted_b64, validate=True)
+    except Exception as err:
+        raise ValueError(f"Invalid base64: {err}") from err
     if raw[:8] != b"Salted__":
         raise ValueError("Payload missing CryptoJS 'Salted__' magic header")
     # CryptoJS Salted__ format: bytes 0-7 = magic, 8-15 = salt, 16+ = ciphertext
     salt = raw[8:16]
     ciphertext = raw[16:]
+    if len(raw) < 32:
+        raise ValueError(f"Payload too short ({len(raw)} bytes)")
 
     # EvpKDF: chain MD5(prev + evp_key + salt) until we have 48 bytes (32 key + 16 IV)
     d, d_i = b"", b""
@@ -42,4 +48,9 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
         raise ValueError(f"Invalid PKCS7 padding length: {pad_len}")
     if padded[-pad_len:] != bytes([pad_len] * pad_len):
         raise ValueError("Invalid PKCS7 padding bytes")
-    return json.loads(padded[:-pad_len])
+    result = json.loads(padded[:-pad_len])
+    if not isinstance(result, list):
+        raise ValueError(
+            f"Expected list from decrypted JSON, got {type(result).__name__}"
+        )
+    return result

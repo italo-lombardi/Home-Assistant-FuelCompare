@@ -131,8 +131,6 @@ class GrFuelgovProvider(BaseProvider):
             "county",
             # Timing
             "lastupdated",
-            # Passthrough
-            "source_station_id",
         }
     )
 

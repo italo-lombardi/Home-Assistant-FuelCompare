@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Valitse tietolähde",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Tietolähde"
         },
@@ -61,7 +62,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Virheellinen aseman tunnus. Syötä kelvollinen positiivinen luku.",
+      "invalid_station_id": "Aseman tunnus ei voi olla tyhjä.",
       "invalid_api_key": "API-avain ei voi olla tyhjä.",
       "invalid_location": "Virheelliset koordinaatit. Syötä kelvolliset leveysaste- ja pituusastearvot.",
       "no_stations_found": "Tältä lääniltä ei löydy asemia. Kokeile eri lääniä."
@@ -69,6 +70,12 @@
     "abort": {
       "already_configured": "Tämä asema on jo määritetty.",
       "no_providers_for_country": "Tälle maalle ei ole saatavilla tietolähteen tarjoajia."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie sulkeutuu",
+      "description": "Verkkosivusto fuelcompare.ie on aikataulutettu sulkeutumaan **30. kesäkuuta 2026**. Asemasi **{entry_title}** lakkaa saamasta hintapäivityksiä tuon päivämäärän jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
     }
   },
   "entity": {
