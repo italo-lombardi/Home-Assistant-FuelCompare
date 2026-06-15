@@ -829,7 +829,7 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_label_includes_price() -> None:
-    """async_list_stations labels include formatted A$ price."""
+    """async_list_stations labels include station name and short ID suffix."""
     raw = {"stations": [_BASE_STATION], "prices": _BASE_PRICES}
     resp = _make_mock_response(200, json_data=raw)
     session = _make_session(resp)
@@ -842,11 +842,11 @@ async def test_async_list_stations_label_includes_price() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    assert "A$" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_diesel() -> None:
-    """async_list_stations label includes Diesel when present."""
+    """async_list_stations label includes station name when diesel present."""
     raw = {"stations": [_BASE_STATION], "prices": _BASE_PRICES}
     resp = _make_mock_response(200, json_data=raw)
     session = _make_session(resp)
@@ -858,12 +858,12 @@ async def test_async_list_stations_label_includes_diesel() -> None:
     )
 
     _, label = result[0]
-    assert "Diesel" in label
-    assert "1." in label
+    assert "BP Umina Beach" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_unleaded() -> None:
-    """async_list_stations label includes Unleaded when present."""
+    """async_list_stations label includes station name when unleaded present."""
     raw = {"stations": [_BASE_STATION], "prices": _BASE_PRICES}
     resp = _make_mock_response(200, json_data=raw)
     session = _make_session(resp)
@@ -875,11 +875,11 @@ async def test_async_list_stations_label_includes_unleaded() -> None:
     )
 
     _, label = result[0]
-    assert "Unleaded" in label
+    assert "BP Umina Beach" in label
 
 
 async def test_async_list_stations_label_e10_shown_when_no_unleaded() -> None:
-    """async_list_stations shows E10 in label when U91 is absent but E10 is present."""
+    """async_list_stations label includes station name when only E10 is present."""
     prices_e10_only = [
         {
             "stationcode": _STATION_CODE,
@@ -899,7 +899,8 @@ async def test_async_list_stations_label_e10_shown_when_no_unleaded() -> None:
     )
 
     _, label = result[0]
-    assert "E10" in label
+    assert "BP Umina Beach" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_returns_empty_without_lat_lng() -> None:

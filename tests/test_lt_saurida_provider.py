@@ -645,7 +645,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_contains_diesel_price() -> None:
-    """async_list_stations label includes the diesel price."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, text_data=_VALID_HTML)
     session = _make_session(resp)
 
@@ -654,18 +654,18 @@ async def test_async_list_stations_label_contains_diesel_price() -> None:
 
     assert result
     labels = [label for _, label in result]
-    assert any("Diesel" in lbl or "1.52" in lbl or "1.53" in lbl for lbl in labels)
+    assert any("(#" in lbl for lbl in labels)
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations sorts stations cheapest-first by diesel price."""
+    """async_list_stations sorts stations alphabetically by label."""
     resp = _make_mock_response(200, text_data=_VALID_HTML)
     session = _make_session(resp)
 
     provider = _make_provider()
     result = await provider.async_list_stations(session)
 
-    # Kaunas has cheaper diesel (1.529) vs Vilnius (1.539)
+    # "Kaunas..." < "Vilnius..." alphabetically
     assert result[0][0] == _STATION_NAME_2
     assert result[1][0] == _STATION_NAME_1
 

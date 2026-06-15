@@ -788,7 +788,7 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_label_includes_price() -> None:
-    """async_list_stations label includes diesel price in EUR."""
+    """async_list_stations label includes short station ID in (#...) format."""
     provider = _provider_with_cached_location()
 
     diesel_resp = _make_html_response(_TWO_STATIONS_HTML)
@@ -800,7 +800,7 @@ async def test_async_list_stations_label_includes_price() -> None:
 
     assert results
     _sid, label = results[0]
-    assert "€" in label or "Diesel" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_returns_empty_without_postal_code() -> None:

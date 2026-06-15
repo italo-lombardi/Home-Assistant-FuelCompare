@@ -859,13 +859,13 @@ async def test_async_list_stations_excludes_station_outside_radius() -> None:
 
 
 async def test_async_list_stations_label_contains_sp95_price() -> None:
-    """Each label should contain an SP95/unleaded price string."""
+    """Each label should contain the short station ID in (#...) format."""
     session = _make_session_always(_PAYLOAD_SP95)
     p = _provider()
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
     if result:
         _, label = result[0]
-        assert "SP95" in label or "1.879" in label
+        assert "(#" in label
 
 
 async def test_async_list_stations_returns_empty_when_no_coordinates() -> None:
@@ -942,7 +942,7 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
 
 
 async def test_async_list_stations_station_no_price_sorts_last() -> None:
-    """Stations with no price should appear after priced stations."""
+    """Stations are sorted alphabetically by label."""
     priced = {**_BASE_STATION, "id": "priced", "price": 1.799}
     no_price = {**_BASE_STATION, "id": "no-price", "price": None}
     payload = {"data": [no_price, priced]}
@@ -951,7 +951,8 @@ async def test_async_list_stations_station_no_price_sorts_last() -> None:
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
     if len(result) >= 2:
         ids = [sid for sid, _ in result]
-        assert ids.index("priced") < ids.index("no-price")
+        # Both have same display name; alphabetically "(#no-price" < "(#priced" → no-price first
+        assert ids.index("no-price") < ids.index("priced")
 
 
 async def test_async_list_stations_deduplicates_by_station_id() -> None:

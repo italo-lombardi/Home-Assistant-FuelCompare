@@ -284,8 +284,8 @@ class AuVicProvider(BaseProvider):
             radius_km: Search radius in kilometres (float, default 10.0).
 
         Returns:
-            List of (station_uuid, "Name — Unleaded A$1.76 / Diesel A$1.84")
-            tuples ordered cheapest first.  Returns empty list on any failure.
+            List of (station_uuid, "Brand/Name, Address (#uuid[:8])")
+            tuples ordered alphabetically by label.  Returns empty list on any failure.
         """
         lat: float | None = (
             kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
@@ -307,7 +307,7 @@ class AuVicProvider(BaseProvider):
 
         station_map = _build_station_map(raw)
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for sid, entry in station_map.items():
             fs = entry.get("fuelStation") or {}
             loc = fs.get("location") or {}
@@ -321,12 +321,11 @@ class AuVicProvider(BaseProvider):
             if dist > radius_km:
                 continue
 
-            prices = _extract_prices(entry.get("fuelPrices") or [])
-            label, sort_key = _build_display_label(fs, prices)
-            result.append((sid, label, sort_key))
+            label = _build_display_label(fs, sid)
+            result.append((sid, label))
 
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1].lower())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -520,41 +519,34 @@ def _build_station_data(entry: dict[str, Any]) -> StationData:
 
 def _build_display_label(
     fs: dict[str, Any],
-    prices: dict[str, float],
-) -> tuple[str, float]:
-    """Build a human-readable display label and sort key for the station picker.
+    station_id: str,
+) -> str:
+    """Build a human-readable display label for the station picker.
+
+    Format: ``"Brand/Name, Address (#uuid[:8])"``
+    No price information is included so the label remains stable between polls.
 
     Args:
-        fs:     The ``fuelStation`` dict from the API response.
-        prices: Pre-extracted {StationData_key: price_aud_per_litre} dict.
+        fs:         The ``fuelStation`` dict from the API response.
+        station_id: The station UUID string (used for the short suffix).
 
     Returns:
-        Tuple of (label_string, sort_key_float) where sort_key_float is the
-        cheapest available price (used to order the station list), or 9999.0
-        for stations with no prices.
+        Label string of the form ``"Brand/Name, Address (#abcd1234)"``.
+        Falls back gracefully when name or address fields are missing.
     """
     name: str = fs.get("name") or "Unknown"
+    address: str = fs.get("address") or ""
     suburb: str = fs.get("suburb") or ""
 
-    # Compose identity part: "Station Name, Suburb" if suburb is known
-    if suburb and suburb.lower() not in name.lower():
-        identity = f"{name}, {suburb}"
+    # Build a compact address: prefer the street address, append suburb if present
+    # and not already embedded in the street string.
+    if suburb and suburb.lower() not in address.lower():
+        full_addr = f"{address}, {suburb}" if address else suburb
     else:
-        identity = name
+        full_addr = address
 
-    price_parts: list[str] = []
-    sort_price = 9999.0
+    uuid_prefix = station_id[:8] if len(station_id) >= 8 else station_id
 
-    for key, label in (
-        ("unleaded", "Unleaded"),
-        ("diesel", "Diesel"),
-        ("e10", "E10"),
-    ):
-        price = prices.get(key)
-        if price is not None:
-            price_parts.append(f"{label} A${price:.3f}")
-            sort_price = min(sort_price, price)
-
-    if price_parts:
-        return f"{identity} — {' / '.join(price_parts)}", sort_price
-    return identity, sort_price
+    if full_addr:
+        return f"{name}, {full_addr} (#{uuid_prefix})"
+    return f"{name} (#{uuid_prefix})"

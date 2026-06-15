@@ -879,22 +879,23 @@ async def test_async_list_stations_station_id_format() -> None:
     provider = _default_provider()
     result = await provider.async_list_stations(session, city="sarajevo")
 
-    assert result[0][0] == "sarajevo:1"  # Petrol Centar is cheaper diesel
-    assert result[1][0] == "sarajevo:0"
+    # Sorted alphabetically: "OMV Sarajevo" < "Petrol Centar"
+    assert result[0][0] == "sarajevo:0"  # OMV Sarajevo comes first alphabetically
+    assert result[1][0] == "sarajevo:1"
 
 
 @pytest.mark.asyncio
 async def test_async_list_stations_sorted_cheapest_diesel_first() -> None:
-    """async_list_stations sorts stations by cheapest diesel first."""
+    """async_list_stations sorts stations alphabetically by label."""
     resp = _make_mock_response(200, text=_SAMPLE_HTML)
     session = _make_session(resp)
 
     provider = _default_provider()
     result = await provider.async_list_stations(session, city="sarajevo")
 
-    # Petrol Centar has diesel 2.720, OMV has 2.750 — cheaper first
+    # Alphabetical order: "OMV Sarajevo" < "Petrol Centar"
     first_sid, first_label = result[0]
-    assert "Petrol Centar" in first_label
+    assert "OMV Sarajevo" in first_label
 
 
 @pytest.mark.asyncio
@@ -912,7 +913,7 @@ async def test_async_list_stations_label_includes_name() -> None:
 
 @pytest.mark.asyncio
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes formatted diesel price in KM."""
+    """async_list_stations label includes short station ID in (#...) format."""
     resp = _make_mock_response(200, text=_SAMPLE_HTML)
     session = _make_session(resp)
 
@@ -920,7 +921,7 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     result = await provider.async_list_stations(session, city="sarajevo")
 
     labels = [label for _, label in result]
-    assert any("Diesel" in lbl and "KM" in lbl for lbl in labels)
+    assert any("(#" in lbl for lbl in labels)
 
 
 @pytest.mark.asyncio

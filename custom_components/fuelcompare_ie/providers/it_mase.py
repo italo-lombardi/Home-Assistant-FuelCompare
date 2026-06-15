@@ -480,9 +480,9 @@ class ItMaseProvider(BaseProvider):
         """Return (station_id, display_label) pairs for stations near the user.
 
         Downloads both CSV files and returns all stations within radius_km of
-        the configured coordinates, sorted cheapest-first by diesel price (or
-        unleaded price if diesel is unavailable; stations with no price go to
-        the end).
+        the configured coordinates, sorted alphabetically by label.
+
+        Label format: "{brand/name}, {address} (#{station_id[:8]})"
 
         Args:
             session:   aiohttp ClientSession.
@@ -491,7 +491,7 @@ class ItMaseProvider(BaseProvider):
             radius_km: Override search radius (falls back to constructor value).
 
         Returns:
-            List of (station_id, display_label) tuples, cheapest first.
+            List of (station_id, display_label) tuples, sorted alphabetically.
             Empty list on any failure.
         """
         raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
@@ -506,12 +506,12 @@ class ItMaseProvider(BaseProvider):
         radius_km: float = float(kwargs.get("radius_km", self._radius_km))
 
         try:
-            price_data, _timestamps, meta_data = await self._fetch_both_csvs(session)
+            _price_data, _timestamps, meta_data = await self._fetch_both_csvs(session)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed to fetch CSVs: %s", err)
             return []
 
-        results: list[tuple[str, str, float]] = []
+        results: list[tuple[str, str]] = []
 
         for station_id, meta in meta_data.items():
             slat = meta.get("lat")
@@ -523,45 +523,29 @@ class ItMaseProvider(BaseProvider):
             if dist > radius_km:
                 continue
 
-            prices = price_data.get(station_id, {})
-
             nome = meta.get("nome") or ""
             bandiera = meta.get("bandiera") or ""
-            display_name = (
-                f"{bandiera} — {nome}"
+            brand_name = (
+                f"{bandiera}/{nome}"
                 if bandiera and nome
                 else (nome or bandiera or f"Station {station_id}")
             )
+
+            indirizzo = meta.get("indirizzo") or ""
             comune = meta.get("comune") or ""
-            if comune:
-                display_name = f"{display_name} ({comune})"
+            address_parts = [p for p in [indirizzo, comune] if p]
+            address = ", ".join(address_parts) if address_parts else ""
 
-            diesel_prices = prices.get("diesel", [])
-            petrol_prices = prices.get("unleaded", [])
+            short_id = station_id[:8]
+            if address:
+                label = f"{brand_name}, {address} (#{short_id})"
+            else:
+                label = f"{brand_name} (#{short_id})"
 
-            price_parts: list[str] = []
-            sort_price = 9999.0
+            results.append((station_id, label))
 
-            d_price = _cheapest_price(diesel_prices)
-            if d_price is not None:
-                price_parts.append(f"Diesel €{d_price:.3f}")
-                sort_price = min(sort_price, d_price)
-
-            p_price = _cheapest_price(petrol_prices)
-            if p_price is not None:
-                price_parts.append(f"Benzina €{p_price:.3f}")
-                sort_price = min(sort_price, p_price)
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)} ({dist:.1f} km)"
-                if price_parts
-                else f"{display_name} ({dist:.1f} km)"
-            )
-
-            results.append((station_id, label, sort_price))
-
-        results.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in results]
+        results.sort(key=lambda x: x[1].lower())
+        return results
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

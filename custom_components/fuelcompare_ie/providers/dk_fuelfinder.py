@@ -422,13 +422,18 @@ class DkFuelFinderProvider(BaseProvider):
         session: ClientSession,
         **kwargs: Any,
     ) -> list[tuple[str, str]]:
-        """Return (brand_name, display_label) pairs for the station picker.
+        """Return (brand_key, display_label) pairs for the station picker.
 
         Called by the config flow location_search step.  Returns all brands
-        from the listprices table sorted cheapest-first by diesel price, then
-        by unleaded price.  The lat/lng/radius kwargs are accepted for API
-        symmetry but are not used for filtering because fuelfinder.dk does not
-        provide per-station location data.
+        from the listprices table sorted alphabetically by label.  The
+        lat/lng/radius kwargs are accepted for API symmetry but are not used
+        for filtering because fuelfinder.dk does not provide per-station
+        location data.
+
+        Labels use the format ``"{brand_name} (#{brand_key[:8]})"`` — no
+        price is included because prices may change between the list step and
+        the actual fetch.  The brand key (company name) is used as the station
+        identifier.
 
         Args:
             session:    aiohttp ClientSession.
@@ -437,7 +442,7 @@ class DkFuelFinderProvider(BaseProvider):
             radius_km:  Search radius in km (accepted but not used for filtering).
 
         Returns:
-            List of (brand_name, label) tuples sorted cheapest-first.
+            List of (brand_key, label) tuples sorted alphabetically by label.
             Returns [] on any network or parse failure.
         """
         try:
@@ -449,33 +454,14 @@ class DkFuelFinderProvider(BaseProvider):
         if not brand_table:
             return []
 
-        candidates: list[tuple[str, str, float]] = []
+        entries: list[tuple[str, str]] = []
 
-        for brand, prices in brand_table.items():
-            diesel = prices.get("diesel")
-            unleaded = prices.get("unleaded")
+        for brand_key in brand_table:
+            label = f"{brand_key} (#{brand_key[:8]})"
+            entries.append((brand_key, label))
 
-            price_parts: list[str] = []
-            if diesel is not None:
-                price_parts.append(f"Diesel {diesel:.2f} DKK")
-            if unleaded is not None:
-                price_parts.append(f"Unleaded {unleaded:.2f} DKK")
-
-            best_price = min(
-                (p for p in [diesel, unleaded] if p is not None),
-                default=None,
-            )
-            sort_key = best_price if best_price is not None else 99999.0
-
-            if price_parts:
-                label = f"{brand} — {' / '.join(price_parts)}"
-            else:
-                label = brand
-
-            candidates.append((brand, label, sort_key))
-
-        candidates.sort(key=lambda x: x[2])
-        return [(brand, label) for brand, label, _ in candidates]
+        entries.sort(key=lambda x: x[1])
+        return entries
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

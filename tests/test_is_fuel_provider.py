@@ -674,7 +674,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_bensin95_price() -> None:
-    """async_list_stations label includes the formatted bensin95 price."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_PAYLOAD_SINGLE)
     session = _make_session(resp)
 
@@ -682,12 +682,11 @@ async def test_async_list_stations_label_includes_bensin95_price() -> None:
     result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "Bensin95" in label
-    assert "191" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes the formatted diesel price (rounded to whole ISK)."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_PAYLOAD_SINGLE)
     session = _make_session(resp)
 
@@ -695,21 +694,21 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     _, label = result[0]
-    assert "Diesel" in label
-    # 227.6 ISK formatted with :.0f rounds to 228
-    assert "228" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_sorted_nearest_first() -> None:
-    """async_list_stations sorts results nearest-first."""
+    """async_list_stations sorts results alphabetically by label."""
     near = {
         **_BASE_STATION,
         "key": "NEAR_001",
+        "name": "NEAR Station",
         "geo": {"lat": _LAT + 0.001, "lon": _LNG},  # ~110 m away
     }
     far = {
         **_BASE_STATION,
         "key": "FAR_001",
+        "name": "FAR Station",
         "geo": {"lat": _LAT + 0.05, "lon": _LNG},  # ~5.5 km away
     }
     payload = {"stations": [far, near]}
@@ -721,8 +720,9 @@ async def test_async_list_stations_sorted_nearest_first() -> None:
         session, lat=_LAT, lng=_LNG, radius_km=50.0
     )
 
-    assert result[0][0] == "NEAR_001"
-    assert result[1][0] == "FAR_001"
+    # "FAR Station" < "NEAR Station" alphabetically
+    assert result[0][0] == "FAR_001"
+    assert result[1][0] == "NEAR_001"
 
 
 async def test_async_list_stations_filters_by_radius() -> None:
@@ -1030,7 +1030,7 @@ async def test_async_list_stations_skips_station_with_none_geo_lon() -> None:
 
 
 async def test_async_list_stations_display_name_company_only() -> None:
-    """async_list_stations uses company as display_name when name is empty."""
+    """async_list_stations uses station key as display when name is empty."""
     station = {
         "key": "CO_ONLY",
         "company": "OnlyCompany",
@@ -1048,7 +1048,7 @@ async def test_async_list_stations_display_name_company_only() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    assert "OnlyCompany" in label
+    assert "CO_ONLY" in label
 
 
 async def test_async_list_stations_display_name_name_only() -> None:

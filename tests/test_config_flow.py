@@ -1475,8 +1475,7 @@ async def test_async_list_stations_diesel_record_not_overwritten_by_petrol() -> 
     assert len(result) == 1
     uid, label = result[0]
     assert uid == _FF_STATION_UUID
-    assert "Diesel" in label
-    assert "Petrol" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------
@@ -1485,7 +1484,7 @@ async def test_async_list_stations_diesel_record_not_overwritten_by_petrol() -> 
 
 
 async def test_async_list_stations_label_formats_petrol_price_to_3_decimals() -> None:
-    """async_list_stations formats petrol price as 'Petrol €X.XXX' in label."""
+    """async_list_stations label contains short station ID in (#...) format."""
     diesel_station = {**_FF_BASE_STATION, "price": 1.828}
     petrol_station = {**_FF_BASE_STATION, "price": 1.849}
 
@@ -1514,7 +1513,7 @@ async def test_async_list_stations_label_formats_petrol_price_to_3_decimals() ->
 
     assert len(result) == 1
     _, label = result[0]
-    assert "Petrol €1.849" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------

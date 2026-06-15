@@ -232,8 +232,8 @@ class BaFuelProvider(BaseProvider):
         """Return (station_id, display_label) pairs for the location-based picker.
 
         Scrapes the city page for the supplied city slug and returns all
-        station rows as (station_id, label) tuples sorted cheapest-first
-        by diesel price.
+        station rows as (station_id, label) tuples sorted alphabetically
+        by label.
 
         Args:
             session:    aiohttp ClientSession.
@@ -245,7 +245,7 @@ class BaFuelProvider(BaseProvider):
             radius_km:  Search radius in km (float, optional).
 
         Returns:
-            List of ("{city}:{index}", "Name — Diesel 2.75 / Super95 2.80") tuples,
+            List of ("{city}:{index}", "Name, Address (#city:idx)") tuples,
             or an empty list on any failure.
 
         Note:
@@ -275,33 +275,19 @@ class BaFuelProvider(BaseProvider):
         if not stations:
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for idx, raw in enumerate(stations):
             sid = f"{city_slug}:{idx}"
             name: str = raw.get("name") or "Unknown"
             address: str = raw.get("address") or ""
 
-            display_name = f"{name} ({address})" if address else name
-
-            diesel_val = raw.get("diesel")
-            unleaded_val = raw.get("unleaded")
-
-            price_parts: list[str] = []
-            if diesel_val is not None:
-                price_parts.append(f"Diesel {diesel_val:.3f} KM")
-            if unleaded_val is not None:
-                price_parts.append(f"Unleaded {unleaded_val:.3f} KM")
-
             label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
+                f"{name}, {address} (#{sid[:8]})" if address else f"{name} (#{sid[:8]})"
             )
-            sort_key = diesel_val if diesel_val is not None else 9999.0
-            result.append((sid, label, sort_key))
+            result.append((sid, label))
 
-        result.sort(key=lambda x: (x[2], x[1]))
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

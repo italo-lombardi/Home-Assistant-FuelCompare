@@ -538,7 +538,7 @@ async def test_async_list_stations_excludes_out_of_radius_stations() -> None:
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations returns stations sorted cheapest-first."""
+    """async_list_stations returns stations sorted alphabetically by label."""
     expensive_site = {
         **_BASE_SITE,
         "S": 77777,
@@ -560,12 +560,12 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
     )
 
     ids = [sid for sid, _ in result]
-    # _SITE_ID diesel=175.9 is cheaper than 77777 diesel=210.0
+    # "BP Brisbane CBD..." sorts before "Expensive..." alphabetically
     assert ids.index(_SITE_ID) < ids.index("77777")
 
 
 async def test_async_list_stations_label_includes_a_dollar() -> None:
-    """async_list_stations label includes 'A$' currency marker."""
+    """async_list_stations label includes station name and short ID suffix."""
     session = _make_session_both()
     provider = AuQldProvider(
         _SITE_ID, api_key="tok", latitude=-27.4698, longitude=153.0251, radius_km=1.0
@@ -576,11 +576,11 @@ async def test_async_list_stations_label_includes_a_dollar() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    assert "A$" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_diesel() -> None:
-    """async_list_stations label includes 'Diesel' when diesel price available."""
+    """async_list_stations label includes station name when diesel price available."""
     session = _make_session_both()
     provider = AuQldProvider(
         _SITE_ID, api_key="tok", latitude=-27.4698, longitude=153.0251, radius_km=1.0
@@ -590,11 +590,12 @@ async def test_async_list_stations_label_includes_diesel() -> None:
     )
 
     _, label = result[0]
-    assert "Diesel" in label
+    assert "BP Brisbane CBD" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_unleaded() -> None:
-    """async_list_stations label includes 'Unleaded' when unleaded price available."""
+    """async_list_stations label includes station name when unleaded price available."""
     session = _make_session_both()
     provider = AuQldProvider(
         _SITE_ID, api_key="tok", latitude=-27.4698, longitude=153.0251, radius_km=1.0
@@ -604,7 +605,7 @@ async def test_async_list_stations_label_includes_unleaded() -> None:
     )
 
     _, label = result[0]
-    assert "Unleaded" in label
+    assert "BP Brisbane CBD" in label
 
 
 async def test_async_list_stations_returns_empty_without_lat_lng() -> None:
@@ -1011,7 +1012,7 @@ async def test_async_fetch_authorization_header_format() -> None:
 
 
 async def test_async_list_stations_e10_fallback_when_no_unleaded() -> None:
-    """async_list_stations uses E10 price label when unleaded is absent but E10 present."""
+    """async_list_stations label includes station name when only E10 present."""
     prices_e10_only: list[dict] = [
         {
             "SiteId": int(_SITE_ID),
@@ -1029,12 +1030,12 @@ async def test_async_list_stations_e10_fallback_when_no_unleaded() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    assert "E10" in label
-    assert "A$" in label
+    assert "BP Brisbane CBD" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_e10_sort_price_updated() -> None:
-    """async_list_stations sort_price includes E10 when unleaded absent."""
+    """async_list_stations label includes station name when diesel and E10 present."""
     prices_diesel_and_e10: list[dict] = [
         {"SiteId": int(_SITE_ID), "FuelId": 3, "Price": 1800},  # diesel 180.0 c/L
         {"SiteId": int(_SITE_ID), "FuelId": 12, "Price": 1650},  # e10 165.0 c/L
@@ -1049,8 +1050,8 @@ async def test_async_list_stations_e10_sort_price_updated() -> None:
 
     assert len(result) == 1
     _, label = result[0]
-    assert "E10" in label
-    assert "Diesel" in label
+    assert "BP Brisbane CBD" in label
+    assert "(#" in label
 
 
 # ---------------------------------------------------------------------------

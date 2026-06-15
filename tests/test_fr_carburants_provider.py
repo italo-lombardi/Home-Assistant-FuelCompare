@@ -1335,7 +1335,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes 'Diesel €x.xxx' when diesel price available."""
+    """async_list_stations label includes short station ID suffix (no price)."""
     zip_bytes = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
     resp = _make_mock_response(200, body=zip_bytes)
     session = _make_session(resp)
@@ -1347,12 +1347,11 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
 
     assert len(results) == 1
     _sid, label = results[0]
-    assert "Diesel" in label
-    assert "1.799" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_sp_price() -> None:
-    """async_list_stations label includes 'SP €x.xxx' for unleaded/e10 price."""
+    """async_list_stations label includes station name (no price)."""
     zip_bytes = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
     resp = _make_mock_response(200, body=zip_bytes)
     session = _make_session(resp)
@@ -1363,24 +1362,24 @@ async def test_async_list_stations_label_includes_sp_price() -> None:
     results = await provider.async_list_stations(session)
 
     _sid, label = results[0]
-    assert "SP" in label
+    assert "MONTPELLIER" in label
 
 
 async def test_async_list_stations_sorted_by_diesel_price_ascending() -> None:
-    """async_list_stations sorts results by diesel price, cheapest first."""
+    """async_list_stations sorts results alphabetically by label."""
     xml_str = """\
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <pdv_liste>
   <pdv id="34001" latitude="4365100" longitude="354700" cp="34001" pop="R">
-    <ville>CHEAP</ville>
+    <ville>ALPHA</ville>
     <prix nom="Gazole" id="1" maj="2024-03-15 10:00:00" valeur="1.699"/>
   </pdv>
   <pdv id="34002" latitude="4365200" longitude="354800" cp="34002" pop="R">
-    <ville>EXPENSIVE</ville>
+    <ville>GAMMA</ville>
     <prix nom="Gazole" id="1" maj="2024-03-15 10:00:00" valeur="1.899"/>
   </pdv>
   <pdv id="34003" latitude="4365300" longitude="354900" cp="34003" pop="R">
-    <ville>MEDIUM</ville>
+    <ville>BETA</ville>
     <prix nom="Gazole" id="1" maj="2024-03-15 10:00:00" valeur="1.799"/>
   </pdv>
 </pdv_liste>"""
@@ -1394,10 +1393,9 @@ async def test_async_list_stations_sorted_by_diesel_price_ascending() -> None:
     results = await provider.async_list_stations(session)
 
     assert len(results) == 3
-    # First result should be cheapest diesel
-    assert results[0][0] == "34001"
-    # Last result should be most expensive diesel
-    assert results[2][0] == "34002"
+    # Alphabetical order: ALPHA < BETA < GAMMA
+    assert results[0][0] == "34001"  # ALPHA
+    assert results[2][0] == "34002"  # GAMMA
 
 
 async def test_async_list_stations_no_diesel_sorts_last() -> None:
@@ -1639,7 +1637,7 @@ async def test_async_list_stations_label_includes_address_when_available() -> No
 
 
 async def test_async_list_stations_e10_used_as_sp_fallback() -> None:
-    """async_list_stations uses e10 price as SP fallback when unleaded (SP95) absent."""
+    """async_list_stations label includes station name when only E10 price available."""
     xml_str = """\
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <pdv_liste>
@@ -1660,8 +1658,7 @@ async def test_async_list_stations_e10_used_as_sp_fallback() -> None:
 
     assert len(results) == 1
     _sid, label = results[0]
-    assert "SP" in label
-    assert "1.829" in label
+    assert "E10 ONLY" in label or "(#" in label
 
 
 async def test_async_list_stations_no_price_label_has_no_euro_sign() -> None:
