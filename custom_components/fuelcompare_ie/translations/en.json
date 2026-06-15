@@ -13,29 +13,6 @@
           "provider": "Data source"
         }
       },
-      "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
-        "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
-        }
-      },
-      "station": {
-        "title": "Add Station",
-        "description": "{hint}",
-        "data": {
-          "station_id": "Station ID"
-        }
-      },
-      "name": {
-        "title": "Station Name",
-        "description": "Confirm or edit the name for this station.",
-        "data": {
-          "name": "Name"
-        }
-      },
       "county": {
         "title": "Select County",
         "description": "Select your county to find nearby stations.",
@@ -50,11 +27,34 @@
           "api_key": "API Key"
         }
       },
+      "station": {
+        "title": "Add Station",
+        "description": "{hint}",
+        "data": {
+          "station_id": "Station ID"
+        }
+      },
       "station_picker": {
         "title": "Select Station",
         "description": "Select a fuel station. Prices shown are for diesel/petrol.",
         "data": {
           "station_id": "Station"
+        }
+      },
+      "location": {
+        "title": "Set Location",
+        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "data": {
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "radius_km": "Radius (km)"
+        }
+      },
+      "name": {
+        "title": "Station Name",
+        "description": "Confirm or edit the name for this station.",
+        "data": {
+          "name": "Name"
         }
       }
     },
