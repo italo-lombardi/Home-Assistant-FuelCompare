@@ -468,8 +468,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             ),
             description_placeholders={
                 "deprecation_notice": (
-                    "⚠️ fuelcompare.ie is scheduled to shut down soon. "
-                    "If you select FuelCompare IE, data may stop updating."
+                    "⚠️ fuelcompare.ie is shutting down on 30 June 2026. "
+                    "If you select FuelCompare IE, data will stop updating after that date."
                 )
                 if any(key == "ie_fuelcompare" for key, _ in providers)
                 else "",
