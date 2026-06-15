@@ -141,7 +141,7 @@ class AuVicProvider(BaseProvider):
 
     # Data is delayed ~24h from retailer submission; poll once daily.
     POLL_INTERVAL_SECONDS = 86400
-    CURRENCY: ClassVar[str] = "AUD/L"
+    CURRENCY: ClassVar[str] = "A$"
 
     # Consumer ID is a registered UUID — equivalent to an API key.
     REQUIRES_API_KEY = True
@@ -165,9 +165,6 @@ class AuVicProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Coordinator sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -290,8 +287,12 @@ class AuVicProvider(BaseProvider):
             List of (station_uuid, "Name — Unleaded A$1.76 / Diesel A$1.84")
             tuples ordered cheapest first.  Returns empty list on any failure.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs.get("lng") or self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        )  # type: ignore[assignment]
+        lng: float | None = (
+            kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        )  # type: ignore[assignment]
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:

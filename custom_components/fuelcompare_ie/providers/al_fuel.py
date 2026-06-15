@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -109,7 +110,7 @@ class AlFuelProvider(BaseProvider):
 
     POLL_INTERVAL_SECONDS = 86400  # daily — data updates approximately weekly
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices (EUR/litre national averages)
             # gasoline 95 → unleaded (standard StationData key for 95-octane petrol)
@@ -121,9 +122,6 @@ class AlFuelProvider(BaseProvider):
             "county",
             # Timing
             "lastupdated",
-            # Coordinator-managed sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

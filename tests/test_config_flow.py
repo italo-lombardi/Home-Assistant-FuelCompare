@@ -1597,49 +1597,47 @@ def test_build_station_data_price_returns_none_for_negative() -> None:
 
 
 def test_build_station_data_lat_none_on_invalid_string() -> None:
-    """_build_station_data sets lat=None when lat is a non-numeric string."""
+    """_build_station_data sets latitude=None when lat is a non-numeric string."""
     provider = IEFuelFinderProvider(_FF_STATION_UUID)
     bad_lat_station = {**_FF_BASE_STATION, "lat": "not-a-float"}
     prices_by_fuel = {"diesel": {**bad_lat_station, "price": 1.828}}
     result = provider._build_station_data(
         _FF_STATION_UUID, bad_lat_station, prices_by_fuel
     )
-    assert result["lat"] is None
     assert result["latitude"] is None
 
 
 def test_build_station_data_lng_none_on_invalid_string() -> None:
-    """_build_station_data sets lng=None when lng is a non-numeric string."""
+    """_build_station_data sets longitude=None when lng is a non-numeric string."""
     provider = IEFuelFinderProvider(_FF_STATION_UUID)
     bad_lng_station = {**_FF_BASE_STATION, "lng": "bad-value"}
     prices_by_fuel = {"diesel": {**bad_lng_station, "price": 1.828}}
     result = provider._build_station_data(
         _FF_STATION_UUID, bad_lng_station, prices_by_fuel
     )
-    assert result["lng"] is None
     assert result["longitude"] is None
 
 
 def test_build_station_data_lat_none_on_type_error() -> None:
-    """_build_station_data sets lat=None when lat is an unconvertible type (list)."""
+    """_build_station_data sets latitude=None when lat is an unconvertible type (list)."""
     provider = IEFuelFinderProvider(_FF_STATION_UUID)
     bad_lat_station = {**_FF_BASE_STATION, "lat": [53.399]}
     prices_by_fuel = {"diesel": {**bad_lat_station, "price": 1.828}}
     result = provider._build_station_data(
         _FF_STATION_UUID, bad_lat_station, prices_by_fuel
     )
-    assert result["lat"] is None
+    assert result["latitude"] is None
 
 
 def test_build_station_data_lng_none_on_type_error() -> None:
-    """_build_station_data sets lng=None when lng is an unconvertible type (list)."""
+    """_build_station_data sets longitude=None when lng is an unconvertible type (list)."""
     provider = IEFuelFinderProvider(_FF_STATION_UUID)
     bad_lng_station = {**_FF_BASE_STATION, "lng": [6.433]}
     prices_by_fuel = {"diesel": {**bad_lng_station, "price": 1.828}}
     result = provider._build_station_data(
         _FF_STATION_UUID, bad_lng_station, prices_by_fuel
     )
-    assert result["lng"] is None
+    assert result["longitude"] is None
 
 
 # ---------------------------------------------------------------------------

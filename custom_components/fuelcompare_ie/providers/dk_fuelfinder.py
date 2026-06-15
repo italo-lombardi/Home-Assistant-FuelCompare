@@ -305,9 +305,9 @@ class DkFuelFinderProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour; WAF is strict; data changes ~daily
-    CURRENCY: ClassVar[str] = "DKK/L"
+    CURRENCY: ClassVar[str] = "kr"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",
@@ -316,8 +316,6 @@ class DkFuelFinderProvider(BaseProvider):
             "name",
             "brand",
             "lastupdated",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

@@ -173,9 +173,9 @@ class SEBensinpriserProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour as specified
-    CURRENCY: ClassVar[str] = "SEK/L"
+    CURRENCY: ClassVar[str] = "kr"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",
@@ -189,9 +189,8 @@ class SEBensinpriserProvider(BaseProvider):
             "latitude",
             "longitude",
             "website",
-            # Diagnostic / coordinator-managed
-            "last_successful_fetch",
-            "data_fetch_problem",
+            "source_station_id",
+            "lastupdated",
         }
     )
 

@@ -2,8 +2,7 @@
 
 Source: Tankerkoenig, operated under a Creative Commons licence.
 API documentation: https://creativecommons.tankerkoenig.de/
-Free API key: https://onboarding.tankerkoenig.de/
-Dev/test key: 00000000-0000-0000-0000-000000000002
+See https://dev.tankerkoenig.de/ for API key registration.
 
 Endpoints used
 --------------
@@ -170,8 +169,6 @@ class DeTankerkoenigProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -229,7 +226,7 @@ class DeTankerkoenigProvider(BaseProvider):
             "id": station_id,
             "apikey": self._api_key,
         }
-        _LOGGER.debug("Fetching Tankerkoenig detail for station %s", station_id)
+        _LOGGER.debug("Fetching station %s (api_key redacted)", station_id)
 
         try:
             async with session.get(

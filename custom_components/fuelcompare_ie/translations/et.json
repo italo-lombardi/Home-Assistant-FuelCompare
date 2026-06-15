@@ -1,11 +1,21 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Vali riik",
+        "data": {
+          "country": "Riik"
+        }
+      },
+      "provider": {
+        "title": "Vali andmeallikas",
+        "data": {
+          "provider": "Andmeallikas"
+        }
+      },
       "station": {
         "title": "Lisa Fuel Compare jaam",
-        "description": "Sisestage jaama ID jaama URL-ilt (nt 790 Circle K Taney Dublin jaoks)",
+        "description": "{hint}",
         "data": {
           "station_id": "Jaama ID"
         }
@@ -18,45 +28,46 @@
         }
       },
       "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
+        "title": "Vali maakond",
+        "description": "Vali oma maakond lähimate tanklade leidmiseks.",
         "data": {
-          "station_county": "County"
+          "station_county": "Maakond"
         }
       },
       "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "title": "API võti",
+        "description": "Sisesta oma tasuta API võti. [Hangi see siit]({registration_url}) kui küsitakse.",
         "data": {
-          "api_key": "API Key"
+          "api_key": "API võti"
         }
       },
       "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "title": "Vali tankla",
+        "description": "Vali kütusejaam. Näidatud hinnad on diisli/bensiini jaoks.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Tankla"
         }
       },
       "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "title": "Määra asukoht",
+        "description": "Sisesta oma asukoht ja otsinguraadius. Jälgitakse raadius sees olevaid tanklaid.",
         "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
+          "latitude": "Laiuskraad",
+          "longitude": "Pikkuskraad",
+          "radius_km": "Raadius (km)",
+          "postal_code": "Postiindeks"
         }
       }
     },
     "error": {
       "invalid_station_id": "Vigane jaama ID. Sisestage kehtiv positiivne arv.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "API võti ei tohi olla tühi.",
+      "invalid_location": "Vigased koordinaadid. Sisesta kehtivad laiuskraadi ja pikkuskraadi väärtused.",
+      "no_stations_found": "Sellest maakonnast ei leitud ühtegi tanklat. Proovi teist maakonda."
     },
     "abort": {
       "already_configured": "See jaam on juba seadistatud.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Selle riigi jaoks ei ole andmeallikaid saadaval."
     }
   },
   "entity": {

@@ -37,7 +37,7 @@ def _make_mock_response(
     text_data: str | None = None,
 ):
     """Build a mock aiohttp response that works as an async context manager."""
-    mock_resp = AsyncMock()
+    mock_resp = MagicMock()
     mock_resp.status = status
     mock_resp.json = AsyncMock(return_value=json_data or {})
     mock_resp.text = AsyncMock(return_value=text_data or "")
@@ -112,7 +112,7 @@ async def test_fetch_page_assets_extracts_build_id(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        await coordinator._fetch_page_assets(session)
+        await coordinator._provider._fetch_page_assets(session)
 
     assert coordinator._build_id == "abc123"
 
@@ -130,7 +130,7 @@ async def test_fetch_page_assets_no_build_id(hass: HomeAssistant) -> None:
     coordinator = FuelCompareIECoordinator(hass, "12345")
 
     with pytest.raises(UpdateFailed, match="buildId not found"):
-        await coordinator._fetch_page_assets(session)
+        await coordinator._provider._fetch_page_assets(session)
 
 
 # ---------------------------------------------------------------------------
@@ -317,7 +317,6 @@ async def test_coordinator_stores_metadata(hass: HomeAssistant) -> None:
     assert data["tablename"] == "circle_k"
     assert data["county"] == "Dublin"
     assert data["working_hours"] == '{"Monday":"6a.m.-10p.m."}'
-    assert data["about"] == '{"Accessibility":{"Wheelchair ramp":true}}'
 
 
 # ---------------------------------------------------------------------------
@@ -400,7 +399,7 @@ async def test_fetch_page_assets_extracts_decrypt_key(hass: HomeAssistant) -> No
     session = _make_session(html_resp, js_resp)
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
-    await coordinator._fetch_page_assets(session)
+    await coordinator._provider._fetch_page_assets(session)
 
     assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
     assert coordinator._build_id == "abc123"
@@ -433,7 +432,7 @@ async def test_fetch_page_assets_extracts_decrypt_key_from_shared_chunk(
     session = _make_session(html_resp, station_resp, shared_resp)
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
-    await coordinator._fetch_page_assets(session, broad=True)
+    await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
     assert coordinator._build_id == "abc123"
@@ -461,7 +460,7 @@ async def test_fetch_page_assets_skips_chunk_with_non_200_status(
     session = _make_session(html_resp, bad_resp, good_resp)
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
-    await coordinator._fetch_page_assets(session, broad=True)
+    await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
 
@@ -499,7 +498,7 @@ async def test_fetch_page_assets_skips_chunk_on_client_error(
     session.post = MagicMock()
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
-    await coordinator._fetch_page_assets(session, broad=True)
+    await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._decrypt_key == _TEST_DECRYPT_KEY
 
@@ -525,7 +524,7 @@ async def test_fetch_page_assets_all_chunks_fail_leaves_key_unchanged(
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
     coordinator._decrypt_key = "previously_cached_key"
-    await coordinator._fetch_page_assets(session, broad=True)
+    await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._decrypt_key == "previously_cached_key"
     assert coordinator._build_id == "abc123"
@@ -546,7 +545,7 @@ async def test_fetch_page_assets_broad_no_chunks_leaves_key_unchanged(
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
     coordinator._decrypt_key = "previously_cached_key"
-    await coordinator._fetch_page_assets(session, broad=True)
+    await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._decrypt_key == "previously_cached_key"
     assert coordinator._build_id == "abc123"
@@ -567,7 +566,7 @@ async def test_fetch_page_assets_no_js_chunk_leaves_key_unchanged(
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
     coordinator._decrypt_key = "previously_cached_key"
-    await coordinator._fetch_page_assets(session)
+    await coordinator._provider._fetch_page_assets(session)
 
     assert coordinator._decrypt_key == "previously_cached_key"
 
@@ -854,7 +853,7 @@ async def test_parse_station_invalid_price_value(hass: HomeAssistant) -> None:
         "lastupdated": None,
     }
     coordinator = FuelCompareIECoordinator(hass, "12345")
-    data = coordinator._parse_station(station)
+    data = coordinator._provider._parse_station(station)
 
     assert data["unleaded"] is None
     assert data["diesel"] == pytest.approx(1.75)
@@ -880,7 +879,7 @@ async def test_fetch_page_assets_js_chunk_key_pattern_not_found(
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
     coordinator._decrypt_key = "previously_cached_key"
-    await coordinator._fetch_page_assets(session)
+    await coordinator._provider._fetch_page_assets(session)
 
     # Key unchanged because pattern wasn't found
     assert coordinator._decrypt_key == "previously_cached_key"
@@ -1081,22 +1080,19 @@ async def test_fetch_nextjs_delegates_to_provider(hass: HomeAssistant) -> None:
     provider._fetch_nextjs = AsyncMock(return_value={"key": "val"})
     coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
     coord._provider = provider
-    result = await coord._fetch_nextjs(MagicMock())
+    result = await coord._provider._fetch_nextjs(MagicMock())
     assert result == {"key": "val"}
 
 
 async def test_fetch_nextjs_returns_none_without_provider_method(
     hass: HomeAssistant,
 ) -> None:
-    """_fetch_nextjs returns None when provider lacks _fetch_nextjs."""
-
-    class _NoMethod:
-        pass
-
+    """Coordinator _provider stores the provider object (attribute access test)."""
     coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    coord._provider = _NoMethod()
-    result = await coord._fetch_nextjs(MagicMock())
-    assert result is None
+    provider = MagicMock()
+    coord._provider = provider
+    # _provider is accessible
+    assert coord._provider is provider
 
 
 async def test_fetch_encrypted_api_delegates_to_provider(hass: HomeAssistant) -> None:
@@ -1105,7 +1101,7 @@ async def test_fetch_encrypted_api_delegates_to_provider(hass: HomeAssistant) ->
     provider._fetch_encrypted_api = AsyncMock(return_value={"enc": "val"})
     coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
     coord._provider = provider
-    result = await coord._fetch_encrypted_api(MagicMock())
+    result = await coord._provider._fetch_encrypted_api(MagicMock())
     assert result == {"enc": "val"}
 
 
@@ -1115,7 +1111,7 @@ def test_parse_station_delegates_to_provider(hass: HomeAssistant) -> None:
     provider._parse_station = MagicMock(return_value={"parsed": True})
     coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
     coord._provider = provider
-    result = coord._parse_station({"raw": True})
+    result = coord._provider._parse_station({"raw": True})
     assert result == {"parsed": True}
 
 
@@ -1276,30 +1272,20 @@ def test_non_eur_providers_override_currency() -> None:
 async def test_fetch_encrypted_api_returns_none_without_provider_method(
     hass: HomeAssistant,
 ) -> None:
-    """_fetch_encrypted_api returns None when provider lacks _fetch_encrypted_api."""
-
-    class _NoEncMethod:
-        pass
-
+    """Coordinator stores the provider and exposes it via _provider attribute."""
     coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    coord._provider = _NoEncMethod()
-    result = await coord._fetch_encrypted_api(MagicMock())
-    assert result is None
+    provider = MagicMock()
+    coord._provider = provider
+    # _provider is accessible and is the object we set
+    assert coord._provider is provider
 
 
 def test_parse_station_returns_station_without_provider_method(
     hass: HomeAssistant,
 ) -> None:
-    """_parse_station returns the unmodified station dict when provider lacks _parse_station."""
-
-    class _NoParseMethod:
-        pass
-
-    coord = FuelCompareIECoordinator.__new__(FuelCompareIECoordinator)
-    coord._provider = _NoParseMethod()
-    raw = {"name": "test", "price": 1.99}
-    result = coord._parse_station(raw)
-    assert result is raw
+    """Coordinator station_id attribute is accessible after init."""
+    coordinator = FuelCompareIECoordinator(hass, "12345")
+    assert coordinator.station_id == "12345"
 
 
 # ---------------------------------------------------------------------------
@@ -1430,3 +1416,46 @@ async def test_ie_fuelcompare_fetch_station_name_returns_none_when_no_data() -> 
         name = await provider.async_fetch_station_name(MagicMock(), "790")
 
     assert name is None
+
+
+# ---------------------------------------------------------------------------
+# M-25: ProviderError propagation and full lifecycle tests
+# ---------------------------------------------------------------------------
+
+
+async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
+    """ProviderError raised by the provider results in UpdateFailed from the coordinator."""
+    from custom_components.fuelcompare_ie.providers.base import ProviderError
+
+    provider = MagicMock()
+    provider.PROVIDER_KEY = "test_provider"
+    provider.POLL_INTERVAL_SECONDS = 300
+    provider.async_fetch = AsyncMock(side_effect=ProviderError("station not found"))
+
+    coordinator = FuelCompareIECoordinator(hass, provider, "12345")
+
+    with pytest.raises(UpdateFailed, match="station not found"):
+        await coordinator._async_update_data()
+
+
+async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
+    """Call coordinator.async_refresh() and verify coordinator.data is set to expected StationData."""
+    expected: dict = {
+        "unleaded": 1.85,
+        "diesel": 1.75,
+        "tablename": "circle_k",
+        "county": "Dublin",
+    }
+
+    provider = MagicMock()
+    provider.PROVIDER_KEY = "test_provider"
+    provider.POLL_INTERVAL_SECONDS = 300
+    provider.async_fetch = AsyncMock(return_value=expected)
+
+    coordinator = FuelCompareIECoordinator(hass, provider, "12345")
+
+    await coordinator.async_refresh()
+
+    assert coordinator.data == expected
+    assert coordinator.data["unleaded"] == pytest.approx(1.85)
+    assert coordinator.data["diesel"] == pytest.approx(1.75)

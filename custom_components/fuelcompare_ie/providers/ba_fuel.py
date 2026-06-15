@@ -130,9 +130,9 @@ class BaFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # site updates daily
-    CURRENCY: ClassVar[str] = "BAM/L"
+    CURRENCY: ClassVar[str] = "KM"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "diesel",
             "unleaded",
@@ -143,8 +143,6 @@ class BaFuelProvider(BaseProvider):
             "address",
             "county",
             "lastupdated",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

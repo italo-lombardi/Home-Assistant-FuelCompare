@@ -53,7 +53,7 @@ import asyncio
 import functools
 import io
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -133,7 +133,7 @@ class NlAnwbProvider(BaseProvider):
 
     POLL_INTERVAL_SECONDS = 86400  # daily; bulletin is published weekly (Thursdays)
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "e10",  # Euro-super 95 / benzine (E10 blend) EUR/litre
@@ -144,9 +144,6 @@ class NlAnwbProvider(BaseProvider):
             "name",
             "lastupdated",
             "source_station_id",
-            # Coordinator-managed sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

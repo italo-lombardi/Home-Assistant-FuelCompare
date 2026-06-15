@@ -96,7 +96,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -196,7 +196,7 @@ class LuCarbuProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 1800  # 30 minutes
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",  # Super 95
@@ -212,9 +212,6 @@ class LuCarbuProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Diagnostic / coordinator-managed
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

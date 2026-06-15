@@ -67,7 +67,7 @@ only as context metadata; they default to central Helsinki.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -278,7 +278,7 @@ class FiTankilleProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # daily — data updates at most monthly
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",
@@ -292,9 +292,6 @@ class FiTankilleProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Diagnostic / coordinator-managed
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -469,16 +466,13 @@ class FiTankilleProvider(BaseProvider):
                         "may have been moved or renamed.  Check "
                         "https://pxdata.stat.fi/PXWeb/api/v1/en/StatFin/ehi/"
                     )
-                try:
-                    response.raise_for_status()
-                except ClientResponseError as exc:
-                    raise ProviderError(
-                        f"Statistics Finland API returned HTTP {response.status}: {exc}"
-                    ) from exc
+                response.raise_for_status()
                 payload: dict[str, Any] = await response.json(content_type=None)
         except ProviderError:
             raise
         except ClientResponseError as exc:
-            raise ProviderError(f"Statistics Finland API HTTP error: {exc}") from exc
+            raise ProviderError(
+                f"HTTP error {exc.status} from Statistics Finland API"
+            ) from exc
 
         return payload

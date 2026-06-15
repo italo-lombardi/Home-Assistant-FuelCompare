@@ -1,11 +1,21 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Roghnaigh Tír",
+        "data": {
+          "country": "Tír"
+        }
+      },
+      "provider": {
+        "title": "Roghnaigh Foinse Sonraí",
+        "data": {
+          "provider": "Foinse Sonraí"
+        }
+      },
       "station": {
         "title": "Cuir Stáisiún Fuel Compare Leis",
-        "description": "Cuir isteach aitheantas an stáisiúin ó URL an stáisiúin (m.sh., 790 le haghaidh Circle K Taney Baile Átha Cliath)",
+        "description": "{hint}",
         "data": {
           "station_id": "Aitheantas Stáisiúin"
         }
@@ -18,45 +28,46 @@
         }
       },
       "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
+        "title": "Roghnaigh Contae",
+        "description": "Roghnaigh do chontae chun stáisiúin in aice láimhe a aimsiú.",
         "data": {
-          "station_county": "County"
+          "station_county": "Contae"
         }
       },
       "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "title": "Eochair API",
+        "description": "Cuir isteach d'eochair API saor in aisce. [Faigh ceann anseo]({registration_url}) má iarrtar ort.",
         "data": {
-          "api_key": "API Key"
+          "api_key": "Eochair API"
         }
       },
       "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "title": "Roghnaigh Stáisiún",
+        "description": "Roghnaigh stáisiún breosla. Taispeántar praghsanna díosail/peitril.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Stáisiún"
         }
       },
       "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "title": "Socraigh Suíomh",
+        "description": "Cuir isteach do shuíomh agus ga cuardaigh. Déanfar stáisiúin laistigh den raidias a rianú.",
         "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
+          "latitude": "Domhanleithead",
+          "longitude": "Domhanfhad",
+          "radius_km": "Raidias (km)",
+          "postal_code": "Cód Poist"
         }
       }
     },
     "error": {
       "invalid_station_id": "Aitheantas stáisiúin neamhbhailí. Cuir isteach uimhir dhearfach bhailí.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "Ní féidir an eochair API a bheith folamh.",
+      "invalid_location": "Comhordanáidí neamhbhailí. Cuir isteach luachanna domhanleithead agus domhanfhaid bhailí.",
+      "no_stations_found": "Níor aimsíodh stáisiúin don chontae seo. Bain triail as contae eile."
     },
     "abort": {
       "already_configured": "Tá an stáisiún seo cumraithe cheana féin.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Níl aon soláthraithe sonraí ar fáil don tír seo."
     }
   },
   "entity": {

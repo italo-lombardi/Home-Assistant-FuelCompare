@@ -14,8 +14,7 @@
   "requirements": [
     "beautifulsoup4>=4.12",
     "cryptography>=41.0.0",
-    "openpyxl>=3.1.0",
-    "tzdata>=2024.1"
+    "openpyxl>=3.1.0"
   ],
   "version": "0.7.0"
 }

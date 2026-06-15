@@ -80,7 +80,7 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
@@ -192,7 +192,7 @@ class EuOilBulletinProvider(BaseProvider):
     _cached_workbook_bytes: ClassVar[bytes | None] = None
     _cached_fetch_time: ClassVar[datetime | None] = None
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",  # Euro-super 95 (E5)
@@ -206,9 +206,6 @@ class EuOilBulletinProvider(BaseProvider):
             "lastupdated",  # Week date from Excel header
             # Source reference
             "source_station_id",
-            # Coordinator sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -485,10 +482,6 @@ class EuOilBulletinProvider(BaseProvider):
                 response.raise_for_status()
                 content_type = response.headers.get("Content-Type", "")
                 data = await response.read()
-        except ClientResponseError as err:
-            raise ProviderError(
-                f"EU Oil Bulletin: HTTP {err.status} when downloading Excel file: {err.message}"
-            ) from err
         except Exception as err:
             raise ProviderError(
                 f"EU Oil Bulletin: network error downloading Excel file: {err}"

@@ -58,7 +58,7 @@ import functools
 import io
 import logging
 import re
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import urlparse
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -140,7 +140,7 @@ class MtFuelProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 604800  # 7 days; bulletin is weekly
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",  # petrol 95 → standard StationData key for 95-octane petrol
             "diesel",
@@ -149,8 +149,6 @@ class MtFuelProvider(BaseProvider):
             "name",
             "county",
             "lastupdated",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

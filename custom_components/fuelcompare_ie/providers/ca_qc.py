@@ -236,7 +236,7 @@ class CaQcProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — data refreshes ~every minute but
-    CURRENCY: ClassVar[str] = "CAD/L"
+    CURRENCY: ClassVar[str] = "CA$"
     # hourly polling is sufficient and respectful of the CDN.
 
     # Class-level GeoJSON cache — shared across all instances so async_fetch
@@ -258,8 +258,6 @@ class CaQcProvider(BaseProvider):
             "county",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

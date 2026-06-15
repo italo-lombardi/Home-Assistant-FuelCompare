@@ -271,8 +271,7 @@ class FrCarburantsProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
-            "last_successful_fetch",
-            "data_fetch_problem",
+            "source_station_id",
         }
     )
 

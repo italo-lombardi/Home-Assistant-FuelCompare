@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -105,7 +105,7 @@ class SiGorivaProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # server cache is 300 s; 1-hour poll is sufficient
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "diesel",
             "unleaded",
@@ -117,8 +117,7 @@ class SiGorivaProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
+            "source_station_id",
         }
     )
 

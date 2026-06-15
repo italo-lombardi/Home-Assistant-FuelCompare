@@ -1,11 +1,21 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Selectați țara",
+        "data": {
+          "country": "Țară"
+        }
+      },
+      "provider": {
+        "title": "Selectați sursa de date",
+        "data": {
+          "provider": "Sursă de date"
+        }
+      },
       "station": {
         "title": "Adăugare stație Fuel Compare",
-        "description": "Introduceți ID-ul stației de pe URL-ul stației (ex.: 790 pentru Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "ID Stație"
         }
@@ -18,45 +28,46 @@
         }
       },
       "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
+        "title": "Selectați județul",
+        "description": "Selectați județul pentru a găsi stații din apropiere.",
         "data": {
-          "station_county": "County"
+          "station_county": "Județ"
         }
       },
       "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "title": "Cheie API",
+        "description": "Introduceți cheia API gratuită. [Obțineți una aici]({registration_url}) dacă vi se solicită.",
         "data": {
-          "api_key": "API Key"
+          "api_key": "Cheie API"
         }
       },
       "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "title": "Selectați stația",
+        "description": "Selectați o stație de combustibil. Prețurile afișate sunt pentru motorină/benzină.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Stație"
         }
       },
       "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "title": "Setați locația",
+        "description": "Introduceți locația și raza de căutare. Stațiile din raza specificată vor fi monitorizate.",
         "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
+          "latitude": "Latitudine",
+          "longitude": "Longitudine",
+          "radius_km": "Rază (km)",
+          "postal_code": "Cod poștal"
         }
       }
     },
     "error": {
       "invalid_station_id": "ID stație invalid. Introduceți un număr pozitiv valid.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "Cheia API nu poate fi goală.",
+      "invalid_location": "Coordonate invalide. Introduceți valori valide pentru latitudine și longitudine.",
+      "no_stations_found": "Nu s-au găsit stații pentru acest județ. Încercați un alt județ."
     },
     "abort": {
       "already_configured": "Această stație este deja configurată.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Nu există furnizori de date disponibili pentru această țară."
     }
   },
   "entity": {

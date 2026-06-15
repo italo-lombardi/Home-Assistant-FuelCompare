@@ -119,7 +119,7 @@ class CzCcsProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
-    CURRENCY: ClassVar[str] = "CZK/L"
+    CURRENCY: ClassVar[str] = "Kc"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
@@ -131,9 +131,6 @@ class CzCcsProvider(BaseProvider):
             "source_station_id",
             # Timing
             "lastupdated",
-            # Coordinator-managed sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

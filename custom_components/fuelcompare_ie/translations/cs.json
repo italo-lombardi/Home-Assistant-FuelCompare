@@ -1,13 +1,54 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Vyberte zemi",
+        "data": {
+          "country": "Země"
+        }
+      },
+      "provider": {
+        "title": "Vyberte zdroj dat",
+        "data": {
+          "provider": "Zdroj dat"
+        }
+      },
+      "county": {
+        "title": "Vyberte okres",
+        "description": "Vyberte svůj okres pro nalezení blízkých stanic.",
+        "data": {
+          "station_county": "Okres"
+        }
+      },
+      "api_key": {
+        "title": "Klíč API",
+        "description": "Zadejte svůj bezplatný klíč API. [Získejte jej zde]({registration_url}), pokud budete vyzváni.",
+        "data": {
+          "api_key": "Klíč API"
+        }
+      },
       "station": {
         "title": "Přidat stanici Fuel Compare",
-        "description": "Zadejte ID stanice z URL adresy stanice (např. 790 pro Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "ID Stanice"
+        }
+      },
+      "station_picker": {
+        "title": "Vyberte stanici",
+        "description": "Vyberte čerpací stanici. Zobrazené ceny jsou pro naftu/benzín.",
+        "data": {
+          "station_id": "Stanice"
+        }
+      },
+      "location": {
+        "title": "Nastavit polohu",
+        "description": "Zadejte svou polohu a poloměr vyhledávání. Stanice v rámci poloměru budou sledovány.",
+        "data": {
+          "latitude": "Zeměpisná šířka",
+          "longitude": "Zeměpisná délka",
+          "radius_km": "Poloměr (km)",
+          "postal_code": "PSČ"
         }
       },
       "name": {
@@ -16,47 +57,17 @@
         "data": {
           "name": "Název"
         }
-      },
-      "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
-        "data": {
-          "station_county": "County"
-        }
-      },
-      "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
-        "data": {
-          "api_key": "API Key"
-        }
-      },
-      "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
-        "data": {
-          "station_id": "Station"
-        }
-      },
-      "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
-        "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
-        }
       }
     },
     "error": {
       "invalid_station_id": "Neplatné ID stanice. Zadejte platné kladné číslo.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "Klíč API nesmí být prázdný.",
+      "invalid_location": "Neplatné souřadnice. Zadejte platné hodnoty zeměpisné šířky a délky.",
+      "no_stations_found": "Pro tento okres nebyly nalezeny žádné stanice. Zkuste jiný okres."
     },
     "abort": {
       "already_configured": "Tato stanice je již nakonfigurována.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Pro tuto zemi nejsou k dispozici žádní poskytovatelé dat."
     }
   },
   "entity": {

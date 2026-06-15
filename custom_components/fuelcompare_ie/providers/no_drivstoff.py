@@ -212,9 +212,9 @@ class NoDrivstoffProvider(BaseProvider):
     API_KEY_REGISTRATION_URL = "https://github.com/drivstoffpriser"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour
-    CURRENCY: ClassVar[str] = "NOK/L"
+    CURRENCY: ClassVar[str] = "kr"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "diesel",
@@ -229,9 +229,6 @@ class NoDrivstoffProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Coordinator-managed sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

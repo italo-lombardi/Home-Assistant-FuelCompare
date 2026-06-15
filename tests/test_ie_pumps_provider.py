@@ -143,8 +143,8 @@ def test_provider_capabilities_include_timing_and_sentinels() -> None:
     """CAPABILITIES includes lastupdated and coordinator sentinel keys."""
     caps = IePumpsProvider.CAPABILITIES
     assert "lastupdated" in caps
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 # ---------------------------------------------------------------------------

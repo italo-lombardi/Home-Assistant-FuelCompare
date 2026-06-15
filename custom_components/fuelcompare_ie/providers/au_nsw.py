@@ -140,7 +140,7 @@ class AuNswProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = (
         3600  # hourly — matches source update cadence; see module docstring
     )
-    CURRENCY: ClassVar[str] = "AUD/L"
+    CURRENCY: ClassVar[str] = "A$"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {
@@ -158,8 +158,6 @@ class AuNswProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -329,19 +327,20 @@ class AuNswProvider(BaseProvider):
             e10_price = prices.get("e10")
 
             if diesel_price is not None:
-                dollars = diesel_price if diesel_price <= 10.0 else diesel_price / 100.0
-                price_parts.append(f"Diesel A${dollars:.3f}")
-                sort_price = min(sort_price, dollars)
+                dollars = _normalise_price(diesel_price)
+                if dollars is not None:
+                    price_parts.append(f"Diesel A${dollars:.3f}")
+                    sort_price = min(sort_price, dollars)
             if unleaded_price is not None:
-                dollars = (
-                    unleaded_price if unleaded_price <= 10.0 else unleaded_price / 100.0
-                )
-                price_parts.append(f"Unleaded A${dollars:.3f}")
-                sort_price = min(sort_price, dollars)
+                dollars = _normalise_price(unleaded_price)
+                if dollars is not None:
+                    price_parts.append(f"Unleaded A${dollars:.3f}")
+                    sort_price = min(sort_price, dollars)
             elif e10_price is not None:
-                dollars = e10_price if e10_price <= 10.0 else e10_price / 100.0
-                price_parts.append(f"E10 A${dollars:.3f}")
-                sort_price = min(sort_price, dollars)
+                dollars = _normalise_price(e10_price)
+                if dollars is not None:
+                    price_parts.append(f"E10 A${dollars:.3f}")
+                    sort_price = min(sort_price, dollars)
 
             label = (
                 f"{display_name} — {' / '.join(price_parts)}"

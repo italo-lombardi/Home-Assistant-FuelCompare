@@ -173,9 +173,9 @@ class PlBenzynaProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
-    CURRENCY: ClassVar[str] = "PLN/L"
+    CURRENCY: ClassVar[str] = "zl"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices (PLN/litre)
             "unleaded",
@@ -190,9 +190,6 @@ class PlBenzynaProvider(BaseProvider):
             "county",
             # Timing
             "lastupdated",
-            # Diagnostic / coordinator-managed
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

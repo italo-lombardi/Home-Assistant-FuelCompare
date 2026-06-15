@@ -85,7 +85,7 @@ import asyncio
 import functools
 import io
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -163,7 +163,7 @@ class MeFuelProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 43200  # 12 hours; source updates approx weekly/bi-weekly
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",  # EUROSUPER 95
@@ -172,9 +172,6 @@ class MeFuelProvider(BaseProvider):
             "kerosene",  # LOŽ ULJE (heating oil)
             # Timing
             "lastupdated",
-            # Coordinator-managed sentinels (always created by coordinator)
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

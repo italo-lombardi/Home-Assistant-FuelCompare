@@ -1,20 +1,17 @@
 # Fuel Compare for Home Assistant
 
-Track live fuel prices from petrol stations across 27 countries directly in your Home Assistant dashboard.
+Live fuel prices from 36 providers across 27 countries — Ireland, UK, Germany, France, Australia, and more — straight into your Home Assistant dashboard. Covers unleaded, diesel, E10, LPG, and premium grades where available. No YAML required.
 
 ![Sensors](assets/sensors.png)
 
 ## Features
 
-- **36 providers across 27 countries** — Ireland, UK, Germany, France, Spain, Italy, Portugal, Netherlands, Belgium, Austria, Switzerland, Norway, Sweden, Denmark, Finland, Poland, Czech Republic, Greece, Croatia, Slovenia, Luxembourg, Lithuania, Iceland, Moldova, Montenegro, Malta, Bosnia & Herzegovina, Australia (WA/NSW/QLD/VIC), Canada (Quebec), and the EU Oil Bulletin
-- Live fuel prices: unleaded, diesel, E10, E85, LPG, CNG, premium grades, kerosene, and AdBlue where available
 - Opening hours, station name, brand, address, coordinates, and facility sensors per station
 - `data_fetch_problem` binary sensor and `last_successful_fetch` timestamp sensor for automations
 - Stale-retention: entities keep their last known value through transient outages
 - Station picker in config flow for location-based providers — sorted cheapest-first
 - Currency-aware: EUR, GBP, AUD per provider
 - Translated into 25 languages
-- No YAML required
 
 ## Setup
 

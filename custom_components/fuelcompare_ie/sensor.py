@@ -25,6 +25,16 @@ from .coordinator import FuelCompareIECoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+_DAYS = (
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+)
+
 # ── Price sensor registry ─────────────────────────────────────────────────────
 #
 # Maps StationData capability key → (translation_key, icon).
@@ -226,8 +236,9 @@ class FuelPriceSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity)
             "source": self.coordinator._provider.LABEL,
         }
         if self.coordinator.data:
-            if lastupdated := self.coordinator.data.get("lastupdated"):
-                attrs["price_last_updated"] = lastupdated
+            if self.coordinator.data.get("lastupdated") is not None:
+                parsed = _parse_lastupdated(self.coordinator.data.get("lastupdated"))
+                attrs["price_last_updated"] = parsed.isoformat() if parsed else None
         return attrs
 
 
@@ -394,7 +405,7 @@ class StationWorkingHoursSensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = dt_util.as_local(dt_util.now()).strftime("%A")
+            today = _DAYS[dt_util.as_local(dt_util.now()).weekday()]
             return hours.get(today)
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours for native_value: %s", err)

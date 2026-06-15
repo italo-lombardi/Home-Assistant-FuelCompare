@@ -39,16 +39,16 @@ Precio Gasoleo B                  → (ignored, off-road diesel)
 Precio Gasoleo Premium            → premium_diesel (passthrough only)
 Fecha                             → lastupdated  (top-level response field)
 
-E85 / AdBlue: MINETUR does not publish these in the open API; the keys are
-included in CAPABILITIES because the integration spec lists them, but they
-will always be None.
+E85 / AdBlue: MINETUR does not publish these in the open API; they are not
+included in CAPABILITIES.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+import ssl
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -61,6 +61,11 @@ from .base import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# MINETUR server only supports TLS 1.2 — it resets TLS 1.3 connections.
+# Force TLS 1.2 max so newer Python/OpenSSL versions can still connect.
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.maximum_version = ssl.TLSVersion.TLSv1_2
 
 _BASE_URL = (
     "https://sedeaplicaciones.minetur.gob.es"
@@ -107,7 +112,7 @@ class EsMineturProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 1800  # API updates every 30 minutes per Nota field
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "diesel",
@@ -120,8 +125,6 @@ class EsMineturProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -322,6 +325,7 @@ class EsMineturProvider(BaseProvider):
             _BASE_URL,
             headers=_HEADERS,
             timeout=_TIMEOUT,
+            ssl=_SSL_CTX,
         ) as resp:
             resp.raise_for_status()
             # Read bytes and decode with utf-8-sig to safely strip any BOM.
@@ -422,10 +426,6 @@ def _parse_station(raw: dict[str, Any], fecha: str | None) -> StationData:
     for api_field, data_key in _PRICE_FIELDS.items():
         prices[data_key] = _parse_price(raw.get(api_field))
 
-    # E85 and AdBlue are not published by MINETUR; always None.
-    prices["e85"] = None
-    prices["adblue"] = None
-
     # Convert Fecha string ('14/06/2026 4:50:43') to an ISO-ish timestamp.
     # Store as-is; the sensor platform accepts any truthy string for lastupdated.
     lastupdated = _normalise_fecha(fecha)
@@ -435,8 +435,8 @@ def _parse_station(raw: dict[str, Any], fecha: str | None) -> StationData:
         "diesel": prices.get("diesel"),
         "premium_unleaded": prices.get("premium_unleaded"),
         "lpg": prices.get("lpg"),
-        "e85": prices.get("e85"),
-        "adblue": prices.get("adblue"),
+        "e85": None,  # MINETUR does not publish E85
+        "adblue": None,  # MINETUR does not publish AdBlue
         "name": brand,  # MINETUR stations have no distinct name; brand serves as name
         "brand": brand,
         "address": address,

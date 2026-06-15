@@ -25,6 +25,15 @@ from .sensor import _device_info
 _LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
 _OSM_TIME_RE = re.compile(r"(\d{1,2}):(\d{2})")
+_DAYS = (
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+)
 _OSM_DAY_MAP = {
     "mo": 0,
     "tu": 1,
@@ -91,7 +100,7 @@ def _is_open(hours_str: str) -> bool | None:
     s = hours_str.strip().lower()
     if "24/7" in s or "24 hours" in s:
         return True
-    if "closed" in s:
+    if s.strip() == "closed":
         return False
 
     # Try OSM format first: 'Mo-Su 07:00-23:00', 'Mo-Fr 08:00-20:00; Sa 09:00-18:00'
@@ -122,34 +131,47 @@ def _is_open_osm(hours_str: str) -> bool | None:
     now = dt_util.now()
     today_idx = now.weekday()  # 0=Monday ... 6=Sunday
 
+    any_valid_window_for_today = False
     for rule in hours_str.split(";"):
         rule = rule.strip()
         # Extract time range
         times = _OSM_TIME_RE.findall(rule)
         if len(times) < 2:
             continue
-        try:
-            # Normalize 24:00 (valid OSM end-of-day notation) to 0:00
-            open_h, open_m = int(times[0][0]), int(times[0][1])
-            close_h, close_m = int(times[1][0]), int(times[1][1])
-            if open_h == 24:
-                open_h = 0
-            if close_h == 24:
-                close_h = 0
-            open_time = dt_time(open_h, open_m)
-            close_time = dt_time(close_h, close_m)
-        except ValueError:
-            continue
 
         # Check if today is covered by this rule's day range
         day_part = rule.split()[0] if rule.split() else ""
         if _day_matches(day_part, today_idx):
             now_time = now.time()
-            if close_time <= open_time:  # crosses midnight
-                return now_time >= open_time or now_time < close_time
-            return open_time <= now_time < close_time
+            # Iterate over ALL HH:MM pairs in the rule (handles multiple windows)
+            for i in range(0, len(times) - 1, 2):
+                try:
+                    open_h, open_m = int(times[i][0]), int(times[i][1])
+                    close_h, close_m = int(times[i + 1][0]), int(times[i + 1][1])
+                    if open_h == 24:
+                        open_h = 0
+                    if close_h == 24:
+                        close_h = 0
+                    open_time = dt_time(open_h, open_m)
+                    close_time = dt_time(close_h, close_m)
+                except ValueError:
+                    continue
+                # Successfully parsed a time window for today
+                any_valid_window_for_today = True
+                # L-07: "00:00-24:00" normalises to 00:00-00:00 → always open
+                if open_time == close_time == dt_time(0, 0):
+                    return True
+                if close_time <= open_time:  # crosses midnight
+                    if now_time >= open_time or now_time < close_time:
+                        return True
+                elif open_time <= now_time < close_time:
+                    return True
 
-    return None
+    if any_valid_window_for_today:
+        return (
+            False  # day matched, valid windows parsed, but none contained now → closed
+        )
+    return None  # no matching rule for today (or all windows had parse errors)
 
 
 def _day_matches(day_spec: str, today_idx: int) -> bool:
@@ -161,6 +183,9 @@ def _day_matches(day_spec: str, today_idx: int) -> bool:
         segment = segment.strip()
         if not segment:
             continue
+        # L-06: segment looks like a time token (e.g. "07:30") → no day restriction
+        if re.match(r"^\d{1,2}:\d{2}", segment):
+            return True
         # Handle ranges like 'mo-su', 'mo-fr'
         parts = segment.split("-")
         if len(parts) == 2:
@@ -273,7 +298,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(dt_util.as_local(dt_util.now()).strftime("%A"))
+            return hours.get(_DAYS[dt_util.as_local(dt_util.now()).weekday()])
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -31,19 +32,15 @@ class IEFuelCompareProvider(BaseProvider):
     LABEL = "fuelcompare.ie"
     POLL_INTERVAL_SECONDS = 1800
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "diesel",
             "lastupdated",
             "name",
-            "brand",
             "county",
             "working_hours",
             "tablename",
-            "last_successful_fetch",
-            "is_open",
-            "data_fetch_problem",
         }
     )
 
@@ -340,7 +337,7 @@ class IEFuelCompareProvider(BaseProvider):
                 fuel_data[fuel_type] = None
 
         fuel_data["lastupdated"] = station.get("lastupdated")
-        for field in ["name", "tablename", "working_hours", "about", "county"]:
+        for field in ["name", "tablename", "working_hours", "county"]:
             fuel_data[field] = station.get(field)
 
         _LOGGER.debug(

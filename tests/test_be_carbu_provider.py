@@ -204,8 +204,8 @@ def test_provider_capabilities_include_station_fields() -> None:
 
 def test_provider_capabilities_include_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
-    assert "last_successful_fetch" in BeCarbuProvider.CAPABILITIES
-    assert "data_fetch_problem" in BeCarbuProvider.CAPABILITIES
+    assert "last_successful_fetch" not in BeCarbuProvider.CAPABILITIES
+    assert "data_fetch_problem" not in BeCarbuProvider.CAPABILITIES
 
 
 def test_provider_does_not_require_api_key() -> None:
