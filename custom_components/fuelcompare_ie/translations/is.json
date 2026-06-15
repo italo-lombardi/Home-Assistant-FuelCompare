@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Þessi stöð er þegar stillt.",
-      "no_providers_for_country": "Engir gagnaveitendur eru tiltækir fyrir þetta land."
+      "no_providers_for_country": "Engir gagnaveitendur eru tiltækir fyrir þetta land.",
+      "no_counties_for_country": "Engar sýslur eru stilltar fyrir valið land."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Tekur við snertilausri greiðslu"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Valkostir",
+        "data": {
+          "api_key": "API-lykill",
+          "radius_km": "Leitarradíus (km)"
+        }
       }
     }
   }

@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "See jaam on juba seadistatud.",
-      "no_providers_for_country": "Selle riigi jaoks ei ole andmeallikaid saadaval."
+      "no_providers_for_country": "Selle riigi jaoks ei ole andmeallikaid saadaval.",
+      "no_counties_for_country": "Valitud riigi jaoks pole maakondakondasid seadistatud."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Aktsepteerib kontaktivaba makset"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Seaded",
+        "data": {
+          "api_key": "API võti",
+          "radius_km": "Otsinguraadius (km)"
+        }
       }
     }
   }

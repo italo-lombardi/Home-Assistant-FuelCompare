@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Datenquelle"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Tankstelle hinzufügen",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",
-      "no_providers_for_country": "Für dieses Land sind keine Datenanbieter verfügbar."
+      "no_providers_for_country": "Für dieses Land sind keine Datenanbieter verfügbar.",
+      "no_counties_for_country": "Für das ausgewählte Land sind keine Landkreise konfiguriert."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie wird eingestellt",
-      "description": "Die Website fuelcompare.ie wird am **30. Juni 2026** abgeschaltet. Ihre Station **{entry_title}** wird nach diesem Datum keine Preisaktualisierungen mehr erhalten. Erwägen Sie, zu einer anderen irischen Kraftstoffpreisquelle zu wechseln, z. B. FuelFinder IE oder IE Pumps."
+      "description": "Die Website fuelcompare.ie soll am **30. Juni 2026** eingestellt werden. Ihre Tankstelle **{entry_title}** erhält nach diesem Datum keine Preisaktualisierungen mehr. Erwägen Sie einen Wechsel zu einer anderen irischen Kraftstoffpreisquelle, wie z. B. FuelFinder IE oder IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie wird eingestellt",
-      "description": "Die Website fuelcompare.ie soll am **30. Juni 2026** eingestellt werden. Ihre Tankstelle **{entry_title}** erhält nach diesem Datum keine Preisaktualisierungen mehr. Erwägen Sie einen Wechsel zu einer anderen irischen Kraftstoffpreisquelle, wie z. B. FuelFinder IE oder IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Optionen",
+        "data": {
+          "api_key": "API-Schlüssel",
+          "radius_km": "Suchradius (km)"
+        }
+      }
     }
   }
 }

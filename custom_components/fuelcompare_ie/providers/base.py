@@ -335,7 +335,11 @@ class BaseProvider(ABC):
                     raise TypeError(
                         f"{cls.__name__} must define class attribute '{attr}'"
                     )
-            unknown = cls.CAPABILITIES - ALL_SENSOR_KEYS - {"last_successful_fetch", "data_fetch_problem"}
+            unknown = (
+                cls.CAPABILITIES
+                - ALL_SENSOR_KEYS
+                - {"last_successful_fetch", "data_fetch_problem"}
+            )
             if unknown:
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "

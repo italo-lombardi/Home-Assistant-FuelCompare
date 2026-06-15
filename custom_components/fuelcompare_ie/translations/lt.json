@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Duomenų šaltinis"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "county": {
         "title": "Pasirinkite apskritį",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Ši stotis jau sukonfigūruota.",
-      "no_providers_for_country": "Šiai šaliai nėra pasiekiamų duomenų teikėjų."
+      "no_providers_for_country": "Šiai šaliai nėra pasiekiamų duomenų teikėjų.",
+      "no_counties_for_country": "Pasirinktai šaliai nėra sukonfigūruota jokių apskričių."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie uždaroma",
-      "description": "fuelcompare.ie svetainė planuojama uždaryti **2026 m. birželio 30 d.** Jūsų stotis **{entry_title}** nustos gauti kainų atnaujinimus po tos datos. Apsvarstykite galimybę pereiti prie kito airių kuro kainų šaltinio, pvz., FuelFinder IE arba IE Pumps."
+      "title": "fuelcompare.ie baigia darbą",
+      "description": "Svetainė fuelcompare.ie planuoja baigti darbą **2026 m. birželio 30 d.** Jūsų stotis **{entry_title}** nustops gauti kainų atnaujinimus po tos datos. Apsvarstykite galimybę pereiti prie kito Airijos degalų kainų šaltinio, pvz., FuelFinder IE arba IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie baigia darbą",
-      "description": "Svetainė fuelcompare.ie planuoja baigti darbą **2026 m. birželio 30 d.** Jūsų stotis **{entry_title}** nustops gauti kainų atnaujinimus po tos datos. Apsvarstykite galimybę pereiti prie kito Airijos degalų kainų šaltinio, pvz., FuelFinder IE arba IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Parinktys",
+        "data": {
+          "api_key": "API raktas",
+          "radius_km": "Paieškos spindulys (km)"
+        }
+      }
     }
   }
 }

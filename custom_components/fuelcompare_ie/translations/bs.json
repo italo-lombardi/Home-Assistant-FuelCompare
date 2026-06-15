@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Ova stanica je već konfigurirana.",
-      "no_providers_for_country": "Za ovu državu nisu dostupni pružatelji podataka."
+      "no_providers_for_country": "Za ovu državu nisu dostupni pružatelji podataka.",
+      "no_counties_for_country": "Nije konfiguriran nijedan kanton za odabranu zemlju."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Prima Beskontaktno Plaćanje"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcije",
+        "data": {
+          "api_key": "API ključ",
+          "radius_km": "Polumjer pretraživanja (km)"
+        }
       }
     }
   }

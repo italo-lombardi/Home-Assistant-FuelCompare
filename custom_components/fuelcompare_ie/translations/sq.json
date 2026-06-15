@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Ky stacion është konfiguruar tashmë.",
-      "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend."
+      "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend.",
+      "no_counties_for_country": "Nuk ka bashki të konfiguruara për vendin e zgjedhur."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Pranon Pagesë Kontaktsore"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsionet",
+        "data": {
+          "api_key": "Çelës API",
+          "radius_km": "Rrezja e kërkimit (km)"
+        }
       }
     }
   }

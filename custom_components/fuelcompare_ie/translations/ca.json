@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Aquesta estació ja està configurada.",
-      "no_providers_for_country": "No hi ha proveïdors de dades disponibles per a aquest país."
+      "no_providers_for_country": "No hi ha proveïdors de dades disponibles per a aquest país.",
+      "no_counties_for_country": "No hi ha comarques configurades per al país seleccionat."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Accepta pagament sense contacte"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcions",
+        "data": {
+          "api_key": "Clau API",
+          "radius_km": "Radi de cerca (km)"
+        }
       }
     }
   }

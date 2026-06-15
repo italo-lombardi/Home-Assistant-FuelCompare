@@ -141,7 +141,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         provider = provider_cls(station_id, **kwargs)
     else:
         provider = provider_cls(station_id)
-    coordinator = FuelCompareIECoordinator(hass, provider, station_id, config_entry=entry)
+    coordinator = FuelCompareIECoordinator(
+        hass, provider, station_id, config_entry=entry
+    )
 
     hass.data.setdefault(DOMAIN, {})
 

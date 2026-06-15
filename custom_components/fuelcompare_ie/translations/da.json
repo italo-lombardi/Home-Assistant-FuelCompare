@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Datakilde"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Tilføj station",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Denne station er allerede konfigureret.",
-      "no_providers_for_country": "Der er ingen tilgængelige dataudbydere for dette land."
+      "no_providers_for_country": "Der er ingen tilgængelige dataudbydere for dette land.",
+      "no_counties_for_country": "Der er ingen konfigurerede kommuner for det valgte land."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie lukker ned",
-      "description": "Hjemmesiden fuelcompare.ie er planlagt til at lukke ned den **30. juni 2026**. Din station **{entry_title}** vil stoppe med at modtage prisopdateringer efter denne dato. Overvej at skifte til en anden irsk kilde til brændstofpriser, såsom FuelFinder IE eller IE Pumps."
+      "description": "Hjemmesiden fuelcompare.ie er planlagt til at lukke ned den **30. juni 2026**. Din station **{entry_title}** vil stoppe med at modtage prisopdateringer efter denne dato. Overvej at skifte til en anden irsk brændstofpriskoilde, f.eks. FuelFinder IE eller IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie lukker ned",
-      "description": "Hjemmesiden fuelcompare.ie er planlagt til at lukke ned den **30. juni 2026**. Din station **{entry_title}** vil stoppe med at modtage prisopdateringer efter denne dato. Overvej at skifte til en anden irsk brændstofpriskoilde, f.eks. FuelFinder IE eller IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Indstillinger",
+        "data": {
+          "api_key": "API-nøgle",
+          "radius_km": "Søgeradius (km)"
+        }
+      }
     }
   }
 }

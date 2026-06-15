@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Mae'r orsaf hon eisoes wedi'i ffurfweddu.",
-      "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon."
+      "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon.",
+      "no_counties_for_country": "Nid oes siroedd wedi'u ffurfweddu ar gyfer y wlad a ddewiswyd."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Yn Derbyn Taliad Di-gyffwrdd"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsiynau",
+        "data": {
+          "api_key": "Allwedd API",
+          "radius_km": "Radiws chwilio (km)"
+        }
       }
     }
   }

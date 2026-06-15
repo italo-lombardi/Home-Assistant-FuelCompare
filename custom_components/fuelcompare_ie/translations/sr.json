@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Ова станица је већ конфигурисана.",
-      "no_providers_for_country": "За ову земљу нису доступни добављачи података."
+      "no_providers_for_country": "За ову земљу нису доступни добављачи података.",
+      "no_counties_for_country": "За одабрану земљу нису конфигурисани окрузи."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Прихвата бесконтактно плаћање"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Опције",
+        "data": {
+          "api_key": "API кључ",
+          "radius_km": "Полупречник претраживања (km)"
+        }
       }
     }
   }

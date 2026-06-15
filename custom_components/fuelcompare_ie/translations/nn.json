@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Denne stasjonen er allereie konfigurert.",
-      "no_providers_for_country": "Ingen dataleverandørar er tilgjengelege for dette landet."
+      "no_providers_for_country": "Ingen dataleverandørar er tilgjengelege for dette landet.",
+      "no_counties_for_country": "Ingen fylke er konfigurert for det valde landet."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Godtek kontaktlaus betaling"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Alternativ",
+        "data": {
+          "api_key": "API-nøkkel",
+          "radius_km": "Søkeradius (km)"
+        }
       }
     }
   }

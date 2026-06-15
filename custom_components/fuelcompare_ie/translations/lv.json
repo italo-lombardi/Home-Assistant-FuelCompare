@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Datu avots"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Pievienot staciju",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Šī stacija jau ir konfigurēta.",
-      "no_providers_for_country": "Šai valstij nav pieejami datu sniedzēji."
+      "no_providers_for_country": "Šai valstij nav pieejami datu sniedzēji.",
+      "no_counties_for_country": "Izvēlētajai valstij nav konfigurēti novadi."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie tiek slēgts",
-      "description": "fuelcompare.ie vietne ir plānota slēgšanai **2026. gada 30. jūnijā**. Jūsu stacija **{entry_title}** pēc šī datuma pārtrauks saņemt cenu atjauninājumus. Apsveriet pāreju uz citu Īrijas degvielas cenu avotu, piemēram, FuelFinder IE vai IE Pumps."
+      "description": "Tīmekļa vietne fuelcompare.ie ir paredzēta slēgšanai **2026. gada 30. jūnijā**. Jūsu stacija **{entry_title}** pārtrauks saņemt cenu atjauninājumus pēc šī datuma. Apsveriet iespēju pāriet uz citu Īrijas degvielas cenu avotu, piemēram, FuelFinder IE vai IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie tiek slēgts",
-      "description": "Tīmekļa vietne fuelcompare.ie ir paredzēta slēgšanai **2026. gada 30. jūnijā**. Jūsu stacija **{entry_title}** pārtrauks saņemt cenu atjauninājumus pēc šī datuma. Apsveriet iespēju pāriet uz citu Īrijas degvielas cenu avotu, piemēram, FuelFinder IE vai IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcijas",
+        "data": {
+          "api_key": "API atslēga",
+          "radius_km": "Meklēšanas rādiuss (km)"
+        }
+      }
     }
   }
 }

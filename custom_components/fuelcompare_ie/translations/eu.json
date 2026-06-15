@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Gasolindegia dagoeneko konfiguratuta dago.",
-      "no_providers_for_country": "Ez dago datu-hornitzailerik herrialde honetarako."
+      "no_providers_for_country": "Ez dago datu-hornitzailerik herrialde honetarako.",
+      "no_counties_for_country": "Ez dago aukeratutako herrialderako eskualderik konfiguratuta."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Kontakturik gabeko ordainketa onartzen du"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aukerak",
+        "data": {
+          "api_key": "API gakoa",
+          "radius_km": "Bilaketa-erradioa (km)"
+        }
       }
     }
   }

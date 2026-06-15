@@ -68,7 +68,8 @@
     },
     "abort": {
       "already_configured": "Esta estación xa está configurada.",
-      "no_providers_for_country": "Non hai provedores de datos dispoñibles para este país."
+      "no_providers_for_country": "Non hai provedores de datos dispoñibles para este país.",
+      "no_counties_for_country": "Non hai comarcas configuradas para o país seleccionado."
     }
   },
   "issues": {
@@ -203,6 +204,17 @@
       },
       "accepts_contactless": {
         "name": "Acepta pagamento sen contacto"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcións",
+        "data": {
+          "api_key": "Clave API",
+          "radius_km": "Radio de busca (km)"
+        }
       }
     }
   }

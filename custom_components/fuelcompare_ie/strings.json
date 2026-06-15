@@ -68,7 +68,19 @@
     },
     "abort": {
       "already_configured": "This station is already configured.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "No data providers are available for this country.",
+      "no_counties_for_country": "No counties are configured for the selected country."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "api_key": "API Key",
+          "radius_km": "Search radius (km)"
+        }
+      }
     }
   },
   "issues": {

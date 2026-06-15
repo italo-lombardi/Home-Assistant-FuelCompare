@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Tietolähde"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "county": {
         "title": "Valitse lääni",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Tämä asema on jo määritetty.",
-      "no_providers_for_country": "Tälle maalle ei ole saatavilla tietolähteen tarjoajia."
+      "no_providers_for_country": "Tälle maalle ei ole saatavilla tietolähteen tarjoajia.",
+      "no_counties_for_country": "Valitulle maalle ei ole konfiguroitu maakuntia."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie sulkeutuu",
-      "description": "Verkkosivusto fuelcompare.ie on aikataulutettu sulkeutumaan **30. kesäkuuta 2026**. Asemasi **{entry_title}** lakkaa saamasta hintapäivityksiä tuon päivämäärän jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
+      "title": "fuelcompare.ie suljetaan",
+      "description": "Verkkosivusto fuelcompare.ie on suunniteltu suljettavaksi **30. kesäkuuta 2026**. Asemasi **{entry_title}** lopettaa hinnapäivitysten vastaanottamisen sen jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie suljetaan",
-      "description": "Verkkosivusto fuelcompare.ie on suunniteltu suljettavaksi **30. kesäkuuta 2026**. Asemasi **{entry_title}** lopettaa hinnapäivitysten vastaanottamisen sen jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Asetukset",
+        "data": {
+          "api_key": "API-avain",
+          "radius_km": "Hakusäde (km)"
+        }
+      }
     }
   }
 }

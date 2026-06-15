@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Джерело даних"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Додати станцію",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Цю станцію вже налаштовано.",
-      "no_providers_for_country": "Для цієї країни немає доступних постачальників даних."
+      "no_providers_for_country": "Для цієї країни немає доступних постачальників даних.",
+      "no_counties_for_country": "Для обраної країни не налаштовано жодних районів."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie припиняє роботу",
-      "description": "Веб-сайт fuelcompare.ie заплановано до закриття **30 червня 2026 року**. Ваша станція **{entry_title}** припинить отримувати оновлення цін після цієї дати. Розгляньте можливість переходу на інше ірландське джерело цін на пальне, наприклад FuelFinder IE або IE Pumps."
+      "description": "Веб-сайт fuelcompare.ie планується закрити **30 червня 2026 року**. Ваша станція **{entry_title}** перестане отримувати оновлення цін після цієї дати. Розгляньте можливість переходу на інше ірландське джерело цін на паливо, наприклад FuelFinder IE або IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie припиняє роботу",
-      "description": "Веб-сайт fuelcompare.ie планується закрити **30 червня 2026 року**. Ваша станція **{entry_title}** перестане отримувати оновлення цін після цієї дати. Розгляньте можливість переходу на інше ірландське джерело цін на паливо, наприклад FuelFinder IE або IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Параметри",
+        "data": {
+          "api_key": "API ключ",
+          "radius_km": "Радіус пошуку (км)"
+        }
+      }
     }
   }
 }

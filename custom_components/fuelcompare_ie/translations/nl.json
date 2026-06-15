@@ -12,8 +12,7 @@
         "description": "{deprecation_notice}",
         "data": {
           "provider": "Gegevensbron"
-        },
-        "description": "{deprecation_notice}"
+        }
       },
       "station": {
         "title": "Station toevoegen",
@@ -69,13 +68,14 @@
     },
     "abort": {
       "already_configured": "Dit station is al geconfigureerd.",
-      "no_providers_for_country": "Er zijn geen gegevensproviders beschikbaar voor dit land."
+      "no_providers_for_country": "Er zijn geen gegevensproviders beschikbaar voor dit land.",
+      "no_counties_for_country": "Er zijn geen provincies geconfigureerd voor het geselecteerde land."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie sluit",
-      "description": "De website fuelcompare.ie is gepland om te sluiten op **30 juni 2026**. Uw station **{entry_title}** ontvangt na die datum geen prijsupdates meer. Overweeg over te stappen naar een andere Ierse brandstofprijsbron, zoals FuelFinder IE of IE Pumps."
+      "description": "De website fuelcompare.ie staat gepland om te sluiten op **30 juni 2026**. Uw station **{entry_title}** stopt na die datum met het ontvangen van prijsupdates. Overweeg over te stappen naar een andere Ierse brandstofprijsbron, zoals FuelFinder IE of IE Pumps."
     }
   },
   "entity": {
@@ -207,10 +207,15 @@
       }
     }
   },
-  "issues": {
-    "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie sluit",
-      "description": "De website fuelcompare.ie staat gepland om te sluiten op **30 juni 2026**. Uw station **{entry_title}** stopt na die datum met het ontvangen van prijsupdates. Overweeg over te stappen naar een andere Ierse brandstofprijsbron, zoals FuelFinder IE of IE Pumps."
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opties",
+        "data": {
+          "api_key": "API-sleutel",
+          "radius_km": "Zoekradius (km)"
+        }
+      }
     }
   }
 }
