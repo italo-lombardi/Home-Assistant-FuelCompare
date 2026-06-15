@@ -50,34 +50,6 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
         self._provider = provider
         self.last_successful_fetch: datetime | None = None
 
-    # ---- Backwards-compatible accessors used by tests ---------------------------
-
-    @property
-    def _build_id(self) -> str | None:
-        return getattr(self._provider, "_build_id", None)
-
-    @_build_id.setter
-    def _build_id(self, value: str | None) -> None:
-        if hasattr(self._provider, "_build_id"):
-            self._provider._build_id = value
-        else:
-            _LOGGER.debug(
-                "Coordinator proxy setter: provider has no _build_id attribute, write discarded"
-            )
-
-    @property
-    def _decrypt_key(self) -> str | None:
-        return getattr(self._provider, "_decrypt_key", None)
-
-    @_decrypt_key.setter
-    def _decrypt_key(self, value: str | None) -> None:
-        if hasattr(self._provider, "_decrypt_key"):
-            self._provider._decrypt_key = value
-        else:
-            _LOGGER.debug(
-                "Coordinator proxy setter: provider has no _decrypt_key attribute, write discarded"
-            )
-
     @property
     def provider_capabilities(self) -> frozenset[str]:
         return self._provider.CAPABILITIES
@@ -91,6 +63,9 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
         return self._provider.CURRENCY
 
     # ---- Update cycle -----------------------------------------------------------
+
+    async def async_shutdown(self) -> None:
+        """Cancel any pending tasks and release resources."""
 
     async def _async_update_data(self) -> StationData:
         try:

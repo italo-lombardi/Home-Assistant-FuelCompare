@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -209,7 +209,7 @@ class MdFuelProvider(BaseProvider):
     async def async_list_stations(
         self,
         session: ClientSession,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> list[tuple[str, str]]:
         """Return the single national reference entry for the station picker.
 

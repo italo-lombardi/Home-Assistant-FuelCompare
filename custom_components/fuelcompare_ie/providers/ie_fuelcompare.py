@@ -7,6 +7,7 @@ import logging
 from typing import ClassVar
 
 from aiohttp import ClientError, ClientResponseError, ClientSession, ClientTimeout
+from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from ..const import API_TIMEOUT, BASE_URL
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
@@ -126,7 +127,10 @@ class IEFuelCompareProvider(BaseProvider):
     async def _fetch_page_assets(
         self, session: ClientSession, broad: bool = False
     ) -> None:
-        await self._assets.refresh(session, broad=broad)
+        try:
+            await self._assets.refresh(session, broad=broad)
+        except ValueError as err:
+            raise UpdateFailed(str(err)) from err
 
     # ---- Path A: Next.js static JSON --------------------------------------------
 

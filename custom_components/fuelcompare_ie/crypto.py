@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import json
 from typing import Any
@@ -20,8 +21,8 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> Any:
     """
     try:
         raw = base64.b64decode(encrypted_b64, validate=True)
-    except Exception as err:
-        raise ValueError(f"Invalid base64: {err}") from err
+    except binascii.Error as err:
+        raise ValueError(f"Invalid base64 ciphertext: {err}") from err
     if raw[:8] != b"Salted__":
         raise ValueError("Payload missing CryptoJS 'Salted__' magic header")
     # CryptoJS Salted__ format: bytes 0-7 = magic, 8-15 = salt, 16+ = ciphertext

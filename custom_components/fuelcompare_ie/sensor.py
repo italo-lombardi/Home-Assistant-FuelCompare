@@ -25,10 +25,6 @@ from .coordinator import FuelCompareIECoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-# Keep _DAYS as a module-level alias so that binary_sensor.py can still
-# import it from here without breaking existing references.
-_DAYS = DAYS
-
 # ── Price sensor registry ─────────────────────────────────────────────────────
 #
 # Maps StationData capability key → (translation_key, icon).
@@ -403,7 +399,7 @@ class StationWorkingHoursSensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            today = _DAYS[dt_util.now().weekday()]
+            today = DAYS[dt_util.now().weekday()]
             return hours.get(today)
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours for native_value: %s", err)
@@ -579,8 +575,17 @@ class StationAboutCategorySensor(
         self._attr_device_info = _device_info(
             station_id, station_name, coordinator.provider_label
         )
+        self._cached_category_data: dict | None = None
+
+    def _handle_coordinator_update(self) -> None:
+        """Invalidate the category-data cache on each coordinator update."""
+        self._cached_category_data = None
+        super()._handle_coordinator_update()
 
     def _get_category_data(self) -> dict:
+        cached = getattr(self, "_cached_category_data", None)
+        if cached is not None:
+            return cached
         if not self.coordinator.data:
             return {}
         raw = self.coordinator.data.get("about")
@@ -589,6 +594,7 @@ class StationAboutCategorySensor(
                 about = json_lib.loads(raw) if isinstance(raw, str) else raw
                 cat = about.get(self._category)
                 if cat:
+                    self._cached_category_data = cat
                     return cat
             except (ValueError, TypeError) as err:
                 _LOGGER.debug(
@@ -599,7 +605,9 @@ class StationAboutCategorySensor(
         # Fall back to flat key if about dict doesn't have the category
         flat = self.coordinator.data.get(self._category)
         if isinstance(flat, dict):
+            self._cached_category_data = flat
             return flat
+        self._cached_category_data = {}
         return {}
 
     @property

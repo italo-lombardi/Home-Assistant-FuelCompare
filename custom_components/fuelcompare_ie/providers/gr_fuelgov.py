@@ -256,9 +256,17 @@ class GrFuelgovProvider(BaseProvider):
 
             price_parts: list[str] = []
             if diesel is not None:
-                price_parts.append(f"Diesel €{diesel:.3f}")
+                try:
+                    diesel_val = float(diesel)
+                    price_parts.append(f"Diesel €{diesel_val:.3f}")
+                except (ValueError, TypeError):
+                    pass
             if unleaded is not None:
-                price_parts.append(f"Unleaded €{unleaded:.3f}")
+                try:
+                    unleaded_val = float(unleaded)
+                    price_parts.append(f"Unleaded €{unleaded_val:.3f}")
+                except (ValueError, TypeError):
+                    pass
 
             if price_parts:
                 label = f"{pref_name} — {' / '.join(price_parts)}"
