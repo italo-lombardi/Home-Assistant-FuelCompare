@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import ClassVar
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT, BASE_URL
 from ..crypto import cryptojs_decrypt as _cryptojs_decrypt
@@ -40,7 +40,7 @@ class IEFuelCompareProvider(BaseProvider):
             "name",
             "county",
             "working_hours",
-            "tablename",
+            "brand",
         }
     )
 
@@ -176,7 +176,7 @@ class IEFuelCompareProvider(BaseProvider):
 
             return station
 
-        except Exception as err:
+        except (KeyError, ValueError, TypeError, ClientResponseError) as err:
             _LOGGER.debug(
                 "Next.js path failed for station %s: %s", self._station_id, err
             )
@@ -279,26 +279,34 @@ class IEFuelCompareProvider(BaseProvider):
     async def _decrypt_with_recovery(
         self, session: ClientSession, encrypted: str
     ) -> list | None:
-        try:
-            return _cryptojs_decrypt(encrypted, self._decrypt_key)
-        except Exception as err:
-            _LOGGER.debug(
-                "Decrypt failed for station %s (stale key?): %s — refreshing key and retrying",
-                self._station_id,
-                err,
-            )
+        if self._decrypt_key is not None:
+            try:
+                return _cryptojs_decrypt(encrypted, self._decrypt_key)
+            except Exception as err:
+                _LOGGER.debug(
+                    "Decrypt failed for station %s (stale key?): %s — refreshing key and retrying",
+                    self._station_id,
+                    err,
+                )
 
         await self._fetch_page_assets(session)
-        try:
-            return _cryptojs_decrypt(encrypted, self._decrypt_key)
-        except Exception as retry_err:
-            _LOGGER.debug(
-                "Decrypt failed again for station %s after standard refresh: %s — retrying with broad chunk scan",
-                self._station_id,
-                retry_err,
-            )
+        if self._decrypt_key is not None:
+            try:
+                return _cryptojs_decrypt(encrypted, self._decrypt_key)
+            except Exception as retry_err:
+                _LOGGER.debug(
+                    "Decrypt failed again for station %s after standard refresh: %s — retrying with broad chunk scan",
+                    self._station_id,
+                    retry_err,
+                )
 
         await self._fetch_page_assets(session, broad=True)
+        if self._decrypt_key is None:
+            _LOGGER.debug(
+                "Decrypt key unavailable for station %s after broad chunk scan",
+                self._station_id,
+            )
+            return None
         try:
             return _cryptojs_decrypt(encrypted, self._decrypt_key)
         except Exception as broad_err:

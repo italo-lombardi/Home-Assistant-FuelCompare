@@ -113,7 +113,6 @@ class PtDgegProvider(BaseProvider):
             "premium_unleaded",
             "lpg",
             "lastupdated",
-            "source_station_id",
             "name",
             "county",
             "address",

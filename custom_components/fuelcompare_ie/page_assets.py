@@ -27,6 +27,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import urllib.parse
 from typing import Final
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
@@ -157,6 +158,11 @@ class PageAssets:
             return
 
         for chunk_path in ordered:
+            decoded = urllib.parse.unquote(chunk_path)
+            if ".." in decoded or not re.match(
+                r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
+            ):
+                continue
             chunk_url = BASE_URL + chunk_path
             _LOGGER.debug(
                 "Scanning JS chunk for decrypt key (station %s): %s",

@@ -143,7 +143,6 @@ class NlAnwbProvider(BaseProvider):
             # Identity / meta
             "name",
             "lastupdated",
-            "source_station_id",
         }
     )
 
@@ -345,7 +344,12 @@ async def _parse_bulletin(raw: bytes) -> StationData:
                 # Row 1: date is in column A (index 0), not column B (index 1)
                 date_val = row[0] if len(row) > 0 else None
                 if date_val is not None:
-                    bulletin_date = str(date_val)
+                    from datetime import datetime as _datetime  # noqa: PLC0415
+
+                    if isinstance(date_val, _datetime):
+                        bulletin_date = date_val.date().isoformat()
+                    else:
+                        bulletin_date = str(date_val)
                 continue
             if row_idx == 1:
                 # Row 2: units header — skip

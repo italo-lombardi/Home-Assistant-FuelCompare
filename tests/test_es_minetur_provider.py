@@ -281,28 +281,6 @@ async def test_async_fetch_success_lpg_price() -> None:
     assert data["lpg"] == pytest.approx(0.899)
 
 
-async def test_async_fetch_e85_always_none() -> None:
-    """async_fetch returns e85=None — MINETUR does not publish E85."""
-    resp = _make_mock_response(200)
-    session = _make_session(resp)
-
-    provider = EsMineturProvider(_STATION_ID)
-    data = await provider.async_fetch(session, _STATION_ID)
-
-    assert data["e85"] is None
-
-
-async def test_async_fetch_adblue_always_none() -> None:
-    """async_fetch returns adblue=None — MINETUR does not publish AdBlue."""
-    resp = _make_mock_response(200)
-    session = _make_session(resp)
-
-    provider = EsMineturProvider(_STATION_ID)
-    data = await provider.async_fetch(session, _STATION_ID)
-
-    assert data["adblue"] is None
-
-
 async def test_async_fetch_station_identity_fields() -> None:
     """async_fetch populates brand, address, county from API response."""
     resp = _make_mock_response(200)
@@ -936,8 +914,6 @@ def test_parse_station_returns_all_expected_keys() -> None:
         "diesel",
         "premium_unleaded",
         "lpg",
-        "e85",
-        "adblue",
         "name",
         "brand",
         "address",
@@ -958,13 +934,6 @@ def test_parse_station_fuel_prices() -> None:
     assert result["diesel"] == pytest.approx(1.549)
     assert result["premium_unleaded"] == pytest.approx(1.789)
     assert result["lpg"] == pytest.approx(0.899)
-
-
-def test_parse_station_e85_and_adblue_always_none() -> None:
-    """_parse_station always sets e85 and adblue to None."""
-    result = _parse_station(_BASE_STATION, _FECHA)
-    assert result["e85"] is None
-    assert result["adblue"] is None
 
 
 def test_parse_station_name_equals_brand() -> None:

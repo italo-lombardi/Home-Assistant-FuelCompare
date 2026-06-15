@@ -99,7 +99,7 @@ class MdFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 43200  # 12 hours — ANRE updates at most once daily
-    CURRENCY: ClassVar[str] = "L"
+    CURRENCY: ClassVar[str] = "MDL"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

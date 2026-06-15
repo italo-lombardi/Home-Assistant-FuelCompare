@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Válasszon adatforrást",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Adatforrás"
         }
@@ -60,7 +61,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Érvénytelen állomás azonosító. Kérjük, adjon meg egy érvényes pozitív számot.",
+      "invalid_station_id": "Az állomás azonosítója nem lehet üres.",
       "invalid_api_key": "Az API kulcs nem lehet üres.",
       "invalid_location": "Érvénytelen koordináták. Adjon meg érvényes szélességi és hosszúsági fokot.",
       "no_stations_found": "Nem találhatók állomások ebben a megyében. Próbáljon másik megyét."
@@ -68,6 +69,12 @@
     "abort": {
       "already_configured": "Ez az állomás már konfigurálva van.",
       "no_providers_for_country": "Ehhez az országhoz nem érhetők el adatszolgáltatók."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "A fuelcompare.ie leáll",
+      "description": "A fuelcompare.ie weboldal **2026. június 30-án** tervezi a leállást. Az **{entry_title}** állomása ezen dátum után nem fog több árfrissítést kapni. Fontolja meg egy másik ír üzemanyagár-forrásra való áttérést, például a FuelFinder IE vagy az IE Pumps szolgáltatásra."
     }
   },
   "entity": {
@@ -139,7 +146,7 @@
         "name": "Szolgáltatások"
       },
       "opening_hours": {
-        "name": "Nyitvatartás"
+        "name": "Nyitvatartás (OSM)"
       },
       "payments": {
         "name": "Fizetési módok"
@@ -148,7 +155,7 @@
         "name": "Telefon"
       },
       "price_confidence": {
-        "name": "Ármeghbízhatóság"
+        "name": "Ármegbízhatóság"
       },
       "price_last_updated": {
         "name": "Ár utolsó frissítése"

@@ -67,7 +67,6 @@ class HRMzoeProvider(BaseProvider):
             "unleaded",
             "diesel",
             "lpg",
-            "lastupdated",
             "name",
             "brand",
             "county",
@@ -273,6 +272,5 @@ def _parse_station(station: dict, raw: dict) -> StationData:
         "address": station.get("adresa") or None,
         "latitude": latitude,
         "longitude": longitude,
-        "lastupdated": None,  # API does not return per-station timestamp
         "source_station_id": str(station.get("id", "")),
     }

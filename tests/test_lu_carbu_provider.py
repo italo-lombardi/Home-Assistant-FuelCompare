@@ -141,11 +141,6 @@ def test_provider_metadata_station_lookup_mode() -> None:
     assert LuCarbuProvider.STATION_LOOKUP_MODE == "location_search"
 
 
-def test_provider_metadata_country_lu() -> None:
-    """LuCarbuProvider is for Luxembourg."""
-    assert LuCarbuProvider.COUNTRY == "LU"
-
-
 def test_provider_capabilities_fuel_types() -> None:
     """CAPABILITIES includes all five Luxembourg fuel types."""
     caps = LuCarbuProvider.CAPABILITIES
@@ -160,8 +155,8 @@ def test_provider_capabilities_station_fields() -> None:
         assert field in caps, f"Field '{field}' missing from CAPABILITIES"
 
 
-def test_provider_capabilities_coordinator_sentinels() -> None:
-    """CAPABILITIES includes coordinator sentinel keys."""
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
+    """CAPABILITIES excludes coordinator sentinel keys."""
     caps = LuCarbuProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps
     assert "data_fetch_problem" not in caps

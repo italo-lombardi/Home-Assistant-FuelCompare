@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import logging
 from typing import Any
 
@@ -353,14 +352,13 @@ async def _fetch_station_name(
         return None
     try:
         session = async_get_clientsession(hass)
-        sig = inspect.signature(provider_cls.__init__)
-        if api_key and "api_key" in sig.parameters:
+        if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
             provider = provider_cls(station_id, api_key=api_key)
         else:
             provider = provider_cls(station_id)
         return await provider.async_fetch_station_name(session, station_id)
     except Exception as err:  # noqa: BLE001
-        _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
+        _LOGGER.warning("Failed to fetch station name for %s: %s", station_id, err)
     return None
 
 
@@ -403,6 +401,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._country = user_input[CONF_COUNTRY]
             return await self._async_step_provider()
+
+        if not countries:
+            return self.async_abort(reason="no_providers_for_country")
 
         return self.async_show_form(
             step_id="user",
@@ -553,6 +554,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # Build county list from the country. For IE use the 26 counties + all-Ireland.
         county_options = _counties_for_country(self._country)
+        if not county_options:
+            return self.async_abort(reason="no_counties_for_country")
         return self.async_show_form(
             step_id="county",
             data_schema=vol.Schema(
@@ -613,7 +616,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     session, **list_kwargs
                 )
             except Exception as err:  # noqa: BLE001
-                _LOGGER.debug("Failed to load station list: %s", err)
+                _LOGGER.warning("Failed to load station list: %s", err)
 
         self._station_list = station_list
 

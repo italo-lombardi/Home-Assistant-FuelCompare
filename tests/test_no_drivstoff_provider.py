@@ -798,7 +798,7 @@ async def test_async_fetch_raises_provider_error_on_401() -> None:
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ProviderError, match=r"api_key|API key|api key"):
         await provider.async_fetch(session, _STATION_UUID)
 
 
@@ -809,7 +809,7 @@ async def test_async_fetch_raises_provider_error_on_403() -> None:
 
     provider = _make_provider()
 
-    with pytest.raises(ProviderError):
+    with pytest.raises(ProviderError, match=r"api_key|API key|api key"):
         await provider.async_fetch(session, _STATION_UUID)
 
 
@@ -1122,10 +1122,17 @@ async def test_async_list_stations_includes_zero_coordinate_station() -> None:
     station_at_null_island = {
         "id": "zero-island",
         "name": "Station at Null Island",
-        "brand": "Test",
+        "provider": "CIRCLE_K",
+        "address": "Null Island Road 0",
+        "city": "Null Island",
         "location": {"lat": 0.0, "lng": 0.0},
-        "fuel_prices": [{"fuel_name": "Bensin 95", "price": 1.85}],
-        "updated_at": "2026-06-14T12:00:00Z",
+        "prices": [
+            {
+                "fuelType": "DIESEL",
+                "price": "1.85",
+                "registeredAt": "2026-06-14T12:00:00Z",
+            }
+        ],
     }
 
     from unittest.mock import AsyncMock, MagicMock
@@ -1152,6 +1159,9 @@ async def test_async_list_stations_includes_zero_coordinate_station() -> None:
     assert "zero-island" in uids, (
         "Station at lat=0.0/lng=0.0 must not be dropped by falsy check"
     )
+    # Verify the label contains the expected station name from the API 'name' field
+    label = next(label for uid, label in stations if uid == "zero-island")
+    assert "Station at Null Island" in label
 
 
 # ---------------------------------------------------------------------------

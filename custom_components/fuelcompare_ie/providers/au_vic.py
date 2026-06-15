@@ -147,7 +147,7 @@ class AuVicProvider(BaseProvider):
     REQUIRES_API_KEY = True
     API_KEY_REGISTRATION_URL = "https://developer.service.vic.gov.au/"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",
@@ -159,6 +159,7 @@ class AuVicProvider(BaseProvider):
             "e85",
             # Station identity
             "name",
+            "brand",
             "address",
             "county",
             "latitude",

@@ -183,7 +183,7 @@ def test_provider_capabilities_include_identity_fields() -> None:
         assert key in caps, f"Missing capability: {key}"
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = SEBensinpriserProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps
@@ -388,9 +388,9 @@ def test_parse_station_source_station_id_is_string() -> None:
 
 
 def test_parse_station_lastupdated_is_none() -> None:
-    """_parse_station returns lastupdated=None (no per-price timestamps in API)."""
+    """_parse_station does not include lastupdated (no per-price timestamps in API)."""
     result = _parse_station(_BASE_STATION)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 # ---------------------------------------------------------------------------

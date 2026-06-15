@@ -525,6 +525,4 @@ def _parse_station(
         "county": county,
         "latitude": latitude,
         "longitude": longitude,
-        "lastupdated": None,  # goriva.si does not return per-station timestamps
-        "source_station_id": str(station.get("pk", "")),
     }

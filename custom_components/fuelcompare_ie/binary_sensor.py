@@ -20,20 +20,11 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import FuelCompareIECoordinator
-from .sensor import _device_info
+from .sensor import _DAYS, _device_info
 
 _LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)
 _OSM_TIME_RE = re.compile(r"(\d{1,2}):(\d{2})")
-_DAYS = (
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-)
 _OSM_DAY_MAP = {
     "mo": 0,
     "tu": 1,
@@ -100,7 +91,7 @@ def _is_open(hours_str: str) -> bool | None:
     s = hours_str.strip().lower()
     if "24/7" in s or "24 hours" in s:
         return True
-    if s.strip() == "closed":
+    if s == "closed":
         return False
 
     # Try OSM format first: 'Mo-Su 07:00-23:00', 'Mo-Fr 08:00-20:00; Sa 09:00-18:00'
@@ -134,13 +125,19 @@ def _is_open_osm(hours_str: str) -> bool | None:
     any_valid_window_for_today = False
     for rule in hours_str.split(";"):
         rule = rule.strip()
+        # Check if today is covered by this rule's day range
+        day_part = rule.split()[0] if rule.split() else ""
+        # Handle explicit "closed" keyword (e.g. "Mo closed")
+        if "closed" in rule.lower():
+            if _day_matches(day_part, today_idx):
+                return False
+            continue
         # Extract time range
         times = _OSM_TIME_RE.findall(rule)
         if len(times) < 2:
             continue
 
         # Check if today is covered by this rule's day range
-        day_part = rule.split()[0] if rule.split() else ""
         if _day_matches(day_part, today_idx):
             now_time = now.time()
             # Iterate over ALL HH:MM pairs in the rule (handles multiple windows)
@@ -257,7 +254,6 @@ class StationIsOpenBinarySensor(
 ):
     """Binary sensor indicating whether the station is currently open."""
 
-    _attr_device_class = None
     _attr_icon = "mdi:store-clock"
     _attr_has_entity_name = True
     _attr_translation_key = "is_open"
@@ -273,7 +269,7 @@ class StationIsOpenBinarySensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_is_open"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -301,7 +297,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(_DAYS[dt_util.as_local(dt_util.now()).weekday()])
+            return hours.get(_DAYS[dt_util.now().weekday()])
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None
@@ -358,7 +354,7 @@ class DataFetchProblemBinarySensor(
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_data_fetch_problem"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property
@@ -417,7 +413,7 @@ class FacilityBinarySensor(
         self._attr_device_class = device_class
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{cap_key}"
         self._attr_device_info = _device_info(
-            station_id, station_name, coordinator._provider.LABEL
+            station_id, station_name, coordinator.provider_label
         )
 
     @property

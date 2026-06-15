@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Pasirinkite duomenų šaltinį",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Duomenų šaltinis"
         }
@@ -60,7 +61,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Neteisingas stoties ID. Įveskite teigiamą skaičių.",
+      "invalid_station_id": "Stoties ID negali būti tuščias.",
       "invalid_api_key": "API raktas negali būti tuščias.",
       "invalid_location": "Neteisingos koordinatės. Įveskite galiojančias platumos ir ilgumos reikšmes.",
       "no_stations_found": "Šioje apskrityje stočių nerasta. Bandykite kitą apskritį."
@@ -68,6 +69,12 @@
     "abort": {
       "already_configured": "Ši stotis jau sukonfigūruota.",
       "no_providers_for_country": "Šiai šaliai nėra pasiekiamų duomenų teikėjų."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie uždaroma",
+      "description": "fuelcompare.ie svetainė planuojama uždaryti **2026 m. birželio 30 d.** Jūsų stotis **{entry_title}** nustos gauti kainų atnaujinimus po tos datos. Apsvarstykite galimybę pereiti prie kito airių kuro kainų šaltinio, pvz., FuelFinder IE arba IE Pumps."
     }
   },
   "entity": {
@@ -139,7 +146,7 @@
         "name": "Paslaugos"
       },
       "opening_hours": {
-        "name": "Darbo laikas"
+        "name": "Darbo laikas (OSM)"
       },
       "payments": {
         "name": "Mokėjimai"

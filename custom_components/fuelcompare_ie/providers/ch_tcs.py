@@ -550,7 +550,6 @@ def _build_station_data(station_id: str, raw: dict[str, Any]) -> StationData:
         "diesel": prices.get("diesel"),
         "name": meta.get("displayName") or None,
         "brand": meta.get("brand") or None,
-        "tablename": meta.get("brand") or None,
         "address": meta.get("formattedAddress") or None,
         "latitude": lat,
         "longitude": lng,

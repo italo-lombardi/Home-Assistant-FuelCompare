@@ -191,7 +191,7 @@ def test_provider_capabilities_include_name_and_brand() -> None:
     assert "brand" in caps
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = LtSauridaProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps

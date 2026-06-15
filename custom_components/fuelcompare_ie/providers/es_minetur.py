@@ -415,8 +415,6 @@ def _parse_station(raw: dict[str, Any], fecha: str | None) -> StationData:
         "diesel": prices.get("diesel"),
         "premium_unleaded": prices.get("premium_unleaded"),
         "lpg": prices.get("lpg"),
-        "e85": None,  # MINETUR does not publish E85
-        "adblue": None,  # MINETUR does not publish AdBlue
         "name": brand,  # MINETUR stations have no distinct name; brand serves as name
         "brand": brand,
         "address": address,

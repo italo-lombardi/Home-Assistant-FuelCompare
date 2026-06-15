@@ -478,15 +478,15 @@ async def test_async_fetch_is_open_none_when_field_absent() -> None:
     assert data["is_open"] is None
 
 
-async def test_async_fetch_lastupdated_is_none() -> None:
-    """async_fetch returns lastupdated=None (API provides no per-station timestamps)."""
+async def test_async_fetch_lastupdated_not_in_result() -> None:
+    """async_fetch does not return lastupdated (API provides no per-station timestamps)."""
     die_resp, sup_resp, gas_resp = _three_fuel_responses()
     session = _make_session(die_resp, sup_resp, gas_resp)
 
     p = _provider()
     data = await p.async_fetch(session, _STATION_ID)
 
-    assert data["lastupdated"] is None
+    assert "lastupdated" not in data
 
 
 # ---------------------------------------------------------------------------
@@ -1334,7 +1334,6 @@ def test_build_station_data_returns_all_capability_keys() -> None:
         "latitude",
         "longitude",
         "is_open",
-        "lastupdated",
     }
     for key in required_keys:
         assert key in result, f"Key '{key}' missing from _build_station_data result"
@@ -1396,10 +1395,10 @@ def test_build_station_data_is_open_none_when_absent() -> None:
     assert result["is_open"] is None
 
 
-def test_build_station_data_lastupdated_is_none() -> None:
-    """_build_station_data sets lastupdated=None (API has no price timestamps)."""
+def test_build_station_data_lastupdated_not_in_result() -> None:
+    """_build_station_data does not include lastupdated (API has no price timestamps)."""
     result = _build_station_data(_BASE_STATION_RAW)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 def test_build_station_data_latitude_none_on_invalid_value() -> None:

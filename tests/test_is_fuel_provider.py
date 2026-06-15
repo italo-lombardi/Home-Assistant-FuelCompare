@@ -348,7 +348,6 @@ def test_parse_station_returns_all_required_keys() -> None:
         "brand",
         "latitude",
         "longitude",
-        "lastupdated",
         "source_station_id",
     }
     for key in required_keys:
@@ -418,9 +417,9 @@ def test_parse_station_source_station_id_is_key() -> None:
 
 
 def test_parse_station_lastupdated_is_none() -> None:
-    """_parse_station sets lastupdated to None (no per-station timestamp)."""
+    """_parse_station does not include lastupdated (no per-station timestamp in API)."""
     result = _parse_station(_BASE_STATION)
-    assert result["lastupdated"] is None
+    assert "lastupdated" not in result
 
 
 def test_parse_station_null_geo_returns_none_coords() -> None:

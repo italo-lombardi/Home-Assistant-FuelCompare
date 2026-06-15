@@ -116,7 +116,6 @@ _HEADER_TO_KEY: dict[str, str] = {
     "lpg": "lpg",
     "dyzelinas_dz": "premium_diesel",
     "dyzelinas dz": "premium_diesel",
-    " dz": "premium_diesel",
 }
 
 

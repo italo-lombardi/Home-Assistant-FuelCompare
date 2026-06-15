@@ -494,16 +494,10 @@ def test_parse_station_longitude_none_for_invalid_lng() -> None:
     assert result["longitude"] is None
 
 
-def test_parse_station_lastupdated_is_none() -> None:
-    """_parse_station always returns lastupdated=None (API has no timestamp)."""
+def test_parse_station_source_station_id_not_in_result() -> None:
+    """_parse_station does not include source_station_id (removed from M-12 fix)."""
     result = _parse_station(_BASE_STATION, {})
-    assert result["lastupdated"] is None
-
-
-def test_parse_station_source_station_id_matches_pk() -> None:
-    """_parse_station sets source_station_id to str(pk)."""
-    result = _parse_station(_BASE_STATION, {})
-    assert result["source_station_id"] == str(_STATION_PK)
+    assert "source_station_id" not in result
 
 
 def test_parse_station_null_prices_return_none() -> None:
@@ -698,19 +692,6 @@ async def test_async_fetch_success_populates_coordinates() -> None:
 
     assert data["latitude"] == pytest.approx(46.0517)
     assert data["longitude"] == pytest.approx(14.5079)
-
-
-@pytest.mark.asyncio
-async def test_async_fetch_lastupdated_is_none() -> None:
-    """async_fetch returns lastupdated=None (API has no per-station timestamp)."""
-    franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
-    page1 = _make_mock_response(200, json_data=_search_page([_BASE_STATION]))
-    session = _make_session(franchise_resp, page1)
-
-    provider = _default_provider()
-    data = await provider.async_fetch(session, _STATION_ID)
-
-    assert data["lastupdated"] is None
 
 
 # ---------------------------------------------------------------------------

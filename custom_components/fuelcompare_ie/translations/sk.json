@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Vyberte zdroj dát",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Zdroj dát"
         }
@@ -60,7 +61,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Neplatné ID stanice. Zadajte platné kladné číslo.",
+      "invalid_station_id": "ID stanice nesmie byť prázdne.",
       "invalid_api_key": "API kľúč nesmie byť prázdny.",
       "invalid_location": "Neplatné súradnice. Zadajte platné hodnoty zemepisnej šírky a dĺžky.",
       "no_stations_found": "Pre tento okres sa nenašli žiadne stanice. Skúste iný okres."
@@ -68,6 +69,12 @@
     "abort": {
       "already_configured": "Táto stanica je už nakonfigurovaná.",
       "no_providers_for_country": "Pre túto krajinu nie sú dostupní žiadni poskytovatelia dát."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie sa zatvára",
+      "description": "Webová stránka fuelcompare.ie je naplánovaná na vypnutie **30. júna 2026**. Vaša stanica **{entry_title}** prestane po tomto dátume dostávať aktualizácie cien. Zvážte prechod na iný írsky zdroj cien palív, napríklad FuelFinder IE alebo IE Pumps."
     }
   },
   "entity": {
@@ -139,7 +146,7 @@
         "name": "Služby"
       },
       "opening_hours": {
-        "name": "Otváracie hodiny"
+        "name": "Otváracie hodiny (OSM)"
       },
       "payments": {
         "name": "Platby"

@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
+from typing import TYPE_CHECKING
 
 import homeassistant.util.dt as dt_util
 from aiohttp import ClientError
@@ -14,6 +15,9 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .providers.base import BaseProvider, ProviderError, StationData
 
+if TYPE_CHECKING:
+    from datetime import datetime
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -23,7 +27,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     def __init__(
         self,
         hass: HomeAssistant,
-        provider_or_station_id: "BaseProvider | str",
+        provider_or_station_id: BaseProvider | str,
         station_id: str | None = None,
     ) -> None:
         # Support old 2-arg call: FuelCompareIECoordinator(hass, station_id_str)
@@ -75,8 +79,16 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
             )
 
     @property
-    def provider_capabilities(self) -> frozenset:
+    def provider_capabilities(self) -> frozenset[str]:
         return self._provider.CAPABILITIES
+
+    @property
+    def provider_label(self) -> str:
+        return self._provider.LABEL
+
+    @property
+    def provider_currency(self) -> str:
+        return self._provider.CURRENCY
 
     # ---- Update cycle -----------------------------------------------------------
 

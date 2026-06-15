@@ -22,7 +22,7 @@ import asyncio
 import logging
 from typing import Any, ClassVar
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
@@ -202,11 +202,21 @@ class AtEcontrolProvider(BaseProvider):
         station dict with a combined 'prices' list from all fuel type queries.
         """
         results = await asyncio.gather(
-            *[self._fetch_fuel_type(session, lat, lng, code) for code, _ in _FUEL_CODES]
+            *[
+                self._fetch_fuel_type(session, lat, lng, code)
+                for code, _ in _FUEL_CODES
+            ],
+            return_exceptions=True,
         )
 
         merged: dict[str, dict[str, Any]] = {}
+        client_errors = [r for r in results if isinstance(r, ClientError)]
+        if client_errors and all(isinstance(r, BaseException) for r in results):
+            raise client_errors[0]
         for stations in results:
+            if isinstance(stations, BaseException):
+                _LOGGER.debug("One fuel-type fetch failed, skipping: %s", stations)
+                continue
             for station in stations:
                 sid = str(station.get("id", ""))
                 if not sid:
@@ -341,6 +351,7 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
         "latitude": latitude,
         "longitude": longitude,
         "is_open": raw.get("open") if "open" in raw else None,
-        "lastupdated": None,
-        "source_station_id": str(raw.get("id") or ""),
+        "source_station_id": str(raw["id"])
+        if "id" in raw and raw["id"] is not None
+        else "",
     }

@@ -270,7 +270,6 @@ class FiTankilleProvider(BaseProvider):
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
-            "unleaded",
             "e10",
             "diesel",
             "kerosene",
@@ -349,8 +348,7 @@ class FiTankilleProvider(BaseProvider):
         )
 
         data: StationData = {
-            "unleaded": prices.get("A"),
-            "e10": prices.get("A"),  # 95 E10 — same value, different key alias
+            "e10": prices.get("A"),  # 95 E10 — Finland standard name
             "diesel": prices.get("B"),
             "kerosene": prices.get("D"),
             "premium_diesel": prices.get("E"),

@@ -9,6 +9,7 @@
       },
       "provider": {
         "title": "Odaberite izvor podataka",
+        "description": "{deprecation_notice}",
         "data": {
           "provider": "Izvor podataka"
         }
@@ -60,7 +61,7 @@
       }
     },
     "error": {
-      "invalid_station_id": "Nevažeći ID stanice. Unesite valjani pozitivni broj.",
+      "invalid_station_id": "ID stanice ne smije biti prazan.",
       "invalid_api_key": "API ključ ne smije biti prazan.",
       "invalid_location": "Nevažeće koordinate. Unesite valjane vrijednosti zemljopisne širine i dužine.",
       "no_stations_found": "Nisu pronađene postaje za ovu županiju. Pokušajte s drugom županijom."
@@ -68,6 +69,12 @@
     "abort": {
       "already_configured": "Ova stanica je već konfigurirana.",
       "no_providers_for_country": "Za ovu zemlju nisu dostupni davatelji podataka."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie se gasi",
+      "description": "Web stranica fuelcompare.ie planira se ugasiti **30. lipnja 2026.** Vaša postaja **{entry_title}** prestat će primati ažuriranja cijena nakon tog datuma. Razmislite o prelasku na drugi irski izvor cijena goriva, poput FuelFinder IE ili IE Pumps."
     }
   },
   "entity": {

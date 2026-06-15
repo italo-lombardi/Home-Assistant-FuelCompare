@@ -191,9 +191,7 @@ class StationData(TypedDict, total=False):
 
 # All keys that the sensor platform knows how to handle.
 # Used as a reference — providers declare a subset in CAPABILITIES.
-ALL_SENSOR_KEYS: Final[frozenset[str]] = frozenset(
-    StationData.__required_keys__ | StationData.__optional_keys__
-)
+ALL_SENSOR_KEYS: Final[frozenset[str]] = frozenset(StationData.__optional_keys__)
 
 
 class BaseProvider(ABC):
@@ -314,11 +312,10 @@ class BaseProvider(ABC):
     Override in subclasses for non-EUR providers:
       £      — United Kingdom (GBP)
       A$     — Australia (AUD)
-      kr     — Norway/Denmark/Sweden
+      kr     — Norway (NOK) / Denmark (DKK) / Sweden (SEK) / Iceland (ISK)
       Fr.    — Switzerland (CHF)
       Kč     — Czech Republic (CZK)
       zł     — Poland (PLN)
-      kr     — Iceland (ISK)
       CA$    — Canada (CAD)
       KM     — Bosnia and Herzegovina (BAM)
     """
@@ -333,15 +330,22 @@ class BaseProvider(ABC):
                     raise TypeError(
                         f"{cls.__name__} must define class attribute '{attr}'"
                     )
-            unknown = (
-                cls.CAPABILITIES
-                - ALL_SENSOR_KEYS
-                - {"last_successful_fetch", "data_fetch_problem"}
-            )
+            unknown = cls.CAPABILITIES - ALL_SENSOR_KEYS - {"last_successful_fetch"}
             if unknown:
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "
                     f"Add them to StationData first."
+                )
+            FORBIDDEN_CAPS = {
+                "source_station_id",
+                "tablename",
+                "data_fetch_problem",
+                "last_successful_fetch",
+            }
+            forbidden = cls.CAPABILITIES & FORBIDDEN_CAPS
+            if forbidden:
+                raise TypeError(
+                    f"{cls.__name__}.CAPABILITIES contains forbidden keys: {forbidden}"
                 )
             if cls.STATION_LOOKUP_MODE != "manual_id" and not any(
                 "async_list_stations" in c.__dict__

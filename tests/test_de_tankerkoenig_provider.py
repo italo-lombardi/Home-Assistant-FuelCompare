@@ -178,7 +178,7 @@ def test_provider_capabilities_include_is_open() -> None:
     assert "is_open" in DeTankerkoenigProvider.CAPABILITIES
 
 
-def test_provider_capabilities_include_coordinator_sentinels() -> None:
+def test_provider_capabilities_exclude_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = DeTankerkoenigProvider.CAPABILITIES
     assert "last_successful_fetch" not in caps

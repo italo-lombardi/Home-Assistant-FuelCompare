@@ -207,8 +207,8 @@ def test_capabilities_include_longitude() -> None:
     assert "longitude" in CaQcProvider.CAPABILITIES
 
 
-def test_capabilities_include_coordinator_sentinels() -> None:
-    """CAPABILITIES includes coordinator sentinel keys."""
+def test_capabilities_exclude_coordinator_sentinels() -> None:
+    """CAPABILITIES excludes coordinator sentinel keys."""
     assert "last_successful_fetch" not in CaQcProvider.CAPABILITIES
     assert "data_fetch_problem" not in CaQcProvider.CAPABILITIES
 

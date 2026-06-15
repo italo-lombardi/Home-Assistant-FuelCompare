@@ -18,12 +18,17 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> Any:
     format: base64("Salted__" + 8-byte-salt + ciphertext), with key+IV derived via
     iterative MD5 (EvpKDF). The key is extracted dynamically by PageAssets.
     """
-    raw = base64.b64decode(encrypted_b64, validate=True)
+    try:
+        raw = base64.b64decode(encrypted_b64, validate=True)
+    except Exception as err:
+        raise ValueError(f"Invalid base64: {err}") from err
     if raw[:8] != b"Salted__":
         raise ValueError("Payload missing CryptoJS 'Salted__' magic header")
     # CryptoJS Salted__ format: bytes 0-7 = magic, 8-15 = salt, 16+ = ciphertext
     salt = raw[8:16]
     ciphertext = raw[16:]
+    if len(raw) < 32:
+        raise ValueError(f"Payload too short ({len(raw)} bytes)")
 
     # EvpKDF: chain MD5(prev + evp_key + salt) until we have 48 bytes (32 key + 16 IV)
     d, d_i = b"", b""

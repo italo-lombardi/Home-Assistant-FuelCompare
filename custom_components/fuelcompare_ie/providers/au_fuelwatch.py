@@ -82,7 +82,7 @@ class AuFuelwatchProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = 86400
     CURRENCY: ClassVar[str] = "A$"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "premium_unleaded",

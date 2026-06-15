@@ -562,7 +562,6 @@ def _build_station_data(
         "e85": prices.get("e85"),
         "name": name,
         "brand": brand,
-        "tablename": brand,
         "address": address,
         "county": county,
         "latitude": latitude,
