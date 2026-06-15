@@ -346,9 +346,7 @@ class BaseProvider(ABC):
             if cls.STATION_LOOKUP_MODE != "manual_id" and not any(
                 "async_list_stations" in c.__dict__ for c in cls.__mro__[1:]
             ):
-                raise TypeError(
-                    cls.__name__ + " must override async_list_stations"
-                )
+                raise TypeError(cls.__name__ + " must override async_list_stations")
 
     # ── Abstract interface ────────────────────────────────────────────────────
 

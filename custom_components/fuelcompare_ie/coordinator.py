@@ -40,9 +40,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
             hass,
             _LOGGER,
             name=f"Fuel Compare [{provider.PROVIDER_KEY}] Station {_station_id}",
-            update_interval=timedelta(
-                seconds=provider.POLL_INTERVAL_SECONDS
-            ),
+            update_interval=timedelta(seconds=provider.POLL_INTERVAL_SECONDS),
         )
         self.station_id = _station_id
         self._provider = provider

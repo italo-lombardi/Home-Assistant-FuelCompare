@@ -168,7 +168,9 @@ def _is_open_osm(hours_str: str) -> bool | None:
                     return True
 
     if any_valid_window_for_today:
-        return False  # day matched, valid windows parsed, but none contained now → closed
+        return (
+            False  # day matched, valid windows parsed, but none contained now → closed
+        )
     return None  # no matching rule for today (or all windows had parse errors)
 
 

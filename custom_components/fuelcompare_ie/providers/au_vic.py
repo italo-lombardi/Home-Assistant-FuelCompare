@@ -287,8 +287,12 @@ class AuVicProvider(BaseProvider):
             List of (station_uuid, "Name — Unleaded A$1.76 / Diesel A$1.84")
             tuples ordered cheapest first.  Returns empty list on any failure.
         """
-        lat: float | None = kwargs["lat"] if kwargs.get("lat") is not None else self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs["lng"] if kwargs.get("lng") is not None else self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        )  # type: ignore[assignment]
+        lng: float | None = (
+            kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        )  # type: ignore[assignment]
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:

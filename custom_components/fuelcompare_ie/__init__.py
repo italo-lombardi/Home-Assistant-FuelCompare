@@ -54,7 +54,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
         provider_cls = PROVIDER_REGISTRY.get(DEFAULT_PROVIDER)
-        _LOGGER.warning("Unknown provider key %r, falling back to %r", provider_key, DEFAULT_PROVIDER)
+        _LOGGER.warning(
+            "Unknown provider key %r, falling back to %r",
+            provider_key,
+            DEFAULT_PROVIDER,
+        )
         if provider_cls is None:
             raise ConfigEntryNotReady(
                 f"Provider '{provider_key}' not found and default provider '{DEFAULT_PROVIDER}' is also missing."
@@ -69,11 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # to entry.data for entries created before this change was introduced.
     # Use truthy check — empty string is treated as absent so we fall back to entry.data.
     _api_key_options = entry.options.get(CONF_API_KEY)
-    api_key = (
-        _api_key_options
-        if _api_key_options
-        else entry.data.get(CONF_API_KEY)
-    )
+    api_key = _api_key_options if _api_key_options else entry.data.get(CONF_API_KEY)
     latitude = entry.data.get(CONF_LATITUDE)
     longitude = entry.data.get(CONF_LONGITUDE)
     _radius_options = entry.options.get(CONF_RADIUS_KM)
@@ -89,7 +89,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # postal_code: use NEEDS_POSTAL_CODE ClassVar (inspect.signature breaks for **kwargs).
     if getattr(provider_cls, "NEEDS_POSTAL_CODE", False):
         postal_code = entry.data.get(CONF_POSTAL_CODE)
-        if not postal_code and county and str(county).isdigit() and CONF_POSTAL_CODE not in entry.data:
+        if (
+            not postal_code
+            and county
+            and str(county).isdigit()
+            and CONF_POSTAL_CODE not in entry.data
+        ):
             postal_code = county
         if postal_code:
             kwargs["postal_code"] = postal_code

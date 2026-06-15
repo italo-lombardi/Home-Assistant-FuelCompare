@@ -785,9 +785,10 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
 
         if user_input is not None:
             errors: dict[str, str] = {}
-            if CONF_API_KEY in user_input and not (
-                user_input[CONF_API_KEY] or ""
-            ).strip():
+            if (
+                CONF_API_KEY in user_input
+                and not (user_input[CONF_API_KEY] or "").strip()
+            ):
                 errors[CONF_API_KEY] = "invalid_api_key"
                 return self.async_show_form(
                     step_id="init", data_schema=schema, errors=errors

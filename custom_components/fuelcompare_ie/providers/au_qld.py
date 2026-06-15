@@ -308,8 +308,12 @@ class AuQldProvider(BaseProvider):
             List of (site_id_str, "Brand Name — Diesel A$1.79 / Unleaded A$1.83")
             tuples ordered cheapest-first.  Empty list on any failure.
         """
-        lat: float | None = kwargs["lat"] if kwargs.get("lat") is not None else self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs["lng"] if kwargs.get("lng") is not None else self._longitude  # type: ignore[assignment]
+        lat: float | None = (
+            kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
+        )  # type: ignore[assignment]
+        lng: float | None = (
+            kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
+        )  # type: ignore[assignment]
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:

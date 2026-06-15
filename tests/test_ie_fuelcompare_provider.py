@@ -181,7 +181,8 @@ async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() 
     fetch_assets_calls: list[dict] = []
 
     async def _mock_fetch_page_assets(
-        sess: object, broad: bool = False  # noqa: ARG001
+        sess: object,
+        broad: bool = False,  # noqa: ARG001
     ) -> None:
         fetch_assets_calls.append({"broad": broad})
         # After any asset refresh give the provider a "good" key so the
@@ -203,7 +204,9 @@ async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() 
 
     with patch.object(provider, "_fetch_nextjs", fetch_nextjs_mock):
         with patch.object(provider, "_post_encrypted", post_encrypted_mock):
-            with patch.object(provider, "_fetch_page_assets", side_effect=_mock_fetch_page_assets):
+            with patch.object(
+                provider, "_fetch_page_assets", side_effect=_mock_fetch_page_assets
+            ):
                 with patch(
                     "custom_components.fuelcompare_ie.providers.ie_fuelcompare._cryptojs_decrypt",
                     side_effect=_mock_cryptojs_decrypt,
