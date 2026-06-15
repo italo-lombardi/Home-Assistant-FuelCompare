@@ -51,7 +51,7 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ _STATION_ID = "AL"
 # ── HTTP configuration ────────────────────────────────────────────────────────
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "text/html,application/xhtml+xml",
     "Accept-Language": "en-US,en;q=0.9",
 }

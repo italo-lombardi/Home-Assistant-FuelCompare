@@ -61,7 +61,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import (
     BaseProvider,
     ProviderError,
@@ -74,7 +74,7 @@ _LOGGER = logging.getLogger(__name__)
 _DATA_URL = "https://donnees.roulez-eco.fr/opendata/instantane"
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "*/*",
     "Accept-Encoding": "gzip, deflate",
 }

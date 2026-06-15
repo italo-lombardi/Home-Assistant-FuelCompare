@@ -49,7 +49,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ _LOGGER = logging.getLogger(__name__)
 _BASE_URL = "https://creativecommons.tankerkoenig.de/json"
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
 }
 

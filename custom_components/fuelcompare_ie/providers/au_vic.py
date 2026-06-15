@@ -96,7 +96,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
@@ -344,7 +344,7 @@ class AuVicProvider(BaseProvider):
             "x-consumer-id": self._api_key,
             "x-transactionid": str(uuid.uuid4()),
             "Accept": "application/json",
-            "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+            "User-Agent": UA_HEADER,
         }
 
         _LOGGER.debug("Fetching Service Victoria fuel prices")

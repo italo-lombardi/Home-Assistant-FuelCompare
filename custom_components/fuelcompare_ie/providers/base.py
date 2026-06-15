@@ -220,6 +220,11 @@ class BaseProvider(ABC):
     'station_id' — user enters a numeric/string identifier (default).
     'location'   — user enters lat/lng + radius; coordinator fetches all
                    stations in the radius and creates entities dynamically.
+
+    NOTE: This attribute is read by config_flow._dispatch_after_provider() to
+    determine whether to show the location step.  Keep it even for providers
+    that also set STATION_LOOKUP_MODE='location_search' — the config flow
+    checks CONFIG_MODE == 'location' as a fallback route to async_step_location.
     """
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

@@ -42,7 +42,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import (
     BaseProvider,
     ProviderError,
@@ -60,7 +60,7 @@ _META_URL = "https://www.mimit.gov.it/images/exportCSV/anagrafica_impianti_attiv
 # ── HTTP settings ─────────────────────────────────────────────────────────────
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "*/*",
 }
 # The price CSV is ~3.6 MB and may be slow on Italian government servers;

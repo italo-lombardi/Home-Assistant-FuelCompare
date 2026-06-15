@@ -30,7 +30,7 @@ from xml.etree import ElementTree as ET
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ _RSS_URL = "https://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS"
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT * 3)
 
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "text/xml,application/xml,*/*",
 }
 

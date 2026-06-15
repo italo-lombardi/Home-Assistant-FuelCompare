@@ -65,7 +65,7 @@ from urllib.parse import urlparse
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ _DOWNLOAD_HREF_PATTERN = re.compile(
 
 # User-Agent header for both the landing page and XLSX download.
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "*/*",
 }
 

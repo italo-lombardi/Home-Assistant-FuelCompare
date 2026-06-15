@@ -1,5 +1,8 @@
 """Constants for the Fuel Compare integration."""
 
+import aiohttp as _aiohttp
+import homeassistant.const as _ha_const
+
 DOMAIN = "fuelcompare_ie"
 
 # Config flow
@@ -21,6 +24,10 @@ DEFAULT_RADIUS_KM = 10.0
 # API
 BASE_URL = "https://fuelcompare.ie"
 API_TIMEOUT = 10
+
+# Dynamic User-Agent string using actual HA and aiohttp versions.
+# Import with: from .const import UA_HEADER
+UA_HEADER: str = f"HomeAssistant/{_ha_const.__version__} aiohttp/{_aiohttp.__version__}"
 
 # Day name tuple used by working_hours sensors (index matches datetime.weekday())
 DAYS = (

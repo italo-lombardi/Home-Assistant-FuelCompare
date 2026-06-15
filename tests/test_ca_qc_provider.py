@@ -1164,12 +1164,13 @@ async def test_fetch_geojson_returns_cached_data_without_http_call() -> None:
     import time
 
     cached_features = [_BASE_FEATURE]
-    CaQcProvider._geojson_cache = cached_features
-    CaQcProvider._geojson_cache_ts = time.monotonic()  # just set → within TTL
 
     session = MagicMock()
 
     p = _provider()
+    # Pre-populate the instance-level cache directly
+    p._geojson_cache = cached_features
+    p._geojson_cache_ts = time.monotonic()  # just set → within TTL
     result = await p._fetch_geojson(session)
 
     assert result is cached_features

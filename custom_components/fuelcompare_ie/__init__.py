@@ -155,6 +155,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_placeholders={"entry_title": entry.title},
         )
 
+    # Warn users of ie_pumps that TLS certificate verification is disabled.
+    if provider_key == "ie_pumps":
+        async_create_issue(
+            hass,
+            DOMAIN,
+            f"ie_pumps_tls_disabled_{entry.entry_id}",
+            is_fixable=False,
+            severity=IssueSeverity.WARNING,
+            translation_key="ie_pumps_tls_disabled",
+            translation_placeholders={"entry_title": entry.title},
+        )
+
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -174,5 +186,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
     async_delete_issue(hass, DOMAIN, f"fuelcompare_ie_deprecation_{entry.entry_id}")
+    async_delete_issue(hass, DOMAIN, f"ie_pumps_tls_disabled_{entry.entry_id}")
 
     return unload_ok

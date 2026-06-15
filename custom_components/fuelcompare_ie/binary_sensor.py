@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DAYS, DOMAIN
 from .coordinator import FuelCompareIECoordinator
-from .sensor import _device_info
+from .helpers import _device_info
 
 _LOGGER = logging.getLogger(__name__)
 _TIME_RE = re.compile(r"(\d+)(?::(\d+))?\s*(a\.m\.|p\.m\.|am|pm)", re.IGNORECASE)

@@ -15,13 +15,13 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DAYS, DOMAIN
 from .coordinator import FuelCompareIECoordinator
+from .helpers import _device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -157,16 +157,6 @@ async def async_setup_entry(
             entities.append(factory(coordinator, station_id, station_name))
 
     async_add_entities(entities)
-
-
-def _device_info(station_id: str, station_name: str, manufacturer: str) -> DeviceInfo:
-    """Return shared device info for all sensors of a station."""
-    return DeviceInfo(
-        identifiers={(DOMAIN, station_id)},
-        name=station_name,
-        manufacturer=manufacturer,
-        entry_type=DeviceEntryType.SERVICE,
-    )
 
 
 # ── Fuel price sensors ────────────────────────────────────────────────────────

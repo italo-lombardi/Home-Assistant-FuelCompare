@@ -32,7 +32,7 @@ cached and used in subsequent polls to keep response payloads small
 Auth headers
 ------------
 All requests carry:
-  User-Agent:     HomeAssistant/2025.1 aiohttp/3.9.1
+  User-Agent:     HomeAssistant/<HA_VERSION> aiohttp/<AIOHTTP_VERSION>  (see const.UA_HEADER)
   Accept:         application/json
   Referer:        https://www.fuelfinder.ie/fuelfinder
   Sec-Fetch-Site: same-origin
@@ -91,7 +91,7 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import API_TIMEOUT
+from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ _BASE_URL = "https://www.fuelfinder.ie/api/fuelfinder"
 # All read endpoints require these; sending a subset may work on cached
 # responses but will fail on cache misses and no-store endpoints.
 _HEADERS: dict[str, str] = {
-    "User-Agent": "HomeAssistant/2025.1 aiohttp/3.9.1",
+    "User-Agent": UA_HEADER,
     "Accept": "application/json",
     "Referer": "https://www.fuelfinder.ie/fuelfinder",
     "Sec-Fetch-Site": "same-origin",
