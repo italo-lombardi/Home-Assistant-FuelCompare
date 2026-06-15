@@ -18,6 +18,8 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
     iterative MD5 (EvpKDF). The key is extracted dynamically by PageAssets.
     """
     raw = base64.b64decode(encrypted_b64, validate=True)
+    if raw[:8] != b"Salted__":
+        raise ValueError("Payload missing CryptoJS 'Salted__' magic header")
     # CryptoJS Salted__ format: bytes 0-7 = magic, 8-15 = salt, 16+ = ciphertext
     salt = raw[8:16]
     ciphertext = raw[16:]

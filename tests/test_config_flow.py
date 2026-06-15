@@ -2442,3 +2442,30 @@ async def test_reload_entry_listener_calls_async_reload(hass: HomeAssistant) -> 
 
     await asyncio.sleep(0)
     assert entry.entry_id in reload_called_with
+
+
+async def test_async_setup_entry_unknown_provider_raises_config_entry_not_ready(
+    hass: HomeAssistant,
+) -> None:
+    """Lines 47-52: raise ConfigEntryNotReady when provider key unknown and default also absent."""
+    from homeassistant.exceptions import ConfigEntryNotReady
+
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_bad_provider",
+        data={CONF_STATION_ID: "1", CONF_PROVIDER: "__nonexistent_provider__"},
+    )
+    entry.add_to_hass(hass)
+
+    saved_default = PROVIDER_REGISTRY.pop(DEFAULT_PROVIDER, None)
+    try:
+        import pytest
+
+        with pytest.raises(ConfigEntryNotReady):
+            await async_setup_entry(hass, entry)
+    finally:
+        if saved_default is not None:
+            PROVIDER_REGISTRY[DEFAULT_PROVIDER] = saved_default

@@ -997,6 +997,13 @@ def test_cryptojs_decrypt_invalid_pkcs7_bytes() -> None:
         _cryptojs_decrypt(bad_payload, evp_key)
 
 
+def test_cryptojs_decrypt_missing_magic_header() -> None:
+    """Payload without 'Salted__' header raises ValueError."""
+    bad_payload = base64.b64encode(b"NoMagic!" + b"\x00" * 24).decode()
+    with pytest.raises(ValueError, match="Salted__"):
+        _cryptojs_decrypt(bad_payload, _TEST_DECRYPT_KEY)
+
+
 # ---------------------------------------------------------------------------
 # last_successful_fetch stamping
 # ---------------------------------------------------------------------------

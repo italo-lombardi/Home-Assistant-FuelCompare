@@ -45,7 +45,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
     provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
-        provider_cls = PROVIDER_REGISTRY[DEFAULT_PROVIDER]
+        provider_cls = PROVIDER_REGISTRY.get(DEFAULT_PROVIDER)
+        if provider_cls is None:
+            from homeassistant.exceptions import ConfigEntryNotReady
+
+            raise ConfigEntryNotReady(
+                f"Provider '{provider_key}' not found and default provider '{DEFAULT_PROVIDER}' is also missing."
+            )
 
     # Pass county to providers that support county_search mode.
     # Pass api_key to providers that require authentication.
@@ -103,10 +109,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
 
-    await coordinator.async_config_entry_first_refresh()
-
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
+
+    await coordinator.async_config_entry_first_refresh()
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

@@ -48,7 +48,7 @@ from __future__ import annotations
 import logging
 from typing import Any, ClassVar
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
@@ -237,6 +237,8 @@ class DeTankerkoenigProvider(BaseProvider):
             ) as resp:
                 resp.raise_for_status()
                 payload: dict[str, Any] = await resp.json()
+        except ClientError:
+            raise
         except Exception as err:
             raise ProviderError(
                 f"Tankerkoenig API request failed for station '{station_id}': "

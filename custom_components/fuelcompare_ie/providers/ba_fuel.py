@@ -142,8 +142,6 @@ class BaFuelProvider(BaseProvider):
             "brand",
             "address",
             "county",
-            "latitude",
-            "longitude",
             "lastupdated",
             "last_successful_fetch",
             "data_fetch_problem",

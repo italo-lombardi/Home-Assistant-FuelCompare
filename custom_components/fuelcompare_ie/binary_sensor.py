@@ -87,7 +87,7 @@ def _is_open(hours_str: str) -> bool | None:
     if not hours_str:
         return None
     s = hours_str.strip().lower()
-    if "24/7" in s or ("24" in s and ("7" in s or "hour" in s)):
+    if "24/7" in s or "24 hours" in s:
         return True
     if "closed" in s:
         return False
@@ -127,8 +127,15 @@ def _is_open_osm(hours_str: str) -> bool | None:
         if len(times) < 2:
             continue
         try:
-            open_time = dt_time(int(times[0][0]), int(times[0][1]))
-            close_time = dt_time(int(times[1][0]), int(times[1][1]))
+            # Normalize 24:00 (valid OSM end-of-day notation) to 0:00
+            open_h, open_m = int(times[0][0]), int(times[0][1])
+            close_h, close_m = int(times[1][0]), int(times[1][1])
+            if open_h == 24:
+                open_h = 0
+            if close_h == 24:
+                close_h = 0
+            open_time = dt_time(open_h, open_m)
+            close_time = dt_time(close_h, close_m)
         except ValueError:
             continue
 
@@ -212,7 +219,7 @@ class StationIsOpenBinarySensor(
 ):
     """Binary sensor indicating whether the station is currently open."""
 
-    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+    _attr_device_class = None
     _attr_icon = "mdi:store-clock"
     _attr_has_entity_name = True
     _attr_translation_key = "is_open"

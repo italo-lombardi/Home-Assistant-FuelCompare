@@ -5,7 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - 2026-06-14
+## [0.9.1] - 2026-06-15
+
+### Fixed
+- `__init__.py`: raise `ConfigEntryNotReady` when provider key missing instead of bare `KeyError`
+- `__init__.py`: store coordinator in `hass.data` before `async_config_entry_first_refresh` to prevent `KeyError` in `async_unload_entry` on first-refresh failure
+- `binary_sensor.py`: fix `24/7` detection — no longer false-positive on strings like `Mo-Fr 07:00-24:00`
+- `binary_sensor.py`: normalize `24:00` closing time in OSM hours to prevent `ValueError`
+- `binary_sensor.py`: set `_attr_device_class = None` on `StationIsOpenBinarySensor` (was incorrectly `CONNECTIVITY`)
+- `providers/de_tankerkoenig.py`: let `aiohttp.ClientError` propagate from `async_fetch` for stale-data retention
+- `providers/gb_fuelfinder.py`: fix `CURRENCY` from `"GBP/L"` to `"£"`
+- `providers/ie_fuelcompare.py`: remove 4 facility keys from CAPABILITIES that were never populated; add `tablename`
+- `providers/hr_mzoe.py`: remove `is_open` from CAPABILITIES (never set); remove spurious `tablename` from result dict; wrap gzip/json parse in `ProviderError`
+- `providers/mt_fuel.py`: remove duplicate `petrol_95`/`heating_oil` passthrough keys
+- `providers/pl_benzyna.py`: remove aviation fuel passthrough (`jeta1`/`avgas100ll`) not in StationData
+- `providers/ba_fuel.py`: remove `latitude`/`longitude` from CAPABILITIES (always `None`)
+- `crypto.py`: validate `Salted__` magic header before decryption
+- `translations/uk.json`: fix `unleaded` translation (`"Безсвинцевий"` instead of duplicate `"Бензин"`)
+- `translations/bg.json`: fix `name` data label from Croatian `"Ime"` to Bulgarian `"Име"`
+- `translations/da.json`: fix `price_confidence` translation from invalid `"Prisconfidentiality"` to `"Pristilforlidelighed"`
+
 
 ### Added
 - **Multi-country provider support**: 36 providers across 27 countries — Albania, Austria, Australia (WA/NSW/QLD/VIC), Bosnia & Herzegovina, Belgium, Canada (Quebec), Croatia, Czech Republic, Denmark, Finland, France, Germany, Greece, Iceland, Ireland (3 providers), Italy, Lithuania, Luxembourg, Malta, Moldova, Montenegro, Netherlands, Norway, Poland, Portugal, Slovenia, Spain, Sweden, Switzerland, United Kingdom, European Union (Oil Bulletin)

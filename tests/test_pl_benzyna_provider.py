@@ -700,7 +700,7 @@ async def test_async_fetch_all_product_codes_mapped() -> None:
 
 
 async def test_async_fetch_aviation_fuels_as_extra_attrs() -> None:
-    """async_fetch stores JETA1 and AVGAS100LL as extra passthrough attributes."""
+    """Aviation fuel codes (JETA1, AVGAS100LL) are not exposed as StationData keys."""
     resp_wholesale = _make_mock_response(200, json_data=_WHOLESALE_PAYLOAD)
     resp_lpg = _make_mock_response(200, json_data=_AUTOGAS_PAYLOAD)
     session = _make_session(resp_wholesale, resp_lpg)
@@ -708,11 +708,8 @@ async def test_async_fetch_aviation_fuels_as_extra_attrs() -> None:
     provider = _make_provider()
     data = await provider.async_fetch(session, "PL")
 
-    # Aviation fuels stored as lowercase keys
-    assert "jeta1" in data
-    assert "avgas100ll" in data
-    assert data["jeta1"] == pytest.approx(7.1, abs=1e-4)
-    assert data["avgas100ll"] == pytest.approx(8.9, abs=1e-4)
+    assert "jeta1" not in data
+    assert "avgas100ll" not in data
 
 
 async def test_async_fetch_prices_in_pln_per_litre_not_per_1000l() -> None:

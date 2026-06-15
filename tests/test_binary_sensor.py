@@ -530,6 +530,32 @@ def test_is_open_osm_midnight_crossing_returns_false_between_close_and_open() ->
     assert result is False
 
 
+def test_is_open_osm_normalizes_2400_closing_time() -> None:
+    """OSM '24:00' closing time is normalized to 00:00 (not a ValueError)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # Station open Mo-Su 07:00-24:00 — at 10:00 should be open
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(10, 0)
+        result = _is_open_osm("mo-su 07:00-24:00")
+    assert result is True
+
+
+def test_is_open_osm_normalizes_2400_opening_time() -> None:
+    """OSM '24:00' opening time is normalized to 00:00 (treats as midnight open)."""
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
+    import homeassistant.util.dt as _dt
+
+    # 24:00-06:00 → 00:00-06:00 crossing midnight; at 01:00 should be open
+    with patch.object(_dt, "now") as mock_now:
+        mock_now.return_value.weekday.return_value = 0
+        mock_now.return_value.time.return_value = dt_time(1, 0)
+        result = _is_open_osm("mo-su 24:00-06:00")
+    assert result is True
+
+
 # ---------------------------------------------------------------------------
 # _day_matches — empty day spec, wrapped range, single day (lines 149, 159-164)
 # ---------------------------------------------------------------------------

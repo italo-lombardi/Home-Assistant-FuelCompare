@@ -226,10 +226,10 @@ def test_capabilities_includes_identity_fields() -> None:
 
 
 def test_capabilities_includes_location_fields() -> None:
-    """CAPABILITIES includes latitude and longitude."""
+    """CAPABILITIES does not include latitude/longitude (site exposes no coordinates)."""
     caps = BaFuelProvider.CAPABILITIES
-    assert "latitude" in caps
-    assert "longitude" in caps
+    assert "latitude" not in caps
+    assert "longitude" not in caps
 
 
 def test_capabilities_includes_coordinator_sentinels() -> None:

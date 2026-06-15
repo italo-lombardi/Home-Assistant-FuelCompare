@@ -387,3 +387,21 @@ async def test_async_list_stations_skips_station_with_empty_string_id() -> None:
     results = await provider.async_list_stations(session, county="croatia")
     assert len(results) == 1
     assert results[0][0] == "42"
+
+
+@pytest.mark.asyncio
+async def test_fetch_raw_bad_gzip_raises_provider_error() -> None:
+    """_fetch_raw raises ProviderError when response is not valid gzip."""
+    from custom_components.fuelcompare_ie.providers.base import ProviderError
+
+    resp = MagicMock()
+    resp.__aenter__ = AsyncMock(return_value=resp)
+    resp.__aexit__ = AsyncMock(return_value=False)
+    resp.raise_for_status = MagicMock()
+    resp.read = AsyncMock(return_value=b"not gzip data at all")
+    session = MagicMock()
+    session.get = MagicMock(return_value=resp)
+
+    provider = _make_provider()
+    with pytest.raises(ProviderError, match="decompress"):
+        await provider._fetch_raw(session)

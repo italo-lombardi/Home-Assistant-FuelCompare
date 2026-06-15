@@ -74,7 +74,6 @@ class HRMzoeProvider(BaseProvider):
             "latitude",
             "longitude",
             "last_successful_fetch",
-            "is_open",
             "data_fetch_problem",
         }
     )
@@ -202,7 +201,12 @@ class HRMzoeProvider(BaseProvider):
             compressed = await resp.read()
         import json as _json
 
-        return _json.loads(gzip.decompress(compressed))
+        try:
+            return _json.loads(gzip.decompress(compressed))
+        except (gzip.BadGzipFile, OSError, ValueError) as err:
+            raise ProviderError(
+                f"Failed to decompress/parse mzoe-gor.hr response: {err}"
+            ) from err
 
 
 # ── Module-level helpers ──────────────────────────────────────────────────────
@@ -283,7 +287,6 @@ def _parse_station(station: dict, raw: dict) -> StationData:
         "lpg": prices.get("lpg"),
         "name": name,
         "brand": brand,
-        "tablename": brand,
         "county": county,
         "address": station.get("adresa") or None,
         "latitude": latitude,
