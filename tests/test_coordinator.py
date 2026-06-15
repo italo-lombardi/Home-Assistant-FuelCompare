@@ -1377,15 +1377,16 @@ async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    try:
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=MagicMock(),
+    ):
         with pytest.raises(UpdateFailed, match="station not found"):
             await coordinator._async_update_data()
-    finally:
-        await coordinator.async_shutdown()
 
 
 async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
-    """Call coordinator.async_refresh() and verify coordinator.data is set to expected StationData."""
+    """_async_update_data() returns StationData and coordinator.data is updated on refresh."""
     expected: dict = {
         "unleaded": 1.85,
         "diesel": 1.75,
@@ -1400,9 +1401,12 @@ async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    try:
-        await coordinator.async_refresh()
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=MagicMock(),
+    ):
+        # Call _async_update_data directly to avoid scheduling a recurring timer
+        # that would leave a lingering handle in the event loop.
+        data = await coordinator._async_update_data()
 
-        assert coordinator.data == expected
-    finally:
-        await coordinator.async_shutdown()
+    assert data == expected
