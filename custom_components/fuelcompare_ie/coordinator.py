@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import homeassistant.util.dt as dt_util
 from aiohttp import ClientError
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -27,26 +28,18 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     def __init__(
         self,
         hass: HomeAssistant,
-        provider_or_station_id: BaseProvider | str,
-        station_id: str | None = None,
+        provider: BaseProvider,
+        station_id: str = "",
+        config_entry: ConfigEntry | None = None,
     ) -> None:
-        # Support old 2-arg call: FuelCompareIECoordinator(hass, station_id_str)
-        if isinstance(provider_or_station_id, str):
-            from .providers.ie_fuelcompare import IEFuelCompareProvider
-
-            _station_id = provider_or_station_id
-            provider: BaseProvider = IEFuelCompareProvider(_station_id)
-        else:
-            provider = provider_or_station_id
-            _station_id = station_id or ""
-
         super().__init__(
             hass,
             _LOGGER,
-            name=f"Fuel Compare [{provider.PROVIDER_KEY}] Station {_station_id}",
+            name=f"Fuel Compare [{provider.PROVIDER_KEY}] Station {station_id}",
             update_interval=timedelta(seconds=provider.POLL_INTERVAL_SECONDS),
+            config_entry=config_entry,
         )
-        self.station_id = _station_id
+        self.station_id = station_id
         self._provider = provider
         self.last_successful_fetch: datetime | None = None
 

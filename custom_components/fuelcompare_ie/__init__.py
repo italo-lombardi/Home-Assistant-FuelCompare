@@ -116,16 +116,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if postal_code:
             kwargs["postal_code"] = postal_code
     # prefecture_id: for gr_fuelgov — station_id stores the prefecture numeric id.
-    if ("prefecture_id" in sig.parameters or has_var_kwargs) and station_id:
+    # Capture the raw entry value BEFORE any lat/lng fallback overwrites station_id.
+    raw_station_id = entry.data.get(CONF_STATION_ID, "")
+    if ("prefecture_id" in sig.parameters or has_var_kwargs) and raw_station_id:
         try:
-            kwargs["prefecture_id"] = int(station_id)
+            kwargs["prefecture_id"] = int(raw_station_id)
         except (ValueError, TypeError):
             _LOGGER.warning(
                 "Could not parse prefecture_id from station_id %r for provider %r",
-                station_id,
+                raw_station_id,
                 provider_key,
             )
-    if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
+    # Use is-not-None check: empty string ("") is a deliberate key clear and
+    # must still be passed through rather than silently skipped.
+    if api_key is not None and getattr(provider_cls, "REQUIRES_API_KEY", False):
         kwargs["api_key"] = api_key
     if latitude is not None and (has_var_kwargs or "latitude" in sig.parameters):
         kwargs["latitude"] = latitude
@@ -137,13 +141,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         provider = provider_cls(station_id, **kwargs)
     else:
         provider = provider_cls(station_id)
-    coordinator = FuelCompareIECoordinator(hass, provider, station_id)
+    coordinator = FuelCompareIECoordinator(hass, provider, station_id, config_entry=entry)
 
     hass.data.setdefault(DOMAIN, {})
 
     await coordinator.async_config_entry_first_refresh()
 
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+
     # Warn users of ie_fuelcompare (fuelcompare.ie) that the service is ending.
+    # These calls are placed AFTER the coordinator is stored so that if issue
+    # creation triggers any synchronous listeners they can safely access the entry.
     if provider_key == "ie_fuelcompare":
         async_create_issue(
             hass,
@@ -167,8 +175,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_placeholders={"entry_title": entry.title},
         )
 
-    hass.data[DOMAIN][entry.entry_id] = coordinator
-
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Reload when options change (e.g. radius, api_key) so the new values take effect.
@@ -185,7 +191,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
-    async_delete_issue(hass, DOMAIN, f"fuelcompare_ie_deprecation_{entry.entry_id}")
-    async_delete_issue(hass, DOMAIN, f"ie_pumps_tls_disabled_{entry.entry_id}")
+        # Only delete repair issues when the entry actually unloaded; if unload
+        # failed the entry stays loaded and the issue should remain visible.
+        async_delete_issue(hass, DOMAIN, f"fuelcompare_ie_deprecation_{entry.entry_id}")
+        async_delete_issue(hass, DOMAIN, f"ie_pumps_tls_disabled_{entry.entry_id}")
 
     return unload_ok

@@ -408,18 +408,19 @@ async def test_unknown_provider_key_falls_back_to_default(
 
 
 # ---------------------------------------------------------------------------
-# test_coordinator_2arg_compat
+# test_coordinator_provider_instance
 # ---------------------------------------------------------------------------
 
 
-async def test_coordinator_2arg_compat(hass: HomeAssistant) -> None:
-    """FuelCompareIECoordinator(hass, station_id_str) creates IEFuelCompareProvider."""
+async def test_coordinator_provider_instance(hass: HomeAssistant) -> None:
+    """FuelCompareIECoordinator correctly stores provider and station_id."""
     from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
     from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
         IEFuelCompareProvider,
     )
 
-    coordinator = FuelCompareIECoordinator(hass, "42")
+    provider = IEFuelCompareProvider("42")
+    coordinator = FuelCompareIECoordinator(hass, provider, "42")
     assert coordinator.station_id == "42"
     assert isinstance(coordinator._provider, IEFuelCompareProvider)
 
@@ -809,6 +810,9 @@ async def test_async_setup_entry_postal_code_explicit(hass: HomeAssistant) -> No
         async def async_fetch_station_name(self, session, station_id):
             return None
 
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
     PROVIDER_REGISTRY[_FakeBeCarbu.PROVIDER_KEY] = _FakeBeCarbu
     try:
         entry = MockConfigEntry(
@@ -866,6 +870,9 @@ async def test_async_setup_entry_postal_code_from_numeric_county(
 
         async def async_fetch_station_name(self, session, station_id):
             return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
 
     PROVIDER_REGISTRY[_FakeBeCarbuCounty.PROVIDER_KEY] = _FakeBeCarbuCounty
     try:
@@ -925,6 +932,9 @@ async def test_async_setup_entry_postal_code_non_numeric_county_not_used(
         async def async_fetch_station_name(self, session, station_id):
             return None
 
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
     PROVIDER_REGISTRY[_FakeBeCarbuNonNumeric.PROVIDER_KEY] = _FakeBeCarbuNonNumeric
     try:
         entry = MockConfigEntry(
@@ -983,6 +993,9 @@ async def test_async_setup_entry_prefecture_id_valid(hass: HomeAssistant) -> Non
         async def async_fetch_station_name(self, session, station_id):
             return None
 
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
     PROVIDER_REGISTRY[_FakeGrProvider.PROVIDER_KEY] = _FakeGrProvider
     try:
         entry = MockConfigEntry(
@@ -1035,6 +1048,9 @@ async def test_async_setup_entry_prefecture_id_invalid_skipped(
 
         async def async_fetch_station_name(self, session, station_id):
             return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
 
     PROVIDER_REGISTRY[_FakeGrProviderBadId.PROVIDER_KEY] = _FakeGrProviderBadId
     try:
@@ -1108,6 +1124,9 @@ async def test_async_setup_entry_geo_params_passed(hass: HomeAssistant) -> None:
 
         async def async_fetch_station_name(self, session, station_id):
             return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
 
     PROVIDER_REGISTRY[_FakeDEGeoProvider.PROVIDER_KEY] = _FakeDEGeoProvider
     try:

@@ -24,6 +24,14 @@ from custom_components.fuelcompare_ie.coordinator import (
 from custom_components.fuelcompare_ie.crypto import (
     cryptojs_decrypt as _cryptojs_decrypt,
 )
+from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+    IEFuelCompareProvider,
+)
+
+
+def _ie_coordinator(hass: HomeAssistant, station_id: str) -> FuelCompareIECoordinator:
+    """Create a FuelCompareIECoordinator backed by IEFuelCompareProvider."""
+    return FuelCompareIECoordinator(hass, IEFuelCompareProvider(station_id), station_id)
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +114,7 @@ async def test_fetch_page_assets_extracts_build_id(hass: HomeAssistant) -> None:
     # No JS chunk in HTML so _decrypt_key stays None — that's fine for this test
     session = _make_session(html_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
 
     with patch(
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
@@ -127,7 +135,7 @@ async def test_fetch_page_assets_no_build_id(hass: HomeAssistant) -> None:
     html_resp = _make_mock_response(200, text_data="<html>no build id here</html>")
     session = _make_session(html_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
 
     with pytest.raises(UpdateFailed, match="buildId not found"):
         await coordinator._provider._fetch_page_assets(session)
@@ -145,7 +153,7 @@ async def test_async_update_data_happy_path(hass: HomeAssistant) -> None:
     )
     session = _make_session(data_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     with patch(
@@ -170,7 +178,7 @@ async def test_async_update_data_prices_already_euros(hass: HomeAssistant) -> No
     )
     session = _make_session(data_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     with patch(
@@ -196,7 +204,7 @@ async def test_async_update_data_missing_fuel(hass: HomeAssistant) -> None:
     )
     session = _make_session(data_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     with patch(
@@ -220,7 +228,7 @@ async def test_async_update_data_missing_station(hass: HomeAssistant) -> None:
     post_resp = _make_mock_response(200, json_data={"success": False})
     session = _make_session(data_resp, post_responses=(post_resp,))
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = "fake_key"
 
@@ -250,7 +258,7 @@ async def test_async_update_data_stale_buildid(hass: HomeAssistant) -> None:
 
     session = _make_session(stale_resp, html_resp, fresh_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "stale_build"
 
     with patch(
@@ -276,7 +284,7 @@ async def test_async_update_data_client_error(hass: HomeAssistant) -> None:
     session = MagicMock()
     session.get = MagicMock(side_effect=ClientError("network error"))
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     with patch(
@@ -305,7 +313,7 @@ async def test_coordinator_stores_metadata(hass: HomeAssistant) -> None:
     )
     session = _make_session(data_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     with patch(
@@ -398,7 +406,7 @@ async def test_fetch_page_assets_extracts_decrypt_key(hass: HomeAssistant) -> No
     js_resp = _make_mock_response(200, text_data=js)
     session = _make_session(html_resp, js_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     await coordinator._provider._fetch_page_assets(session)
 
     assert coordinator._provider._decrypt_key == _TEST_DECRYPT_KEY
@@ -431,7 +439,7 @@ async def test_fetch_page_assets_extracts_decrypt_key_from_shared_chunk(
     shared_resp = _make_mock_response(200, text_data=shared_js)
     session = _make_session(html_resp, station_resp, shared_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._provider._decrypt_key == _TEST_DECRYPT_KEY
@@ -459,7 +467,7 @@ async def test_fetch_page_assets_skips_chunk_with_non_200_status(
     )
     session = _make_session(html_resp, bad_resp, good_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._provider._decrypt_key == _TEST_DECRYPT_KEY
@@ -497,7 +505,7 @@ async def test_fetch_page_assets_skips_chunk_on_client_error(
     session.get = MagicMock(side_effect=_get)
     session.post = MagicMock()
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     await coordinator._provider._fetch_page_assets(session, broad=True)
 
     assert coordinator._provider._decrypt_key == _TEST_DECRYPT_KEY
@@ -522,7 +530,7 @@ async def test_fetch_page_assets_all_chunks_fail_leaves_key_unchanged(
     b_resp = _make_mock_response(200, text_data="// also no key")
     session = _make_session(html_resp, a_resp, b_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._decrypt_key = "previously_cached_key"
     await coordinator._provider._fetch_page_assets(session, broad=True)
 
@@ -543,7 +551,7 @@ async def test_fetch_page_assets_broad_no_chunks_leaves_key_unchanged(
     html_resp = _make_mock_response(200, text_data=html)
     session = _make_session(html_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._decrypt_key = "previously_cached_key"
     await coordinator._provider._fetch_page_assets(session, broad=True)
 
@@ -564,7 +572,7 @@ async def test_fetch_page_assets_no_js_chunk_leaves_key_unchanged(
     html_resp = _make_mock_response(200, text_data=html)
     session = _make_session(html_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._decrypt_key = "previously_cached_key"
     await coordinator._provider._fetch_page_assets(session)
 
@@ -586,7 +594,7 @@ async def test_encrypted_api_path_success(hass: HomeAssistant) -> None:
     )
     session = _make_session(nextjs_resp, post_responses=(post_resp,))
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
@@ -617,7 +625,7 @@ async def test_encrypted_api_state_mapped_to_county(hass: HomeAssistant) -> None
     )
     session = _make_session(nextjs_resp, post_responses=(post_resp,))
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
@@ -666,7 +674,7 @@ async def test_encrypted_api_stale_key_refreshed_and_retried(
         nextjs_resp, html_resp, js_resp, post_responses=(post_resp,)
     )
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "build1"
     coordinator._provider._decrypt_key = (
         "a" * 64
@@ -695,7 +703,7 @@ async def test_encrypted_api_both_paths_fail_raises(hass: HomeAssistant) -> None
     post_resp = _make_mock_response(200, json_data={"success": False})
     session = _make_session(nextjs_resp, post_responses=(post_resp,))
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
@@ -725,7 +733,7 @@ async def test_encrypted_api_decrypt_key_unavailable_skips_api(
     html_resp_2 = _make_mock_response(200, text_data='"buildId":"build1"')
     session = _make_session(nextjs_resp, html_resp, html_resp_2)
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "test_build"
     # _decrypt_key stays None — JS chunk not reachable
 
@@ -747,7 +755,7 @@ async def test_async_update_data_generic_exception(hass: HomeAssistant) -> None:
     session = MagicMock()
     session.get = MagicMock(side_effect=RuntimeError("unexpected"))
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     with patch(
@@ -772,7 +780,7 @@ async def test_fetch_nextjs_build_id_none_after_page_assets(
     html_resp2 = _make_mock_response(200, text_data="<html>no build id</html>")
     session = _make_session(html_resp, html_resp2)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     # _build_id is None so _fetch_page_assets will be called; it raises UpdateFailed
     # which is caught inside _fetch_nextjs, leaving _build_id=None → returns None
     # Then _fetch_encrypted_api also calls _fetch_page_assets, fails → returns None
@@ -799,7 +807,7 @@ async def test_encrypted_api_empty_data_field(hass: HomeAssistant) -> None:
     post_resp = _make_mock_response(200, json_data={"success": True, "data": None})
     session = _make_session(nextjs_resp, post_responses=(post_resp,))
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
@@ -826,7 +834,7 @@ async def test_encrypted_api_empty_stations_list(hass: HomeAssistant) -> None:
     post_resp = _make_mock_response(200, json_data={"success": True, "data": encrypted})
     session = _make_session(nextjs_resp, post_responses=(post_resp,))
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
@@ -854,7 +862,7 @@ async def test_parse_station_invalid_price_value(hass: HomeAssistant) -> None:
         "about": None,
         "lastupdated": None,
     }
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     data = coordinator._provider._parse_station(station)
 
     assert data["unleaded"] is None
@@ -879,7 +887,7 @@ async def test_fetch_page_assets_js_chunk_key_pattern_not_found(
     js_resp = _make_mock_response(200, text_data=js)
     session = _make_session(html_resp, js_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._decrypt_key = "previously_cached_key"
     await coordinator._provider._fetch_page_assets(session)
 
@@ -931,7 +939,7 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
         post_responses=(post_resp,),
     )
 
-    coordinator = FuelCompareIECoordinator(hass, "790")
+    coordinator = _ie_coordinator(hass, "790")
     coordinator._provider._build_id = "build1"
     coordinator._provider._decrypt_key = "a" * 64  # stale — won't decrypt payload
 
@@ -1014,7 +1022,7 @@ def test_cryptojs_decrypt_missing_magic_header() -> None:
 
 async def test_last_successful_fetch_initially_none(hass: HomeAssistant) -> None:
     """Coordinator starts with last_successful_fetch = None."""
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     assert coordinator.last_successful_fetch is None
 
 
@@ -1025,7 +1033,7 @@ async def test_last_successful_fetch_stamped_on_success(hass: HomeAssistant) -> 
     )
     session = _make_session(data_resp)
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
     fixed_now = __import__("datetime").datetime(
@@ -1053,7 +1061,7 @@ async def test_last_successful_fetch_unchanged_on_failure(
     session = MagicMock()
     session.get = MagicMock(side_effect=ClientError("network error"))
 
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
     # Pre-set a known timestamp so we verify it's unchanged (not just still None).
     prior_fetch = __import__("datetime").datetime(
@@ -1229,7 +1237,7 @@ def test_parse_station_returns_station_without_provider_method(
     hass: HomeAssistant,
 ) -> None:
     """Coordinator station_id attribute is accessible after init."""
-    coordinator = FuelCompareIECoordinator(hass, "12345")
+    coordinator = _ie_coordinator(hass, "12345")
     assert coordinator.station_id == "12345"
 
 

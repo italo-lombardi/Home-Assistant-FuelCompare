@@ -251,12 +251,12 @@ class BaseProvider(ABC):
     which entities to create. Only keys listed here get entities. Unknown
     keys are silently ignored.
 
-    Two keys have special coordinator-level handling — do NOT list them here:
+    'data_fetch_problem' (binary_sensor) — must NOT be listed here; it is
+    always created unconditionally by the coordinator and is never gated
+    by CAPABILITIES.
 
-    * 'data_fetch_problem' (binary_sensor) — always created unconditionally
-      by the coordinator; it is never gated by CAPABILITIES.
-    * 'last_successful_fetch' (sensor) — IS gated by CAPABILITIES; list it
-      here if your provider wants to expose it as an entity.
+    'last_successful_fetch' (sensor) — CAN be listed here (opt-in); list it
+    to expose a "Last Successful Fetch" timestamp sensor for this provider.
 
     Keys 'source_station_id' and 'tablename' are also injected automatically
     by the coordinator as entity attributes and should not be listed here.
@@ -335,7 +335,7 @@ class BaseProvider(ABC):
                     raise TypeError(
                         f"{cls.__name__} must define class attribute '{attr}'"
                     )
-            unknown = cls.CAPABILITIES - ALL_SENSOR_KEYS - {"last_successful_fetch"}
+            unknown = cls.CAPABILITIES - ALL_SENSOR_KEYS - {"last_successful_fetch", "data_fetch_problem"}
             if unknown:
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "
@@ -344,17 +344,23 @@ class BaseProvider(ABC):
             FORBIDDEN_CAPS = {
                 "source_station_id",
                 "tablename",
-                "data_fetch_problem",
+                "data_fetch_problem",  # always created by coordinator, never gated
             }
             forbidden = cls.CAPABILITIES & FORBIDDEN_CAPS
             if forbidden:
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains forbidden keys: {forbidden}"
                 )
-            if cls.STATION_LOOKUP_MODE != "manual_id" and not any(
-                "async_list_stations" in c.__dict__
-                for c in cls.__mro__
-                if c is not BaseProvider
+            # Enforce that non-manual_id providers define async_list_stations
+            # directly in their own class dict (cls.__dict__).  Checking only
+            # cls.__dict__ (rather than the full MRO) prevents a mixin or parent
+            # that incidentally defines the method from silently satisfying the
+            # contract for a concrete class that forgot to override it.
+            # Subclasses of concrete providers (e.g. thin test-fakes) must
+            # define their own pass-through override.
+            if (
+                cls.STATION_LOOKUP_MODE != "manual_id"
+                and "async_list_stations" not in cls.__dict__
             ):
                 raise TypeError(cls.__name__ + " must override async_list_stations")
 

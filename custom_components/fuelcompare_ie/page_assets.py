@@ -146,11 +146,11 @@ class PageAssets:
     async def _extract_key_broad(self, session: ClientSession, html: str) -> None:
         """Iterate every chunk in the HTML until the AES key regex matches.
 
-        A 5-chunk ceiling caps the scan at ~50 s worst-case (5 × 10 s timeout).
+        A 3-chunk ceiling caps the scan at ~30 s worst-case (3 × 10 s timeout).
         Without this guard, 50–100 chunks × 10 s each could block the coordinator
         for up to 500–1000 seconds on a slow/unreachable CDN.
         """
-        _MAX_CHUNKS = 5
+        _MAX_CHUNKS = 3
 
         station_chunks = _STATION_CHUNK_RE.findall(html)
         all_chunks = _ANY_CHUNK_FINDALL_RE.findall(html)
