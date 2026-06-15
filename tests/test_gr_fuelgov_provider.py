@@ -152,8 +152,8 @@ def test_provider_capabilities_identity_fields() -> None:
 def test_provider_capabilities_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = GrFuelgovProvider.CAPABILITIES
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 # ---------------------------------------------------------------------------

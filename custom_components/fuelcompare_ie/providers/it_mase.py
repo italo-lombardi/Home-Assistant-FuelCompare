@@ -38,7 +38,7 @@ import asyncio
 import functools
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -351,7 +351,7 @@ class ItMaseProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "diesel",
@@ -365,8 +365,6 @@ class ItMaseProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

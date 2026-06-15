@@ -43,11 +43,8 @@ _HEADERS: Final = {
 
 _BUILD_ID_RE: Final = re.compile(r'"buildId":"([^"]+)"')
 _STATION_CHUNK_RE: Final = re.compile(r'(/_next/static/chunks/pages/station/[^"]+\.js)')
-_STATION_CHUNK_FINDALL_RE: Final = re.compile(
-    r'/_next/static/chunks/pages/station/[^"]+\.js'
-)
 _ANY_CHUNK_FINDALL_RE: Final = re.compile(r'/_next/static/chunks/[^"]+\.js')
-_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(e,"([a-f0-9]{64})"', re.IGNORECASE)
+_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(\w+,"([a-fA-F0-9]{64})"')
 
 
 class PageAssets:
@@ -113,11 +110,20 @@ class PageAssets:
             self.station_id,
             chunk_url,
         )
-        async with session.get(
-            chunk_url, timeout=_TIMEOUT, headers=_HEADERS
-        ) as response:
-            response.raise_for_status()
-            js = await response.text()
+        try:
+            async with session.get(
+                chunk_url, timeout=_TIMEOUT, headers=_HEADERS
+            ) as response:
+                response.raise_for_status()
+                js = await response.text()
+        except (ClientError, asyncio.TimeoutError) as err:
+            _LOGGER.debug(
+                "Failed to fetch station JS chunk %s for station %s: %s",
+                chunk_url,
+                self.station_id,
+                err,
+            )
+            return
 
         if not self._set_key_from_js(js):
             _LOGGER.debug(
@@ -127,7 +133,7 @@ class PageAssets:
 
     async def _extract_key_broad(self, session: ClientSession, html: str) -> None:
         """Iterate every chunk in the HTML until the AES key regex matches."""
-        station_chunks = _STATION_CHUNK_FINDALL_RE.findall(html)
+        station_chunks = _STATION_CHUNK_RE.findall(html)
         all_chunks = _ANY_CHUNK_FINDALL_RE.findall(html)
         # Try the station chunk first (legacy fast path), then the rest.
         ordered = list(dict.fromkeys(station_chunks + all_chunks))

@@ -164,39 +164,62 @@ async def test_async_fetch_raises_provider_error_when_all_paths_fail() -> None:
 
 
 async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() -> None:
-    """_fetch_encrypted_api retries with broad chunk scan when narrow decrypt fails."""
+    """_decrypt_with_recovery calls _fetch_page_assets(broad=True) after narrow decrypt fails."""
     provider = _make_provider("790")
-    provider._build_id = "test_build"
-    provider._decrypt_key = "test_key"
+    # Pre-seed a stale decrypt key so _fetch_encrypted_api skips the initial
+    # "key is None" fetch and goes straight to _post_encrypted.
+    provider._decrypt_key = "stale_key"
 
-    encrypted_payload = [{"data": "ENCRYPTED"}]
-    station_data = {"unleaded": "169.9", "diesel": "157.9"}
+    session = _make_session()
+    encrypted_str = "ENCRYPTED_BLOB"
+    station_data = {"unleaded": "169.9", "diesel": "157.9", "name": "Circle K"}
 
-    with patch.object(
-        provider,
-        "_fetch_nextjs",
-        AsyncMock(return_value=encrypted_payload),
-    ):
-        # First decrypt raises, broad scan re-fetches assets, second decrypt succeeds
-        decrypt_calls = []
+    # _post_encrypted returns the ciphertext string immediately.
+    post_encrypted_mock = AsyncMock(return_value=encrypted_str)
 
-        def _mock_decrypt(enc, key):
-            decrypt_calls.append(1)
-            if len(decrypt_calls) == 1:
-                raise ValueError("bad key")
-            return [station_data]
+    # Track _fetch_page_assets calls so we can assert broad=True was used.
+    fetch_assets_calls: list[dict] = []
 
-        with patch(
-            "custom_components.fuelcompare_ie.providers.ie_fuelcompare._cryptojs_decrypt",
-            side_effect=_mock_decrypt,
-        ):
-            with patch.object(provider, "_fetch_page_assets", AsyncMock()):
-                with patch.object(
-                    provider,
-                    "_fetch_encrypted_api",
-                    wraps=provider._fetch_encrypted_api,
+    async def _mock_fetch_page_assets(
+        sess: object, broad: bool = False  # noqa: ARG001
+    ) -> None:
+        fetch_assets_calls.append({"broad": broad})
+        # After any asset refresh give the provider a "good" key so the
+        # third decrypt attempt (after broad scan) has something to work with.
+        provider._decrypt_key = "good_key"
+
+    # _cryptojs_decrypt: fail on attempts 1 and 2, succeed on attempt 3.
+    decrypt_call_count = 0
+
+    def _mock_cryptojs_decrypt(enc: str, key: str) -> list:  # noqa: ARG001
+        nonlocal decrypt_call_count
+        decrypt_call_count += 1
+        if decrypt_call_count < 3:
+            raise ValueError(f"bad key (attempt {decrypt_call_count})")
+        return [[station_data]]
+
+    # Also stub _fetch_nextjs so async_fetch goes straight to the encrypted API path.
+    fetch_nextjs_mock = AsyncMock(return_value=None)
+
+    with patch.object(provider, "_fetch_nextjs", fetch_nextjs_mock):
+        with patch.object(provider, "_post_encrypted", post_encrypted_mock):
+            with patch.object(provider, "_fetch_page_assets", side_effect=_mock_fetch_page_assets):
+                with patch(
+                    "custom_components.fuelcompare_ie.providers.ie_fuelcompare._cryptojs_decrypt",
+                    side_effect=_mock_cryptojs_decrypt,
                 ):
-                    # Just test that _parse_station handles the output correctly
-                    result = provider._parse_station(station_data)
+                    # Call async_fetch so _parse_station is applied and we get StationData.
+                    result = await provider.async_fetch(session, "790")
 
+    # _decrypt_with_recovery must have called _fetch_page_assets at least once
+    # with broad=True (the second recovery step).
+    broad_calls = [c for c in fetch_assets_calls if c["broad"] is True]
+    assert broad_calls, (
+        "_fetch_page_assets(broad=True) was never called — retry path not exercised"
+    )
+
+    # The final result should be the parsed StationData from the successful third attempt.
+    assert result is not None
     assert result["unleaded"] == pytest.approx(1.699)
+    assert result["diesel"] == pytest.approx(1.579)
+    assert result["name"] == "Circle K"

@@ -82,7 +82,7 @@ import logging
 import random
 import ssl
 import xml.etree.ElementTree as ET
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -101,6 +101,9 @@ _SSL_UNVERIFIED: ssl.SSLContext | None = None
 def _get_ssl_context() -> ssl.SSLContext:
     global _SSL_UNVERIFIED
     if _SSL_UNVERIFIED is None:
+        # pumps.ie has an expired TLS certificate; cert renewal is pending.
+        # CERT_NONE disables certificate verification so requests succeed.
+        # check_hostname must also be False when verify_mode is CERT_NONE.
         _SSL_UNVERIFIED = ssl.create_default_context()
         _SSL_UNVERIFIED.check_hostname = False
         _SSL_UNVERIFIED.verify_mode = ssl.CERT_NONE
@@ -154,7 +157,7 @@ class IePumpsProvider(BaseProvider):
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour; data is crowd-sourced and mostly stale
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "diesel",
@@ -168,9 +171,6 @@ class IePumpsProvider(BaseProvider):
             "longitude",
             # Timing (crowd-sourced — may be months or years old)
             "lastupdated",
-            # Coordinator sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -190,9 +190,8 @@ class IePumpsProvider(BaseProvider):
         self._station_id = station_id
         _get_ssl_context()
         _LOGGER.warning(
-            "ie_pumps: pumps.ie TLS certificate is expired — certificate verification "
-            "is disabled. MITM attacks on fuel price data are theoretically possible. "
-            "This will be resolved when pumps.ie renews their certificate."
+            "ie_pumps: TLS certificate verification is disabled — cert renewal pending. "
+            "See https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues"
         )
 
     # ── Public interface ──────────────────────────────────────────────────────
@@ -622,7 +621,7 @@ def _build_station_data(
         "dateupdated=%s county=%s",
         station_id,
         data.get("diesel"),
-        data.get("petrol"),
+        data.get("unleaded"),
         dateupdated,
         county,
     )

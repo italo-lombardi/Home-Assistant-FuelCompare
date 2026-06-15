@@ -178,7 +178,7 @@ class ChTcsProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # crowd-sourced data; 1 hour cadence is adequate
-    CURRENCY: ClassVar[str] = "CHF/L"
+    CURRENCY: ClassVar[str] = "Fr."
     REQUIRES_API_KEY = False
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
@@ -193,8 +193,6 @@ class ChTcsProvider(BaseProvider):
             "longitude",
             "price_confidence",
             "lastupdated",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

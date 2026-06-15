@@ -70,7 +70,7 @@ Station-level data is not available (STATION_LEVEL = False).
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -119,7 +119,7 @@ class GrFuelgovProvider(BaseProvider):
     LABEL = "Greek Ministry of Energy (nireas.iee.ihu.gr)"
     CONFIG_MODE = "location"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",
@@ -131,9 +131,6 @@ class GrFuelgovProvider(BaseProvider):
             "county",
             # Timing
             "lastupdated",
-            # Coordinator sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
             # Passthrough
             "source_station_id",
         }

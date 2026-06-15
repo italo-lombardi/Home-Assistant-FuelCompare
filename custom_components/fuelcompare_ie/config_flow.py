@@ -488,7 +488,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         registration_url: str = getattr(
             provider_cls_for_key,
             "API_KEY_REGISTRATION_URL",
-            "https://onboarding.tankerkoenig.de/",
+            "",
         )
         return self.async_show_form(
             step_id="api_key",
@@ -573,7 +573,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     await self.async_set_unique_id(
                         f"{DOMAIN}_{self._provider_key}_{station_id}"
                     )
-                self._abort_if_unique_id_configured()
+                    self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key, self._api_key
@@ -600,8 +600,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     list_kwargs["lat"] = self._latitude
                 if self._longitude is not None:
                     list_kwargs["lng"] = self._longitude
-                if self._radius_km is not None:
-                    list_kwargs["radius_km"] = self._radius_km
+                list_kwargs["radius_km"] = self._radius_km
                 station_list = await provider_instance.async_list_stations(
                     session, **list_kwargs
                 )
@@ -721,7 +720,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     data[CONF_STATION_COUNTY] = self._station_county
             if self._postal_code:
                 data[CONF_POSTAL_CODE] = self._postal_code
-            if self._latitude is not None:
+            if self._latitude is not None and self._longitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
                 data[CONF_RADIUS_KM] = self._radius_km
@@ -749,9 +748,6 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
         provider_cls = PROVIDER_REGISTRY.get(provider_key)
         requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
 
-        if user_input is not None:
-            return self.async_create_entry(data=user_input)
-
         existing_key = self.config_entry.options.get(CONF_API_KEY, "")
 
         if is_location_entry:
@@ -778,5 +774,16 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
             if not schema_dict:
                 return self.async_create_entry(data={})
             schema = vol.Schema(schema_dict)
+
+        if user_input is not None:
+            errors: dict[str, str] = {}
+            if CONF_API_KEY in user_input and not (
+                user_input[CONF_API_KEY] or ""
+            ).strip():
+                errors[CONF_API_KEY] = "invalid_api_key"
+                return self.async_show_form(
+                    step_id="init", data_schema=schema, errors=errors
+                )
+            return self.async_create_entry(data=user_input)
 
         return self.async_show_form(step_id="init", data_schema=schema)

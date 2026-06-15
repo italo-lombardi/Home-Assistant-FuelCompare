@@ -148,8 +148,8 @@ def test_capabilities_includes_name() -> None:
 def test_capabilities_includes_coordinator_sentinels() -> None:
     """CAPABILITIES includes last_successful_fetch and data_fetch_problem."""
     caps = CzCcsProvider.CAPABILITIES
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 # ---------------------------------------------------------------------------

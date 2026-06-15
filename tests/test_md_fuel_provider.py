@@ -170,8 +170,8 @@ def test_provider_capabilities_include_fuel_types() -> None:
 def test_provider_capabilities_include_coordinator_sentinels() -> None:
     """CAPABILITIES includes last_successful_fetch and data_fetch_problem."""
     caps = MdFuelProvider.CAPABILITIES
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 def test_provider_poll_interval_is_reasonable() -> None:

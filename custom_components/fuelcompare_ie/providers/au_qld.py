@@ -163,7 +163,7 @@ class AuQldProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — matches FPPS update cadence
-    CURRENCY: ClassVar[str] = "AUD/L"
+    CURRENCY: ClassVar[str] = "A$"
 
     REQUIRES_API_KEY = True
     API_KEY_REGISTRATION_URL = "https://www.fuelpricesqld.com.au/"
@@ -187,9 +187,6 @@ class AuQldProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Coordinator sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -311,8 +308,8 @@ class AuQldProvider(BaseProvider):
             List of (site_id_str, "Brand Name — Diesel A$1.79 / Unleaded A$1.83")
             tuples ordered cheapest-first.  Empty list on any failure.
         """
-        lat: float | None = kwargs.get("lat") or self._latitude  # type: ignore[assignment]
-        lng: float | None = kwargs.get("lng") or self._longitude  # type: ignore[assignment]
+        lat: float | None = kwargs["lat"] if kwargs.get("lat") is not None else self._latitude  # type: ignore[assignment]
+        lng: float | None = kwargs["lng"] if kwargs.get("lng") is not None else self._longitude  # type: ignore[assignment]
         radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
 
         if lat is None or lng is None:

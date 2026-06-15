@@ -69,7 +69,7 @@ from __future__ import annotations
 
 import logging
 from html.parser import HTMLParser
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -363,7 +363,7 @@ class LtSauridaProvider(BaseProvider):
 
     POLL_INTERVAL_SECONDS = 3600  # prices change ~daily; 1-hour poll is sufficient
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "diesel",
@@ -374,9 +374,9 @@ class LtSauridaProvider(BaseProvider):
             # Station identity
             "name",
             "brand",
-            # Diagnostic / coordinator-managed
-            "last_successful_fetch",
-            "data_fetch_problem",
+            # Per-station source identifier and timestamp
+            "source_station_id",
+            "lastupdated",
         }
     )
 

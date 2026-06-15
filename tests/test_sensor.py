@@ -177,7 +177,7 @@ async def test_working_hours_from_json_string() -> None:
             side_effect=lambda x: x,
         ),
     ):
-        mock_now.return_value.strftime.return_value = "Monday"
+        mock_now.return_value.weekday.return_value = 0
         result = sensor.native_value
 
     assert result == "6a.m.-10p.m."
@@ -196,7 +196,7 @@ async def test_working_hours_from_dict() -> None:
             side_effect=lambda x: x,
         ),
     ):
-        mock_now.return_value.strftime.return_value = "Monday"
+        mock_now.return_value.weekday.return_value = 0
         result = sensor.native_value
 
     assert result == "6a.m.-10p.m."
@@ -263,7 +263,7 @@ async def test_fuel_price_sensor_extra_state_attributes_with_lastupdated() -> No
     assert attrs["station_id"] == "12345"
     assert attrs["fuel_type"] == "unleaded"
     assert attrs["source"] == "fuelcompare.ie"
-    assert attrs["price_last_updated"] == "2024-01-15T10:30:00.000Z"
+    assert attrs["price_last_updated"] == "2024-01-15T10:30:00+00:00"
 
 
 async def test_fuel_price_sensor_extra_state_attributes_no_lastupdated() -> None:
@@ -475,6 +475,7 @@ async def test_fuel_price_sensor_stale_retention_after_failure() -> None:
         data={"unleaded": 1.85},
         last_update_success=False,
     )
+    # Stale retention: entities stay available and keep last value during coordinator outages
     assert sensor.available is True
     assert sensor.native_value == pytest.approx(1.85)
 

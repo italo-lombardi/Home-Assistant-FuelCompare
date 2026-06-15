@@ -142,8 +142,8 @@ def test_provider_capabilities_include_fuelfinder_fields() -> None:
 def test_provider_capabilities_include_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = IEFuelFinderProvider.CAPABILITIES
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 def test_provider_poll_interval() -> None:

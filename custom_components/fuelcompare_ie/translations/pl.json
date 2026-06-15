@@ -1,11 +1,21 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Wybierz kraj",
+        "data": {
+          "country": "Kraj"
+        }
+      },
+      "provider": {
+        "title": "Wybierz źródło danych",
+        "data": {
+          "provider": "Źródło danych"
+        }
+      },
       "station": {
         "title": "Dodaj stację Fuel Compare",
-        "description": "Wprowadź ID stacji z adresu URL stacji (np. 790 dla Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "ID Stacji"
         }
@@ -18,45 +28,46 @@
         }
       },
       "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
+        "title": "Wybierz hrabstwo",
+        "description": "Wybierz swoje hrabstwo, aby znaleźć pobliskie stacje.",
         "data": {
-          "station_county": "County"
+          "station_county": "Hrabstwo"
         }
       },
       "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "title": "Klucz API",
+        "description": "Wprowadź swój bezpłatny klucz API. [Pobierz tutaj]({registration_url}), jeśli zostaniesz poproszony.",
         "data": {
-          "api_key": "API Key"
+          "api_key": "Klucz API"
         }
       },
       "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "title": "Wybierz stację",
+        "description": "Wybierz stację paliw. Pokazane ceny dotyczą oleju napędowego/benzyny.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Stacja"
         }
       },
       "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "title": "Ustaw lokalizację",
+        "description": "Wprowadź swoją lokalizację i promień wyszukiwania. Stacje w promieniu będą śledzone.",
         "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
+          "latitude": "Szerokość geograficzna",
+          "longitude": "Długość geograficzna",
+          "radius_km": "Promień (km)",
+          "postal_code": "Kod pocztowy"
         }
       }
     },
     "error": {
       "invalid_station_id": "Nieprawidłowe ID stacji. Wprowadź prawidłową liczbę dodatnią.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "Klucz API nie może być pusty.",
+      "invalid_location": "Nieprawidłowe współrzędne. Wprowadź prawidłowe wartości szerokości i długości geograficznej.",
+      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa."
     },
     "abort": {
       "already_configured": "Ta stacja jest już skonfigurowana.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Brak dostępnych dostawców danych dla tego kraju."
     }
   },
   "entity": {

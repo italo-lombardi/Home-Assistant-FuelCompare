@@ -1,13 +1,54 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Sélectionner le pays",
+        "data": {
+          "country": "Pays"
+        }
+      },
+      "provider": {
+        "title": "Sélectionner la source de données",
+        "data": {
+          "provider": "Source de données"
+        }
+      },
+      "county": {
+        "title": "Sélectionner le comté",
+        "description": "Sélectionnez votre comté pour trouver les stations à proximité.",
+        "data": {
+          "station_county": "Comté"
+        }
+      },
+      "api_key": {
+        "title": "Clé API",
+        "description": "Entrez votre clé API gratuite. [Obtenez-en une ici]({registration_url}) si demandé.",
+        "data": {
+          "api_key": "Clé API"
+        }
+      },
       "station": {
         "title": "Ajouter une station Fuel Compare",
-        "description": "Entrez l'identifiant de la station depuis l'URL de la station (ex. : 790 pour Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "Identifiant de la station"
+        }
+      },
+      "station_picker": {
+        "title": "Sélectionner une station",
+        "description": "Sélectionnez une station-service. Les prix affichés sont pour le diesel/l'essence.",
+        "data": {
+          "station_id": "Station"
+        }
+      },
+      "location": {
+        "title": "Définir l'emplacement",
+        "description": "Entrez votre emplacement et le rayon de recherche. Les stations dans ce rayon seront suivies.",
+        "data": {
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "radius_km": "Rayon (km)",
+          "postal_code": "Code postal"
         }
       },
       "name": {
@@ -16,47 +57,17 @@
         "data": {
           "name": "Nom"
         }
-      },
-      "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
-        "data": {
-          "station_county": "County"
-        }
-      },
-      "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
-        "data": {
-          "api_key": "API Key"
-        }
-      },
-      "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
-        "data": {
-          "station_id": "Station"
-        }
-      },
-      "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
-        "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
-        }
       }
     },
     "error": {
       "invalid_station_id": "Identifiant de station invalide. Veuillez entrer un nombre positif valide.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "La clé API ne peut pas être vide.",
+      "invalid_location": "Coordonnées invalides. Entrez des valeurs valides de latitude et longitude.",
+      "no_stations_found": "Aucune station trouvée pour ce comté. Essayez un autre comté."
     },
     "abort": {
       "already_configured": "Cette station est déjà configurée.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Aucun fournisseur de données n'est disponible pour ce pays."
     }
   },
   "entity": {

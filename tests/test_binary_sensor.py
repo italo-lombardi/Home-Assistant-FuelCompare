@@ -154,7 +154,7 @@ async def test_binary_sensor_today_hours_attribute() -> None:
             side_effect=lambda x: x,
         ),
     ):
-        mock_now.return_value.strftime.return_value = "Monday"
+        mock_now.return_value.weekday.return_value = 0
         attrs = sensor.extra_state_attributes
 
     assert "today_hours" in attrs
@@ -196,7 +196,7 @@ async def test_binary_sensor_today_not_in_hours() -> None:
             side_effect=lambda x: x,
         ),
     ):
-        mock_now.return_value.strftime.return_value = "Monday"
+        mock_now.return_value.weekday.return_value = 0
         result = sensor.is_on
 
     assert result is None
@@ -214,7 +214,7 @@ async def test_binary_sensor_is_on_from_dict_hours() -> None:
             side_effect=lambda x: x,
         ),
     ):
-        mock_now.return_value.strftime.return_value = "Monday"
+        mock_now.return_value.weekday.return_value = 0
         mock_now.return_value.time.return_value = dt_time(9, 0)
         result = sensor.is_on
 
@@ -254,7 +254,9 @@ async def test_is_open_available_with_data_after_failure() -> None:
     object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "12345")
 
+    # Stale retention: entities stay available and keep last value during coordinator outages
     assert sensor.available is True
+    assert sensor.is_on is not None  # retains last known open/closed state
 
 
 async def test_is_open_unavailable_when_no_data() -> None:

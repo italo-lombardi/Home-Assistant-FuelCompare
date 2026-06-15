@@ -1,11 +1,21 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Izberite državo",
+        "data": {
+          "country": "Država"
+        }
+      },
+      "provider": {
+        "title": "Izberite vir podatkov",
+        "data": {
+          "provider": "Vir podatkov"
+        }
+      },
       "station": {
         "title": "Dodaj postajo Fuel Compare",
-        "description": "Vnesite ID postaje z URL-ja postaje (npr. 790 za Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "ID Postaje"
         }
@@ -18,45 +28,46 @@
         }
       },
       "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
+        "title": "Izberite okrožje",
+        "description": "Izberite svoje okrožje za iskanje bližnjih postaj.",
         "data": {
-          "station_county": "County"
+          "station_county": "Okrožje"
         }
       },
       "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
+        "title": "API-ključ",
+        "description": "Vnesite brezplačni API-ključ. [Pridobite ga tukaj]({registration_url}), če je zahtevano.",
         "data": {
-          "api_key": "API Key"
+          "api_key": "API-ključ"
         }
       },
       "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "title": "Izberite postajo",
+        "description": "Izberite bencinsko postajo. Prikazane cene so za dizel/bencin.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Postaja"
         }
       },
       "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
+        "title": "Nastavite lokacijo",
+        "description": "Vnesite svojo lokacijo in polmer iskanja. Sledile se bodo postaje znotraj polmera.",
         "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
+          "latitude": "Zemljepisna širina",
+          "longitude": "Zemljepisna dolžina",
+          "radius_km": "Polmer (km)",
+          "postal_code": "Poštna številka"
         }
       }
     },
     "error": {
       "invalid_station_id": "Neveljaven ID postaje. Vnesite veljavno pozitivno število.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "API-ključ ne sme biti prazen.",
+      "invalid_location": "Neveljavne koordinate. Vnesite veljavne vrednosti zemljepisne širine in dolžine.",
+      "no_stations_found": "Za to okrožje ni bilo najdenih postaj. Poskusite z drugim okrožjem."
     },
     "abort": {
       "already_configured": "Ta postaja je že nastavljena.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Za to državo ni na voljo nobenih ponudnikov podatkov."
     }
   },
   "entity": {

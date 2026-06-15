@@ -207,8 +207,8 @@ def test_provider_capabilities_include_timing_fields() -> None:
 def test_provider_capabilities_include_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = PtDgegProvider.CAPABILITIES
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 def test_provider_no_api_key_required() -> None:

@@ -6,13 +6,12 @@ import logging
 from datetime import datetime, timedelta
 
 import homeassistant.util.dt as dt_util
-from aiohttp import ClientError, ClientSession
+from aiohttp import ClientError
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DEFAULT_SCAN_INTERVAL
 from .providers.base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,9 +41,7 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
             _LOGGER,
             name=f"Fuel Compare [{provider.PROVIDER_KEY}] Station {_station_id}",
             update_interval=timedelta(
-                seconds=getattr(
-                    provider, "POLL_INTERVAL_SECONDS", DEFAULT_SCAN_INTERVAL
-                )
+                seconds=provider.POLL_INTERVAL_SECONDS
             ),
         )
         self.station_id = _station_id
@@ -61,6 +58,10 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     def _build_id(self, value: str | None) -> None:
         if hasattr(self._provider, "_build_id"):
             self._provider._build_id = value
+        else:
+            _LOGGER.debug(
+                "Coordinator proxy setter: provider has no _build_id attribute, write discarded"
+            )
 
     @property
     def _decrypt_key(self) -> str | None:
@@ -70,31 +71,18 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     def _decrypt_key(self, value: str | None) -> None:
         if hasattr(self._provider, "_decrypt_key"):
             self._provider._decrypt_key = value
+        else:
+            _LOGGER.debug(
+                "Coordinator proxy setter: provider has no _decrypt_key attribute, write discarded"
+            )
 
-    async def _fetch_page_assets(
-        self, session: ClientSession, broad: bool = False
-    ) -> None:
-        if hasattr(self._provider, "_fetch_page_assets"):
-            await self._provider._fetch_page_assets(session, broad=broad)
-
-    async def _fetch_nextjs(self, session: ClientSession) -> dict | None:
-        if hasattr(self._provider, "_fetch_nextjs"):
-            return await self._provider._fetch_nextjs(session)
-        return None
-
-    async def _fetch_encrypted_api(self, session: ClientSession) -> dict | None:
-        if hasattr(self._provider, "_fetch_encrypted_api"):
-            return await self._provider._fetch_encrypted_api(session)
-        return None
-
-    def _parse_station(self, station: dict) -> dict:
-        if hasattr(self._provider, "_parse_station"):
-            return self._provider._parse_station(station)
-        return station
+    @property
+    def provider_capabilities(self) -> frozenset:
+        return self._provider.CAPABILITIES
 
     # ---- Update cycle -----------------------------------------------------------
 
-    async def _async_update_data(self) -> dict:
+    async def _async_update_data(self) -> StationData:
         try:
             session = async_get_clientsession(self.hass)
             _LOGGER.debug("Starting data update for station %s", self.station_id)
@@ -102,16 +90,16 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
             self.last_successful_fetch = dt_util.utcnow()
             return data
         except ClientError as err:
-            _LOGGER.debug(
+            _LOGGER.warning(
                 "HTTP error fetching station %s: %s",
                 self.station_id,
-                type(err).__name__,
+                err,
             )
             raise UpdateFailed(
                 f"Error communicating with API: {type(err).__name__}"
             ) from err
         except ProviderError as err:
-            _LOGGER.debug("Provider error for station %s: %s", self.station_id, err)
+            _LOGGER.warning("Provider error for station %s: %s", self.station_id, err)
             raise UpdateFailed(str(err)) from err
         except UpdateFailed:
             raise

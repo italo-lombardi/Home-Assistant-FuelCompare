@@ -21,7 +21,7 @@ ToS: Personal/home-automation use acceptable; commercial use prohibited.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -106,20 +106,19 @@ class PtDgegProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600  # DGEG updates intraday; 1-hour poll is sufficient
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "diesel",
             "unleaded",
             "premium_unleaded",
             "lpg",
             "lastupdated",
+            "source_station_id",
             "name",
             "county",
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

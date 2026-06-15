@@ -39,16 +39,15 @@ Precio Gasoleo B                  → (ignored, off-road diesel)
 Precio Gasoleo Premium            → premium_diesel (passthrough only)
 Fecha                             → lastupdated  (top-level response field)
 
-E85 / AdBlue: MINETUR does not publish these in the open API; the keys are
-included in CAPABILITIES because the integration spec lists them, but they
-will always be None.
+E85 / AdBlue: MINETUR does not publish these in the open API; they are not
+included in CAPABILITIES.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -107,7 +106,7 @@ class EsMineturProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 1800  # API updates every 30 minutes per Nota field
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "diesel",
@@ -120,8 +119,6 @@ class EsMineturProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -422,10 +419,6 @@ def _parse_station(raw: dict[str, Any], fecha: str | None) -> StationData:
     for api_field, data_key in _PRICE_FIELDS.items():
         prices[data_key] = _parse_price(raw.get(api_field))
 
-    # E85 and AdBlue are not published by MINETUR; always None.
-    prices["e85"] = None
-    prices["adblue"] = None
-
     # Convert Fecha string ('14/06/2026 4:50:43') to an ISO-ish timestamp.
     # Store as-is; the sensor platform accepts any truthy string for lastupdated.
     lastupdated = _normalise_fecha(fecha)
@@ -435,8 +428,8 @@ def _parse_station(raw: dict[str, Any], fecha: str | None) -> StationData:
         "diesel": prices.get("diesel"),
         "premium_unleaded": prices.get("premium_unleaded"),
         "lpg": prices.get("lpg"),
-        "e85": prices.get("e85"),
-        "adblue": prices.get("adblue"),
+        "e85": None,  # MINETUR does not publish E85
+        "adblue": None,  # MINETUR does not publish AdBlue
         "name": brand,  # MINETUR stations have no distinct name; brand serves as name
         "brand": brand,
         "address": address,

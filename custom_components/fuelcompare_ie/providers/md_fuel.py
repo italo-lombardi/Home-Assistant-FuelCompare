@@ -99,16 +99,14 @@ class MdFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 43200  # 12 hours — ANRE updates at most once daily
-    CURRENCY: ClassVar[str] = "MDL/L"
+    CURRENCY: ClassVar[str] = "L"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",  # Benzina 95 — MDL/litre
             "diesel",  # Motorina  — MDL/litre
             "lastupdated",
             "name",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

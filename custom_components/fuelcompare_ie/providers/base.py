@@ -19,6 +19,7 @@ Adding a new country / provider:
 
 from __future__ import annotations
 
+import inspect
 from abc import ABC, abstractmethod
 from math import atan2, cos, radians, sin, sqrt
 from typing import Any, ClassVar, Final, Literal, TypedDict
@@ -225,7 +226,7 @@ class BaseProvider(ABC):
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
-            # Default: the 14 entities created by the original fuelcompare.ie provider.
+            # Default: the 12 entities created by the original fuelcompare.ie provider.
             # Override in subclasses to declare exactly what your provider populates.
             "unleaded",
             "diesel",
@@ -247,10 +248,15 @@ class BaseProvider(ABC):
     which entities to create. Only keys listed here get entities. Unknown
     keys are silently ignored.
 
-    Keys 'last_successful_fetch' and 'data_fetch_problem' are special:
-    they are always created by the coordinator regardless of CAPABILITIES.
-    Do NOT list them here — they are coordinator-level passthroughs, like
-    'source_station_id' and 'tablename' which are also injected automatically.
+    Two keys have special coordinator-level handling — do NOT list them here:
+
+    * 'data_fetch_problem' (binary_sensor) — always created unconditionally
+      by the coordinator; it is never gated by CAPABILITIES.
+    * 'last_successful_fetch' (sensor) — IS gated by CAPABILITIES; list it
+      here only if your provider wants to expose it as an entity.
+
+    Keys 'source_station_id' and 'tablename' are also injected automatically
+    by the coordinator as entity attributes and should not be listed here.
     """
 
     STATION_ID_HINT: ClassVar[str] = "Enter the station ID from the station URL."
@@ -321,7 +327,7 @@ class BaseProvider(ABC):
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
-        if not getattr(cls, "__abstractmethods__", None):
+        if not inspect.isabstract(cls):
             for attr in ("COUNTRY", "PROVIDER_KEY", "LABEL"):
                 if not hasattr(cls, attr):
                     raise TypeError(
@@ -336,6 +342,12 @@ class BaseProvider(ABC):
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "
                     f"Add them to StationData first."
+                )
+            if cls.STATION_LOOKUP_MODE != "manual_id" and not any(
+                "async_list_stations" in c.__dict__ for c in cls.__mro__[1:]
+            ):
+                raise TypeError(
+                    cls.__name__ + " must override async_list_stations"
                 )
 
     # ── Abstract interface ────────────────────────────────────────────────────

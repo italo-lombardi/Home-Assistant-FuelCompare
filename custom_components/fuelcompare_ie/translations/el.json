@@ -1,13 +1,54 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Επιλογή χώρας",
+        "data": {
+          "country": "Χώρα"
+        }
+      },
+      "provider": {
+        "title": "Επιλογή πηγής δεδομένων",
+        "data": {
+          "provider": "Πηγή δεδομένων"
+        }
+      },
+      "county": {
+        "title": "Επιλογή νομού",
+        "description": "Επιλέξτε τον νομό σας για να βρείτε κοντινούς σταθμούς.",
+        "data": {
+          "station_county": "Νομός"
+        }
+      },
+      "api_key": {
+        "title": "Κλειδί API",
+        "description": "Εισάγετε το δωρεάν κλειδί API σας. [Αποκτήστε ένα εδώ]({registration_url}) εάν σας ζητηθεί.",
+        "data": {
+          "api_key": "Κλειδί API"
+        }
+      },
       "station": {
         "title": "Προσθήκη σταθμού Fuel Compare",
-        "description": "Εισάγετε το αναγνωριστικό σταθμού από τη διεύθυνση URL του σταθμού (π.χ. 790 για Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "Αναγνωριστικό Σταθμού"
+        }
+      },
+      "station_picker": {
+        "title": "Επιλογή σταθμού",
+        "description": "Επιλέξτε σταθμό καυσίμων. Οι τιμές που εμφανίζονται αφορούν ντίζελ/βενζίνη.",
+        "data": {
+          "station_id": "Σταθμός"
+        }
+      },
+      "location": {
+        "title": "Ορισμός τοποθεσίας",
+        "description": "Εισάγετε την τοποθεσία σας και την ακτίνα αναζήτησης. Οι σταθμοί εντός της ακτίνας θα παρακολουθούνται.",
+        "data": {
+          "latitude": "Γεωγραφικό πλάτος",
+          "longitude": "Γεωγραφικό μήκος",
+          "radius_km": "Ακτίνα (km)",
+          "postal_code": "Ταχυδρομικός κώδικας"
         }
       },
       "name": {
@@ -16,47 +57,17 @@
         "data": {
           "name": "Όνομα"
         }
-      },
-      "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
-        "data": {
-          "station_county": "County"
-        }
-      },
-      "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
-        "data": {
-          "api_key": "API Key"
-        }
-      },
-      "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
-        "data": {
-          "station_id": "Station"
-        }
-      },
-      "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
-        "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
-        }
       }
     },
     "error": {
       "invalid_station_id": "Μη έγκυρο αναγνωριστικό σταθμού. Εισάγετε έναν έγκυρο θετικό αριθμό.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "Το κλειδί API δεν μπορεί να είναι κενό.",
+      "invalid_location": "Μη έγκυρες συντεταγμένες. Εισάγετε έγκυρες τιμές γεωγραφικού πλάτους και μήκους.",
+      "no_stations_found": "Δεν βρέθηκαν σταθμοί για αυτόν τον νομό. Δοκιμάστε διαφορετικό νομό."
     },
     "abort": {
       "already_configured": "Αυτός ο σταθμός είναι ήδη διαμορφωμένος.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Δεν υπάρχουν διαθέσιμοι πάροχοι δεδομένων για αυτή τη χώρα."
     }
   },
   "entity": {

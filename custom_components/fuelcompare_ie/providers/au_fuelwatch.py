@@ -80,7 +80,7 @@ class AuFuelwatchProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     # WA tomorrow-prices published at 14:30 AWST; poll once daily at 14:45 AWST.
     POLL_INTERVAL_SECONDS = 86400
-    CURRENCY: ClassVar[str] = "AUD/L"
+    CURRENCY: ClassVar[str] = "A$"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {
@@ -97,8 +97,6 @@ class AuFuelwatchProvider(BaseProvider):
             "longitude",
             "phone",
             "is_open",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

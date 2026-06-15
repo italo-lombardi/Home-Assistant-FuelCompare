@@ -87,6 +87,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -149,7 +150,7 @@ class IEFuelFinderProvider(BaseProvider):
     LABEL = "FuelFinder.ie"
     CONFIG_MODE = "station_id"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "diesel",
@@ -173,9 +174,6 @@ class IEFuelFinderProvider(BaseProvider):
             # FuelFinder-specific
             "price_confidence",
             "has_price",
-            # Diagnostic / coordinator-managed
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
@@ -612,22 +610,19 @@ class IEFuelFinderProvider(BaseProvider):
         # These are not declared in CAPABILITIES so no entities are created
         # for them by the sensor platform.  They are accessible from
         # coordinator.data in templates and custom extra_state_attributes.
-        #
-        # FuelFinder-specific fields not in StationData TypedDict are stored
-        # here as plain dict entries.  TypedDict with total=False allows
-        # arbitrary extra keys at runtime even though type checkers will warn.
 
-        data["confidence"] = confidence  # type: ignore[typeddict-unknown-key]
         data["price_confidence"] = confidence
-        data["osm_id"] = osm_id  # type: ignore[typeddict-unknown-key]
-        data["slug"] = slug  # type: ignore[typeddict-unknown-key]
-        data["logo_url"] = logo_url  # type: ignore[typeddict-unknown-key]
+        data["confidence"] = confidence  # alias used by tests and templates
         data["has_price"] = has_price
         data["kerosene"] = _price("kerosene")
         data["cng"] = _price("cng")
-        # lat/lng passthrough for tests that check raw field names
-        data["lat"] = lat  # type: ignore[typeddict-unknown-key]
-        data["lng"] = lng  # type: ignore[typeddict-unknown-key]
+        # Raw lat/lng passthrough (alongside normalised latitude/longitude)
+        data["lat"] = lat
+        data["lng"] = lng
+        # Extra identity passthrough
+        data["osm_id"] = osm_id
+        data["slug"] = slug
+        data["logo_url"] = logo_url
 
         _LOGGER.debug(
             "FuelFinder parsed data for station %s: diesel=%s unleaded=%s "

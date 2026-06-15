@@ -1,13 +1,54 @@
 {
   "config": {
     "step": {
-      "user": {},
-      "provider": {},
+      "user": {
+        "title": "Valitse maa",
+        "data": {
+          "country": "Maa"
+        }
+      },
+      "provider": {
+        "title": "Valitse tietolähde",
+        "data": {
+          "provider": "Tietolähde"
+        }
+      },
+      "county": {
+        "title": "Valitse lääni",
+        "description": "Valitse lääni löytääksesi lähimmät asemat.",
+        "data": {
+          "station_county": "Lääni"
+        }
+      },
+      "api_key": {
+        "title": "API-avain",
+        "description": "Syötä maksuton API-avaimesi. [Hanki se täältä]({registration_url}) tarvittaessa.",
+        "data": {
+          "api_key": "API-avain"
+        }
+      },
       "station": {
         "title": "Lisää Fuel Compare-asema",
-        "description": "Syötä aseman tunnus-aseman URL-osoitteesta (esim. 790 Circle K Taney Dublin)",
+        "description": "{hint}",
         "data": {
           "station_id": "Aseman tunnus"
+        }
+      },
+      "station_picker": {
+        "title": "Valitse asema",
+        "description": "Valitse polttoaineasema. Näytetyt hinnat ovat diesel- ja bensiinipolttoaineille.",
+        "data": {
+          "station_id": "Asema"
+        }
+      },
+      "location": {
+        "title": "Aseta sijainti",
+        "description": "Syötä sijaintisi ja hakusäde. Säteen sisällä olevat asemat seurataan.",
+        "data": {
+          "latitude": "Leveysaste",
+          "longitude": "Pituusaste",
+          "radius_km": "Säde (km)",
+          "postal_code": "Postinumero"
         }
       },
       "name": {
@@ -16,47 +57,17 @@
         "data": {
           "name": "Nimi"
         }
-      },
-      "county": {
-        "title": "Select County",
-        "description": "Select your county to find nearby stations.",
-        "data": {
-          "station_county": "County"
-        }
-      },
-      "api_key": {
-        "title": "API Key",
-        "description": "Enter your free API key. [Get one here]({registration_url}) if prompted.",
-        "data": {
-          "api_key": "API Key"
-        }
-      },
-      "station_picker": {
-        "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
-        "data": {
-          "station_id": "Station"
-        }
-      },
-      "location": {
-        "title": "Set Location",
-        "description": "Enter your location and search radius. Stations within the radius will be tracked.",
-        "data": {
-          "latitude": "Latitude",
-          "longitude": "Longitude",
-          "radius_km": "Radius (km)"
-        }
       }
     },
     "error": {
       "invalid_station_id": "Virheellinen aseman tunnus. Syötä kelvollinen positiivinen luku.",
-      "invalid_api_key": "API key cannot be empty.",
-      "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
-      "no_stations_found": "No stations found for this county. Try a different county."
+      "invalid_api_key": "API-avain ei voi olla tyhjä.",
+      "invalid_location": "Virheelliset koordinaatit. Syötä kelvolliset leveysaste- ja pituusastearvot.",
+      "no_stations_found": "Tältä lääniltä ei löydy asemia. Kokeile eri lääniä."
     },
     "abort": {
       "already_configured": "Tämä asema on jo määritetty.",
-      "no_providers_for_country": "No data providers are available for this country."
+      "no_providers_for_country": "Tälle maalle ei ole saatavilla tietolähteen tarjoajia."
     }
   },
   "entity": {

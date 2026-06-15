@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import inspect
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import (
     CONF_API_KEY,
@@ -22,6 +24,8 @@ from .const import (
 )
 from .coordinator import FuelCompareIECoordinator
 from .providers import PROVIDER_REGISTRY
+
+_LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
@@ -40,6 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _lng = entry.data.get(CONF_LONGITUDE)
         if _lat is not None and _lng is not None:
             station_id = f"{round(_lat, 4)}_{round(_lng, 4)}"
+    if not station_id:
+        station_id = entry.entry_id
 
     # Existing entries have no CONF_PROVIDER key — default to ie_fuelcompare
     # so they continue working without any migration.
@@ -47,9 +53,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
         provider_cls = PROVIDER_REGISTRY.get(DEFAULT_PROVIDER)
+        _LOGGER.warning("Unknown provider key %r, falling back to %r", provider_key, DEFAULT_PROVIDER)
         if provider_cls is None:
-            from homeassistant.exceptions import ConfigEntryNotReady
-
             raise ConfigEntryNotReady(
                 f"Provider '{provider_key}' not found and default provider '{DEFAULT_PROVIDER}' is also missing."
             )
@@ -61,12 +66,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     county = entry.data.get(CONF_STATION_COUNTY)
     # API key is stored in entry.options (not entry.data) for security; fall back
     # to entry.data for entries created before this change was introduced.
-    # Use explicit is not None checks — empty string is a valid (invalid) key,
-    # not a signal to fall through to entry.data.
+    # Use truthy check — empty string is treated as absent so we fall back to entry.data.
     _api_key_options = entry.options.get(CONF_API_KEY)
     api_key = (
         _api_key_options
-        if _api_key_options is not None
+        if _api_key_options
         else entry.data.get(CONF_API_KEY)
     )
     latitude = entry.data.get(CONF_LATITUDE)
@@ -84,7 +88,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # postal_code: use NEEDS_POSTAL_CODE ClassVar (inspect.signature breaks for **kwargs).
     if getattr(provider_cls, "NEEDS_POSTAL_CODE", False):
         postal_code = entry.data.get(CONF_POSTAL_CODE)
-        if not postal_code and county and str(county).isdigit():
+        if not postal_code and county and str(county).isdigit() and CONF_POSTAL_CODE not in entry.data:
             postal_code = county
         if postal_code:
             kwargs["postal_code"] = postal_code
@@ -109,9 +113,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await coordinator.async_config_entry_first_refresh()
+
+    hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -126,7 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        hass.data[DOMAIN].pop(entry.entry_id, None)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    hass.data[DOMAIN].pop(entry.entry_id, None)
 
     return unload_ok

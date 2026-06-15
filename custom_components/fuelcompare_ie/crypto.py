@@ -35,6 +35,8 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
     decryptor = cipher.decryptor()
     padded = decryptor.update(ciphertext) + decryptor.finalize()
     # Remove PKCS7 padding — last byte is the pad length; AES block size is 16
+    if not padded:
+        raise ValueError("Decrypted output is empty — ciphertext too short")
     pad_len = padded[-1]
     if not (1 <= pad_len <= 16):
         raise ValueError(f"Invalid PKCS7 padding length: {pad_len}")

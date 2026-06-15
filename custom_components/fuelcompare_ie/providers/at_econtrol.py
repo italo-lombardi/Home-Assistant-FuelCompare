@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -61,15 +61,13 @@ class AtEcontrolProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = POLL_INTERVAL
     REQUIRES_API_KEY = False
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "address",
             "cng",
             "county",
-            "data_fetch_problem",
             "diesel",
             "is_open",
-            "last_successful_fetch",
             "latitude",
             "longitude",
             "name",
@@ -351,9 +349,6 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
 
     address = _format_address(location)
 
-    open_val = raw.get("open")
-    is_open: bool | None = bool(open_val) if open_val is not None else None
-
     return {
         "diesel": prices.get("diesel"),
         "unleaded": prices.get("unleaded"),
@@ -363,7 +358,7 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
         "address": address or None,
         "latitude": latitude,
         "longitude": longitude,
-        "is_open": is_open,
-        "lastupdated": None,  # API does not provide per-station price timestamps
+        "is_open": raw.get("open") if "open" in raw else None,
+        "lastupdated": None,
         "source_station_id": str(raw.get("id") or ""),
     }

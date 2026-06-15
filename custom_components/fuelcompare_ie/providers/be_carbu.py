@@ -85,7 +85,7 @@ import asyncio
 
 import logging
 import re
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
@@ -365,7 +365,7 @@ class BeCarbuProvider(BaseProvider):
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — carbu.com rate-limit guidance
     NEEDS_POSTAL_CODE = True
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices
             "unleaded",  # Super 95 (E10)
@@ -381,9 +381,6 @@ class BeCarbuProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Coordinator sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

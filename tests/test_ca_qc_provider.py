@@ -209,8 +209,8 @@ def test_capabilities_include_longitude() -> None:
 
 def test_capabilities_include_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
-    assert "last_successful_fetch" in CaQcProvider.CAPABILITIES
-    assert "data_fetch_problem" in CaQcProvider.CAPABILITIES
+    assert "last_successful_fetch" not in CaQcProvider.CAPABILITIES
+    assert "data_fetch_problem" not in CaQcProvider.CAPABILITIES
 
 
 def test_geojson_url_points_to_regieessence() -> None:

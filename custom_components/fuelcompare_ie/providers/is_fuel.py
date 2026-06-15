@@ -221,9 +221,9 @@ class IsFuelProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
 
     POLL_INTERVAL_SECONDS = 900  # 15 minutes — matches upstream commit cadence
-    CURRENCY: ClassVar[str] = "ISK/L"
+    CURRENCY: ClassVar[str] = "kr"
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             # Fuel prices (ISK/litre)
             "unleaded",  # bensin95 — standard 95 octane petrol
@@ -237,9 +237,6 @@ class IsFuelProvider(BaseProvider):
             "longitude",
             # Timing
             "lastupdated",
-            # Coordinator-managed sentinels
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 

@@ -219,8 +219,8 @@ def test_capabilities_include_price_confidence() -> None:
 def test_capabilities_include_coordinator_sentinels() -> None:
     """CAPABILITIES includes coordinator sentinel keys."""
     caps = ChTcsProvider.CAPABILITIES
-    assert "last_successful_fetch" in caps
-    assert "data_fetch_problem" in caps
+    assert "last_successful_fetch" not in caps
+    assert "data_fetch_problem" not in caps
 
 
 # ---------------------------------------------------------------------------

@@ -22,7 +22,7 @@ from __future__ import annotations
 import gzip
 import json
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -62,7 +62,7 @@ class HRMzoeProvider(BaseProvider):
     STATION_LOOKUP_MODE = "county_search"
     POLL_INTERVAL_SECONDS = 3600  # updated hourly; align poll to :05 past the hour
 
-    CAPABILITIES: frozenset[str] = frozenset(
+    CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
             "unleaded",
             "diesel",
@@ -74,8 +74,6 @@ class HRMzoeProvider(BaseProvider):
             "address",
             "latitude",
             "longitude",
-            "last_successful_fetch",
-            "data_fetch_problem",
         }
     )
 
