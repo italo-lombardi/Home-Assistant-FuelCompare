@@ -817,7 +817,8 @@ async def test_async_list_stations_skips_stations_with_null_id() -> None:
     )
 
     ids = [r[0] for r in result]
-    assert "None" not in ids or "13" in ids  # must not crash; valid station present
+    assert "None" not in ids  # null-id station must be filtered out
+    assert "13" in ids  # valid station must be present
 
 
 # ---------------------------------------------------------------------------

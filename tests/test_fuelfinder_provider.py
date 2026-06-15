@@ -202,7 +202,11 @@ async def test_async_fetch_success_diesel() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -224,7 +228,11 @@ async def test_async_fetch_success_petrol() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -246,7 +254,11 @@ async def test_async_fetch_kerosene_none_when_absent_from_results() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -267,7 +279,11 @@ async def test_async_fetch_price_not_divided_by_100() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -292,7 +308,11 @@ async def test_async_fetch_normalises_station_identity_fields() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -314,7 +334,11 @@ async def test_async_fetch_normalises_location_fields() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -334,7 +358,11 @@ async def test_async_fetch_normalises_fuelfinder_specific_fields() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -355,13 +383,17 @@ async def test_async_fetch_updated_at_mapped_to_lastupdated() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
 
     # lastupdated must mirror updated_at so StationPriceLastUpdatedSensor works
-    assert data["lastupdated"] == data["lastupdated"]
+    assert data["lastupdated"] == "2026-06-13T16:04:01.754194+00:00"
 
 
 async def test_async_fetch_brand_none_when_api_returns_null() -> None:
@@ -377,7 +409,11 @@ async def test_async_fetch_brand_none_when_api_returns_null() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -398,7 +434,11 @@ async def test_async_fetch_brand_none_when_api_returns_empty_string() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -424,7 +464,11 @@ async def test_async_fetch_has_price_false_when_no_submissions() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)
@@ -452,7 +496,11 @@ async def test_async_fetch_raises_provider_error_when_station_not_in_results() -
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
 
@@ -466,7 +514,8 @@ async def test_async_fetch_raises_provider_error_when_all_responses_empty() -> N
     diesel_resp = _make_mock_response(200, json_data=empty)
     petrol_resp = _make_mock_response(200, json_data={**empty, "fuel": "petrol"})
     kerosene_resp = _make_mock_response(200, json_data={**empty, "fuel": "kerosene"})
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(200, json_data={**empty, "fuel": "cng"})
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
 
@@ -518,7 +567,11 @@ async def test_async_fetch_sends_sec_fetch_site_header() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     await provider.async_fetch(session, _STATION_UUID)
@@ -540,7 +593,11 @@ async def test_async_fetch_sends_referer_header() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     await provider.async_fetch(session, _STATION_UUID)
@@ -562,7 +619,11 @@ async def test_async_fetch_fan_out_makes_multiple_fuel_requests() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     await provider.async_fetch(session, _STATION_UUID)
@@ -684,7 +745,6 @@ def test_parse_station_updated_at_mirrored_to_lastupdated() -> None:
     provider = IEFuelFinderProvider(_STATION_UUID)
     prices_by_fuel = {"diesel": {**_BASE_STATION, "price": 1.828}}
     result = provider._build_station_data(_STATION_UUID, _BASE_STATION, prices_by_fuel)
-    assert result["lastupdated"] == result["lastupdated"]
     assert result["lastupdated"] == "2026-06-13T16:04:01.754194+00:00"
 
 
@@ -703,7 +763,11 @@ async def test_async_fetch_station_name_success() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     name = await provider.async_fetch_station_name(session, _STATION_UUID)
@@ -735,7 +799,11 @@ async def test_async_fetch_station_name_returns_none_when_station_not_found() ->
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     name = await provider.async_fetch_station_name(session, _STATION_UUID)
@@ -829,7 +897,11 @@ async def test_async_fetch_cng_none_when_not_included() -> None:
         200,
         json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "kerosene"},
     )
-    session = _make_session(diesel_resp, petrol_resp, kerosene_resp)
+    cng_resp = _make_mock_response(
+        200,
+        json_data={"stations": [], "total": 0, "city": "dublin", "fuel": "cng"},
+    )
+    session = _make_session(diesel_resp, petrol_resp, kerosene_resp, cng_resp)
 
     provider = IEFuelFinderProvider(_STATION_UUID)
     data = await provider.async_fetch(session, _STATION_UUID)

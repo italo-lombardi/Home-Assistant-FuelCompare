@@ -101,6 +101,8 @@ async def test_async_fetch_returns_station_data() -> None:
     assert data["name"] == "INA Sarajevska"
     assert data["latitude"] == pytest.approx(45.79)
     assert data["longitude"] == pytest.approx(16.15)
+    assert data["unleaded"] == pytest.approx(1.540)
+    assert data["diesel"] == pytest.approx(1.720)
 
 
 @pytest.mark.asyncio

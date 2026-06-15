@@ -575,7 +575,7 @@ async def test_async_fetch_diesel_price() -> None:
     data = await provider.async_fetch(session, _STATION_ID)
 
     assert data.get("diesel") is not None
-    assert 0.3 <= data["diesel"] <= 5.0  # type: ignore[operator]
+    assert data["diesel"] == pytest.approx(2.065)
 
 
 async def test_async_fetch_raises_provider_error_when_station_not_found() -> None:
@@ -1098,6 +1098,22 @@ def test_parse_station_html_invalid_lng_returns_none() -> None:
     result = _parse_station_html(_INVALID_COORDS_HTML, "diesel")
     assert result
     assert result[0]["longitude"] is None
+
+
+def test_parse_station_html_primary_div_id_format() -> None:
+    """_parse_station_html parses the primary div id='item_N' data-attribute format."""
+    html = (
+        '<div id="item_0" data-price="1.999" data-name="Test Station" '
+        'data-lat="50.85" data-lng="4.35" data-id="99001">'
+        '</div>'
+    )
+    result = _parse_station_html(html, "diesel")
+    assert len(result) == 1
+    assert result[0]["station_id"] == "99001"
+    assert result[0]["price"] == pytest.approx(1.999)
+    assert result[0]["name"] == "Test Station"
+    assert result[0]["latitude"] == pytest.approx(50.85)
+    assert result[0]["longitude"] == pytest.approx(4.35)
 
 
 # ---------------------------------------------------------------------------

@@ -1219,6 +1219,14 @@ async def test_async_list_stations_returns_empty_on_completely_empty_body() -> N
     assert isinstance(result, list)
 
 
+async def test_async_list_stations_returns_empty_when_lat_lng_none() -> None:
+    """async_list_stations returns [] immediately when lat or lng is None."""
+    provider = GbFuelfinderProvider(_NODE_ID)
+    session = _make_session(_make_mock_response(200, b""))
+    result = await provider.async_list_stations(session, lat=None, lng=None, radius_km=10.0)
+    assert result == []
+
+
 # ---------------------------------------------------------------------------
 # Price boundary: _parse_price_pence — 300.0 passes, 300.1 is rejected
 # (guard using _MAX_PENCE_PER_LITRE when it exists)

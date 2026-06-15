@@ -676,11 +676,6 @@ async def test_async_fetch_handles_connection_error_gracefully() -> None:
 
 async def test_async_fetch_http_error_returns_none_prices() -> None:
     """async_fetch handles per-fuel HTTP errors and still assembles partial data."""
-    # Diesel response is HTTP 500, but at least one fuel (unleaded) succeeds
-    _make_mock_response(
-        500,
-        raise_on_status=ClientResponseError(MagicMock(), (), status=500),
-    )
     resp_ok = _make_mock_response(200, body=[{**_STATION_STRASSEN, "price": "1.733"}])
 
     fuel_responses = []

@@ -339,7 +339,7 @@ def _make_encrypted_payload(data: list, evp_key: str) -> str:
 
     d, d_i = b"", b""
     while len(d) < 48:
-        d_i = hashlib.md5(d_i + evp_key.encode() + salt).digest()
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt, usedforsecurity=False).digest()
         d += d_i
     key, iv = d[:32], d[32:48]
 
@@ -956,7 +956,7 @@ def test_cryptojs_decrypt_invalid_padding() -> None:
 
     d, d_i = b"", b""
     while len(d) < 48:
-        d_i = hashlib.md5(d_i + evp_key.encode() + salt).digest()
+        d_i = hashlib.md5(d_i + evp_key.encode() + salt, usedforsecurity=False).digest()
         d += d_i
     key, iv = d[:32], d[32:48]
 
@@ -1052,6 +1052,11 @@ async def test_last_successful_fetch_unchanged_on_failure(
 
     coordinator = FuelCompareIECoordinator(hass, "12345")
     coordinator._build_id = "test_build"
+    # Pre-set a known timestamp so we verify it's unchanged (not just still None).
+    prior_fetch = __import__("datetime").datetime(
+        2026, 1, 1, 0, 0, 0, tzinfo=__import__("datetime").timezone.utc
+    )
+    coordinator.last_successful_fetch = prior_fetch
 
     with patch(
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
@@ -1060,7 +1065,7 @@ async def test_last_successful_fetch_unchanged_on_failure(
         with pytest.raises(UpdateFailed):
             await coordinator._async_update_data()
 
-    assert coordinator.last_successful_fetch is None
+    assert coordinator.last_successful_fetch is prior_fetch
 
 
 # ---------------------------------------------------------------------------
