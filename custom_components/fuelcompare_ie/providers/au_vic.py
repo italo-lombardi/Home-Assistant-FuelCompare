@@ -501,7 +501,6 @@ def _build_station_data(entry: dict[str, Any]) -> StationData:
         "e85": prices.get("e85"),
         # Station identity
         "name": name,
-        "brand": None,  # brandId is a UUID; brand name requires a /brands lookup
         "address": full_address,
         "county": county,
         "latitude": latitude,

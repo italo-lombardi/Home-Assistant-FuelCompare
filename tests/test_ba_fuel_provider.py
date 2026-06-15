@@ -606,8 +606,8 @@ def test_build_station_data_does_not_set_source_station_id() -> None:
     assert "source_station_id" not in data
 
 
-def test_build_station_data_brand_is_none() -> None:
-    """_build_station_data sets brand=None (site has no brand field)."""
+def test_build_station_data_brand_not_set() -> None:
+    """_build_station_data does not set brand (site has no brand field)."""
     raw = {
         "name": "Test",
         "address": None,
@@ -617,7 +617,7 @@ def test_build_station_data_brand_is_none() -> None:
         "lpg": None,
     }
     data = _build_station_data("sarajevo:0", raw, "sarajevo")
-    assert data["brand"] is None
+    assert "brand" not in data
 
 
 def test_build_station_data_latitude_is_none() -> None:

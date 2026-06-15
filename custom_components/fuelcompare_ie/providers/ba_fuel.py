@@ -688,7 +688,6 @@ def _build_station_data(
         "premium_unleaded": raw.get("premium_unleaded"),
         "lpg": raw.get("lpg"),
         "name": name,
-        "brand": None,  # cijenegoriva.ba does not expose a brand field
         "address": address,
         "county": county,
     }
