@@ -391,7 +391,10 @@ class IEFuelFinderProvider(BaseProvider):
         for uid, station in merged.items():
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
+            address = station.get("street") or ""
             display_name = f"{brand} {name}".strip() if brand else name
+            if address:
+                display_name = f"{display_name}, {address}"
 
             d_price = diesel_prices.get(uid)
             p_price = petrol_prices.get(uid)
