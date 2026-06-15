@@ -47,7 +47,7 @@ _STATION_CHUNK_FINDALL_RE: Final = re.compile(
     r'/_next/static/chunks/pages/station/[^"]+\.js'
 )
 _ANY_CHUNK_FINDALL_RE: Final = re.compile(r'/_next/static/chunks/[^"]+\.js')
-_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(e,"([a-f0-9]{64})"')
+_AES_KEY_RE: Final = re.compile(r'AES\.decrypt\(e,"([a-f0-9]{64})"', re.IGNORECASE)
 
 
 class PageAssets:

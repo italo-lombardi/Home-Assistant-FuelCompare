@@ -48,129 +48,49 @@ _PRICE_SENSOR_REGISTRY: dict[str, tuple[str, str]] = {
 
 # ── Info sensor registry ──────────────────────────────────────────────────────
 #
-# Maps StationData capability key → factory that returns a SensorEntity.
-# Factories are callables: (coordinator, station_id, station_name) → SensorEntity.
-
-
-def _make_price_last_updated(coord, sid, sname):
-    return StationPriceLastUpdatedSensor(coord, sid, sname)
-
-
-def _make_station_name(coord, sid, sname):
-    return StationNameSensor(coord, sid, sname)
-
-
-def _make_brand(coord, sid, sname):
-    return StationBrandSensor(coord, sid, sname)
-
-
-def _make_county(coord, sid, sname):
-    return StationCountySensor(coord, sid, sname)
-
-
-def _make_working_hours(coord, sid, sname):
-    return StationWorkingHoursSensor(coord, sid, sname)
-
-
-def _make_opening_hours(coord, sid, sname):
-    return StationOpeningHoursSensor(coord, sid, sname)
-
-
-def _make_address(coord, sid, sname):
-    return StationSimpleStrSensor(
-        coord, sid, sname, "address", "mdi:map-marker", "address"
-    )
-
-
-def _make_latitude(coord, sid, sname):
-    return StationSimpleFloatSensor(
-        coord, sid, sname, "latitude", "mdi:crosshairs-gps", "latitude"
-    )
-
-
-def _make_longitude(coord, sid, sname):
-    return StationSimpleFloatSensor(
-        coord, sid, sname, "longitude", "mdi:crosshairs-gps", "longitude"
-    )
-
-
-def _make_phone(coord, sid, sname):
-    return StationSimpleStrSensor(coord, sid, sname, "phone", "mdi:phone", "phone")
-
-
-def _make_website(coord, sid, sname):
-    return StationSimpleStrSensor(coord, sid, sname, "website", "mdi:web", "website")
-
-
-def _make_location(coord, sid, sname):
-    return StationSimpleStrSensor(
-        coord, sid, sname, "location", "mdi:map-marker-radius", "location"
-    )
-
-
-def _make_price_confidence(coord, sid, sname):
-    return StationSimpleStrSensor(
-        coord,
-        sid,
-        sname,
-        "price_confidence",
-        "mdi:shield-check-outline",
-        "price_confidence",
-    )
-
-
-def _make_accessibility(coord, sid, sname):
-    return StationAboutCategorySensor(
-        coord,
-        sid,
-        sname,
-        "Accessibility",
-        "accessibility",
-        "mdi:wheelchair-accessibility",
-    )
-
-
-def _make_offerings(coord, sid, sname):
-    return StationAboutCategorySensor(
-        coord, sid, sname, "Offerings", "offerings", "mdi:store"
-    )
-
-
-def _make_amenities(coord, sid, sname):
-    return StationAboutCategorySensor(
-        coord, sid, sname, "Amenities", "amenities", "mdi:toilet"
-    )
-
-
-def _make_payments(coord, sid, sname):
-    return StationAboutCategorySensor(
-        coord, sid, sname, "Payments", "payments", "mdi:credit-card"
-    )
-
-
-def _make_last_successful_fetch(coord, sid, sname):
-    return LastSuccessfulFetchSensor(coord, sid, sname)
-
+# Maps StationData capability key → factory: (coordinator, station_id, station_name) → SensorEntity.
 
 _INFO_SENSOR_REGISTRY: dict[str, Any] = {
-    "lastupdated": _make_price_last_updated,
-    "name": _make_station_name,
-    "brand": _make_brand,
-    "county": _make_county,
-    "working_hours": _make_working_hours,
-    "opening_hours": _make_opening_hours,
-    "address": _make_address,
-    "latitude": _make_latitude,
-    "longitude": _make_longitude,
-    "phone": _make_phone,
-    "website": _make_website,
-    "location": _make_location,
-    "price_confidence": _make_price_confidence,
-    "accessibility": _make_accessibility,
-    "offerings": _make_offerings,
-    "amenities": _make_amenities,
-    "payments": _make_payments,
-    "last_successful_fetch": _make_last_successful_fetch,
+    "lastupdated": lambda c, s, n: StationPriceLastUpdatedSensor(c, s, n),
+    "name": lambda c, s, n: StationNameSensor(c, s, n),
+    "brand": lambda c, s, n: StationBrandSensor(c, s, n),
+    "county": lambda c, s, n: StationCountySensor(c, s, n),
+    "working_hours": lambda c, s, n: StationWorkingHoursSensor(c, s, n),
+    "opening_hours": lambda c, s, n: StationOpeningHoursSensor(c, s, n),
+    "address": lambda c, s, n: StationSimpleStrSensor(
+        c, s, n, "address", "mdi:map-marker", "address"
+    ),
+    "latitude": lambda c, s, n: StationSimpleFloatSensor(
+        c, s, n, "latitude", "mdi:crosshairs-gps", "latitude"
+    ),
+    "longitude": lambda c, s, n: StationSimpleFloatSensor(
+        c, s, n, "longitude", "mdi:crosshairs-gps", "longitude"
+    ),
+    "phone": lambda c, s, n: StationSimpleStrSensor(
+        c, s, n, "phone", "mdi:phone", "phone"
+    ),
+    "website": lambda c, s, n: StationSimpleStrSensor(
+        c, s, n, "website", "mdi:web", "website"
+    ),
+    "location": lambda c, s, n: StationSimpleStrSensor(
+        c, s, n, "location", "mdi:map-marker-radius", "location"
+    ),
+    "price_confidence": lambda c, s, n: StationSimpleStrSensor(
+        c, s, n, "price_confidence", "mdi:shield-check-outline", "price_confidence"
+    ),
+    "accessibility": lambda c, s, n: StationAboutCategorySensor(
+        c, s, n, "Accessibility", "accessibility", "mdi:wheelchair-accessibility"
+    ),
+    "offerings": lambda c, s, n: StationAboutCategorySensor(
+        c, s, n, "Offerings", "offerings", "mdi:store"
+    ),
+    "amenities": lambda c, s, n: StationAboutCategorySensor(
+        c, s, n, "Amenities", "amenities", "mdi:toilet"
+    ),
+    "payments": lambda c, s, n: StationAboutCategorySensor(
+        c, s, n, "Payments", "payments", "mdi:credit-card"
+    ),
+    "last_successful_fetch": lambda c, s, n: LastSuccessfulFetchSensor(c, s, n),
 }
 
 

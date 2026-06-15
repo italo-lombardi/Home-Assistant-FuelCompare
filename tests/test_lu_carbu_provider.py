@@ -210,7 +210,9 @@ def test_provider_init_stores_coordinates() -> None:
 
 def test_base_url_points_to_carbu_luxembourg() -> None:
     """_BASE_URL points to the carbu.com Luxembourg endpoint."""
-    assert "carbu.com" in _BASE_URL
+    from urllib.parse import urlparse
+
+    assert urlparse(_BASE_URL).netloc.endswith("carbu.com")
     assert "luxembourg" in _BASE_URL
     assert _BASE_URL.startswith("https://")
 

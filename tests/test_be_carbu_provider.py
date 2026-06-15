@@ -268,13 +268,17 @@ def test_init_location_cache_starts_empty() -> None:
 
 def test_location_url_points_to_carbu() -> None:
     """_LOCATION_URL points at carbu.com location endpoint."""
-    assert "carbu.com" in _LOCATION_URL
+    from urllib.parse import urlparse
+
+    assert urlparse(_LOCATION_URL).netloc.endswith("carbu.com")
     assert _LOCATION_URL.startswith("https://")
 
 
 def test_station_listing_url_template_contains_carbu() -> None:
     """_STATION_LISTING_URL contains carbu.com domain and template slots."""
-    assert "carbu.com" in _STATION_LISTING_URL
+    from urllib.parse import urlparse
+
+    assert urlparse(_STATION_LISTING_URL).netloc.endswith("carbu.com")
     assert "{fueltype}" in _STATION_LISTING_URL
     assert "{postalcode}" in _STATION_LISTING_URL
     assert "{locationid}" in _STATION_LISTING_URL
