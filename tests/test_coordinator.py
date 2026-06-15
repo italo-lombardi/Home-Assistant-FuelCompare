@@ -1145,6 +1145,7 @@ def test_cryptojs_decrypt_empty_decrypted_output() -> None:
     evp_key = _TEST_DECRYPT_KEY
     # Build a syntactically valid Salted__ payload (content doesn't matter — decryptor mocked)
     import os
+
     salt = os.urandom(8)
     dummy_cipher = b"\x00" * 16
     payload = base64.b64encode(b"Salted__" + salt + dummy_cipher).decode()
@@ -1155,7 +1156,9 @@ def test_cryptojs_decrypt_empty_decrypted_output() -> None:
     mock_cipher_obj = MagicMock()
     mock_cipher_obj.decryptor.return_value = mock_decryptor
 
-    with patch("custom_components.fuelcompare_ie.crypto.Cipher", return_value=mock_cipher_obj):
+    with patch(
+        "custom_components.fuelcompare_ie.crypto.Cipher", return_value=mock_cipher_obj
+    ):
         with pytest.raises(ValueError, match="Decrypted output is empty"):
             _cryptojs_decrypt(payload, evp_key)
 

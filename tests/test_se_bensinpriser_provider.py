@@ -746,7 +746,9 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
         "lng": 12.555,
         "price95": 16.00,
     }
-    resp = _make_mock_response(200, json_data=[cheap_alpha_second, expensive_alpha_first])
+    resp = _make_mock_response(
+        200, json_data=[cheap_alpha_second, expensive_alpha_first]
+    )
     session = _make_session(resp)
 
     provider = _make_provider()

@@ -2657,7 +2657,9 @@ async def test_options_flow_station_entry_invalid_api_key_shows_error(
 # ---------------------------------------------------------------------------
 
 
-async def test_async_setup_entry_ie_pumps_creates_tls_issue(hass: HomeAssistant) -> None:
+async def test_async_setup_entry_ie_pumps_creates_tls_issue(
+    hass: HomeAssistant,
+) -> None:
     """async_setup_entry creates ie_pumps_tls_disabled repair issue for ie_pumps entries."""
     from unittest.mock import patch
 
