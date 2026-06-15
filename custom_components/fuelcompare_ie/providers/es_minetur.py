@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import json
 import logging
+import ssl
 from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
@@ -60,6 +61,11 @@ from .base import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# MINETUR server only supports TLS 1.2 — it resets TLS 1.3 connections.
+# Force TLS 1.2 max so newer Python/OpenSSL versions can still connect.
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.maximum_version = ssl.TLSVersion.TLSv1_2
 
 _BASE_URL = (
     "https://sedeaplicaciones.minetur.gob.es"
@@ -319,6 +325,7 @@ class EsMineturProvider(BaseProvider):
             _BASE_URL,
             headers=_HEADERS,
             timeout=_TIMEOUT,
+            ssl=_SSL_CTX,
         ) as resp:
             resp.raise_for_status()
             # Read bytes and decode with utf-8-sig to safely strip any BOM.
