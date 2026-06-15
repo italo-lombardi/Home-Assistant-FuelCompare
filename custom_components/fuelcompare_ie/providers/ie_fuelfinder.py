@@ -156,7 +156,7 @@ class IEFuelFinderProvider(BaseProvider):
             "diesel",
             "kerosene",
             "cng",
-            "unleaded",  # alias: petrol stored here for fuelcompare.ie sensor compat
+            "unleaded",  # petrol maps to unleaded
             # Station identity
             "name",
             "brand",
@@ -201,6 +201,8 @@ class IEFuelFinderProvider(BaseProvider):
         # Pre-seeded from config entry data when available; otherwise populated
         # after the first successful fetch.
         self._cached_county: str | None = county.lower() if county else None
+        # Slug cache populated by async_list_stations; maps station UUID → slug.
+        self._slug_cache: dict[str, str] = {}
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -340,15 +342,15 @@ class IEFuelFinderProvider(BaseProvider):
 
         Called by the config flow county_search step.  Fetches stations for the
         supplied county for diesel AND petrol, merges results, de-dupes by UUID,
-        and returns a list sorted cheapest-first (stations with no price last).
+        and returns a list sorted alphabetically by label.
 
         Args:
             session: aiohttp ClientSession.
             county:  Lowercase county name (e.g. 'dublin').
 
         Returns:
-            List of (uuid, "Station Name — Diesel €1.83 / Petrol €1.85") tuples.
-            Empty list on any failure.
+            List of (uuid, "Display Name, Street (#abcd1234)") tuples sorted
+            alphabetically.  Empty list on any failure.
         """
         county: str = str(kwargs.get("county", "ireland")).lower()
         try:
@@ -364,15 +366,12 @@ class IEFuelFinderProvider(BaseProvider):
 
         # Merge per-fuel results into one dict keyed by UUID
         merged: dict[str, dict] = {}
-        diesel_prices: dict[str, float | None] = {}
-        petrol_prices: dict[str, float | None] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 uid = s.get("id")
                 if uid:
                     merged[uid] = s
-                    diesel_prices[uid] = s.get("price")
 
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
@@ -380,37 +379,36 @@ class IEFuelFinderProvider(BaseProvider):
                 if uid:
                     if uid not in merged:
                         merged[uid] = s
-                    petrol_prices[uid] = s.get("price")
 
         if not merged:
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for uid, station in merged.items():
+            # Cache slug for later use (e.g. deep-linking to station page).
+            self._slug_cache[uid] = station.get("slug", "")
+
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
-            display_name = f"{brand} {name}".strip() if brand else name
+            street = station.get("street") or ""
 
-            d_price = diesel_prices.get(uid)
-            p_price = petrol_prices.get(uid)
-
-            price_parts = []
-            if d_price is not None:
-                price_parts.append(f"Diesel €{d_price:.3f}")
-            if p_price is not None:
-                price_parts.append(f"Petrol €{p_price:.3f}")
-
-            if price_parts:
-                label = f"{display_name} — {' / '.join(price_parts)}"
-                sort_key = min(v for v in (d_price, p_price) if v is not None)
+            # Avoid "Circle K Circle K Taney" when name already starts with brand.
+            if brand and name.lower().startswith(brand.lower()):
+                display_name = name.strip()
             else:
-                label = f"{display_name}"
-                sort_key = 9999.0  # stations with no price go to end
+                display_name = f"{brand} {name}".strip() if brand else name
 
-            result.append((uid, label, sort_key))
+            # Build label: include street when present, always append short UUID.
+            if street:
+                label = f"{display_name}, {street} (#{uid[:8]})"
+            else:
+                label = f"{display_name} (#{uid[:8]})"
 
-        result.sort(key=lambda x: x[2])
-        return [(uid, label) for uid, label, _ in result]
+            result.append((uid, label))
+
+        # Sort alphabetically by label (case-insensitive).
+        result.sort(key=lambda x: x[0].lower())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -581,7 +579,6 @@ class IEFuelFinderProvider(BaseProvider):
             "unleaded": _price(
                 "petrol"
             ),  # petrol → unleaded for fuelcompare.ie sensor compat
-            "petrol": _price("petrol"),  # also store as 'petrol' for FuelFinder sensors
             # Station identity
             "name": name,
             "brand": brand,

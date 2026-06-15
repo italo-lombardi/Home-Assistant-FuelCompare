@@ -345,7 +345,7 @@ class IsFuelProvider(BaseProvider):
         """Return (station_key, display_label) pairs for the config flow station picker.
 
         Downloads the full Gasvaktin snapshot, filters by haversine distance,
-        and returns stations within radius_km sorted nearest-first.
+        and returns stations within radius_km sorted alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -354,8 +354,8 @@ class IsFuelProvider(BaseProvider):
             radius_km: Search radius in kilometres (overrides constructor value).
 
         Returns:
-            List of (key, "Company — Name — Bensin95: 191 kr / Diesel: 228 kr")
-            tuples sorted nearest-first.  Empty list on any failure.
+            List of (key, "Name (#key[:8])") tuples sorted alphabetically by
+            label.  Empty list on any failure.
         """
         raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
         raw_lng = (
@@ -385,7 +385,7 @@ class IsFuelProvider(BaseProvider):
             )
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for station in stations:
             s_lat_raw = (station.get("geo") or {}).get("lat")
             s_lon_raw = (station.get("geo") or {}).get("lon")
@@ -406,37 +406,14 @@ class IsFuelProvider(BaseProvider):
             if not key:
                 continue
 
-            name: str = station.get("name") or ""
-            company: str = station.get("company") or ""
+            name: str = station.get("name") or key
 
-            if company and name:
-                display_name = f"{company} — {name}"
-            elif company:
-                display_name = company
-            elif name:
-                display_name = name
-            else:
-                display_name = key
+            label = f"{name} (#{key[:8]})"
 
-            p95 = _parse_price(station.get("bensin95"))
-            p_diesel = _parse_price(station.get("diesel"))
+            result.append((key, label))
 
-            price_parts: list[str] = []
-            if p95 is not None:
-                price_parts.append(f"Bensin95: {p95:.0f} kr")
-            if p_diesel is not None:
-                price_parts.append(f"Diesel: {p_diesel:.0f} kr")
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
-
-            result.append((key, label, dist))
-
-        result.sort(key=lambda x: x[2])
-        return [(key, label) for key, label, _ in result]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

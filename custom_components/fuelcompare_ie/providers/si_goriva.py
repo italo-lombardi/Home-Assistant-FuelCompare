@@ -95,7 +95,7 @@ class SiGorivaProvider(BaseProvider):
     fetches the full paginated dataset on each poll, finds the matching
     station by pk, and returns its normalised prices.  async_list_stations
     fetches all pages, filters by distance from the supplied coordinates,
-    and returns a list sorted cheapest-first by diesel price.
+    and returns a list sorted alphabetically by station label.
     """
 
     COUNTRY = "SI"
@@ -222,9 +222,8 @@ class SiGorivaProvider(BaseProvider):
         """Return (station_id, display_label) pairs for the location-based picker.
 
         Fetches all goriva.si stations, optionally filters by distance from
-        the supplied coordinates, and returns a list sorted cheapest-first by
-        diesel price (stations with no diesel price are sorted last, then by
-        name).
+        the supplied coordinates, and returns a list sorted alphabetically by
+        label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -233,7 +232,7 @@ class SiGorivaProvider(BaseProvider):
             radius_km: Search radius in kilometres (float, default 10).
 
         Returns:
-            List of ("pk_string", "Name — Brand — Diesel €x.xxx") tuples,
+            List of ("pk_string", "Brand/Name, Address (#id8char)") tuples,
             or an empty list on any failure.
         """
         lat: float | None = (
@@ -251,7 +250,7 @@ class SiGorivaProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
 
         for station in all_stations:
             pk = station.get("pk")
@@ -278,33 +277,20 @@ class SiGorivaProvider(BaseProvider):
             name = station.get("name") or "Unknown"
             address = station.get("address") or ""
 
-            display_name = name
-            if brand and brand.lower() not in name.lower():
-                display_name = f"{brand} — {name}"
+            # Primary name: prefer brand when distinct from the station name,
+            # otherwise fall back to the station name.
+            primary = brand if brand and brand.lower() not in name.lower() else name
+
+            # Label: "Primary, Address (#first8chars)"
+            label_parts = [primary]
             if address:
-                display_name = f"{display_name} ({address})"
+                label_parts.append(address)
+            label = ", ".join(label_parts) + f" (#{sid[:8]})"
 
-            prices = station.get("prices") or {}
-            diesel_val = _parse_price(prices.get("dizel"))
+            result.append((sid, label))
 
-            price_parts: list[str] = []
-            if diesel_val is not None:
-                price_parts.append(f"Diesel €{diesel_val:.3f}")
-            unleaded_val = _parse_price(prices.get("95"))
-            if unleaded_val is not None:
-                price_parts.append(f"95 €{unleaded_val:.3f}")
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
-
-            sort_key = diesel_val if diesel_val is not None else 9999.0
-            result.append((sid, label, sort_key))
-
-        result.sort(key=lambda x: (x[2], x[1]))
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1].casefold())
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

@@ -23,7 +23,7 @@ Body (JSON selection query selecting the most recent time period):
 {
   "query": [
     {"code": "Hyödyke", "selection": {"filter": "item", "values": ["A", "B", "D", "E"]}},
-    {"code": "Tiedot",  "selection": {"filter": "item", "values": ["kuluttajahinta"]}}
+    {"code": "Tiedot",  "selection": {"filter": "item", "values": ["hinta"]}}
   ],
   "response": {"format": "json-stat2"}
 }
@@ -36,8 +36,6 @@ Variable codes:
     E  — Renewable diesel HVO100 (EUR/litre)
   Tiedot (measure):
     kuluttajahinta — consumer price in EUR/litre
-
-Response format: JSON-stat 2.0
   dataset.dimension — axis metadata (includes the time dimension labels)
   dataset.value     — flat array of float values in row-major order
                       (commodity × time); NaN represented as null.
@@ -86,15 +84,6 @@ _DIM_MEASURE = "Tiedot"
 # Commodity codes to request from the API.
 # A = 95E10 petrol, B = Diesel, D = Light fuel oil, E = Renewable diesel HVO100
 _COMMODITY_CODES: list[str] = ["A", "B", "D", "E"]
-
-# Mapping from commodity code to StationData key(s).
-# Each code may map to one or more keys (price duplicated for aliases).
-_CODE_TO_KEYS: dict[str, list[str]] = {
-    "A": ["unleaded", "e10"],
-    "B": ["diesel"],
-    "D": ["kerosene"],
-    "E": ["premium_diesel"],
-}
 
 # The PxWeb measure code for consumer price (EUR/litre, incl. VAT).
 _MEASURE_CODE = "hinta"
@@ -178,7 +167,7 @@ def _extract_prices_from_jsonstat2(payload: dict[str, Any]) -> dict[str, float |
       dataset.value                           — flat row-major array
 
     Dimensions are ordered as they appear in the query: commodity × measure × time.
-    Since we request only one measure (kuluttajahinta), the effective shape is:
+    Since we request only one measure (hinta), the effective shape is:
       (len(commodities),  len(time_periods))
 
     We iterate from the most recent time period backwards and return the first

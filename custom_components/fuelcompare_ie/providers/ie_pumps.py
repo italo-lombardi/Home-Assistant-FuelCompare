@@ -287,8 +287,8 @@ class IePumpsProvider(BaseProvider):
         """Return (station_id, display_label) pairs for the location-search picker.
 
         Fetches the national station list, filters by Haversine distance from
-        (lat, lng), and returns stations within radius_km sorted cheapest-first
-        by diesel price (then petrol, then distance).
+        (lat, lng), and returns stations within radius_km sorted alphabetically
+        by label.
 
         Kwargs:
             lat (float):       Centre latitude for the search.
@@ -296,7 +296,9 @@ class IePumpsProvider(BaseProvider):
             radius_km (float): Search radius in kilometres (default: 10).
 
         Returns:
-            List of (station_id, "Name — Diesel €1.74/L / Petrol €1.75/L") tuples.
+            List of (station_id, "{display_name}, {address} (#{sid[:8]})") tuples
+            sorted alphabetically by label.  When no address is available the
+            label is "{display_name} (#{sid[:8]})".
             Empty list on any failure or when no stations are within radius.
         """
         lat: float | None = kwargs.get("lat")  # type: ignore[assignment]
@@ -321,15 +323,12 @@ class IePumpsProvider(BaseProvider):
 
         # Merge per-fuel station lists keyed by station ID.
         merged: dict[str, dict] = {}
-        diesel_prices: dict[str, float | None] = {}
-        petrol_prices: dict[str, float | None] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 sid = s.get("ID")
                 if sid:
                     merged[sid] = s
-                    diesel_prices[sid] = s.get("price_eur")
 
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
@@ -337,12 +336,11 @@ class IePumpsProvider(BaseProvider):
                 if sid:
                     if sid not in merged:
                         merged[sid] = s
-                    petrol_prices[sid] = s.get("price_eur")
 
         if not merged:
             return []
 
-        nearby: list[tuple[str, str, float]] = []
+        nearby: list[tuple[str, str]] = []
         for sid, station in merged.items():
             s_lat = station.get("lat")
             s_lng = station.get("lng")
@@ -356,28 +354,31 @@ class IePumpsProvider(BaseProvider):
 
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
-            display_name = f"{brand} {name}".strip() if brand else name
-
-            d_price = diesel_prices.get(sid)
-            p_price = petrol_prices.get(sid)
-
-            price_parts: list[str] = []
-            if d_price is not None:
-                price_parts.append(f"Diesel €{d_price:.3f}")
-            if p_price is not None:
-                price_parts.append(f"Petrol €{p_price:.3f}")
-
-            if price_parts:
-                label = f"{display_name} — {' / '.join(price_parts)}"
-                sort_key = min(v for v in (d_price, p_price) if v is not None)
+            addr1 = (station.get("addr1") or "").strip()
+            addr2 = (station.get("addr2") or "").strip()
+            if addr1 and addr2:
+                address = f"{addr1}, {addr2}"
+            elif addr1:
+                address = addr1
+            elif addr2:
+                address = addr2
             else:
-                label = display_name
-                sort_key = 9999.0
+                address = ""
 
-            nearby.append((sid, label, sort_key))
+            if brand and name.lower().startswith(brand.lower()):
+                display_name = name.strip()
+            else:
+                display_name = f"{brand} {name}".strip() if brand else name
 
-        nearby.sort(key=lambda x: (x[2], x[1]))
-        return [(sid, label) for sid, label, _ in nearby]
+            if address:
+                label = f"{display_name}, {address} (#{sid[:8]})"
+            else:
+                label = f"{display_name} (#{sid[:8]})"
+
+            nearby.append((sid, label))
+
+        nearby.sort(key=lambda x: x[1])
+        return nearby
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -494,6 +495,8 @@ def _parse_xml(xml_text: str, fuel: str) -> list[dict] | None:
                 "ID": str(station_id),
                 "name": (attrib.get("name") or "").strip() or None,
                 "brand": (attrib.get("brand") or "").strip() or None,
+                "addr1": addr1,
+                "addr2": addr2,
                 "address": address,
                 "county": county,
                 "lat": lat,

@@ -105,7 +105,18 @@ class PageAssets:
             )
             return
 
-        chunk_url = BASE_URL + chunk_match.group(1)
+        chunk_path = chunk_match.group(1)
+        if ".." in chunk_path or not re.match(
+            r"^/_next/static/chunks/[a-zA-Z0-9._\-%/]+\.js$", chunk_path
+        ):
+            _LOGGER.debug(
+                "Station JS chunk path failed validation for station %s: %s",
+                self.station_id,
+                chunk_path,
+            )
+            return
+
+        chunk_url = BASE_URL + chunk_path
         _LOGGER.debug(
             "Fetching station JS chunk for decrypt key (station %s): %s",
             self.station_id,

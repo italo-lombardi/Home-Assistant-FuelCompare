@@ -236,7 +236,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 url, params=params, headers=_HEADERS, timeout=_TIMEOUT
             ) as resp:
                 resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json()
+                payload: dict[str, Any] = await resp.json(content_type=None)
         except ClientError:
             raise
         except Exception as err:
@@ -283,7 +283,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 url, params=params, headers=_HEADERS, timeout=_TIMEOUT
             ) as resp:
                 resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json()
+                payload: dict[str, Any] = await resp.json(content_type=None)
 
             if not payload.get("ok"):
                 return None
@@ -312,8 +312,12 @@ class DeTankerkoenigProvider(BaseProvider):
         """Return (station_uuid, display_label) pairs for the config flow station picker.
 
         Calls /list.php with the configured or supplied lat/lng + radius, then
-        returns all results sorted cheapest-first by diesel price (stations
-        with no diesel price are sorted by unleaded/e10, then by name).
+        returns all results sorted alphabetically by label.
+
+        Label format: "{brand} {name}, {address} (#{uuid[:8]})"
+        - If name already starts with brand (case-insensitive), brand prefix is omitted.
+        - Address part is omitted when no address is available.
+        - No price information is included in the label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -322,8 +326,8 @@ class DeTankerkoenigProvider(BaseProvider):
             radius_km: Search radius in kilometres (overrides constructor value).
 
         Returns:
-            List of (uuid, "Brand Name — Diesel €1.789/L") tuples sorted
-            cheapest-first.  Empty list on any failure.
+            List of (uuid, label) tuples sorted alphabetically by label.
+            Empty list on any failure.
         """
         lat: float | None = (
             kwargs["lat"]
@@ -359,7 +363,7 @@ class DeTankerkoenigProvider(BaseProvider):
                 url, params=params, headers=_HEADERS, timeout=_TIMEOUT
             ) as resp:
                 resp.raise_for_status()
-                payload: dict[str, Any] = await resp.json()
+                payload: dict[str, Any] = await resp.json(content_type=None)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations HTTP error: %s", type(err).__name__)
             return []
@@ -373,7 +377,7 @@ class DeTankerkoenigProvider(BaseProvider):
         if not stations:
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for station in stations:
             uid: str = str(station["id"]) if station.get("id") is not None else ""
             if not uid:
@@ -381,36 +385,25 @@ class DeTankerkoenigProvider(BaseProvider):
 
             name: str = station.get("name") or ""
             brand: str = station.get("brand") or ""
-            display_name = (
-                f"{brand} — {name}"
-                if brand and brand.lower() not in name.lower()
-                else name or brand or uid
-            )
 
-            diesel = _parse_price(station.get("diesel"))
-            unleaded = _parse_price(station.get("e5"))
-            e10 = _parse_price(station.get("e10"))
+            # Build display name: prepend brand only when name does not already
+            # start with it (case-insensitive comparison).
+            if brand and not name.lower().startswith(brand.lower()):
+                display_name = f"{brand} {name}".strip()
+            else:
+                display_name = name or brand or uid
 
-            price_parts: list[str] = []
-            if diesel is not None:
-                price_parts.append(f"Diesel €{diesel:.3f}")
-            if unleaded is not None:
-                price_parts.append(f"Super €{unleaded:.3f}")
-            if e10 is not None:
-                price_parts.append(f"E10 €{e10:.3f}")
+            # Build address from _build_address helper (returns None when absent).
+            address: str | None = _build_address(station)
 
-            # Determine sort key: cheapest relevant price, or inf for no price
-            sort_key: float = min(
-                (p for p in (diesel, unleaded, e10) if p is not None),
-                default=float("inf"),
-            )
+            # Compose label: "Display Name, Address (#uuid[:8])"
+            short_id = uid[:8]
+            if address:
+                label = f"{display_name}, {address} (#{short_id})"
+            else:
+                label = f"{display_name} (#{short_id})"
 
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
-            result.append((uid, label, sort_key))
+            result.append((uid, label))
 
-        result.sort(key=lambda x: x[2])
-        return [(uid, label) for uid, label, _ in result]
+        result.sort(key=lambda x: x[1].lower())
+        return result

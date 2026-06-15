@@ -5,11 +5,12 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+from typing import Any
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
+def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> Any:
     """Decrypt a CryptoJS AES-CBC base64 payload using EvpKDF key derivation.
 
     fuelcompare.ie API responses are encrypted with CryptoJS AES using a key
@@ -47,4 +48,9 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> list:
         raise ValueError(f"Invalid PKCS7 padding length: {pad_len}")
     if padded[-pad_len:] != bytes([pad_len] * pad_len):
         raise ValueError("Invalid PKCS7 padding bytes")
-    return json.loads(padded[:-pad_len])
+    result = json.loads(padded[:-pad_len])
+    if not isinstance(result, list):
+        raise ValueError(
+            f"Expected list from decrypted JSON, got {type(result).__name__}"
+        )
+    return result

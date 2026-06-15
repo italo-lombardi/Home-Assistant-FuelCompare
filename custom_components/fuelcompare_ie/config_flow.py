@@ -441,7 +441,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
-        if getattr(provider_cls, "STATION_LOOKUP_MODE", None) == "location_search":
+        if (
+            getattr(provider_cls, "CONFIG_MODE", None) == "location"
+            or mode == "location_search"
+        ):
             return await self.async_step_location()
         return await self.async_step_station()
 
@@ -692,7 +695,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if needs_postal:
                 self._postal_code = str(user_input.get(CONF_POSTAL_CODE) or "").strip()
             self._station_id = ""
-            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}_{self._radius_km}"
+            # 4 decimal places ≈ 11 m precision; stations closer than ~11 m share an entry_id
+            unique = f"{DOMAIN}_{self._provider_key}_{round(self._latitude, 4)}_{round(self._longitude, 4)}"
             await self.async_set_unique_id(unique)
             self._abort_if_unique_id_configured()
             self._suggested_name = (
@@ -779,6 +783,18 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
             schema_dict: dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            if user_input is not None:
+                errors: dict[str, str] = {}
+                if (
+                    CONF_API_KEY in user_input
+                    and not (user_input[CONF_API_KEY] or "").strip()
+                ):
+                    errors[CONF_API_KEY] = "invalid_api_key"
+                    schema = vol.Schema(schema_dict)
+                    return self.async_show_form(
+                        step_id="init", data_schema=schema, errors=errors
+                    )
+                return self.async_create_entry(data=user_input)
             if not schema_dict:
                 return self.async_create_entry(data={})
             schema = vol.Schema(schema_dict)

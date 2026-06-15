@@ -1377,8 +1377,11 @@ async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    with pytest.raises(UpdateFailed, match="station not found"):
-        await coordinator._async_update_data()
+    try:
+        with pytest.raises(UpdateFailed, match="station not found"):
+            await coordinator._async_update_data()
+    finally:
+        await coordinator.async_shutdown()
 
 
 async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
@@ -1397,8 +1400,11 @@ async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    await coordinator.async_refresh()
+    try:
+        await coordinator.async_refresh()
 
-    assert coordinator.data == expected
-    assert coordinator.data["unleaded"] == pytest.approx(1.85)
-    assert coordinator.data["diesel"] == pytest.approx(1.75)
+        assert coordinator.data == expected
+        assert coordinator.data["unleaded"] == pytest.approx(1.85)
+        assert coordinator.data["diesel"] == pytest.approx(1.75)
+    finally:
+        await coordinator.async_shutdown()

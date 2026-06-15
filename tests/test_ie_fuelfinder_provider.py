@@ -438,16 +438,17 @@ def test_build_station_data_identity_fields() -> None:
 
 
 async def test_async_list_stations_returns_sorted_results() -> None:
-    """async_list_stations returns a sorted list of (id, label) tuples."""
+    """async_list_stations returns a sorted list of (id, label) tuples (sorted by UUID)."""
     provider = IEFuelFinderProvider(_STATION_ID)
 
-    # Cheaper station first after sort
-    cheaper = {**_OTHER_STATION, "id": "bbbb", "county": "Dublin", "price": 1.800}
-    dearer = {**_DIESEL_RECORD}  # price 1.839
+    # Stations are sorted alphabetically by UUID string
+    # "7ec0dd4f..." < "bbbb" alphabetically, so _STATION_ID comes first
+    other = {**_OTHER_STATION, "id": "bbbb", "county": "Dublin", "price": 1.800}
+    main_station = {**_DIESEL_RECORD}  # _STATION_ID
 
     async def _mock_fetch(session, city, fuel):
         if fuel == "diesel":
-            return [dearer, cheaper]
+            return [main_station, other]
         if fuel == "petrol":
             return []
         return []
@@ -458,12 +459,12 @@ async def test_async_list_stations_returns_sorted_results() -> None:
 
     assert len(result) >= 2
     station_ids = [sid for sid, _ in result]
-    # cheaper station should come first
-    assert station_ids.index("bbbb") < station_ids.index(_STATION_ID)
+    # Sorted alphabetically by UUID: "7ec0..." < "bbbb"
+    assert station_ids.index(_STATION_ID) < station_ids.index("bbbb")
 
 
-async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes 'Diesel' price string."""
+async def test_async_list_stations_label_includes_station_name() -> None:
+    """async_list_stations label includes the station name and short UUID."""
     provider = IEFuelFinderProvider(_STATION_ID)
 
     async def _mock_fetch(session, city, fuel):
@@ -477,7 +478,9 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
 
     assert result
     _, label = result[0]
-    assert "Diesel" in label
+    # Label format: "{name}, {street} (#{uid[:8]})" or "{name} (#{uid[:8]})"
+    assert "(#" in label
+    assert _STATION_ID[:8] in label
 
 
 async def test_async_list_stations_returns_empty_on_failure() -> None:

@@ -7,7 +7,11 @@ import logging
 import re
 from typing import Any
 
-from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
+from homeassistant.helpers.issue_registry import (
+    IssueSeverity,
+    async_create_issue,
+    async_delete_issue,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -37,22 +41,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Fuel Compare from a config entry."""
     station_id = entry.data.get(CONF_STATION_ID, "")
 
+    # Existing entries have no CONF_PROVIDER key — default to ie_fuelcompare
+    # so they continue working without any migration.
+    provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
+
     # Location-mode providers (DE, FR, ES, PT, AT, IT, SI, GB, AU) have no
     # station picker in config_flow, so station_id is always "".  An empty
     # station_id produces an invalid HA entity unique_id.  Generate a stable
     # substitute from the rounded lat/lng stored in entry.data so the device
-    # registry entry is stable across restarts.
+    # registry entry is stable across restarts.  Include provider_key to
+    # prevent ID collisions when two providers share the same coordinates.
     if not station_id:
         _lat = entry.data.get(CONF_LATITUDE)
         _lng = entry.data.get(CONF_LONGITUDE)
         if _lat is not None and _lng is not None:
-            station_id = f"{_lat:.4f}_{_lng:.4f}"
+            station_id = f"{provider_key}_{_lat:.4f}_{_lng:.4f}"
     if not station_id:
         station_id = entry.entry_id
 
-    # Existing entries have no CONF_PROVIDER key — default to ie_fuelcompare
-    # so they continue working without any migration.
-    provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
     provider_cls = PROVIDER_REGISTRY.get(provider_key)
     if provider_cls is None:
         _LOGGER.warning(
@@ -114,7 +120,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 station_id,
                 provider_key,
             )
-    if api_key and (has_var_kwargs or "api_key" in sig.parameters):
+    if api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
         kwargs["api_key"] = api_key
     if latitude is not None and (has_var_kwargs or "latitude" in sig.parameters):
         kwargs["latitude"] = latitude
@@ -128,6 +134,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         provider = provider_cls(station_id)
     coordinator = FuelCompareIECoordinator(hass, provider, station_id)
 
+    hass.data.setdefault(DOMAIN, {})
+
+    await coordinator.async_config_entry_first_refresh()
+
     # Warn users of ie_fuelcompare (fuelcompare.ie) that the service is ending.
     if provider_key == "ie_fuelcompare":
         async_create_issue(
@@ -139,10 +149,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_key="fuelcompare_ie_deprecation",
             translation_placeholders={"entry_title": entry.title},
         )
-
-    hass.data.setdefault(DOMAIN, {})
-
-    await coordinator.async_config_entry_first_refresh()
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
@@ -160,6 +166,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    hass.data[DOMAIN].pop(entry.entry_id, None)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+    async_delete_issue(hass, DOMAIN, f"fuelcompare_ie_deprecation_{entry.entry_id}")
 
     return unload_ok

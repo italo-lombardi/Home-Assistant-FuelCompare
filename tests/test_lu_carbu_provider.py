@@ -790,7 +790,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes 'Diesel €x.xxx' when diesel price available."""
+    """async_list_stations label includes station identifier token (no price)."""
     resp = _make_mock_response(200, body=[_STATION_STRASSEN])
     session = _make_session(resp)
 
@@ -801,12 +801,11 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
 
     assert len(results) >= 1
     _sid, label = results[0]
-    assert "Diesel" in label
-    assert "1.753" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations sorts results by diesel price, cheapest first."""
+    """async_list_stations sorts results alphabetically by label."""
     cheap = {**_STATION_STRASSEN, "id": "LU-CHEAP", "price": "1.699"}
     expensive = {**_STATION_KIRCHBERG, "id": "LU-EXPENSIVE", "price": "1.899"}
     resp = _make_mock_response(200, body=[expensive, cheap])
@@ -819,8 +818,9 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
     )
 
     if len(results) >= 2:
+        # "Shell Shell Kirchberg..." < "Total Total Strassen..." alphabetically
         first_sid = results[0][0]
-        assert first_sid == "LU-CHEAP"
+        assert first_sid == "LU-EXPENSIVE"
 
 
 async def test_async_list_stations_uses_kwargs_lat_lng() -> None:
@@ -838,7 +838,7 @@ async def test_async_list_stations_uses_kwargs_lat_lng() -> None:
 
 
 async def test_async_list_stations_station_without_price_sorts_last() -> None:
-    """async_list_stations puts stations with no price at the end."""
+    """async_list_stations sorts stations alphabetically regardless of price."""
     with_price = {**_STATION_STRASSEN, "id": "LU-PRICED", "price": "1.753"}
     no_price = {**_STATION_KIRCHBERG, "id": "LU-NOPR", "price": None}
     resp = _make_mock_response(200, body=[no_price, with_price])
@@ -850,8 +850,10 @@ async def test_async_list_stations_station_without_price_sorts_last() -> None:
     )
 
     if len(results) >= 2:
-        # Station with price should come first
-        assert results[0][0] == "LU-PRICED"
+        # Both stations present; order is alphabetical
+        station_ids = [sid for sid, _ in results]
+        assert "LU-NOPR" in station_ids
+        assert "LU-PRICED" in station_ids
 
 
 # ---------------------------------------------------------------------------
@@ -991,9 +993,9 @@ async def test_async_list_stations_deduplicates_sp95_station_keeps_diesel_entry(
     # Station should appear exactly once
     station_ids = [sid for sid, _label in results]
     assert station_ids.count(_STATION_ID) == 1
-    # Label should contain Diesel price
+    # Label should contain station identifier token
     _sid, label = results[0]
-    assert "Diesel" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_sp95_only_station_added_to_merged() -> None:

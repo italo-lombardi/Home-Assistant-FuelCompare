@@ -501,7 +501,10 @@ class StationSimpleStrSensor(CoordinatorEntity[FuelCompareIECoordinator], Sensor
 
     @property
     def available(self) -> bool:
-        return self.coordinator.data is not None
+        return (
+            self.coordinator.data is not None
+            and self.coordinator.data.get(self._data_key) is not None
+        )
 
     @property
     def extra_state_attributes(self) -> dict:

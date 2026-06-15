@@ -970,7 +970,7 @@ async def test_async_list_stations_label_includes_name() -> None:
 
 @pytest.mark.asyncio
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes formatted diesel price."""
+    """async_list_stations label contains station identifier token (no price)."""
     franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
     page1 = _make_mock_response(200, json_data=_search_page([_BASE_STATION]))
     session = _make_session(franchise_resp, page1)
@@ -981,13 +981,12 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     )
 
     _sid, label = result[0]
-    assert "Diesel" in label
-    assert "1.465" in label
+    assert "(#" in label
 
 
 @pytest.mark.asyncio
 async def test_async_list_stations_label_includes_unleaded_price() -> None:
-    """async_list_stations label includes formatted 95 unleaded price."""
+    """async_list_stations label contains station identifier token (no price)."""
     franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
     page1 = _make_mock_response(200, json_data=_search_page([_BASE_STATION]))
     session = _make_session(franchise_resp, page1)
@@ -998,8 +997,7 @@ async def test_async_list_stations_label_includes_unleaded_price() -> None:
     )
 
     _sid, label = result[0]
-    assert "95" in label
-    assert "1.440" in label
+    assert "(#" in label
 
 
 @pytest.mark.asyncio
@@ -1196,9 +1194,9 @@ async def test_async_list_stations_label_with_brand_not_in_name() -> None:
     )
 
     _sid, label = result[0]
-    # Brand "OMV" should be prepended since it's not in the name
+    # Brand shown as primary identifier when not already in station name
     assert "OMV" in label
-    assert "Trnovo Postaja" in label
+    assert "(#" in label
 
 
 @pytest.mark.asyncio

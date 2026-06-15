@@ -180,32 +180,12 @@ class AtEcontrolProvider(BaseProvider):
             name = raw.get("name") or f"Station {sid}"
             location = raw.get("location") or {}
             address = _format_address(location)
-            label_parts = [name]
-            if address:
-                label_parts.append(address)
+            label = (
+                f"{name}, {address} (#{sid[:8]})" if address else f"{name} (#{sid[:8]})"
+            )
+            result.append((sid, label))
 
-            prices = _extract_prices(raw.get("prices", []))
-            price_strs: list[str] = []
-            if prices.get("diesel") is not None:
-                price_strs.append(f"Diesel €{prices['diesel']:.3f}")
-            if prices.get("unleaded") is not None:
-                price_strs.append(f"Super 95 €{prices['unleaded']:.3f}")
-            if prices.get("cng") is not None:
-                price_strs.append(f"CNG €{prices['cng']:.3f}")
-
-            if price_strs:
-                label_parts.append(" / ".join(price_strs))
-
-            result.append((sid, " — ".join(label_parts)))
-
-        # Sort by cheapest diesel price, then by name
-        def _sort_key(item: tuple[str, str]) -> tuple[float, str]:
-            raw_station = merged.get(item[0], {})
-            prices = _extract_prices(raw_station.get("prices", []))
-            diesel = prices.get("diesel")
-            return (diesel if diesel is not None else 99.0, item[1])
-
-        result.sort(key=_sort_key)
+        result.sort(key=lambda item: item[1])
         return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
@@ -294,7 +274,7 @@ def _extract_prices(prices_list: list[dict[str, Any]]) -> dict[str, float | None
     Maps fuelType codes (DIE, SUP, GAS) to StationData keys.
     Handles empty array gracefully.
     """
-    if prices_list is True:
+    if not isinstance(prices_list, list):
         return {}
     fuel_code_map = {
         "DIE": "diesel",

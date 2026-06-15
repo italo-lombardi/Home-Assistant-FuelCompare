@@ -140,10 +140,6 @@ class HRMzoeProvider(BaseProvider):
         # Build operator/brand lookup
         brand_map = {o["id"]: o.get("naziv", "") for o in raw.get("obvezniks", [])}
 
-        # Build vrsta_gorivas → tip_goriva_id map for price type lookup
-        vrsta_tip = {v["id"]: v["tip_goriva_id"] for v in raw.get("vrsta_gorivas", [])}
-        gorivo_vrsta = {g["id"]: g["vrsta_goriva_id"] for g in raw.get("gorivos", [])}
-
         result: list[tuple[str, str]] = []
         for station in raw.get("postajas", []):
             sid = str(station.get("id", ""))
@@ -171,20 +167,8 @@ class HRMzoeProvider(BaseProvider):
                 if brand and brand.lower() not in name.lower()
                 else name
             )
-
-            # Get best diesel/petrol price for label
-            prices = _extract_prices(station, vrsta_tip, gorivo_vrsta)
-            price_parts = []
-            if prices.get("diesel") is not None:
-                price_parts.append(f"Diesel €{prices['diesel']:.2f}")
-            if prices.get("unleaded") is not None:
-                price_parts.append(f"Petrol €{prices['unleaded']:.2f}")
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
+            address = station.get("adresa", "") or ""
+            label = f"{display_name}, {address} (#{sid[:8]})"
             result.append((sid, label))
 
         result.sort(key=lambda x: x[1])

@@ -404,7 +404,7 @@ class FrCarburantsProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed to fetch XML: %s", err)
             return []
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
 
         for pdv in root.iter("pdv"):
             raw = _parse_pdv(pdv)
@@ -421,31 +421,19 @@ class FrCarburantsProvider(BaseProvider):
             if not sid:
                 continue
 
-            prices: dict[str, float | None] = raw.get("prices", {})
             name: str = raw.get("name") or sid
             address: str | None = raw.get("address")
+            sid_short = sid[:8]
 
-            label_name = f"{name} — {address}" if address else name
-
-            price_parts: list[str] = []
-            diesel = prices.get("diesel")
-            if diesel is not None:
-                price_parts.append(f"Diesel €{diesel:.3f}")
-            unleaded = prices.get("unleaded") or prices.get("e10")
-            if unleaded is not None:
-                price_parts.append(f"SP €{unleaded:.3f}")
-
-            if price_parts:
-                label = f"{label_name} — {' / '.join(price_parts)}"
-                sort_key = diesel if diesel is not None else 9999.0
+            if address:
+                label = f"{name}, {address} (#{sid_short})"
             else:
-                label = label_name
-                sort_key = 9999.0
+                label = f"{name} (#{sid_short})"
 
-            result.append((sid, label, sort_key))
+            result.append((sid, label))
 
-        result.sort(key=lambda x: x[2])
-        return [(sid, label) for sid, label, _ in result]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

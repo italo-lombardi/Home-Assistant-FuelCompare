@@ -263,8 +263,7 @@ class AuNswProvider(BaseProvider):
         """Return (station_code, display_label) pairs for stations near a location.
 
         Fetches the full dataset, filters stations within ``radius_km`` of
-        (``lat``, ``lng``), and returns them sorted by the cheapest available
-        fuel price (diesel first, then unleaded).
+        (``lat``, ``lng``), and returns them sorted alphabetically by label.
 
         Args:
             session:   aiohttp ClientSession.
@@ -273,8 +272,8 @@ class AuNswProvider(BaseProvider):
             radius_km: Search radius in kilometres (float, default 10.0).
 
         Returns:
-            List of (station_code, "Brand Name — Diesel A$1.68 / Unleaded A$1.72")
-            tuples ordered by cheapest price first, empty list on any failure.
+            List of (station_code, "Brand/Name, Address (#CODE1234)")
+            tuples ordered alphabetically by label, empty list on any failure.
         """
         lat: float | None = (
             kwargs["lat"] if kwargs.get("lat") is not None else self._latitude
@@ -294,9 +293,9 @@ class AuNswProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
-        station_map, prices_map = _build_index(raw)
+        station_map, _ = _build_index(raw)
 
-        result: list[tuple[str, str, float]] = []
+        result: list[tuple[str, str]] = []
         for code, station in station_map.items():
             loc = station.get("location") or {}
             try:
@@ -309,48 +308,19 @@ class AuNswProvider(BaseProvider):
             if dist > radius_km:
                 continue
 
-            prices = prices_map.get(code, {})
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
+            address = station.get("address") or ""
             display_name = (
-                f"{brand} — {name}"
+                f"{brand}, {name}"
                 if brand and brand.lower() not in name.lower()
                 else name
             )
+            label = f"{display_name}, {address} (#{code[:8]})"
+            result.append((code, label))
 
-            # Build price label and determine sort key (cheapest fuel)
-            price_parts: list[str] = []
-            sort_price = 9999.0
-
-            diesel_price = prices.get("diesel")
-            unleaded_price = prices.get("unleaded")
-            e10_price = prices.get("e10")
-
-            if diesel_price is not None:
-                dollars = _normalise_price(diesel_price)
-                if dollars is not None:
-                    price_parts.append(f"Diesel A${dollars:.3f}")
-                    sort_price = min(sort_price, dollars)
-            if unleaded_price is not None:
-                dollars = _normalise_price(unleaded_price)
-                if dollars is not None:
-                    price_parts.append(f"Unleaded A${dollars:.3f}")
-                    sort_price = min(sort_price, dollars)
-            elif e10_price is not None:
-                dollars = _normalise_price(e10_price)
-                if dollars is not None:
-                    price_parts.append(f"E10 A${dollars:.3f}")
-                    sort_price = min(sort_price, dollars)
-
-            label = (
-                f"{display_name} — {' / '.join(price_parts)}"
-                if price_parts
-                else display_name
-            )
-            result.append((code, label, sort_price))
-
-        result.sort(key=lambda x: x[2])
-        return [(code, label) for code, label, _ in result]
+        result.sort(key=lambda x: x[1])
+        return result
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

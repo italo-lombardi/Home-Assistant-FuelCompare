@@ -1037,7 +1037,7 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes formatted diesel price."""
+    """async_list_stations label includes short station ID suffix (no price)."""
     resp = _make_mock_response(200, json_data=_LIST_PAYLOAD_OK)
     session = _make_session(resp)
 
@@ -1045,12 +1045,11 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     result = await provider.async_list_stations(session)
 
     _, label = result[0]
-    assert "Diesel" in label
-    assert "1.699" in label
+    assert "(#" in label
 
 
 async def test_async_list_stations_label_includes_super_price() -> None:
-    """async_list_stations label includes formatted Super (unleaded) price."""
+    """async_list_stations label includes station name (no price)."""
     resp = _make_mock_response(200, json_data=_LIST_PAYLOAD_OK)
     session = _make_session(resp)
 
@@ -1058,12 +1057,11 @@ async def test_async_list_stations_label_includes_super_price() -> None:
     result = await provider.async_list_stations(session)
 
     _, label = result[0]
-    assert "Super" in label
-    assert "1.789" in label
+    assert "ARAL" in label
 
 
 async def test_async_list_stations_label_includes_e10_price() -> None:
-    """async_list_stations label includes formatted E10 price."""
+    """async_list_stations label includes address (no price)."""
     resp = _make_mock_response(200, json_data=_LIST_PAYLOAD_OK)
     session = _make_session(resp)
 
@@ -1071,8 +1069,7 @@ async def test_async_list_stations_label_includes_e10_price() -> None:
     result = await provider.async_list_stations(session)
 
     _, label = result[0]
-    assert "E10" in label
-    assert "1.759" in label
+    assert "Hauptstraße" in label or "Berlin" in label
 
 
 async def test_async_list_stations_uses_list_endpoint() -> None:
@@ -1144,17 +1141,23 @@ async def test_async_list_stations_kwargs_override_constructor_coords() -> None:
 
 
 async def test_async_list_stations_sorted_cheapest_first() -> None:
-    """async_list_stations returns stations sorted cheapest-first by lowest price."""
-    cheap_station = {**_BASE_STATION, "id": "cheap-uuid", "diesel": 1.599, "e5": 1.689}
-    expensive_station = {
+    """async_list_stations returns stations sorted alphabetically by label."""
+    # "Alpha Station" sorts before "Beta Station" alphabetically
+    alpha_station = {
         **_BASE_STATION,
-        "id": "expensive-uuid",
-        "diesel": 1.799,
-        "e5": 1.849,
+        "id": "alpha-uuid",
+        "name": "Alpha Station",
+        "brand": "Alpha",
+    }
+    beta_station = {
+        **_BASE_STATION,
+        "id": "beta-uuid",
+        "name": "Beta Station",
+        "brand": "Beta",
     }
     payload = {
         "ok": True,
-        "stations": [expensive_station, cheap_station],
+        "stations": [beta_station, alpha_station],
     }
     resp = _make_mock_response(200, json_data=payload)
     session = _make_session(resp)
@@ -1162,8 +1165,8 @@ async def test_async_list_stations_sorted_cheapest_first() -> None:
     provider = _make_provider()
     result = await provider.async_list_stations(session)
 
-    assert result[0][0] == "cheap-uuid"
-    assert result[1][0] == "expensive-uuid"
+    assert result[0][0] == "alpha-uuid"
+    assert result[1][0] == "beta-uuid"
 
 
 async def test_async_list_stations_skips_stations_without_id() -> None:

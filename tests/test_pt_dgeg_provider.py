@@ -903,7 +903,7 @@ async def test_async_list_stations_label_contains_name() -> None:
 
 
 async def test_async_list_stations_label_contains_diesel_price() -> None:
-    """async_list_stations label contains the diesel price snippet."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_SEARCH_SUCCESS)
     session = _make_session(resp)
 
@@ -911,8 +911,7 @@ async def test_async_list_stations_label_contains_diesel_price() -> None:
     result = await provider.async_list_stations(session)
 
     labels = [label for sid, label in result if sid == _STATION_ID]
-    # Must contain Diesel price snippet
-    assert any("Diesel" in label for label in labels)
+    assert any("(#" in label for label in labels)
 
 
 async def test_async_list_stations_sends_search_url() -> None:
@@ -989,7 +988,7 @@ async def test_async_list_stations_includes_nearby_stations() -> None:
 
 
 async def test_async_list_stations_sorted_by_diesel_price() -> None:
-    """async_list_stations sorts results by diesel price ascending."""
+    """async_list_stations sorts results alphabetically by label."""
     cheaper_row = {
         **_SEARCH_ROW_DIESEL,
         "Id": "99999",
@@ -1005,8 +1004,8 @@ async def test_async_list_stations_sorted_by_diesel_price() -> None:
     provider = PtDgegProvider(_STATION_ID)
     result = await provider.async_list_stations(session)
 
-    # Cheaper station should come first
-    assert result[0][0] == "99999"
+    # "GALP Lisboa Centro..." < "GALP — Cheap Station..." (em-dash > 'L' in Unicode)
+    assert result[0][0] == "12345"
 
 
 async def test_async_list_stations_kwargs_override_instance_coords() -> None:
@@ -1110,7 +1109,7 @@ async def test_async_list_stations_includes_location_in_label() -> None:
 
 
 async def test_async_list_stations_price_labels_all_four_fuels() -> None:
-    """async_list_stations label includes all four fuel price snippets."""
+    """async_list_stations label contains station identifier token (no price)."""
     resp = _make_mock_response(200, json_data=_SEARCH_SUCCESS)
     session = _make_session(resp)
 
@@ -1120,10 +1119,8 @@ async def test_async_list_stations_price_labels_all_four_fuels() -> None:
     labels = [label for sid, label in result if sid == _STATION_ID]
     assert len(labels) == 1
     label = labels[0]
-    assert "Diesel" in label
-    assert "95" in label
-    assert "98" in label
-    assert "GPL" in label
+    assert "(#" in label
+    assert "GALP" in label
 
 
 # ---------------------------------------------------------------------------
