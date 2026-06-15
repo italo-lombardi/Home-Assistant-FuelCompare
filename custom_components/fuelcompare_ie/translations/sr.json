@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Изаберите земљу",
+        "data": {
+          "country": "Земља"
+        }
+      },
+      "provider": {
+        "title": "Изаберите извор података",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Извор података"
+        }
+      },
+      "county": {
+        "title": "Изаберите округ",
+        "description": "Изаберите свој округ да бисте пронашли оближње станице.",
+        "data": {
+          "station_county": "Округ"
+        }
+      },
+      "api_key": {
+        "title": "API кључ",
+        "description": "Унесите свој бесплатни API кључ. [Набавите га овде]({registration_url}) ако се затражи.",
+        "data": {
+          "api_key": "API кључ"
+        }
+      },
+      "station": {
+        "title": "Додај станицу",
+        "description": "{hint}",
+        "data": {
+          "station_id": "ID станице"
+        }
+      },
+      "station_picker": {
+        "title": "Изаберите станицу",
+        "description": "Изаберите станицу за гориво. Приказане цене су за дизел/бензин.",
+        "data": {
+          "station_id": "Станица"
+        }
+      },
+      "location": {
+        "title": "Подесите локацију",
+        "description": "Унесите своју локацију и радијус претраге. Станице у оквиру радијуса биће праћене.",
+        "data": {
+          "latitude": "Географска ширина",
+          "longitude": "Географска дужина",
+          "radius_km": "Радијус (km)",
+          "postal_code": "Поштански број"
+        }
+      },
+      "name": {
+        "title": "Назив станице",
+        "description": "Потврдите или измените назив ове станице.",
+        "data": {
+          "name": "Назив"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "ID станице не може бити празан.",
+      "invalid_location": "Неважеће координате. Унесите важеће вредности географске ширине и дужине.",
+      "no_stations_found": "Нису пронађене станице за овај округ. Покушајте са другим округом.",
+      "invalid_api_key": "API кључ не може бити празан."
+    },
+    "abort": {
+      "already_configured": "Ова станица је већ конфигурисана.",
+      "no_providers_for_country": "За ову земљу нису доступни добављачи података."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie се гаси",
+      "description": "Веб-сајт fuelcompare.ie планира да се угаси **30. јуна 2026.** Ваша станица **{entry_title}** ће престати да прима ажурирања цена након тог датума. Размислите о преласку на другачији ирски извор цена горива, као што су FuelFinder IE или IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Дизел"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Керозин"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Бензин"
+      },
+      "premium_diesel": {
+        "name": "Премијум дизел"
+      },
+      "premium_unleaded": {
+        "name": "Премијум безоловни"
+      },
+      "unleaded": {
+        "name": "Безоловни"
+      },
+      "address": {
+        "name": "Адреса"
+      },
+      "brand": {
+        "name": "Бренд"
+      },
+      "county": {
+        "name": "Округ"
+      },
+      "latitude": {
+        "name": "Географска ширина"
+      },
+      "location": {
+        "name": "Локација"
+      },
+      "longitude": {
+        "name": "Географска дужина"
+      },
+      "station_name": {
+        "name": "Назив станице"
+      },
+      "accessibility": {
+        "name": "Приступачност"
+      },
+      "amenities": {
+        "name": "Садржаји"
+      },
+      "last_successful_fetch": {
+        "name": "Последње успешно преузимање"
+      },
+      "offerings": {
+        "name": "Понуда"
+      },
+      "opening_hours": {
+        "name": "Радно време (OSM)"
+      },
+      "payments": {
+        "name": "Начини плаћања"
+      },
+      "phone": {
+        "name": "Телефон"
+      },
+      "price_confidence": {
+        "name": "Поузданост цене"
+      },
+      "price_last_updated": {
+        "name": "Последња измена цене"
+      },
+      "website": {
+        "name": "Веб-сајт"
+      },
+      "working_hours": {
+        "name": "Радно време"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Проблем с преузимањем података"
+      },
+      "has_price": {
+        "name": "Има цену"
+      },
+      "is_open": {
+        "name": "Отворено"
+      },
+      "has_atm": {
+        "name": "Банкомат"
+      },
+      "has_car_wash": {
+        "name": "Аутопраоница"
+      },
+      "has_disabled_access": {
+        "name": "Приступ за особе с инвалидитетом"
+      },
+      "has_electric_charging": {
+        "name": "Пуњење електричних возила"
+      },
+      "has_shop": {
+        "name": "Продавница"
+      },
+      "has_toilet": {
+        "name": "Тоалет"
+      },
+      "accepts_cards": {
+        "name": "Прихвата картице"
+      },
+      "accepts_cash": {
+        "name": "Прихвата готовину"
+      },
+      "accepts_contactless": {
+        "name": "Прихвата бесконтактно плаћање"
+      }
+    }
+  }
+}

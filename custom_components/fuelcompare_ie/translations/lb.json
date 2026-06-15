@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Land auswielen",
+        "data": {
+          "country": "Land"
+        }
+      },
+      "provider": {
+        "title": "Dateequell auswielen",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Dateequell"
+        }
+      },
+      "county": {
+        "title": "Kanton auswielen",
+        "description": "Wielt äre Kanton fir no Tankstatiounen an der Géigend ze sichen.",
+        "data": {
+          "station_county": "Kanton"
+        }
+      },
+      "api_key": {
+        "title": "API-Schlëssel",
+        "description": "Gitt äre gratis API-Schlëssel an. [Kritt en hei]({registration_url}) wann néideg.",
+        "data": {
+          "api_key": "API-Schlëssel"
+        }
+      },
+      "station": {
+        "title": "Statioun derbäisetzen",
+        "description": "{hint}",
+        "data": {
+          "station_id": "Statiounskennung"
+        }
+      },
+      "station_picker": {
+        "title": "Statioun auswielen",
+        "description": "Wielt eng Tankstatioun. Déi ugewisene Präisser si fir Diesel/Benzin.",
+        "data": {
+          "station_id": "Statioun"
+        }
+      },
+      "location": {
+        "title": "Standuert festleeën",
+        "description": "Gitt äre Standuert an de Sichradius an. Statiounen am Radius ginn verfolgt.",
+        "data": {
+          "latitude": "Breedegard",
+          "longitude": "Längegrad",
+          "radius_km": "Radius (km)",
+          "postal_code": "Postleitzuel"
+        }
+      },
+      "name": {
+        "title": "Statiounsnum",
+        "description": "Confirméiert oder ännert den Numm vun dëser Statioun.",
+        "data": {
+          "name": "Numm"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Statiounskennung dierf net eidel sinn.",
+      "invalid_location": "Ongülteg Koordinaten. Gitt gülteg Breed- a Längegrader an.",
+      "no_stations_found": "Keng Statiounen fir dëse Kanton fonnt. Probéiert en anere Kanton.",
+      "invalid_api_key": "API-Schlëssel dierf net eidel sinn."
+    },
+    "abort": {
+      "already_configured": "Dës Statioun ass schon configuréiert.",
+      "no_providers_for_country": "Keng Dateequellen sinn fir dëst Land verfügbar."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie stellt säi Betrib an",
+      "description": "D'Websäit fuelcompare.ie ass geplangt fir den **30. Juni 2026** zouzemaachen. Är Statioun **{entry_title}** wäert no deem Datum keng Präisupdates méi kréien. Iwwerdenkt op eng aner iresch Benzinpräisquell ëmzestellen, wéi FuelFinder IE oder IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Diesel"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Kerosin"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzin"
+      },
+      "premium_diesel": {
+        "name": "Premium Diesel"
+      },
+      "premium_unleaded": {
+        "name": "Premium bleifräi"
+      },
+      "unleaded": {
+        "name": "Bleifräi"
+      },
+      "address": {
+        "name": "Adress"
+      },
+      "brand": {
+        "name": "Marque"
+      },
+      "county": {
+        "name": "Kanton"
+      },
+      "latitude": {
+        "name": "Breedegard"
+      },
+      "location": {
+        "name": "Standuert"
+      },
+      "longitude": {
+        "name": "Längegrad"
+      },
+      "station_name": {
+        "name": "Statiounsnum"
+      },
+      "accessibility": {
+        "name": "Zougänglechkeet"
+      },
+      "amenities": {
+        "name": "Servicer"
+      },
+      "last_successful_fetch": {
+        "name": "Leschten erfollegräiche Fetch"
+      },
+      "offerings": {
+        "name": "Ubidder"
+      },
+      "opening_hours": {
+        "name": "Ouvertureszäiten (OSM)"
+      },
+      "payments": {
+        "name": "Bezuelunge"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Präisvertrauen"
+      },
+      "price_last_updated": {
+        "name": "Präis zuletzt aktualiséiert"
+      },
+      "website": {
+        "name": "Websäit"
+      },
+      "working_hours": {
+        "name": "Aarbechtszäiten"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Problem beim Daten eroflueden"
+      },
+      "has_price": {
+        "name": "Huet Präis"
+      },
+      "is_open": {
+        "name": "Ass op"
+      },
+      "has_atm": {
+        "name": "Bankomat"
+      },
+      "has_car_wash": {
+        "name": "Autowäsch"
+      },
+      "has_disabled_access": {
+        "name": "Zougang fir Behënnert"
+      },
+      "has_electric_charging": {
+        "name": "Luede fir Elektroautoen"
+      },
+      "has_shop": {
+        "name": "Geschäft"
+      },
+      "has_toilet": {
+        "name": "Toilette"
+      },
+      "accepts_cards": {
+        "name": "Acceptéiert Kaarten"
+      },
+      "accepts_cash": {
+        "name": "Acceptéiert Boergeld"
+      },
+      "accepts_contactless": {
+        "name": "Acceptéiert kontaktlos Bezuelen"
+      }
+    }
+  }
+}

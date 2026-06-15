@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Veldu land",
+        "data": {
+          "country": "Land"
+        }
+      },
+      "provider": {
+        "title": "Veldu gagnagjafa",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Gagnagjafi"
+        }
+      },
+      "county": {
+        "title": "Veldu sýslu",
+        "description": "Veldu sýslu þína til að finna nálægar stöðvar.",
+        "data": {
+          "station_county": "Sýsla"
+        }
+      },
+      "api_key": {
+        "title": "API-lykill",
+        "description": "Sláðu inn ókeypis API-lykilinn þinn. [Fáðu hann hér]({registration_url}) ef þörf krefur.",
+        "data": {
+          "api_key": "API-lykill"
+        }
+      },
+      "station": {
+        "title": "Bæta við stöð",
+        "description": "{hint}",
+        "data": {
+          "station_id": "Stöðvarauðkenni"
+        }
+      },
+      "station_picker": {
+        "title": "Veldu stöð",
+        "description": "Veldu eldsneytisstöð. Verð sem sýnd eru eru fyrir dísel/bensín.",
+        "data": {
+          "station_id": "Stöð"
+        }
+      },
+      "location": {
+        "title": "Stilla staðsetningu",
+        "description": "Sláðu inn staðsetningu þína og leitarradíus. Stöðvar innan radíusins verða raktar.",
+        "data": {
+          "latitude": "Breiddargráða",
+          "longitude": "Lengdargráða",
+          "radius_km": "Radíus (km)",
+          "postal_code": "Póstnúmer"
+        }
+      },
+      "name": {
+        "title": "Nafn stöðvar",
+        "description": "Staðfestu eða breyttu nafni þessarar stöðvar.",
+        "data": {
+          "name": "Nafn"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Stöðvarauðkenni má ekki vera tómt.",
+      "invalid_location": "Ógildar hnit. Sláðu inn gildar breiddargráður og lengdargráður.",
+      "no_stations_found": "Engar stöðvar fundust í þessari sýslu. Prófaðu aðra sýslu.",
+      "invalid_api_key": "API-lykill má ekki vera tómur."
+    },
+    "abort": {
+      "already_configured": "Þessi stöð er þegar stillt.",
+      "no_providers_for_country": "Engir gagnaveitendur eru tiltækir fyrir þetta land."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie er að loka",
+      "description": "Vefsíðan fuelcompare.ie er áætluð til að loka **30. júní 2026**. Stöðin þín **{entry_title}** mun hætta að fá verðuppfærslur eftir þann dag. Íhugaðu að skipta yfir í annan írskan eldsneytisverðgjafa, eins og FuelFinder IE eða IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Dísel"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Kerósín"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Bensín"
+      },
+      "premium_diesel": {
+        "name": "Premium dísel"
+      },
+      "premium_unleaded": {
+        "name": "Premium blýlaust"
+      },
+      "unleaded": {
+        "name": "Blýlaust"
+      },
+      "address": {
+        "name": "Heimilisfang"
+      },
+      "brand": {
+        "name": "Vörumerki"
+      },
+      "county": {
+        "name": "Sýsla"
+      },
+      "latitude": {
+        "name": "Breiddargráða"
+      },
+      "location": {
+        "name": "Staðsetning"
+      },
+      "longitude": {
+        "name": "Lengdargráða"
+      },
+      "station_name": {
+        "name": "Nafn stöðvar"
+      },
+      "accessibility": {
+        "name": "Aðgengi"
+      },
+      "amenities": {
+        "name": "Þjónusta"
+      },
+      "last_successful_fetch": {
+        "name": "Síðasta vel heppnaða sækja"
+      },
+      "offerings": {
+        "name": "Tilboð"
+      },
+      "opening_hours": {
+        "name": "Opnunartímar (OSM)"
+      },
+      "payments": {
+        "name": "Greiðslur"
+      },
+      "phone": {
+        "name": "Sími"
+      },
+      "price_confidence": {
+        "name": "Verðtraust"
+      },
+      "price_last_updated": {
+        "name": "Verð síðast uppfært"
+      },
+      "website": {
+        "name": "Vefsíða"
+      },
+      "working_hours": {
+        "name": "Vinnutímar"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Vandamál við gagnasækja"
+      },
+      "has_price": {
+        "name": "Er með verð"
+      },
+      "is_open": {
+        "name": "Er opið"
+      },
+      "has_atm": {
+        "name": "Hraðbanki"
+      },
+      "has_car_wash": {
+        "name": "Bílþvottur"
+      },
+      "has_disabled_access": {
+        "name": "Aðgengi fyrir fatlaða"
+      },
+      "has_electric_charging": {
+        "name": "Hleðsla fyrir rafbíla"
+      },
+      "has_shop": {
+        "name": "Búð"
+      },
+      "has_toilet": {
+        "name": "Salerni"
+      },
+      "accepts_cards": {
+        "name": "Tekur við kortum"
+      },
+      "accepts_cash": {
+        "name": "Tekur við reiðufé"
+      },
+      "accepts_contactless": {
+        "name": "Tekur við snertilausri greiðslu"
+      }
+    }
+  }
+}

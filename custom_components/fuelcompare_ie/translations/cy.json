@@ -1,0 +1,209 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dewiswch Wlad",
+        "data": {
+          "country": "Gwlad"
+        }
+      },
+      "provider": {
+        "title": "Dewiswch Ffynhonnell Data",
+        "description": "{deprecation_notice}",
+        "data": {
+          "provider": "Ffynhonnell data"
+        }
+      },
+      "county": {
+        "title": "Dewiswch Sir",
+        "description": "Dewiswch eich sir i ddod o hyd i orsafoedd cyfagos.",
+        "data": {
+          "station_county": "Sir"
+        }
+      },
+      "api_key": {
+        "title": "Allwedd API",
+        "description": "Rhowch eich allwedd API am ddim. [Cewch un yma]({registration_url}) os gofynnir.",
+        "data": {
+          "api_key": "Allwedd API"
+        }
+      },
+      "station": {
+        "title": "Ychwanegu Gorsaf",
+        "description": "{hint}",
+        "data": {
+          "station_id": "ID Gorsaf"
+        }
+      },
+      "station_picker": {
+        "title": "Dewiswch Orsaf",
+        "description": "Dewiswch orsaf danwydd. Mae'r prisiau a ddangosir ar gyfer diesel/petrol.",
+        "data": {
+          "station_id": "Gorsaf"
+        }
+      },
+      "location": {
+        "title": "Gosod Lleoliad",
+        "description": "Rhowch eich lleoliad a radiws chwilio. Bydd gorsafoedd o fewn y radiws yn cael eu holrhain.",
+        "data": {
+          "latitude": "Lledred",
+          "longitude": "Hydred",
+          "radius_km": "Radiws (km)",
+          "postal_code": "Cod post"
+        }
+      },
+      "name": {
+        "title": "Enw'r Orsaf",
+        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.",
+        "data": {
+          "name": "Enw"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "Ni all ID yr orsaf fod yn wag.",
+      "invalid_location": "Cyfesurynnau annilys. Rhowch werthoedd lledred a hydred dilys.",
+      "no_stations_found": "Ni chanfuwyd gorsafoedd ar gyfer y sir hon. Rhowch gynnig ar sir wahanol.",
+      "invalid_api_key": "Ni all yr allwedd API fod yn wag."
+    },
+    "abort": {
+      "already_configured": "Mae'r orsaf hon eisoes wedi'i ffurfweddu.",
+      "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon."
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "Mae fuelcompare.ie yn cau",
+      "description": "Mae gwefan fuelcompare.ie wedi'i threfnu i gau ar **30 Mehefin 2026**. Bydd eich gorsaf **{entry_title}** yn rhoi'r gorau i dderbyn diweddariadau prisiau ar ôl y dyddiad hwnnw. Ystyriwch newid i ffynhonnell prisiau tanwydd Gwyddelig wahanol, fel FuelFinder IE neu IE Pumps."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Diesel"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Cerosin"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Petrol"
+      },
+      "premium_diesel": {
+        "name": "Diesel Premiwm"
+      },
+      "premium_unleaded": {
+        "name": "Di-blwm Premiwm"
+      },
+      "unleaded": {
+        "name": "Di-blwm"
+      },
+      "address": {
+        "name": "Cyfeiriad"
+      },
+      "brand": {
+        "name": "Brand"
+      },
+      "county": {
+        "name": "Sir"
+      },
+      "latitude": {
+        "name": "Lledred"
+      },
+      "location": {
+        "name": "Lleoliad"
+      },
+      "longitude": {
+        "name": "Hydred"
+      },
+      "station_name": {
+        "name": "Enw'r Orsaf"
+      },
+      "accessibility": {
+        "name": "Hygyrchedd"
+      },
+      "amenities": {
+        "name": "Cyfleusterau"
+      },
+      "last_successful_fetch": {
+        "name": "Cyrchiad Llwyddiannus Diwethaf"
+      },
+      "offerings": {
+        "name": "Cynigion"
+      },
+      "opening_hours": {
+        "name": "Oriau Agor (OSM)"
+      },
+      "payments": {
+        "name": "Dulliau Talu"
+      },
+      "phone": {
+        "name": "Ffôn"
+      },
+      "price_confidence": {
+        "name": "Hyder Pris"
+      },
+      "price_last_updated": {
+        "name": "Pris Wedi'i Ddiweddaru Ddiwethaf"
+      },
+      "website": {
+        "name": "Gwefan"
+      },
+      "working_hours": {
+        "name": "Oriau Gweithio"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Problem Cyrchu Data"
+      },
+      "has_price": {
+        "name": "Mae Pris"
+      },
+      "is_open": {
+        "name": "Ar Agor"
+      },
+      "has_atm": {
+        "name": "Peiriant Arian"
+      },
+      "has_car_wash": {
+        "name": "Golchfa Ceir"
+      },
+      "has_disabled_access": {
+        "name": "Mynediad i Bobl Anabl"
+      },
+      "has_electric_charging": {
+        "name": "Gwefru Cerbydau Trydan"
+      },
+      "has_shop": {
+        "name": "Siop"
+      },
+      "has_toilet": {
+        "name": "Toiled"
+      },
+      "accepts_cards": {
+        "name": "Yn Derbyn Cardiau"
+      },
+      "accepts_cash": {
+        "name": "Yn Derbyn Arian Parod"
+      },
+      "accepts_contactless": {
+        "name": "Yn Derbyn Taliad Di-gyffwrdd"
+      }
+    }
+  }
+}
