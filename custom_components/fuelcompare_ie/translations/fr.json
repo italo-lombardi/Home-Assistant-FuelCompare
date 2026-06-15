@@ -11,7 +11,8 @@
         "title": "Sélectionner la source de données",
         "data": {
           "provider": "Source de données"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "county": {
         "title": "Sélectionner le comté",
@@ -28,7 +29,7 @@
         }
       },
       "station": {
-        "title": "Ajouter une station Fuel Compare",
+        "title": "Ajouter une station",
         "description": "{hint}",
         "data": {
           "station_id": "Identifiant de la station"
@@ -197,6 +198,12 @@
       "accepts_contactless": {
         "name": "Accepte le sans contact"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie va fermer",
+      "description": "Le site fuelcompare.ie est prévu de fermer le **30 juin 2026**. Votre station **{entry_title}** ne recevra plus de mises à jour de prix après cette date. Envisagez de passer à une autre source irlandaise de prix des carburants, comme FuelFinder IE ou IE Pumps."
     }
   }
 }

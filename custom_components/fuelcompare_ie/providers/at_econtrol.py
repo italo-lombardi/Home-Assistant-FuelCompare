@@ -284,6 +284,8 @@ def _extract_prices(prices_list: list[dict[str, Any]]) -> dict[str, float | None
     Maps fuelType codes (DIE, SUP, GAS) to StationData keys.
     Handles empty array gracefully.
     """
+    if not isinstance(prices_list, list):
+        return {}
     fuel_code_map = {
         "DIE": "diesel",
         "SUP": "unleaded",

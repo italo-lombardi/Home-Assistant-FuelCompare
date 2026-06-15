@@ -11,10 +11,11 @@
         "title": "Vali andmeallikas",
         "data": {
           "provider": "Andmeallikas"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Lisa Fuel Compare jaam",
+        "title": "Lisa jaam",
         "description": "{hint}",
         "data": {
           "station_id": "Jaama ID"
@@ -139,7 +140,7 @@
         "name": "Teenused"
       },
       "opening_hours": {
-        "name": "Lahtiolekuajad"
+        "name": "Lahtiolekuajad (OSM)"
       },
       "payments": {
         "name": "Maksed"
@@ -171,7 +172,7 @@
         "name": "On avatud"
       },
       "has_atm": {
-        "name": "Pangaautomaati"
+        "name": "Sularahaautomaat"
       },
       "has_car_wash": {
         "name": "Autopesla"
@@ -197,6 +198,12 @@
       "accepts_contactless": {
         "name": "Aktsepteerib kontaktivaba makset"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie lõpetab töö",
+      "description": "Veebisait fuelcompare.ie on plaanitud sulgeda **30. juunil 2026**. Teie jaam **{entry_title}** lõpetab hinnavärskenduste saamise pärast seda kuupäeva. Kaaluge üleminekut mõnele teisele Iiri kütusehindade allikale, näiteks FuelFinder IE või IE Pumps."
     }
   }
 }

@@ -11,10 +11,11 @@
         "title": "Izberite vir podatkov",
         "data": {
           "provider": "Vir podatkov"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Dodaj postajo Fuel Compare",
+        "title": "Dodaj postajo",
         "description": "{hint}",
         "data": {
           "station_id": "ID Postaje"
@@ -139,7 +140,7 @@
         "name": "Storitve"
       },
       "opening_hours": {
-        "name": "Delovni čas"
+        "name": "Delovni čas (OSM)"
       },
       "payments": {
         "name": "Plačila"
@@ -197,6 +198,12 @@
       "accepts_contactless": {
         "name": "Sprejema brezstično plačilo"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie se zapira",
+      "description": "Spletna stran fuelcompare.ie je načrtovana za zaprtje **30. junija 2026**. Vaša postaja **{entry_title}** bo po tem datumu prenehala prejemati posodobitve cen. Razmislite o prehodu na drug irski vir cen goriva, kot sta FuelFinder IE ali IE Pumps."
     }
   }
 }

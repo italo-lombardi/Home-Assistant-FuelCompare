@@ -11,10 +11,11 @@
         "title": "Välj datakälla",
         "data": {
           "provider": "Datakälla"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Lägg till Fuel Compare-station",
+        "title": "Lägg till station",
         "description": "{hint}",
         "data": {
           "station_id": "Stations-ID"
@@ -197,6 +198,12 @@
       "accepts_contactless": {
         "name": "Accepterar kontaktlös betalning"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie stänger",
+      "description": "Webbplatsen fuelcompare.ie planeras att stänga **30 juni 2026**. Din station **{entry_title}** slutar ta emot prisuppdateringar efter det datumet. Överväg att byta till en annan irländsk bränslekälla, till exempel FuelFinder IE eller IE Pumps."
     }
   }
 }

@@ -11,10 +11,11 @@
         "title": "Odaberite izvor podataka",
         "data": {
           "provider": "Izvor podataka"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Dodaj Fuel Compare stanicu",
+        "title": "Dodaj stanicu",
         "description": "{hint}",
         "data": {
           "station_id": "ID Stanice"
@@ -157,7 +158,7 @@
         "name": "Web stranica"
       },
       "working_hours": {
-        "name": "Radno vrijeme (lokalno)"
+        "name": "Radno vrijeme"
       }
     },
     "binary_sensor": {
@@ -197,6 +198,12 @@
       "accepts_contactless": {
         "name": "Prihvaća beskontaktno plaćanje"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie se gasi",
+      "description": "Web stranica fuelcompare.ie planira prestati s radom **30. lipnja 2026.** Vaša postaja **{entry_title}** prestat će primati ažuriranja cijena nakon tog datuma. Razmislite o prelasku na drugi irski izvor cijena goriva, kao što su FuelFinder IE ili IE Pumps."
     }
   }
 }

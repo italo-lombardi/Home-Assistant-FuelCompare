@@ -11,10 +11,11 @@
         "title": "Válasszon adatforrást",
         "data": {
           "provider": "Adatforrás"
-        }
+        },
+        "description": "{deprecation_notice}"
       },
       "station": {
-        "title": "Fuel Compare állomás hozzáadása",
+        "title": "Állomás hozzáadása",
         "description": "{hint}",
         "data": {
           "station_id": "Állomás azonosító"
@@ -139,7 +140,7 @@
         "name": "Szolgáltatások"
       },
       "opening_hours": {
-        "name": "Nyitvatartás"
+        "name": "Nyitvatartás (OSM)"
       },
       "payments": {
         "name": "Fizetési módok"
@@ -197,6 +198,12 @@
       "accepts_contactless": {
         "name": "Elfogad érintésmentes fizetést"
       }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "A fuelcompare.ie leáll",
+      "description": "A fuelcompare.ie weboldal **2026. június 30-án** tervezi a leállást. Az Ön állomása **{entry_title}** az adott dátum után nem kap több árfrissítést. Fontolja meg az átváltást egy másik ír üzemanyagár-forrásra, például a FuelFinder IE-re vagy az IE Pumps-ra."
     }
   }
 }
