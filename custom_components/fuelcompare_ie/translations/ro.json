@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Selectați stația",
-        "description": "Selectați o stație de combustibil. Prețurile afișate sunt pentru motorină/benzină.",
+        "description": "Selectați o stație de combustibil. Prețurile afișate sunt pentru motorină/benzină.{station_page_url_line}",
         "data": {
           "station_id": "Stație"
         }

@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Statioun auswielen",
-        "description": "Wielt eng Tankstatioun. Déi ugewisene Präisser si fir Diesel/Benzin.",
+        "description": "Wielt eng Tankstatioun. Déi ugewisene Präisser si fir Diesel/Benzin.{station_page_url_line}",
         "data": {
           "station_id": "Statioun"
         }

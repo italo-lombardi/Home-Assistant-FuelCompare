@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Vælg station",
-        "description": "Vælg en benzinstation. Viste priser er for diesel/benzin.",
+        "description": "Vælg en benzinstation. Viste priser er for diesel/benzin.{station_page_url_line}",
         "data": {
           "station_id": "Station"
         }

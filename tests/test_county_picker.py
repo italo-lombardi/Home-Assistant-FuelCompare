@@ -412,6 +412,11 @@ async def test_config_flow_fuelfinder_county_to_picker(hass: HomeAssistant) -> N
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_STATION_ID: "uuid-abc"}
         )
+        # Two-pass: if URL found, picker re-renders with link — submit again to confirm
+        if result.get("step_id") == "station_picker":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_STATION_ID: "uuid-abc"}
+            )
         # Name confirmation
         assert result["step_id"] == "name"
         result = await hass.config_entries.flow.async_configure(
@@ -463,6 +468,11 @@ async def test_config_flow_croatia_county_picker(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_STATION_ID: "1001"}
         )
+        # Two-pass: if URL found, picker re-renders with link — submit again to confirm
+        if result.get("step_id") == "station_picker":
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], user_input={CONF_STATION_ID: "1001"}
+            )
         assert result["step_id"] == "name"
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={"name": "Shell Zagreb"}

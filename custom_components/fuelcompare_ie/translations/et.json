@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Vali tankla",
-        "description": "Vali kütusejaam. Näidatud hinnad on diisli/bensiini jaoks.",
+        "description": "Vali kütusejaam. Näidatud hinnad on diisli/bensiini jaoks.{station_page_url_line}",
         "data": {
           "station_id": "Tankla"
         }

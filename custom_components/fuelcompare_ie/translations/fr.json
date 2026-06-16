@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Sélectionner une station",
-        "description": "Sélectionnez une station-service. Les prix affichés sont pour le diesel/l'essence.",
+        "description": "Sélectionnez une station-service. Les prix affichés sont pour le diesel/l'essence.{station_page_url_line}",
         "data": {
           "station_id": "Station"
         }

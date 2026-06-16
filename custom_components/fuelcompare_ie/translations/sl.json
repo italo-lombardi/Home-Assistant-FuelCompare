@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Izberite postajo",
-        "description": "Izberite bencinsko postajo. Prikazane cene so za dizel/bencin.",
+        "description": "Izberite bencinsko postajo. Prikazane cene so za dizel/bencin.{station_page_url_line}",
         "data": {
           "station_id": "Postaja"
         }

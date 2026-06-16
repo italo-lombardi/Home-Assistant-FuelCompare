@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Select Station",
-        "description": "Select a fuel station. Prices shown are for diesel/petrol.",
+        "description": "Select a fuel station. Prices shown are for diesel/petrol.{station_page_url_line}",
         "data": {
           "station_id": "Station"
         }

@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Vyberte stanici",
-        "description": "Vyberte čerpací stanici. Zobrazené ceny jsou pro naftu/benzín.",
+        "description": "Vyberte čerpací stanici. Zobrazené ceny jsou pro naftu/benzín.{station_page_url_line}",
         "data": {
           "station_id": "Stanice"
         }

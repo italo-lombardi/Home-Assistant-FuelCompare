@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Seleziona stazione",
-        "description": "Seleziona una stazione di carburante. I prezzi mostrati sono per diesel/benzina.",
+        "description": "Seleziona una stazione di carburante. I prezzi mostrati sono per diesel/benzina.{station_page_url_line}",
         "data": {
           "station_id": "Stazione"
         }

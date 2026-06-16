@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Tankstelle auswählen",
-        "description": "Wählen Sie eine Tankstelle aus. Die angezeigten Preise gelten für Diesel/Benzin.",
+        "description": "Wählen Sie eine Tankstelle aus. Die angezeigten Preise gelten für Diesel/Benzin.{station_page_url_line}",
         "data": {
           "station_id": "Tankstelle"
         }

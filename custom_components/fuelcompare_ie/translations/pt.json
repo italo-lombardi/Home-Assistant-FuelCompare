@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Selecionar Estação",
-        "description": "Selecione uma estação de combustível. Os preços apresentados são para gasóleo/gasolina.",
+        "description": "Selecione uma estação de combustível. Os preços apresentados são para gasóleo/gasolina.{station_page_url_line}",
         "data": {
           "station_id": "Estação"
         }

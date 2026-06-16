@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Välj station",
-        "description": "Välj en bensinstation. Priser visas för diesel/bensin.",
+        "description": "Välj en bensinstation. Priser visas för diesel/bensin.{station_page_url_line}",
         "data": {
           "station_id": "Station"
         }

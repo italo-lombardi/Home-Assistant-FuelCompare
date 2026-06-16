@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Seleccioneu l'estació",
-        "description": "Seleccioneu una estació de combustible. Els preus mostrats corresponen a dièsel/gasolina.",
+        "description": "Seleccioneu una estació de combustible. Els preus mostrats corresponen a dièsel/gasolina.{station_page_url_line}",
         "data": {
           "station_id": "Estació"
         }

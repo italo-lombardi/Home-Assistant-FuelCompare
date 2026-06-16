@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Zgjidhni Stacionin",
-        "description": "Zgjidhni një stacion karburanti. Çmimet e shfaqura janë për naftë/benzinë.",
+        "description": "Zgjidhni një stacion karburanti. Çmimet e shfaqura janë për naftë/benzinë.{station_page_url_line}",
         "data": {
           "station_id": "Stacioni"
         }

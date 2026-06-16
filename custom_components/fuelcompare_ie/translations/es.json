@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Seleccionar estación",
-        "description": "Seleccione una estación de combustible. Los precios mostrados corresponden a diésel/gasolina.",
+        "description": "Seleccione una estación de combustible. Los precios mostrados corresponden a diésel/gasolina.{station_page_url_line}",
         "data": {
           "station_id": "Estación"
         }

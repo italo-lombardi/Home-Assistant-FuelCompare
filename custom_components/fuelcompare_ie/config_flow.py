@@ -386,6 +386,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_page_url: str = (
             ""  # URL for selected station (shown on name step)
         )
+        self._picker_pending_id: str = ""  # station selected on first submit, awaiting URL confirm
         self._latitude: float | None = None
         self._longitude: float | None = None
         self._radius_km: float = DEFAULT_RADIUS_KM
@@ -584,15 +585,34 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
             else:
-                # Only set unique_id from station_id when not already set by
-                # async_step_location (location-search providers set a lat/lng uid).
+                url = self._station_url_map.get(station_id, "")
+                # Two-pass: if this station has a URL and the user hasn't yet
+                # seen it, re-render the picker with the link so they can verify.
+                if url and self._picker_pending_id != station_id:
+                    self._picker_pending_id = station_id
+                    station_list = sorted(self._station_list, key=lambda x: x[1])
+                    url_line = f"\n\n[View station on provider website]({url})"
+                    return self.async_show_form(
+                        step_id="station_picker",
+                        data_schema=vol.Schema(
+                            {
+                                vol.Required(CONF_STATION_ID, default=station_id): vol.In(
+                                    {uid: label for uid, label in station_list}
+                                ),
+                            }
+                        ),
+                        description_placeholders={"station_page_url_line": url_line},
+                        errors=errors,
+                    )
+                # No URL, or user already saw the URL and re-submitted — proceed.
+                self._picker_pending_id = ""
                 if not self.unique_id:
                     await self.async_set_unique_id(
                         f"{DOMAIN}_{self._provider_key}_{station_id}"
                     )
                     self._abort_if_unique_id_configured()
                 self._station_id = station_id
-                self._station_page_url = self._station_url_map.get(station_id, "")
+                self._station_page_url = url
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key, self._api_key
                 )
@@ -600,13 +620,12 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 return await self.async_step_name()
 
         # Load station list from provider
+        self._picker_pending_id = ""
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
         station_list: list[tuple[str, str]] = []
         if provider_cls:
             try:
                 session = async_get_clientsession(self.hass)
-                # Build constructor kwargs so providers that require an api_key
-                # (e.g. Tankerkoenig) can authenticate the list call.
                 init_kwargs: dict[str, Any] = {}
                 if self._api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
                     init_kwargs["api_key"] = self._api_key
@@ -622,8 +641,6 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 station_list = await provider_instance.async_list_stations(
                     session, **list_kwargs
                 )
-                # Build URL map — providers override get_station_page_url() when
-                # they have a stable station detail page (e.g. fuelfinder.ie slug).
                 self._station_url_map = {
                     uid: url
                     for uid, _ in station_list
@@ -633,16 +650,16 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 _LOGGER.warning("Failed to load station list: %s", err)
 
         self._station_list = station_list
+        station_list = sorted(station_list, key=lambda x: x[1])
 
         if not station_list:
-            # For location-based providers the unique_id is already set from
-            # lat/lng — we can proceed to the name step without a station pick.
             if self.unique_id:
                 return await self.async_step_name()
             errors["base"] = "no_stations_found"
             return self.async_show_form(
                 step_id="station_picker",
                 data_schema=vol.Schema({vol.Required(CONF_STATION_ID): str}),
+                description_placeholders={"station_page_url_line": ""},
                 errors=errors,
             )
 
@@ -655,6 +672,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     ),
                 }
             ),
+            description_placeholders={"station_page_url_line": ""},
             errors=errors,
         )
 

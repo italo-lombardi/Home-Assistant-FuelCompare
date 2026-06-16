@@ -761,6 +761,12 @@ async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
                     result["flow_id"],
                     user_input={CONF_STATION_ID: "de-fake-001"},
                 )
+            # Two-pass: if URL found, picker re-renders — submit again to confirm
+            if result.get("step_id") == "station_picker":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_STATION_ID: "de-fake-001"},
+                )
             if result.get("step_id") == "name":
                 result = await hass.config_entries.flow.async_configure(
                     result["flow_id"],

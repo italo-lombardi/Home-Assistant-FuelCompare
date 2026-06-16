@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Vel stasjon",
-        "description": "Vel ein bensinstasjon. Prisane som vert viste er for diesel/bensin.",
+        "description": "Vel ein bensinstasjon. Prisane som vert viste er for diesel/bensin.{station_page_url_line}",
         "data": {
           "station_id": "Stasjon"
         }

@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Atlasiet staciju",
-        "description": "Atlasiet degvielas staciju. Rādītās cenas ir dīzeļdegvielai/benzīnam.",
+        "description": "Atlasiet degvielas staciju. Rādītās cenas ir dīzeļdegvielai/benzīnam.{station_page_url_line}",
         "data": {
           "station_id": "Stacija"
         }

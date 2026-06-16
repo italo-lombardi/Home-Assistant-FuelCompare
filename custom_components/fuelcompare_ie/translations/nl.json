@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Selecteer station",
-        "description": "Selecteer een tankstation. Getoonde prijzen zijn voor diesel/benzine.",
+        "description": "Selecteer een tankstation. Getoonde prijzen zijn voor diesel/benzine.{station_page_url_line}",
         "data": {
           "station_id": "Station"
         }

@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Wybierz stację",
-        "description": "Wybierz stację paliw. Pokazane ceny dotyczą oleju napędowego/benzyny.",
+        "description": "Wybierz stację paliw. Pokazane ceny dotyczą oleju napędowego/benzyny.{station_page_url_line}",
         "data": {
           "station_id": "Stacja"
         }

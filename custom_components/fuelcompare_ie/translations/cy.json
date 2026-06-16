@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Dewiswch Orsaf",
-        "description": "Dewiswch orsaf danwydd. Mae'r prisiau a ddangosir ar gyfer diesel/petrol.",
+        "description": "Dewiswch orsaf danwydd. Mae'r prisiau a ddangosir ar gyfer diesel/petrol.{station_page_url_line}",
         "data": {
           "station_id": "Gorsaf"
         }

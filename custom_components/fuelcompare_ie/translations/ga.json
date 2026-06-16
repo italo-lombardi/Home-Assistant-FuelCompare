@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Roghnaigh Stáisiún",
-        "description": "Roghnaigh stáisiún breosla. Taispeántar praghsanna díosail/peitril.",
+        "description": "Roghnaigh stáisiún breosla. Taispeántar praghsanna díosail/peitril.{station_page_url_line}",
         "data": {
           "station_id": "Stáisiún"
         }

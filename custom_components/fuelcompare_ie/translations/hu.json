@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Válasszon állomást",
-        "description": "Válasszon üzemanyag-állomást. A megjelenített árak dízelre/benzinre vonatkoznak.",
+        "description": "Válasszon üzemanyag-állomást. A megjelenített árak dízelre/benzinre vonatkoznak.{station_page_url_line}",
         "data": {
           "station_id": "Állomás"
         }

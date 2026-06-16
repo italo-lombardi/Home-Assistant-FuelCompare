@@ -45,7 +45,7 @@
       },
       "station_picker": {
         "title": "Odaberite postaju",
-        "description": "Odaberite benzinsku postaju. Prikazane cijene odnose se na dizel/benzin.",
+        "description": "Odaberite benzinsku postaju. Prikazane cijene odnose se na dizel/benzin.{station_page_url_line}",
         "data": {
           "station_id": "Postaja"
         }
