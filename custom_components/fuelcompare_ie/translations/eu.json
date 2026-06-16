@@ -56,7 +56,8 @@
         "title": "Gasolindegiaren izena",
         "description": "Berretsi edo editatu gasolindegiaren izena.{station_page_url_line}",
         "data": {
-          "name": "Izena"
+          "name": "Izena",
+          "show_on_map": "Show station on map"
         }
       }
     },

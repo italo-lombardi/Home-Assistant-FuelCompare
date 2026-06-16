@@ -25,7 +25,8 @@
         "title": "Numele Stației",
         "description": "Confirmați sau editați numele acestei stații.{station_page_url_line}",
         "data": {
-          "name": "Nume"
+          "name": "Nume",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

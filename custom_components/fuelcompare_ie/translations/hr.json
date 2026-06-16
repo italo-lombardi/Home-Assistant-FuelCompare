@@ -25,7 +25,8 @@
         "title": "Naziv Postaje",
         "description": "Potvrdite ili uredite naziv ove postaje.{station_page_url_line}",
         "data": {
-          "name": "Naziv"
+          "name": "Naziv",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

@@ -740,6 +740,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             options: dict[str, Any] = {}
             if self._api_key:
                 options[CONF_API_KEY] = self._api_key
+            if user_input.get(CONF_SHOW_ON_MAP):
+                options[CONF_SHOW_ON_MAP] = True
             if self._station_id:
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
@@ -754,13 +756,24 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 options[CONF_RADIUS_KM] = self._radius_km
             return self.async_create_entry(title=title, data=data, options=options)
 
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+        has_location_caps = (
+            provider_cls is not None
+            and {
+                "latitude",
+                "longitude",
+            }
+            <= provider_cls.CAPABILITIES
+        )
+        schema_dict: dict = {
+            vol.Optional(CONF_NAME, default=self._suggested_name): str,
+        }
+        if has_location_caps:
+            schema_dict[vol.Optional(CONF_SHOW_ON_MAP, default=False)] = bool
+
         return self.async_show_form(
             step_id="name",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(CONF_NAME, default=self._suggested_name): str,
-                }
-            ),
+            data_schema=vol.Schema(schema_dict),
             description_placeholders={
                 "station_page_url_line": (
                     f"\n\n[View station on provider website]({self._station_page_url})"

@@ -60,9 +60,10 @@ class HRMzoeProvider(BaseProvider):
     LABEL = "MINGOR (Croatia)"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "county_search"
-    POLL_INTERVAL_SECONDS = 3600
-    STATION_PAGE_URL: ClassVar[str] = (
-        "https://mzoe-gor.hr"  # updated hourly; align poll to :05 past the hour
+    POLL_INTERVAL_SECONDS = 3600  # updated hourly; align poll to :05 past the hour
+    STATION_PAGE_URL: ClassVar[str] = "https://mzoe-gor.hr"
+    STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
+        "https://mzoe-gor.hr/cjenici-postaja/{station_id}"
     )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

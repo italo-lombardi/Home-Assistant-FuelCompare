@@ -56,7 +56,8 @@
         "title": "Stoties Pavadinimas",
         "description": "Patvirtinkite arba redaguokite šios stoties pavadinimą.{station_page_url_line}",
         "data": {
-          "name": "Pavadinimas"
+          "name": "Pavadinimas",
+          "show_on_map": "Show station on map"
         }
       }
     },

@@ -56,7 +56,8 @@
         "title": "Aseman Nimi",
         "description": "Vahvista tai muuta tämän aseman nimeä.{station_page_url_line}",
         "data": {
-          "name": "Nimi"
+          "name": "Nimi",
+          "show_on_map": "Show station on map"
         }
       }
     },

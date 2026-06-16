@@ -25,7 +25,8 @@
         "title": "Stationsnaam",
         "description": "Bevestig of bewerk de naam van dit station.{station_page_url_line}",
         "data": {
-          "name": "Naam"
+          "name": "Naam",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

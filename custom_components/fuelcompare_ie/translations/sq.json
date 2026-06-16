@@ -56,7 +56,8 @@
         "title": "Emri i Stacionit",
         "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.{station_page_url_line}",
         "data": {
-          "name": "Emri"
+          "name": "Emri",
+          "show_on_map": "Show station on map"
         }
       }
     },

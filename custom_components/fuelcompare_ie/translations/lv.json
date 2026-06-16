@@ -25,7 +25,8 @@
         "title": "Stacijas Nosaukums",
         "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.{station_page_url_line}",
         "data": {
-          "name": "Nosaukums"
+          "name": "Nosaukums",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

@@ -25,7 +25,8 @@
         "title": "Állomás Neve",
         "description": "Erősítse meg vagy szerkessze az állomás nevét.{station_page_url_line}",
         "data": {
-          "name": "Név"
+          "name": "Név",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

@@ -25,7 +25,8 @@
         "title": "Nome della Stazione",
         "description": "Conferma o modifica il nome di questa stazione.{station_page_url_line}",
         "data": {
-          "name": "Nome"
+          "name": "Nome",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

@@ -56,7 +56,8 @@
         "title": "Όνομα Σταθμού",
         "description": "Επιβεβαιώστε ή επεξεργαστείτε το όνομα αυτού του σταθμού.{station_page_url_line}",
         "data": {
-          "name": "Όνομα"
+          "name": "Όνομα",
+          "show_on_map": "Show station on map"
         }
       }
     },

@@ -56,7 +56,8 @@
         "title": "Nom de l'estació",
         "description": "Confirmeu o editeu el nom d'aquesta estació.{station_page_url_line}",
         "data": {
-          "name": "Nom"
+          "name": "Nom",
+          "show_on_map": "Show station on map"
         }
       }
     },

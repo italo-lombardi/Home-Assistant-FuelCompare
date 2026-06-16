@@ -25,7 +25,8 @@
         "title": "Назва Станції",
         "description": "Підтвердіть або відредагуйте назву цієї станції.{station_page_url_line}",
         "data": {
-          "name": "Назва"
+          "name": "Назва",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {

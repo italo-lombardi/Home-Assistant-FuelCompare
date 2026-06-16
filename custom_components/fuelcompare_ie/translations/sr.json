@@ -56,7 +56,8 @@
         "title": "Назив станице",
         "description": "Потврдите или измените назив ове станице.{station_page_url_line}",
         "data": {
-          "name": "Назив"
+          "name": "Назив",
+          "show_on_map": "Show station on map"
         }
       }
     },

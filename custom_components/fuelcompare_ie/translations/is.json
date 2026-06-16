@@ -56,7 +56,8 @@
         "title": "Nafn stöðvar",
         "description": "Staðfestu eða breyttu nafni þessarar stöðvar.{station_page_url_line}",
         "data": {
-          "name": "Nafn"
+          "name": "Nafn",
+          "show_on_map": "Show station on map"
         }
       }
     },

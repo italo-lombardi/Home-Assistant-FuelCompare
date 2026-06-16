@@ -56,7 +56,8 @@
         "title": "Statiounsnum",
         "description": "Confirméiert oder ännert den Numm vun dëser Statioun.{station_page_url_line}",
         "data": {
-          "name": "Numm"
+          "name": "Numm",
+          "show_on_map": "Show station on map"
         }
       }
     },
