@@ -1025,3 +1025,67 @@ def test_build_station_data_list_price_returns_none() -> None:
     data = provider._build_station_data(entry_bad_type, _FULL_PAYLOAD)
 
     assert data["unleaded"] is None
+
+
+# ---------------------------------------------------------------------------
+# gr_fuelgov.py lines 262-263 — except (ValueError, TypeError) for diesel float conversion
+# gr_fuelgov.py lines 268-269 — except (ValueError, TypeError) for unleaded float conversion
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_non_numeric_diesel_price() -> None:
+    """Lines 262-263: when diesel price cannot be converted to float, the except block executes."""
+    entry_bad_diesel = {
+        "prefecture": {"id": 3, "name": "ΝΟΜΟΣ ΑΧΑΙΑΣ"},
+        "prices": {
+            "Diesel Κίνησης": [1.0, 2.0],  # list → TypeError when float() called
+            "Αμόλυβδη 95 οκτ.": 1.999,
+        },
+    }
+    payload_bad_diesel = {
+        "data": {
+            "date": _DATE,
+            "entries": [entry_bad_diesel],
+        }
+    }
+    resp = _make_mock_response(200, payload_bad_diesel)
+    session = _make_session(resp)
+
+    provider = GrFuelgovProvider()
+    results = await provider.async_list_stations(session)
+
+    # The entry should still appear (unleaded is valid), but diesel should not be in label
+    assert len(results) == 1
+    _pid, label = results[0]
+    assert "Diesel" not in label
+    assert "Unleaded" in label
+
+
+async def test_async_list_stations_skips_non_numeric_unleaded_price() -> None:
+    """Lines 268-269: when unleaded price cannot be converted to float, the except block executes."""
+    entry_bad_unleaded = {
+        "prefecture": {"id": 4, "name": "ΝΟΜΟΣ ΑΙΤΩΛΙΑΣ ΚΑΙ ΑΚΑΡΝΑΝΙΑΣ"},
+        "prices": {
+            "Diesel Κίνησης": 1.722,
+            "Αμόλυβδη 95 οκτ.": {
+                "value": "bad"
+            },  # dict → TypeError when float() called
+        },
+    }
+    payload_bad_unleaded = {
+        "data": {
+            "date": _DATE,
+            "entries": [entry_bad_unleaded],
+        }
+    }
+    resp = _make_mock_response(200, payload_bad_unleaded)
+    session = _make_session(resp)
+
+    provider = GrFuelgovProvider()
+    results = await provider.async_list_stations(session)
+
+    # The entry should still appear (diesel is valid), but unleaded should not be in label
+    assert len(results) == 1
+    _pid, label = results[0]
+    assert "Diesel" in label
+    assert "Unleaded" not in label

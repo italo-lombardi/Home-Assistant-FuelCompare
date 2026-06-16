@@ -226,3 +226,90 @@ async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() 
     assert result["unleaded"] == pytest.approx(1.699)
     assert result["diesel"] == pytest.approx(1.579)
     assert result["name"] == "Circle K"
+
+
+# ---------------------------------------------------------------------------
+# ie_fuelcompare.py lines 185-188 — _fetch_nextjs except handler returns None
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_nextjs_returns_none_on_key_error() -> None:
+    """Lines 185-188: _fetch_nextjs returns None when json() raises KeyError."""
+    provider = _make_provider("790")
+    provider._build_id = "test-build-id"
+
+    mock_response = AsyncMock()
+    mock_response.status = 200
+    mock_response.json = AsyncMock(side_effect=KeyError("pageProps"))
+    mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+    mock_response.__aexit__ = AsyncMock(return_value=False)
+
+    session = _make_session()
+    session.get = MagicMock(return_value=mock_response)
+
+    result = await provider._fetch_nextjs(session)
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# ie_fuelcompare.py lines 244-245 — _post_encrypted raises ProviderError for non-numeric station ID
+# ---------------------------------------------------------------------------
+
+
+async def test_post_encrypted_raises_provider_error_for_non_numeric_station_id() -> (
+    None
+):
+    """Lines 244-245: _post_encrypted raises ProviderError when station_id cannot be parsed as int."""
+    provider = _make_provider("not-a-number")
+    session = _make_session()
+
+    with pytest.raises(ProviderError, match="must be numeric"):
+        await provider._post_encrypted(session)
+
+
+# ---------------------------------------------------------------------------
+# ie_fuelcompare.py lines 263-269 — _post_encrypted ClientError returns None
+# ---------------------------------------------------------------------------
+
+
+async def test_post_encrypted_returns_none_on_client_error() -> None:
+    """Lines 263-269: _post_encrypted returns None when the POST request raises ClientError."""
+    from aiohttp import ClientError
+
+    provider = _make_provider("790")
+
+    mock_response = AsyncMock()
+    mock_response.__aenter__ = AsyncMock(side_effect=ClientError("connection error"))
+    mock_response.__aexit__ = AsyncMock(return_value=False)
+
+    session = _make_session()
+    session.post = MagicMock(return_value=mock_response)
+
+    result = await provider._post_encrypted(session)
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# ie_fuelcompare.py lines 318-322 — _decrypt_with_recovery returns None after broad scan finds no key
+# ---------------------------------------------------------------------------
+
+
+async def test_decrypt_with_recovery_returns_none_when_key_absent_after_broad_scan() -> (
+    None
+):
+    """Lines 318-322: _decrypt_with_recovery returns None when decrypt key is still None after broad scan."""
+    provider = _make_provider("790")
+    provider._decrypt_key = None  # start with no key
+
+    session = _make_session()
+
+    async def _mock_fetch_page_assets(sess, broad=False):  # noqa: ARG001
+        # Never set a decrypt key — simulates failure to find key even after broad scan
+        pass
+
+    with patch.object(
+        provider, "_fetch_page_assets", side_effect=_mock_fetch_page_assets
+    ):
+        result = await provider._decrypt_with_recovery(session, "ENCRYPTED_BLOB")
+
+    assert result is None

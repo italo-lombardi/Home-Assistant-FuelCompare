@@ -67,7 +67,7 @@ from __future__ import annotations
 import logging
 from typing import Any, ClassVar
 
-from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from aiohttp import ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
@@ -434,8 +434,8 @@ class FiTankilleProvider(BaseProvider):
             Parsed JSON dict (top-level JSON-stat2 object).
 
         Raises:
-            ProviderError: HTTP 4xx/5xx response from the API.
-            aiohttp.ClientError: On network errors (propagates to coordinator).
+            ProviderError: HTTP 400 (malformed query) or 404 (table moved/renamed).
+            aiohttp.ClientError: All other HTTP/network errors (propagates to coordinator).
         """
         _LOGGER.debug("Fetching Statistics Finland fuel prices from %s", _API_URL)
         try:
@@ -462,9 +462,5 @@ class FiTankilleProvider(BaseProvider):
                 payload: dict[str, Any] = await response.json(content_type=None)
         except ProviderError:
             raise
-        except ClientResponseError as exc:
-            raise ProviderError(
-                f"HTTP error {exc.status} from Statistics Finland API"
-            ) from exc
 
         return payload

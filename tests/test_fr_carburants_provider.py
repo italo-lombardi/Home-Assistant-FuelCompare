@@ -751,8 +751,8 @@ def test_build_station_data_maps_identity_fields() -> None:
     assert result["lastupdated"] == "2024-03-15 10:30:00"
 
 
-def test_build_station_data_source_station_id() -> None:
-    """_build_station_data stores the original station ID as source_station_id."""
+def test_build_station_data_source_station_id_not_set() -> None:
+    """_build_station_data does not set source_station_id; coordinator injects it."""
     raw = {
         "id": _STATION_ID,
         "latitude": 43.651,
@@ -765,7 +765,7 @@ def test_build_station_data_source_station_id() -> None:
         "prices": {},
     }
     result = _build_station_data(raw)
-    assert result["source_station_id"] == _STATION_ID
+    assert "source_station_id" not in result
 
 
 def test_build_station_data_empty_prices() -> None:
@@ -1055,8 +1055,8 @@ async def test_async_fetch_all_capabilities_keys_present() -> None:
         assert key in data, f"CAPABILITIES key '{key}' missing from async_fetch output"
 
 
-async def test_async_fetch_source_station_id_populated() -> None:
-    """async_fetch stores the station's source ID in source_station_id."""
+async def test_async_fetch_source_station_id_not_set_by_provider() -> None:
+    """async_fetch does not set source_station_id; coordinator injects it from config entry."""
     zip_bytes = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
     resp = _make_mock_response(200, body=zip_bytes)
     session = _make_session(resp)
@@ -1064,7 +1064,7 @@ async def test_async_fetch_source_station_id_populated() -> None:
     provider = FrCarburantsProvider(_STATION_ID)
     data = await provider.async_fetch(session, _STATION_ID)
 
-    assert data["source_station_id"] == _STATION_ID
+    assert "source_station_id" not in data
 
 
 # ---------------------------------------------------------------------------

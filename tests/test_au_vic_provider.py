@@ -1336,3 +1336,42 @@ def test_build_station_data_no_suburb_or_state_uses_address_fallback() -> None:
     entry = {**_BASE_ENTRY, "fuelStation": station}
     data = _build_station_data(entry)
     assert data["address"] == "99 Test St"
+
+
+# ---------------------------------------------------------------------------
+# au_vic.py line 545 — full_addr = address (else branch when suburb absent/in address)
+# au_vic.py line 551 — return f"{name} (#{uuid_prefix})" (when full_addr is empty)
+# ---------------------------------------------------------------------------
+
+
+def test_build_display_label_suburb_absent_uses_address_directly() -> None:
+    """Line 545: when suburb is falsy, the else branch sets full_addr = address."""
+    fs = {"name": "BP Melbourne", "address": "100 Swanston St", "suburb": ""}
+    label = _build_display_label(fs, "uuid-1234-abcd")
+    # full_addr = "100 Swanston St" (address), not augmented with suburb
+    assert "BP Melbourne" in label
+    assert "100 Swanston St" in label
+    assert "(#uuid-123" in label
+
+
+def test_build_display_label_suburb_already_in_address_uses_address_directly() -> None:
+    """Line 545: when suburb is already embedded in address, else branch sets full_addr = address."""
+    fs = {
+        "name": "Coles Express",
+        "address": "5 Main Rd, Richmond",
+        "suburb": "Richmond",
+    }
+    label = _build_display_label(fs, "uuid-5678-efgh")
+    assert "Coles Express" in label
+    assert "5 Main Rd, Richmond" in label
+    # suburb should NOT be appended again
+    assert "Richmond, Richmond" not in label
+
+
+def test_build_display_label_empty_address_and_no_suburb_returns_name_short_id() -> (
+    None
+):
+    """Line 551: when address='' and suburb='', full_addr is '' so return uses (#{uuid_prefix})."""
+    fs = {"name": "Unknown Station", "address": "", "suburb": ""}
+    label = _build_display_label(fs, "abcdefgh-1234-5678-9abc-def012345678")
+    assert label == "Unknown Station (#abcdefgh)"

@@ -1293,3 +1293,34 @@ def test_parse_station_lng_none_on_non_numeric_lng() -> None:
     result = _parse_station(station)
     assert result["latitude"] == pytest.approx(59.9110)
     assert result["longitude"] is None
+
+
+# ---------------------------------------------------------------------------
+# no_drivstoff.py line 435 — label without address in async_list_stations
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """Line 435: when station address is empty, label uses '{name} (#{uid[:8]})' format."""
+    station_no_addr = {
+        **_BASE_STATION,
+        "address": "",
+    }
+    payload = {"stations": [station_no_addr]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(
+        session, lat=_LAT, lng=_LNG, radius_km=_RADIUS_KM
+    )
+
+    assert len(result) >= 1
+    uid, label = result[0]
+    assert uid == _STATION_UUID
+    # Label should be "{display_name} (#{short_id})" — no comma before the ID
+    assert "(#" in label
+    assert f"(#{_STATION_UUID[:8]})" in label
+    # No comma should appear before the short ID (no address prefix)
+    assert ", " not in label

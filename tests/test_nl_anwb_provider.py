@@ -624,3 +624,48 @@ async def test_async_fetch_raises_provider_error_on_client_response_error() -> N
     provider = NlAnwbProvider()
     with pytest.raises(ProviderError, match="HTTP error"):
         await provider.async_fetch(session, "NL")
+
+
+# ---------------------------------------------------------------------------
+# nl_anwb.py line 350 — bulletin_date from datetime instance (date_val.date().isoformat())
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_parse_bulletin_extracts_date_from_datetime_instance() -> None:
+    """Line 350: when row 0, col 0 contains a datetime instance, bulletin_date uses date().isoformat()."""
+    try:
+        import openpyxl  # noqa: PLC0415
+        from datetime import datetime as _dt  # noqa: PLC0415
+    except ImportError:
+        pytest.skip("openpyxl not installed")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    # Row 1: date column A contains a real datetime object (not a string)
+    ws.append([_dt(2026, 6, 9, 0, 0, 0), "", "", "", "", "", ""])
+    # Row 2: units header
+    ws.append(
+        [
+            "Country",
+            "Euro/1000L",
+            "Euro/1000L",
+            "Euro/1000L",
+            "change",
+            "Euro/1000L",
+            "Euro/1000L",
+        ]
+    )
+    # Row 3: Netherlands data row (col 0=NL, then price columns)
+    ws.append(["Netherlands", 2255.94, 2150.59, 900.0, 0.0, 1200.0, 800.0])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    xlsx_bytes = buf.getvalue()
+
+    result = await _parse_bulletin(xlsx_bytes)
+
+    # The datetime object should have been converted via .date().isoformat()
+    assert result is not None
+    assert result.get("lastupdated") == "2026-06-09"
