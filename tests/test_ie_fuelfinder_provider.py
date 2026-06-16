@@ -627,7 +627,7 @@ def test_get_station_page_url_returns_url_when_slug_cached() -> None:
     )
 
 
-def test_get_station_page_url_returns_none_when_slug_missing() -> None:
-    """Returns None when station_id not in slug cache."""
+def test_get_station_page_url_returns_homepage_when_slug_missing() -> None:
+    """Returns homepage URL when station_id not in slug cache."""
     provider = IEFuelFinderProvider("some-uuid")
-    assert provider.get_station_page_url("unknown-uuid") is None
+    assert provider.get_station_page_url("unknown-uuid") == "https://www.fuelfinder.ie"

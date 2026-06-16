@@ -149,6 +149,7 @@ class IEFuelFinderProvider(BaseProvider):
     PROVIDER_KEY = "ie_fuelfinder"
     LABEL = "FuelFinder.ie"
     CONFIG_MODE = "station_id"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelfinder.ie"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
@@ -411,10 +412,10 @@ class IEFuelFinderProvider(BaseProvider):
         return result
 
     def get_station_page_url(self, station_id: str) -> str | None:
-        """Return the FuelFinder.ie station page URL, or None if slug unknown."""
+        """Return the FuelFinder.ie station page URL, or homepage if slug unknown."""
         slug = self._slug_cache.get(station_id)
         if not slug:
-            return None
+            return self.STATION_PAGE_URL or None
         return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
 
     # ── Internal helpers ──────────────────────────────────────────────────────

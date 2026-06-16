@@ -2836,3 +2836,51 @@ async def test_async_setup_entry_uses_entry_id_when_no_station_and_no_coords(
 
     assert result is True
     assert captured_ids and captured_ids[0] == entry.entry_id
+
+
+async def test_options_flow_station_entry_with_lat_lon_shows_show_on_map(
+    hass: HomeAssistant,
+) -> None:
+    """Options flow for a station_id provider with lat/lon caps shows show_on_map toggle."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
+
+    class _FakeLatLonStation(BaseProvider):
+        COUNTRY = "HR"
+        PROVIDER_KEY = "hr_fake_latlon_opts"
+        LABEL = "HR Fake LatLon Opts"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "manual_id"
+        CAPABILITIES: frozenset = frozenset({"latitude", "longitude", "diesel"})
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY["hr_fake_latlon_opts"] = _FakeLatLonStation
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_hr_fake_latlon_opts_99",
+            data={CONF_STATION_ID: "99", CONF_PROVIDER: "hr_fake_latlon_opts"},
+            options={},
+            title="HR Station 99",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["type"] == "form"
+        schema_keys = [str(k) for k in result["data_schema"].schema.keys()]
+        assert any(CONF_SHOW_ON_MAP in k for k in schema_keys)
+
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"],
+            user_input={CONF_SHOW_ON_MAP: True},
+        )
+        assert result["type"] == "create_entry"
+        assert result["data"].get(CONF_SHOW_ON_MAP) is True
+    finally:
+        PROVIDER_REGISTRY.pop("hr_fake_latlon_opts", None)

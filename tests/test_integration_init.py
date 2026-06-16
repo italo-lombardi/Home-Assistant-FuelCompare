@@ -153,3 +153,70 @@ async def test_setup_entry_device_tracker_not_loaded_without_lat_lon_caps() -> N
         await async_setup_entry(hass, entry)
 
     assert Platform.DEVICE_TRACKER not in forwarded_platforms
+
+
+async def test_unload_entry_device_tracker_unloaded_when_show_on_map() -> None:
+    """async_unload_entry includes DEVICE_TRACKER when show_on_map=True + lat/lon caps."""
+    from homeassistant.const import Platform
+    from custom_components.fuelcompare_ie import async_unload_entry
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.const import DOMAIN, CONF_SHOW_ON_MAP
+
+    provider_key = "at_econtrol"
+    entry = _make_entry(
+        provider_key=provider_key,
+        station_id="1354901",
+        options={CONF_SHOW_ON_MAP: True},
+    )
+
+    coordinator_mock = MagicMock()
+    coordinator_mock.provider_capabilities = PROVIDER_REGISTRY[
+        provider_key
+    ].CAPABILITIES
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {entry.entry_id: coordinator_mock}}
+
+    unloaded_platforms: list = []
+
+    async def capture_unload(e, platforms):
+        unloaded_platforms.extend(platforms)
+        return True
+
+    hass.config_entries = MagicMock()
+    hass.config_entries.async_unload_platforms = capture_unload
+
+    await async_unload_entry(hass, entry)
+
+    assert Platform.DEVICE_TRACKER in unloaded_platforms
+
+
+async def test_unload_entry_coordinator_none_fallback() -> None:
+    """async_unload_entry falls back to provider class caps when coordinator absent."""
+    from homeassistant.const import Platform
+    from custom_components.fuelcompare_ie import async_unload_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN, CONF_SHOW_ON_MAP
+
+    entry = _make_entry(
+        provider_key="at_econtrol",
+        station_id="1354901",
+        options={CONF_SHOW_ON_MAP: True},
+    )
+
+    hass = MagicMock()
+    hass.data = {
+        DOMAIN: {}
+    }  # coordinator absent — triggers fallback to class CAPABILITIES
+
+    unloaded_platforms: list = []
+
+    async def capture_unload(e, platforms):
+        unloaded_platforms.extend(platforms)
+        return True
+
+    hass.config_entries = MagicMock()
+    hass.config_entries.async_unload_platforms = capture_unload
+
+    await async_unload_entry(hass, entry)
+
+    assert Platform.DEVICE_TRACKER in unloaded_platforms

@@ -1607,3 +1607,23 @@ async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:
         data = await coordinator._async_update_data()
 
     assert data == expected
+
+
+def test_base_provider_bad_station_page_url_template_raises() -> None:
+    """Defining a provider with STATION_PAGE_URL_TEMPLATE missing {station_id} raises TypeError."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    with pytest.raises(TypeError, match="must contain.*station_id"):
+
+        class _BadTemplateProvider(BaseProvider):
+            COUNTRY = "XX"
+            PROVIDER_KEY = "xx_bad_template_test"
+            LABEL = "Bad Template Test"
+            CAPABILITIES: frozenset = frozenset()
+            STATION_PAGE_URL_TEMPLATE: str = "https://example.com/station/{id}"
+
+            async def async_fetch(self, session, station_id):
+                return {}
+
+            async def async_fetch_station_name(self, session, station_id):
+                return None
