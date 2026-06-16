@@ -474,9 +474,9 @@ async def test_async_list_stations_label_includes_station_name() -> None:
 
     assert result
     _, label = result[0]
-    # Label format: "{name}, {street} (#{uid[:8]})" or "{name} (#{uid[:8]})"
+    # Label format: "{name}, {street} (#{uid[:12]})" or "{name} (#{uid[:12]})"
     assert "(#" in label
-    assert _STATION_ID[:8] in label
+    assert _STATION_ID[:12] in label
 
 
 async def test_async_list_stations_returns_empty_on_failure() -> None:

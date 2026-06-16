@@ -401,14 +401,14 @@ class IEFuelFinderProvider(BaseProvider):
 
             # Build label: include street when present, always append short UUID.
             if street:
-                label = f"{display_name}, {street} (#{uid[:8]})"
+                label = f"{display_name}, {street} (#{uid[:12]})"
             else:
-                label = f"{display_name} (#{uid[:8]})"
+                label = f"{display_name} (#{uid[:12]})"
 
             result.append((uid, label))
 
         # Sort alphabetically by label (case-insensitive).
-        result.sort(key=lambda x: x[0].lower())
+        result.sort(key=lambda x: x[1].lower())
         return result
 
     def get_station_page_url(self, station_id: str) -> str | None:
