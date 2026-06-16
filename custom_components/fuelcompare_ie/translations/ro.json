@@ -23,7 +23,7 @@
       },
       "name": {
         "title": "Numele Stației",
-        "description": "Confirmați sau editați numele acestei stații.",
+        "description": "Confirmați sau editați numele acestei stații.{station_page_url_line}",
         "data": {
           "name": "Nume"
         }

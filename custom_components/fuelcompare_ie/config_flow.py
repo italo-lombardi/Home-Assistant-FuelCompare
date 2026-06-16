@@ -380,6 +380,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_county: str = ""  # stored for county_search providers
         self._postal_code: str = ""  # for postal-code-centric providers (e.g. be_carbu)
         self._station_list: list[tuple[str, str]] = []  # for station picker
+        self._station_url_map: dict[str, str] = {}  # station_id → provider page URL
+        self._station_page_url: str = (
+            ""  # URL for selected station (shown on name step)
+        )
         self._latitude: float | None = None
         self._longitude: float | None = None
         self._radius_km: float = DEFAULT_RADIUS_KM
@@ -586,6 +590,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     )
                     self._abort_if_unique_id_configured()
                 self._station_id = station_id
+                self._station_page_url = self._station_url_map.get(station_id, "")
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key, self._api_key
                 )
@@ -615,6 +620,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 station_list = await provider_instance.async_list_stations(
                     session, **list_kwargs
                 )
+                # Build URL map — providers override get_station_page_url() when
+                # they have a stable station detail page (e.g. fuelfinder.ie slug).
+                self._station_url_map = {
+                    uid: url
+                    for uid, _ in station_list
+                    if (url := provider_instance.get_station_page_url(uid))
+                }
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Failed to load station list: %s", err)
 
@@ -745,6 +757,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_NAME, default=self._suggested_name): str,
                 }
             ),
+            description_placeholders={
+                "station_page_url_line": (
+                    f"\n\n[View station on provider website]({self._station_page_url})"
+                    if self._station_page_url
+                    else ""
+                ),
+            },
         )
 
 

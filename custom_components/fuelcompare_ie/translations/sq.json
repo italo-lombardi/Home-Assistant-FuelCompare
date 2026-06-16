@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Emri i Stacionit",
-        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.",
+        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.{station_page_url_line}",
         "data": {
           "name": "Emri"
         }

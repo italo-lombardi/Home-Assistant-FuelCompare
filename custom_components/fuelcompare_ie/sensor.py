@@ -90,7 +90,6 @@ _INFO_SENSOR_REGISTRY: dict[str, Any] = {
     "payments": lambda c, s, n: StationAboutCategorySensor(
         c, s, n, "Payments", "payments", "mdi:credit-card"
     ),
-    "last_successful_fetch": lambda c, s, n: LastSuccessfulFetchSensor(c, s, n),
 }
 
 
@@ -155,6 +154,9 @@ async def async_setup_entry(
     for cap_key, factory in _INFO_SENSOR_REGISTRY.items():
         if cap_key in caps:
             entities.append(factory(coordinator, station_id, station_name))
+
+    # Always-on diagnostic sensor (no CAPABILITIES gate, mirrors data_fetch_problem)
+    entities.append(LastSuccessfulFetchSensor(coordinator, station_id, station_name))
 
     async_add_entities(entities)
 

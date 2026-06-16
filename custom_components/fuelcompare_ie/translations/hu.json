@@ -23,7 +23,7 @@
       },
       "name": {
         "title": "Állomás Neve",
-        "description": "Erősítse meg vagy szerkessze az állomás nevét.",
+        "description": "Erősítse meg vagy szerkessze az állomás nevét.{station_page_url_line}",
         "data": {
           "name": "Név"
         }

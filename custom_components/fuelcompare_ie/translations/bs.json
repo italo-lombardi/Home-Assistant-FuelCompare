@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Naziv Stanice",
-        "description": "Potvrdite ili uredite naziv ove stanice.",
+        "description": "Potvrdite ili uredite naziv ove stanice.{station_page_url_line}",
         "data": {
           "name": "Naziv"
         }

@@ -424,3 +424,12 @@ class BaseProvider(ABC):
         method. The default implementation returns an empty list (safe fallback).
         """
         return []
+
+    def get_station_page_url(self, station_id: str) -> str | None:
+        """Return a URL for the station's page on the provider website, or None.
+
+        Called by the config flow after station selection to display a link.
+        Override in providers that have a stable station detail page URL.
+        The default returns None (no link shown).
+        """
+        return None

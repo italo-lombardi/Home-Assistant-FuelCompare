@@ -23,7 +23,7 @@
       },
       "name": {
         "title": "Jaama Nimi",
-        "description": "Kinnitage või muutke selle jaama nime.",
+        "description": "Kinnitage või muutke selle jaama nime.{station_page_url_line}",
         "data": {
           "name": "Nimi"
         }

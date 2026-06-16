@@ -23,7 +23,7 @@
       },
       "name": {
         "title": "Stationsnamn",
-        "description": "Bekräfta eller redigera namnet på den här stationen.",
+        "description": "Bekräfta eller redigera namnet på den här stationen.{station_page_url_line}",
         "data": {
           "name": "Namn"
         }

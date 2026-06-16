@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Nom de la station",
-        "description": "Confirmez ou modifiez le nom de cette station.",
+        "description": "Confirmez ou modifiez le nom de cette station.{station_page_url_line}",
         "data": {
           "name": "Nom"
         }

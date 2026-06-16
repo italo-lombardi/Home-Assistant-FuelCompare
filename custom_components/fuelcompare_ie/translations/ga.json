@@ -23,7 +23,7 @@
       },
       "name": {
         "title": "Ainm an Stáisiúin",
-        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.",
+        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.{station_page_url_line}",
         "data": {
           "name": "Ainm"
         }

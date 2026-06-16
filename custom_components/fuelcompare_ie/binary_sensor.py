@@ -217,12 +217,14 @@ async def async_setup_entry(
     station_name = entry.title
     caps = coordinator.provider_capabilities
 
-    # is_open: created only when provider declares "is_open" capability.
+    # is_open: created when provider declares "is_open", "working_hours", or
+    # "opening_hours" — any hours capability implies we can derive open/closed.
     # data_fetch_problem: always created (coordinator-managed).
     entities: list[BinarySensorEntity] = [
         DataFetchProblemBinarySensor(coordinator, station_id, station_name),
     ]
-    if "is_open" in caps:
+    _HOURS_CAPS = {"is_open", "working_hours", "opening_hours"}
+    if caps & _HOURS_CAPS:
         entities.insert(
             0, StationIsOpenBinarySensor(coordinator, station_id, station_name)
         )

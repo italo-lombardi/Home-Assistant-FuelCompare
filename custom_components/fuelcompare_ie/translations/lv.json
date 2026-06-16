@@ -23,7 +23,7 @@
       },
       "name": {
         "title": "Stacijas Nosaukums",
-        "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.",
+        "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.{station_page_url_line}",
         "data": {
           "name": "Nosaukums"
         }

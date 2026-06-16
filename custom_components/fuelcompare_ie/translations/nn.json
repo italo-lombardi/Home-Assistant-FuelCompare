@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Stasjonsnamn",
-        "description": "Stadfest eller endra namnet på denne stasjonen.",
+        "description": "Stadfest eller endra namnet på denne stasjonen.{station_page_url_line}",
         "data": {
           "name": "Namn"
         }

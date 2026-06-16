@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Aseman Nimi",
-        "description": "Vahvista tai muuta tämän aseman nimeä.",
+        "description": "Vahvista tai muuta tämän aseman nimeä.{station_page_url_line}",
         "data": {
           "name": "Nimi"
         }

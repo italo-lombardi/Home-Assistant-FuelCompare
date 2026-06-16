@@ -410,6 +410,13 @@ class IEFuelFinderProvider(BaseProvider):
         result.sort(key=lambda x: x[0].lower())
         return result
 
+    def get_station_page_url(self, station_id: str) -> str | None:
+        """Return the FuelFinder.ie station page URL, or None if slug unknown."""
+        slug = self._slug_cache.get(station_id)
+        if not slug:
+            return None
+        return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
+
     # ── Internal helpers ──────────────────────────────────────────────────────
 
     async def _fetch_stations(

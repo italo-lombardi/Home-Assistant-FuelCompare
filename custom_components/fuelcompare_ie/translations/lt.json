@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Stoties Pavadinimas",
-        "description": "Patvirtinkite arba redaguokite šios stoties pavadinimą.",
+        "description": "Patvirtinkite arba redaguokite šios stoties pavadinimą.{station_page_url_line}",
         "data": {
           "name": "Pavadinimas"
         }

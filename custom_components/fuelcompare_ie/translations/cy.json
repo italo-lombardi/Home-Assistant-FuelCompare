@@ -54,7 +54,7 @@
       },
       "name": {
         "title": "Enw'r Orsaf",
-        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.",
+        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.{station_page_url_line}",
         "data": {
           "name": "Enw"
         }
