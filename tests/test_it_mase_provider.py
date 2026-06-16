@@ -1491,3 +1491,31 @@ async def test_async_list_stations_kwargs_override_constructor_radius() -> None:
 
     station_ids = [sid for sid, _ in results]
     assert "3464" in station_ids
+
+
+# ---------------------------------------------------------------------------
+# it_mase.py line 542 — label without address in async_list_stations
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """Line 542: when both indirizzo and comune are absent, label uses '{brand} (#{short_id})' format."""
+    meta_csv_no_addr = (
+        "Estrazione del 2026-06-13\n"
+        "idImpianto|Gestore|Bandiera|Tipo Impianto|Nome Impianto|Indirizzo|Comune|Provincia|Latitudine|Longitudine\n"
+        "3464|Mario Rossi|ENI|Stradale|ENI Via Roma||  |RM|41.9028|12.4964\n"
+    )
+    session = _make_session_with_csvs(meta_csv=meta_csv_no_addr)
+    provider = ItMaseProvider(
+        "3464", latitude=41.9028, longitude=12.4964, radius_km=50.0
+    )
+    results = await provider.async_list_stations(
+        session, lat=41.9028, lng=12.4964, radius_km=50.0
+    )
+
+    assert len(results) >= 1
+    sid, label = results[0]
+    # No address → label should be "ENI (#{short_id})" without a comma
+    assert "(#" in label
+    # No comma separating name from ID
+    assert label.count(",") == 0

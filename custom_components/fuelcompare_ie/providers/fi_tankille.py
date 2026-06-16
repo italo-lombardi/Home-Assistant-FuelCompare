@@ -434,8 +434,8 @@ class FiTankilleProvider(BaseProvider):
             Parsed JSON dict (top-level JSON-stat2 object).
 
         Raises:
-            ProviderError: HTTP 4xx/5xx response from the API.
-            aiohttp.ClientError: On network errors (propagates to coordinator).
+            ProviderError: HTTP 400 (malformed query) or 404 (table moved/renamed).
+            aiohttp.ClientError: All other HTTP/network errors (propagates to coordinator).
         """
         _LOGGER.debug("Fetching Statistics Finland fuel prices from %s", _API_URL)
         try:

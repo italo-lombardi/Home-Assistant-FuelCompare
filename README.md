@@ -289,7 +289,7 @@ This project is a personal, community tool. It is **not** the official FuelCompa
 
 ## Roadmap
 
-**Completed in 0.7.0:**
+**Completed features:**
 - Provider abstraction layer (`BaseProvider` ABC, `providers/` module) — 0.7.0
 - FuelFinder.ie (Ireland, ~1,000+ stations) — 0.8.0
 - Multi-country support: 36 providers, 27 countries, plugin architecture — 0.9.0

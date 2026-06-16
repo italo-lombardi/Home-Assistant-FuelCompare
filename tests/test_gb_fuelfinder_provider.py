@@ -1413,3 +1413,43 @@ async def test_fetch_csv_sends_if_none_match_when_etag_cached() -> None:
     )
     assert "If-None-Match" in headers_sent
     assert headers_sent["If-None-Match"] == '"cached-etag"'
+
+
+# ---------------------------------------------------------------------------
+# gb_fuelfinder.py line 308 — label without address in async_list_stations
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """Line 308: when all address parts are empty, label uses '{name} (#{node_id[:8]})' format."""
+    GbFuelfinderProvider._csv_cache = None
+    GbFuelfinderProvider._csv_cache_ts = 0.0
+
+    # Build a row with no address fields
+    row_no_addr = {
+        **_BASE_ROW,
+        "forecourts.location.address_line_1": "",
+        "forecourts.location.address_line_2": "",
+        "forecourts.location.city": "",
+        "forecourts.location.postcode": "",
+    }
+    resp = _make_csv_response(row_no_addr)
+    session = _make_session(resp)
+
+    provider = GbFuelfinderProvider(_NODE_ID)
+    result = await provider.async_list_stations(
+        session,
+        lat=51.5074,
+        lng=-0.1278,
+        radius_km=10.0,
+    )
+
+    assert len(result) >= 1
+    sid, label = result[0]
+    # Label should be "{display_name} (#{node_id[:8]})" — no comma before the ID
+    assert "(#" in label
+    assert sid == _NODE_ID
+    # Verify no address part (no comma in the label before the short ID)
+    assert f"(#{_NODE_ID[:8]})" in label
+    assert label.endswith(f"(#{_NODE_ID[:8]})")

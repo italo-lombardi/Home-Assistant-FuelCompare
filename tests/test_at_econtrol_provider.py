@@ -1584,3 +1584,51 @@ async def test_async_list_stations_non_list_json_response_returns_empty() -> Non
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
 
     assert result == []
+
+
+# ---------------------------------------------------------------------------
+# at_econtrol.py lines 218-219 — one fuel-type raises non-ClientError BaseException
+# ---------------------------------------------------------------------------
+
+
+async def test_fetch_stations_merged_skips_failing_fuel_type_non_client_error() -> None:
+    """Lines 218-219: when one fuel-type gather result is a non-ClientError BaseException,
+    the debug log fires and that result is skipped while others still populate the merged dict.
+    """
+    from unittest.mock import patch
+
+    die_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "DIE", "amount": 1.599}],
+    }
+    sup_station = {
+        **_BASE_STATION_RAW,
+        "prices": [{"fuelType": "SUP", "amount": 1.679}],
+    }
+
+    # Patch _fetch_fuel_type so that the GAS call raises ValueError (non-ClientError)
+    # while DIE and SUP calls return valid station lists.
+    call_count = {"n": 0}
+
+    async def _patched_fetch_fuel_type(session, lat, lng, code):
+        call_count["n"] += 1
+        if code == "GAS":
+            raise ValueError("bad fuel type data")
+        if code == "DIE":
+            return [die_station]
+        if code == "SUP":
+            return [sup_station]
+        return []
+
+    p = _provider()
+    with patch.object(p, "_fetch_fuel_type", side_effect=_patched_fetch_fuel_type):
+        session = MagicMock()
+        # async_fetch calls _fetch_stations which uses gather with return_exceptions=True
+        data = await p.async_fetch(session, _STATION_ID)
+
+    # The station is still found — DIE and SUP results populated it
+    assert data is not None
+    assert data["diesel"] == pytest.approx(1.599)
+    assert data["unleaded"] == pytest.approx(1.679)
+    # cng is None because GAS call raised
+    assert data["cng"] is None

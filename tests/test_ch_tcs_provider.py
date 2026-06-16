@@ -1059,3 +1059,26 @@ async def test_async_fetch_bbox_returns_empty_list_on_malformed_data_field() -> 
     # We can verify via async_list_stations: no stations should appear
     result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
     assert result == []
+
+
+# ---------------------------------------------------------------------------
+# ch_tcs.py line 355 — label without address in async_list_stations
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """Line 355: when formattedAddress is absent/empty, label uses '{name} (#{sid[:8]})' format."""
+    station_no_addr = {
+        **_BASE_STATION,
+        "formattedAddress": None,
+    }
+    payload = {"data": [station_no_addr]}
+    session = _make_session_always(payload)
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert len(result) >= 1
+    sid, label = result[0]
+    # Address should not appear in label; only name and short ID
+    assert "(#" in label
+    assert ", " not in label or label.startswith(_BASE_STATION.get("displayName", ""))

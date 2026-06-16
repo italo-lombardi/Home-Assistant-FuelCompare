@@ -1361,3 +1361,19 @@ def test_parse_stations_div_float_value_error_skips_price() -> None:
 
     # Result may be empty or partial — we just need the line covered
     assert isinstance(result, list)
+
+
+# ---------------------------------------------------------------------------
+# ba_fuel.py line 192 — raise ProviderError when city_slug not in _CITY_SLUGS
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_async_fetch_raises_provider_error_for_unknown_city_slug() -> None:
+    """Line 192: async_fetch raises ProviderError when city_slug not in _CITY_SLUGS."""
+    provider = _default_provider()
+    session = MagicMock()
+
+    # "fakecity" is not in _CITY_SLUGS
+    with pytest.raises(ProviderError, match="Unknown city slug"):
+        await provider.async_fetch(session, "fakecity:0")

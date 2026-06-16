@@ -1422,3 +1422,124 @@ def test_build_display_label_brand_only() -> None:
     }
     label = _build_display_label(data)
     assert "BP" in label
+
+
+# ---------------------------------------------------------------------------
+# au_fuelwatch.py line 479 — _build_display_label identity=address fallback ("Unknown Station")
+# ---------------------------------------------------------------------------
+
+
+def test_build_display_label_all_identity_fields_absent_uses_unknown() -> None:
+    """_build_display_label falls back to 'Unknown Station' when brand, name, and address are all absent."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_display_label,
+    )
+
+    data: dict = {
+        "brand": None,
+        "name": None,
+        "address": None,
+        "unleaded": 1.799,
+        "diesel": None,
+    }
+    label = _build_display_label(data)
+    assert label == "Unknown Station — ULP A$1.799"
+
+
+def test_build_display_label_empty_address_uses_unknown() -> None:
+    """_build_display_label returns 'Unknown Station' when brand=None, name=None, address=''."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_display_label,
+    )
+
+    data: dict = {
+        "brand": None,
+        "name": None,
+        "address": "",
+        "unleaded": None,
+        "diesel": None,
+    }
+    label = _build_display_label(data)
+    assert label == "Unknown Station"
+
+
+# ---------------------------------------------------------------------------
+# au_fuelwatch.py lines 527-530 — _build_station_list_label identity="Unknown Station"
+# ---------------------------------------------------------------------------
+
+
+def test_build_station_list_label_all_identity_fields_absent() -> None:
+    """_build_station_list_label uses 'Unknown Station' when brand, name are absent."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_station_list_label,
+    )
+
+    data: dict = {
+        "brand": None,
+        "name": None,
+        "address": "42 Elm St",
+    }
+    sid = "-31.8027,115.8376"
+    label = _build_station_list_label(data, sid)
+    # identity should be "Unknown Station", address present → format with address
+    assert "Unknown Station" in label
+    assert "42 Elm St" in label
+    assert "(#" in label
+
+
+def test_build_station_list_label_no_address_returns_short_id_format() -> None:
+    """_build_station_list_label returns '{identity} (#{short_id})' when address is absent."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_station_list_label,
+    )
+
+    data: dict = {
+        "brand": None,
+        "name": None,
+        "address": "",
+    }
+    sid = "-31.8027,115.8376"
+    label = _build_station_list_label(data, sid)
+    assert label == "Unknown Station (#-31.8027)"
+
+
+# ---------------------------------------------------------------------------
+# au_fuelwatch.py line 479 — _build_display_label identity = f"{brand} {name}"
+# au_fuelwatch.py line 528 — _build_station_list_label identity = brand
+# ---------------------------------------------------------------------------
+
+
+def test_build_display_label_brand_and_name_combined_when_brand_not_in_name() -> None:
+    """Line 479: identity = f'{brand} {name}' when both present and brand not in name."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_display_label,
+    )
+
+    data = {
+        "brand": "BP",
+        "name": "Service Station",  # 'bp' not in 'service station'
+        "address": "1 Main St",
+        "unleaded": 1.799,
+        "diesel": None,
+    }
+    label = _build_display_label(data)
+    assert "BP Service Station" in label
+    assert "ULP" in label
+
+
+def test_build_station_list_label_brand_only_when_name_absent() -> None:
+    """Line 528: identity = brand when name is absent but brand is present."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _build_station_list_label,
+    )
+
+    data = {
+        "brand": "Shell",
+        "name": None,
+        "address": "25 Beach Rd",
+    }
+    sid = "-31.9000,115.9000"
+    label = _build_station_list_label(data, sid)
+    assert "Shell" in label
+    assert "25 Beach Rd" in label
+    assert "(#" in label

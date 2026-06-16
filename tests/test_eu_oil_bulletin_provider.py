@@ -1203,3 +1203,83 @@ def test_parse_sheet_skips_row_with_whitespace_only_country() -> None:
     result = _parse_sheet(sheet_mock, 0)
     assert "DE" in result
     assert len(result) == 1
+
+
+# ---------------------------------------------------------------------------
+# eu_oil_bulletin.py line 288 — raise ProviderError from InvalidFileException/ValueError/TypeError
+# eu_oil_bulletin.py line 298 — bare re-raise for non-BadZipFile exception in BLE001 handler
+# ---------------------------------------------------------------------------
+
+
+def _make_invalid_xlsx_bytes() -> bytes:
+    """Create a ZIP file that is not a valid XLSX (triggers openpyxl.InvalidFileException)."""
+    import io
+    import zipfile
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        # Valid ZIP but lacks the required OOXML structure (no [Content_Types].xml etc.)
+        zf.writestr("random.txt", "this is not xlsx content")
+    return buf.getvalue()
+
+
+@_skip_if_no_openpyxl
+async def test_async_fetch_raises_provider_error_on_invalid_file_exception() -> None:
+    """Line 288: ProviderError is raised when the workbook is a valid ZIP but not a valid XLSX."""
+    import sys
+
+    # Some earlier tests pop openpyxl from sys.modules leaving submodules inconsistent.
+    # Fully reload openpyxl (parent + all submodules) to restore a coherent state.
+    _to_pop = [k for k in sys.modules if k == "openpyxl" or k.startswith("openpyxl.")]
+    for _k in _to_pop:
+        sys.modules.pop(_k)
+    import openpyxl as _opx  # noqa: F401
+    import openpyxl.utils.exceptions  # noqa: F401
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    xlsx_body = _make_invalid_xlsx_bytes()
+    resp = _make_mock_response(200, body=xlsx_body)
+    session = _make_session(resp)
+
+    provider = _make_provider("DE")
+
+    with pytest.raises(ProviderError, match="Failed to parse"):
+        await provider.async_fetch(session, "DE")
+
+
+@_skip_if_no_openpyxl
+async def test_async_fetch_reraises_non_bad_zip_exception_from_ble001_handler() -> None:
+    """Line 298: when load_workbook raises a non-BadZipFile exception in the BLE001 handler,
+    it is re-raised as-is (not wrapped in ProviderError)."""
+    import asyncio
+    import sys
+
+    # Fully reload openpyxl to restore a coherent state after sys.modules manipulation.
+    _to_pop = [k for k in sys.modules if k == "openpyxl" or k.startswith("openpyxl.")]
+    for _k in _to_pop:
+        sys.modules.pop(_k)
+    import openpyxl as _opx  # noqa: F401
+    import openpyxl.utils.exceptions  # noqa: F401
+
+    EuOilBulletinProvider._cached_workbook_bytes = None
+    EuOilBulletinProvider._cached_fetch_time = None
+
+    xlsx_body = b"some bytes"
+    resp = _make_mock_response(200, body=xlsx_body)
+    session = _make_session(resp)
+
+    provider = _make_provider("DE")
+
+    class _WeirdError(Exception):
+        pass
+
+    # Patch run_in_executor to run synchronously so mock is in scope
+    async def _sync_executor(self_loop, executor, func, *args):  # noqa: ARG001
+        return func(*args)
+
+    with patch.object(asyncio.AbstractEventLoop, "run_in_executor", _sync_executor):
+        with patch("openpyxl.load_workbook", side_effect=_WeirdError("strange error")):
+            with pytest.raises(_WeirdError):
+                await provider.async_fetch(session, "DE")

@@ -791,3 +791,77 @@ async def test_parse_malta_row_skips_empty_row_and_none_country_cell() -> None:
 
     assert result is not None
     assert result["petrol_95"] == pytest.approx(1.340)
+
+
+# ---------------------------------------------------------------------------
+# mt_fuel.py lines 361-362 — SSRF guard rejects primary xlsx href
+# mt_fuel.py lines 372-373 — SSRF guard rejects fallback href
+# mt_fuel.py line 450 — _make_absolute raises when scheme is not http/https
+# ---------------------------------------------------------------------------
+
+
+async def test_scrape_xlsx_url_ssrf_guard_rejects_primary_href() -> None:
+    """Lines 361-362: _scrape_xlsx_url catches ProviderError from _make_absolute for primary pattern."""
+    from unittest.mock import patch
+
+    provider = MtFuelProvider()
+
+    # An HTML that matches _XLSX_HREF_PATTERN (contains "Weekly...prices...with...Taxes...xlsx")
+    href = "Weekly_EU_DD_prices_with_Taxes_by_Member_State.xlsx"
+    html = f'<a href="{href}">Download</a>'.encode()
+    page_resp = _make_mock_response(200, body=html)
+    session = _make_session(page_resp)
+
+    # Make _make_absolute raise ProviderError for ANY call
+    with patch(
+        "custom_components.fuelcompare_ie.providers.mt_fuel._make_absolute",
+        side_effect=ProviderError("SSRF guard: test rejection"),
+    ):
+        result = await provider._scrape_xlsx_url(session)
+
+    assert result is None
+
+
+async def test_scrape_xlsx_url_ssrf_guard_rejects_fallback_href() -> None:
+    """Lines 372-373: _scrape_xlsx_url catches ProviderError from _make_absolute for fallback pattern."""
+    from unittest.mock import patch
+
+    provider = MtFuelProvider()
+
+    # HTML that does NOT match _XLSX_HREF_PATTERN but does match _DOWNLOAD_HREF_PATTERN
+    # and contains 'xlsx' in the href
+    href = "/document/download/abcdef12-1234-5678-9abc-def012345678_en?filename=Weekly.xlsx"
+    html = f'<a href="{href}">Download</a>'.encode()
+    page_resp = _make_mock_response(200, body=html)
+    session = _make_session(page_resp)
+
+    # Make _make_absolute raise ProviderError for ANY call
+    with patch(
+        "custom_components.fuelcompare_ie.providers.mt_fuel._make_absolute",
+        side_effect=ProviderError("SSRF guard: test rejection"),
+    ):
+        result = await provider._scrape_xlsx_url(session)
+
+    assert result is None
+
+
+def test_make_absolute_raises_on_non_http_scheme() -> None:
+    """Line 450: _make_absolute raises ProviderError when resolved URL has non-http/https scheme."""
+    from unittest.mock import patch
+    from urllib.parse import ParseResult
+
+    # Patch urlparse so that the resolved URL appears to have scheme 'ftp'
+    fake_parsed = ParseResult(
+        scheme="ftp",
+        netloc="energy.ec.europa.eu",
+        path="/some/file.xlsx",
+        params="",
+        query="",
+        fragment="",
+    )
+    with patch(
+        "custom_components.fuelcompare_ie.providers.mt_fuel.urlparse",
+        return_value=fake_parsed,
+    ):
+        with pytest.raises(ProviderError, match="unexpected URL scheme"):
+            _make_absolute("/some/file.xlsx")

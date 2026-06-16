@@ -1096,3 +1096,32 @@ def test_base_url_points_to_minetur() -> None:
 
     assert "sedeaplicaciones.minetur.gob.es" in _BASE_URL
     assert _BASE_URL.startswith("https://")
+
+
+# ---------------------------------------------------------------------------
+# es_minetur.py line 284 — label without address in async_list_stations
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """Line 284: when address ('Dirección') is absent/empty, label uses '{brand} (#{id_suffix})' format."""
+    import json
+
+    station_no_addr = {
+        **_BASE_STATION,
+        "Dirección": "",
+    }
+    payload = {**_PAYLOAD, "ListaEESSPrecio": [station_no_addr]}
+    resp = _make_mock_response(200, body_bytes=json.dumps(payload).encode())
+    session = _make_session(resp)
+
+    provider = EsMineturProvider("4375", latitude=40.416775, longitude=-3.703790)
+    result = await provider.async_list_stations(session, lat=40.416775, lng=-3.703790)
+
+    assert len(result) >= 1
+    sid, label = result[0]
+    # No comma before the short ID; label is brand + short ID only
+    assert "(#" in label
+    assert "REPSOL" in label
+    # Address part should be absent (no ", " before "(#")
+    assert ", " + "(#" not in label

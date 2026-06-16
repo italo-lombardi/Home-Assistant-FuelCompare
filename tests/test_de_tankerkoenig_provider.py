@@ -1433,3 +1433,42 @@ async def test_async_fetch_wraps_non_client_error_in_provider_error() -> None:
 
     with pytest.raises(ProviderError):
         await provider.async_fetch(session, _STATION_UUID)
+
+
+# ---------------------------------------------------------------------------
+# de_tankerkoenig.py line 402 — label without address in async_list_stations
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """Line 402: when _build_address returns None, label uses '{name} (#{short_id})' format."""
+    # Station with no street, no postCode, no place → _build_address returns None
+    no_addr_station = {
+        "id": "no-addr-uuid-1234",
+        "name": "Esso No Address",
+        "brand": "Esso",
+        "street": None,
+        "houseNumber": None,
+        "postCode": None,
+        "place": None,
+        "lat": 52.520,
+        "lng": 13.405,
+        "dist": 0.3,
+        "e5": 1.799,
+        "e10": 1.769,
+        "diesel": 1.699,
+        "isOpen": True,
+    }
+    payload = {"ok": True, "stations": [no_addr_station]}
+    resp = _make_mock_response(200, json_data=payload)
+    session = _make_session(resp)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session)
+
+    assert len(result) >= 1
+    sid, label = result[0]
+    assert sid == "no-addr-uuid-1234"
+    # No comma before the short ID when address is absent
+    assert "(#" in label
+    assert "no-addr" in label  # first 8 chars of the id

@@ -876,3 +876,103 @@ async def test_async_list_stations_sorts_no_price_station_last() -> None:
     station_ids = [sid for sid, _ in result]
     # "Alpha Has Price" sorts before "Zeta No Price" alphabetically (A < Z)
     assert station_ids.index("5501") < station_ids.index("5500")
+
+
+# ---------------------------------------------------------------------------
+# ie_pumps.py lines 363-364 — address = addr2 when addr1 empty, addr2 non-empty
+# ie_pumps.py line 376 — label without address (both addr1 and addr2 empty)
+# ---------------------------------------------------------------------------
+
+_ADDR2_ONLY_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="7771" Lat="53.3498" Lng="-6.2603"
+           name="Addr2 Only" brand="Circle K"
+           addr1="" addr2="Northside Dublin"
+           price="173.9" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+</stations>
+"""
+
+_NO_ADDR_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="7772" Lat="53.3498" Lng="-6.2603"
+           name="No Address" brand="Texaco"
+           addr1="" addr2=""
+           price="174.0" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+</stations>
+"""
+
+
+async def test_async_list_stations_uses_addr2_when_addr1_empty() -> None:
+    """Lines 363-364: when addr1 is empty and addr2 non-empty, address = addr2."""
+    diesel_resp = _make_mock_response(200, _ADDR2_ONLY_XML)
+    petrol_resp = _make_mock_response(200, _EMPTY_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID)
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=5.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "7771" in station_ids
+    # The label should include addr2
+    labels = {sid: label for sid, label in result}
+    assert "Northside Dublin" in labels["7771"]
+
+
+async def test_async_list_stations_label_omits_address_when_both_addr_empty() -> None:
+    """Line 376: when both addr1 and addr2 are empty, label uses '{name} (#{sid[:8]})' format."""
+    diesel_resp = _make_mock_response(200, _NO_ADDR_XML)
+    petrol_resp = _make_mock_response(200, _EMPTY_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID)
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=5.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "7772" in station_ids
+    labels = {sid: label for sid, label in result}
+    label = labels["7772"]
+    # Should be "Texaco No Address (#7772...)" with no comma before the ID
+    assert "(#" in label
+    assert ", " not in label or label.index(", ") > label.index("(#")
+
+
+# ---------------------------------------------------------------------------
+# ie_pumps.py line 362 — address = addr1 when addr1 present, addr2 empty
+# ---------------------------------------------------------------------------
+
+_ADDR1_ONLY_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<stations>
+  <station ID="7773" Lat="53.3498" Lng="-6.2603"
+           name="Addr1 Only" brand="BP"
+           addr1="Main Street Dublin" addr2=""
+           price="173.9" fuel="diesel" trend="stable"
+           dateupdated="" Zone="Dublin" County="Dublin" />
+</stations>
+"""
+
+
+async def test_async_list_stations_uses_addr1_when_addr2_empty() -> None:
+    """Line 362: when addr1 is non-empty and addr2 is empty, address = addr1."""
+    diesel_resp = _make_mock_response(200, _ADDR1_ONLY_XML)
+    petrol_resp = _make_mock_response(200, _EMPTY_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID)
+    result = await provider.async_list_stations(
+        session, lat=53.3498, lng=-6.2603, radius_km=5.0
+    )
+
+    station_ids = [sid for sid, _ in result]
+    assert "7773" in station_ids
+    labels = {sid: label for sid, label in result}
+    # Label should include addr1 but not a double-comma
+    assert "Main Street Dublin" in labels["7773"]
