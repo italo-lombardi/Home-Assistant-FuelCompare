@@ -96,7 +96,8 @@
     }
   },
   "entity": {
-    "sensor": {      "adblue": {
+    "sensor": {
+      "adblue": {
         "name": "AdBlue"
       },
       "cng": {

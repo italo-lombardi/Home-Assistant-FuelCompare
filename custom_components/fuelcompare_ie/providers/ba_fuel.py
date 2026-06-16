@@ -44,7 +44,6 @@ Prices are in KM/L (Bosnian Convertible Mark per litre).
 Prices are stored as KM/L without conversion; the sensor platform
 renders them as-is.  The currency label is set via the provider's
 CURRENCY class attribute (CURRENCY = "KM"
-    STATION_PAGE_URL: ClassVar[str] = "https://cijenegoriva.ba").
 
 Robots / ToS
 ------------
@@ -132,6 +131,7 @@ class BaFuelProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 86400  # site updates daily
     CURRENCY: ClassVar[str] = "KM"
+    STATION_PAGE_URL: ClassVar[str] = "https://cijenegoriva.ba"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

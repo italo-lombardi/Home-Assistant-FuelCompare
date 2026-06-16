@@ -37,7 +37,7 @@ location-based provider.  async_list_stations returns a single entry for
 the national average.
 
 Update cadence: weekly (Thursdays).  POLL_INTERVAL_SECONDS = 604800
-    STATION_PAGE_URL: ClassVar[str] = "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en" (7 days).
+    STATION_PAGE_URL: ClassVar[str] = "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
 A shorter interval (e.g. 86400) is also acceptable; the XLSX does not change
 intra-week so extra fetches are wasted bandwidth.
 
@@ -141,6 +141,9 @@ class MtFuelProvider(BaseProvider):
     LABEL = "EU Oil Bulletin (Malta)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
+    )
     POLL_INTERVAL_SECONDS = 604800  # 7 days; bulletin is weekly
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

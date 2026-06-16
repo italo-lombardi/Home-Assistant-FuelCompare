@@ -37,7 +37,7 @@ Confirmed working as of 2026-06-08:
 Poll interval
 -------------
 POLL_INTERVAL_SECONDS = 86400
-    STATION_PAGE_URL: ClassVar[str] = "https://www.anwb.nl" (24 h) — the bulletin is published once per
+    STATION_PAGE_URL: ClassVar[str] = "https://www.anwb.nl"
 week.  Daily polling avoids re-downloading on non-publication days while
 ensuring the new data is picked up within one day of Thursday publication.
 
@@ -131,6 +131,7 @@ class NlAnwbProvider(BaseProvider):
     LABEL = "EU Oil Bulletin (Netherlands national average)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.anwb.nl"
 
     POLL_INTERVAL_SECONDS = 86400  # daily; bulletin is published weekly (Thursdays)
 

@@ -7,7 +7,7 @@ Format: RSS 2.0 XML (UTF-8 with BOM, CRLF line endings).
 
 WA pricing scheme: tomorrow's prices are published at 14:30 AWST (UTC+8).
 Poll once daily at 14:45 AWST → POLL_INTERVAL_SECONDS = 86400
-    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelwatch.wa.gov.au".
+    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelwatch.wa.gov.au"
 
 Fuel product codes:
   1 = unleaded (ULP 91)
@@ -79,6 +79,7 @@ class AuFuelwatchProvider(BaseProvider):
     LABEL = "FuelWatch (Australia WA)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelwatch.wa.gov.au"
     # WA tomorrow-prices published at 14:30 AWST; poll once daily at 14:45 AWST.
     POLL_INTERVAL_SECONDS = 86400
     CURRENCY: ClassVar[str] = "A$"

@@ -732,32 +732,32 @@ class CountrySensor(SensorEntity):
         return {"station_id": self._station_id}
 
 
-class StationPageUrlSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
-    """Diagnostic sensor: URL to the station page on the provider website."""
+class StationPageUrlSensor(SensorEntity):
+    """Diagnostic sensor: URL to the station page on the provider website (static, set at setup)."""
 
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:open-in-new"
     _attr_has_entity_name = True
     _attr_translation_key = "station_page_url"
+    _attr_should_poll = False
 
     def __init__(
-        self, coordinator, station_id, station_name, station_page_url: str
+        self,
+        coordinator: FuelCompareIECoordinator,
+        station_id: str,
+        station_name: str,
+        station_page_url: str,
     ) -> None:
-        super().__init__(coordinator)
         self._station_id = station_id
-        self._station_page_url = station_page_url
         self._attr_unique_id = f"{DOMAIN}_{station_id}_station_page_url"
+        self._attr_native_value = station_page_url or None
         self._attr_device_info = _device_info(
             station_id, station_name, coordinator.provider_label
         )
 
     @property
     def available(self) -> bool:
-        return bool(self._station_page_url)
-
-    @property
-    def native_value(self) -> str | None:
-        return self._station_page_url or None
+        return bool(self._attr_native_value)
 
     @property
     def extra_state_attributes(self) -> dict:

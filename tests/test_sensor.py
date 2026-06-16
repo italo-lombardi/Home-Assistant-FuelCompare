@@ -932,9 +932,8 @@ def test_station_page_url_sensor_available_when_url_set() -> None:
 
     coord = _make_coordinator({})
     sensor = object.__new__(StationPageUrlSensor)
-    object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "3")
-    object.__setattr__(sensor, "_station_page_url", "https://example.com/station/foo")
+    object.__setattr__(sensor, "_attr_native_value", "https://example.com/station/foo")
     assert sensor.available is True
     assert sensor.native_value == "https://example.com/station/foo"
     assert sensor.extra_state_attributes == {"station_id": "3"}
@@ -946,9 +945,8 @@ def test_station_page_url_sensor_unavailable_when_empty() -> None:
 
     coord = _make_coordinator({})
     sensor = object.__new__(StationPageUrlSensor)
-    object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "4")
-    object.__setattr__(sensor, "_station_page_url", "")
+    object.__setattr__(sensor, "_attr_native_value", None)
     assert sensor.available is False
     assert sensor.native_value is None
 
