@@ -1006,3 +1006,32 @@ async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
     assert "ProviderLabelSensor" in type_names
     assert "CountrySensor" in type_names
     assert "StationPageUrlSensor" not in type_names
+
+
+async def test_setup_entry_station_page_url_from_provider_fallback() -> None:
+    """StationPageUrlSensor created from provider homepage when entry.data has no URL."""
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({})
+    coord.provider_capabilities = frozenset()
+    coord.provider_country = "DE"
+    coord.station_id = "uuid-123"
+    # Simulate provider with STATION_PAGE_URL set (homepage fallback)
+    coord.get_provider_station_page_url = lambda sid: "https://www.tankerkoenig.de"
+
+    entry = MagicMock()
+    entry.title = "Test"
+    entry.entry_id = "e3"
+    entry.data = {}  # no CONF_STATION_PAGE_URL — pre-existing entry
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"e3": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    type_names = {type(e).__name__ for e in added}
+    assert "StationPageUrlSensor" in type_names
+    url_sensors = [e for e in added if type(e).__name__ == "StationPageUrlSensor"]
+    assert url_sensors[0].native_value == "https://www.tankerkoenig.de"

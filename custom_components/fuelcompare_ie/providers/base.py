@@ -383,6 +383,15 @@ class BaseProvider(ABC):
                 and "async_list_stations" not in cls.__dict__
             ):
                 raise TypeError(cls.__name__ + " must override async_list_stations")
+            if (
+                cls.STATION_PAGE_URL_TEMPLATE
+                and "{station_id}" not in cls.STATION_PAGE_URL_TEMPLATE
+            ):
+                raise TypeError(
+                    f"{cls.__name__}.STATION_PAGE_URL_TEMPLATE must contain "
+                    "'{station_id}' placeholder, got: "
+                    f"{cls.STATION_PAGE_URL_TEMPLATE!r}"
+                )
 
     # ── Abstract interface ────────────────────────────────────────────────────
 
