@@ -87,6 +87,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -365,21 +366,21 @@ class IEFuelFinderProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed for county %s: %s", county, err)
             return []
 
-        # Merge per-fuel results into one dict keyed by UUID
+        # Merge per-fuel results into one dict keyed by UUID.
+        # Only include stations that have at least one price available.
         merged: dict[str, dict] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 uid = s.get("id")
-                if uid:
+                if uid and s.get("has_price"):
                     merged[uid] = s
 
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
                 uid = s.get("id")
-                if uid:
-                    if uid not in merged:
-                        merged[uid] = s
+                if uid and s.get("has_price") and uid not in merged:
+                    merged[uid] = s
 
         if not merged:
             return []
@@ -415,6 +416,11 @@ class IEFuelFinderProvider(BaseProvider):
         """Return the FuelFinder.ie station page URL, or homepage if slug unknown."""
         slug = self._slug_cache.get(station_id)
         if not slug:
+            return self.STATION_PAGE_URL or None
+        # Slugs with a trailing numeric ID > 6 digits are internal system IDs
+        # that have no corresponding page on fuelfinder.ie — fall back to homepage.
+        match = re.search(r"-(\d+)$", slug)
+        if match and len(match.group(1)) > 6:
             return self.STATION_PAGE_URL or None
         return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
 

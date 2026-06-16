@@ -631,3 +631,20 @@ def test_get_station_page_url_returns_homepage_when_slug_missing() -> None:
     """Returns homepage URL when station_id not in slug cache."""
     provider = IEFuelFinderProvider("some-uuid")
     assert provider.get_station_page_url("unknown-uuid") == "https://www.fuelfinder.ie"
+
+
+def test_get_station_page_url_falls_back_for_large_numeric_suffix() -> None:
+    """Returns homepage when slug ends with >6 digit ID (internal system ID, no real page)."""
+    provider = IEFuelFinderProvider("some-uuid")
+    provider._slug_cache["some-uuid"] = "circle-k-660671223"
+    assert provider.get_station_page_url("some-uuid") == "https://www.fuelfinder.ie"
+
+
+def test_get_station_page_url_valid_short_numeric_suffix() -> None:
+    """Returns full URL when slug ends with ≤6 digit ID (real station page)."""
+    provider = IEFuelFinderProvider("some-uuid")
+    provider._slug_cache["some-uuid"] = "top-top-dublin-285070"
+    assert (
+        provider.get_station_page_url("some-uuid")
+        == "https://www.fuelfinder.ie/fuelfinder/station/top-top-dublin-285070"
+    )
