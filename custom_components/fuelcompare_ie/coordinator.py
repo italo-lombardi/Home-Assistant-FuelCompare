@@ -52,6 +52,10 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
         return self._provider.LABEL
 
     @property
+    def provider_country(self) -> str:
+        return self._provider.COUNTRY
+
+    @property
     def provider_currency(self) -> str:
         return self._provider.CURRENCY
 

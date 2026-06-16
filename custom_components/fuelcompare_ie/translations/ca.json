@@ -170,6 +170,15 @@
       },
       "working_hours": {
         "name": "Horari d'atenció"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +218,11 @@
       "accepts_contactless": {
         "name": "Accepta pagament sense contacte"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +231,8 @@
         "title": "Opcions",
         "data": {
           "api_key": "Clau API",
-          "radius_km": "Radi de cerca (km)"
+          "radius_km": "Radi de cerca (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

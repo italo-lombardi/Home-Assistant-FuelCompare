@@ -24,6 +24,7 @@ from .const import (
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
+    CONF_SHOW_ON_MAP,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
     DEFAULT_PROVIDER,
@@ -179,6 +180,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Conditionally load device_tracker platform when show_on_map is enabled
+    # and the provider has lat/lon data.
+    caps = provider.CAPABILITIES
+    if (
+        entry.options.get(CONF_SHOW_ON_MAP)
+        and "latitude" in caps
+        and "longitude" in caps
+    ):
+        await hass.config_entries.async_forward_entry_setups(
+            entry, [Platform.DEVICE_TRACKER]
+        )
+
     # Reload when options change (e.g. radius, api_key) so the new values take effect.
     async def _reload_entry(h: HomeAssistant, e: ConfigEntry) -> None:
         e.async_schedule_reload()
@@ -190,7 +203,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    platforms_to_unload = list(PLATFORMS)
+    provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
+    provider_cls = PROVIDER_REGISTRY.get(provider_key)
+    caps = provider_cls.CAPABILITIES if provider_cls else frozenset()
+    if (
+        entry.options.get(CONF_SHOW_ON_MAP)
+        and "latitude" in caps
+        and "longitude" in caps
+    ):
+        platforms_to_unload.append(Platform.DEVICE_TRACKER)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry, platforms_to_unload
+    )
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
         # Only delete repair issues when the entry actually unloaded; if unload

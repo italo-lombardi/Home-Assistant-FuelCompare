@@ -201,7 +201,6 @@ class EuOilBulletinProvider(BaseProvider):
             "lpg",  # LPG motor fuel
             # Station identity (national average pseudo-station)
             "name",  # Country name
-            "county",  # Country name (region context)
             # Timing
             "lastupdated",  # Week date from Excel header
         }
@@ -651,7 +650,6 @@ def _build_station_data(
         "lpg": record.get("lpg"),  # LPG motor fuel
         # Station identity (national average pseudo-station)
         "name": country_name,
-        "county": country_name,
         # Timing
         "lastupdated": week_label,
         # Source reference

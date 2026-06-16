@@ -19,7 +19,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DAYS, DOMAIN
+from .const import DAYS, DOMAIN, CONF_STATION_PAGE_URL
 from .coordinator import FuelCompareIECoordinator
 from .helpers import _device_info
 
@@ -157,6 +157,14 @@ async def async_setup_entry(
 
     # Always-on diagnostic sensor (no CAPABILITIES gate, mirrors data_fetch_problem)
     entities.append(LastSuccessfulFetchSensor(coordinator, station_id, station_name))
+
+    # Always-on identity sensors
+    entities.append(ProviderLabelSensor(coordinator, station_id, station_name))
+    entities.append(CountrySensor(coordinator, station_id, station_name))
+    station_page_url = entry.data.get(CONF_STATION_PAGE_URL, "")
+    entities.append(
+        StationPageUrlSensor(coordinator, station_id, station_name, station_page_url)
+    )
 
     async_add_entities(entities)
 
@@ -647,6 +655,99 @@ class LastSuccessfulFetchSensor(
     @property
     def native_value(self) -> datetime | None:
         return self.coordinator.last_successful_fetch
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"station_id": self._station_id}
+
+
+# ── Identity / diagnostic sensors ─────────────────────────────────────────────
+
+
+class ProviderLabelSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+    """Diagnostic sensor: name of the data provider."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:database"
+    _attr_has_entity_name = True
+    _attr_translation_key = "provider_label"
+
+    def __init__(self, coordinator, station_id, station_name) -> None:
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_provider_label"
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator.provider_label
+        )
+
+    @property
+    def available(self) -> bool:
+        return True
+
+    @property
+    def native_value(self) -> str:
+        return self.coordinator.provider_label
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"station_id": self._station_id}
+
+
+class CountrySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+    """Diagnostic sensor: ISO country code of the data provider."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:earth"
+    _attr_has_entity_name = True
+    _attr_translation_key = "country_code"
+
+    def __init__(self, coordinator, station_id, station_name) -> None:
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_country_code"
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator.provider_label
+        )
+
+    @property
+    def available(self) -> bool:
+        return True
+
+    @property
+    def native_value(self) -> str:
+        return self.coordinator.provider_country
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"station_id": self._station_id}
+
+
+class StationPageUrlSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
+    """Diagnostic sensor: URL to the station page on the provider website."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:open-in-new"
+    _attr_has_entity_name = True
+    _attr_translation_key = "station_page_url"
+
+    def __init__(
+        self, coordinator, station_id, station_name, station_page_url: str
+    ) -> None:
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._station_page_url = station_page_url
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_station_page_url"
+        self._attr_device_info = _device_info(
+            station_id, station_name, coordinator.provider_label
+        )
+
+    @property
+    def available(self) -> bool:
+        return bool(self._station_page_url)
+
+    @property
+    def native_value(self) -> str | None:
+        return self._station_page_url or None
 
     @property
     def extra_state_attributes(self) -> dict:

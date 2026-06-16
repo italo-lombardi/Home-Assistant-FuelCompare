@@ -78,7 +78,8 @@
         "title": "Options",
         "data": {
           "api_key": "API Key",
-          "radius_km": "Search radius (km)"
+          "radius_km": "Search radius (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }
@@ -94,8 +95,7 @@
     }
   },
   "entity": {
-    "sensor": {
-      "adblue": {
+    "sensor": {      "adblue": {
         "name": "AdBlue"
       },
       "cng": {
@@ -158,6 +158,15 @@
       "last_successful_fetch": {
         "name": "Last Successful Fetch"
       },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
+      },
       "offerings": {
         "name": "Offerings"
       },
@@ -219,6 +228,11 @@
       },
       "accepts_contactless": {
         "name": "Accepts Contactless"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
       }
     }
   }

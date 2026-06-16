@@ -170,6 +170,15 @@
       },
       "working_hours": {
         "name": "Години роботи"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +218,11 @@
       "accepts_contactless": {
         "name": "Приймає безконтактний платіж"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +231,8 @@
         "title": "Параметри",
         "data": {
           "api_key": "API ключ",
-          "radius_km": "Радіус пошуку (км)"
+          "radius_km": "Радіус пошуку (км)",
+          "show_on_map": "Show station on map"
         }
       }
     }

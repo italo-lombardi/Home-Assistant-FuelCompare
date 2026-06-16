@@ -170,6 +170,15 @@
       },
       "working_hours": {
         "name": "Ώρες λειτουργίας"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +218,11 @@
       "accepts_contactless": {
         "name": "Δέχεται ανέπαφη πληρωμή"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +231,8 @@
         "title": "Επιλογές",
         "data": {
           "api_key": "Κλειδί API",
-          "radius_km": "Ακτίνα αναζήτησης (km)"
+          "radius_km": "Ακτίνα αναζήτησης (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

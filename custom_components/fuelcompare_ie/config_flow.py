@@ -24,8 +24,10 @@ from .const import (
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
+    CONF_SHOW_ON_MAP,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
+    CONF_STATION_PAGE_URL,
     DEFAULT_COUNTRY,
     DEFAULT_PROVIDER,
     DEFAULT_RADIUS_KM,
@@ -744,6 +746,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     data[CONF_STATION_COUNTY] = self._station_county
             if self._postal_code:
                 data[CONF_POSTAL_CODE] = self._postal_code
+            if self._station_page_url:
+                data[CONF_STATION_PAGE_URL] = self._station_page_url
             if self._latitude is not None and self._longitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
@@ -778,8 +782,17 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
         provider_key = self.config_entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_key)
         requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
+        has_location_caps = (
+            provider_cls is not None
+            and {
+                "latitude",
+                "longitude",
+            }
+            <= provider_cls.CAPABILITIES
+        )
 
         existing_key = self.config_entry.options.get(CONF_API_KEY, "")
+        current_show_on_map = self.config_entry.options.get(CONF_SHOW_ON_MAP, False)
 
         if is_location_entry:
             current_radius = self.config_entry.options.get(
@@ -796,12 +809,25 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                     vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
                         vol.Coerce(float), vol.Range(min=0.1, max=500)
                     ),
+                    **(
+                        {
+                            vol.Optional(
+                                CONF_SHOW_ON_MAP, default=current_show_on_map
+                            ): bool
+                        }
+                        if has_location_caps
+                        else {}
+                    ),
                 }
             )
         else:
             schema_dict: dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            if has_location_caps:
+                schema_dict[
+                    vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
+                ] = bool
             if user_input is not None:
                 errors: dict[str, str] = {}
                 if (

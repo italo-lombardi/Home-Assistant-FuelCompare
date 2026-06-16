@@ -170,6 +170,15 @@
       },
       "working_hours": {
         "name": "Радно време"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +218,11 @@
       "accepts_contactless": {
         "name": "Прихвата бесконтактно плаћање"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +231,8 @@
         "title": "Опције",
         "data": {
           "api_key": "API кључ",
-          "radius_km": "Полупречник претраживања (km)"
+          "radius_km": "Полупречник претраживања (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

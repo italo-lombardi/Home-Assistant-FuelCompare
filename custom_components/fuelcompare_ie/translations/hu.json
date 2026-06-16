@@ -170,6 +170,15 @@
       },
       "working_hours": {
         "name": "Nyitvatartás"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +218,11 @@
       "accepts_contactless": {
         "name": "Elfogad érintésmentes fizetést"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +231,8 @@
         "title": "Beállítások",
         "data": {
           "api_key": "API-kulcs",
-          "radius_km": "Keresési sugár (km)"
+          "radius_km": "Keresési sugár (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

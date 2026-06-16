@@ -170,6 +170,15 @@
       },
       "working_hours": {
         "name": "Lahtiolekuajad"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +218,11 @@
       "accepts_contactless": {
         "name": "Aktsepteerib kontaktivaba makset"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +231,8 @@
         "title": "Seaded",
         "data": {
           "api_key": "API võti",
-          "radius_km": "Otsinguraadius (km)"
+          "radius_km": "Otsinguraadius (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

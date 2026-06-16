@@ -899,3 +899,90 @@ async def test_setup_entry_last_successful_fetch_not_duplicated() -> None:
 
     count = sum(1 for e in added if type(e).__name__ == "LastSuccessfulFetchSensor")
     assert count == 1
+
+
+# ---------------------------------------------------------------------------
+# ProviderLabelSensor / CountrySensor / StationPageUrlSensor
+# ---------------------------------------------------------------------------
+
+
+def test_provider_label_sensor_native_value() -> None:
+    """ProviderLabelSensor returns coordinator.provider_label."""
+    from custom_components.fuelcompare_ie.sensor import ProviderLabelSensor
+
+    coord = _make_coordinator({})
+    coord.provider_label = "FuelFinder.ie"
+    sensor = object.__new__(ProviderLabelSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "1")
+    assert sensor.native_value == "FuelFinder.ie"
+    assert sensor.available is True
+    assert sensor.extra_state_attributes == {"station_id": "1"}
+
+
+def test_country_sensor_native_value() -> None:
+    """CountrySensor returns coordinator.provider_country."""
+    from custom_components.fuelcompare_ie.sensor import CountrySensor
+
+    coord = _make_coordinator({})
+    coord.provider_country = "IE"
+    sensor = object.__new__(CountrySensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "2")
+    assert sensor.native_value == "IE"
+    assert sensor.available is True
+    assert sensor.extra_state_attributes == {"station_id": "2"}
+
+
+def test_station_page_url_sensor_available_when_url_set() -> None:
+    """StationPageUrlSensor is available and returns URL when url is non-empty."""
+    from custom_components.fuelcompare_ie.sensor import StationPageUrlSensor
+
+    coord = _make_coordinator({})
+    sensor = object.__new__(StationPageUrlSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "3")
+    object.__setattr__(sensor, "_station_page_url", "https://example.com/station/foo")
+    assert sensor.available is True
+    assert sensor.native_value == "https://example.com/station/foo"
+    assert sensor.extra_state_attributes == {"station_id": "3"}
+
+
+def test_station_page_url_sensor_unavailable_when_empty() -> None:
+    """StationPageUrlSensor is unavailable and returns None when url is empty."""
+    from custom_components.fuelcompare_ie.sensor import StationPageUrlSensor
+
+    coord = _make_coordinator({})
+    sensor = object.__new__(StationPageUrlSensor)
+    object.__setattr__(sensor, "coordinator", coord)
+    object.__setattr__(sensor, "_station_id", "4")
+    object.__setattr__(sensor, "_station_page_url", "")
+    assert sensor.available is False
+    assert sensor.native_value is None
+
+
+async def test_setup_entry_always_creates_identity_sensors() -> None:
+    """async_setup_entry always creates ProviderLabelSensor, CountrySensor, StationPageUrlSensor."""
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({})
+    coord.provider_capabilities = frozenset()
+    coord.provider_country = "IE"
+    coord.station_id = "id1"
+
+    entry = MagicMock()
+    entry.title = "Test"
+    entry.entry_id = "e1"
+    entry.data = {}
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"e1": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    type_names = {type(e).__name__ for e in added}
+    assert "ProviderLabelSensor" in type_names
+    assert "CountrySensor" in type_names
+    assert "StationPageUrlSensor" in type_names
