@@ -256,7 +256,9 @@ async def test_fetch_nextjs_returns_none_on_key_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_post_encrypted_raises_provider_error_for_non_numeric_station_id() -> None:
+async def test_post_encrypted_raises_provider_error_for_non_numeric_station_id() -> (
+    None
+):
     """Lines 244-245: _post_encrypted raises ProviderError when station_id cannot be parsed as int."""
     provider = _make_provider("not-a-number")
     session = _make_session()
@@ -292,7 +294,9 @@ async def test_post_encrypted_returns_none_on_client_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_decrypt_with_recovery_returns_none_when_key_absent_after_broad_scan() -> None:
+async def test_decrypt_with_recovery_returns_none_when_key_absent_after_broad_scan() -> (
+    None
+):
     """Lines 318-322: _decrypt_with_recovery returns None when decrypt key is still None after broad scan."""
     provider = _make_provider("790")
     provider._decrypt_key = None  # start with no key
@@ -303,7 +307,9 @@ async def test_decrypt_with_recovery_returns_none_when_key_absent_after_broad_sc
         # Never set a decrypt key — simulates failure to find key even after broad scan
         pass
 
-    with patch.object(provider, "_fetch_page_assets", side_effect=_mock_fetch_page_assets):
+    with patch.object(
+        provider, "_fetch_page_assets", side_effect=_mock_fetch_page_assets
+    ):
         result = await provider._decrypt_with_recovery(session, "ENCRYPTED_BLOB")
 
     assert result is None

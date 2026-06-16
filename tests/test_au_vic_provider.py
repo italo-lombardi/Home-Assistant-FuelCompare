@@ -1368,7 +1368,9 @@ def test_build_display_label_suburb_already_in_address_uses_address_directly() -
     assert "Richmond, Richmond" not in label
 
 
-def test_build_display_label_empty_address_and_no_suburb_returns_name_short_id() -> None:
+def test_build_display_label_empty_address_and_no_suburb_returns_name_short_id() -> (
+    None
+):
     """Line 551: when address='' and suburb='', full_addr is '' so return uses (#{uuid_prefix})."""
     fs = {"name": "Unknown Station", "address": "", "suburb": ""}
     label = _build_display_label(fs, "abcdefgh-1234-5678-9abc-def012345678")

@@ -1067,7 +1067,9 @@ async def test_async_list_stations_skips_non_numeric_unleaded_price() -> None:
         "prefecture": {"id": 4, "name": "ΝΟΜΟΣ ΑΙΤΩΛΙΑΣ ΚΑΙ ΑΚΑΡΝΑΝΙΑΣ"},
         "prices": {
             "Diesel Κίνησης": 1.722,
-            "Αμόλυβδη 95 οκτ.": {"value": "bad"},  # dict → TypeError when float() called
+            "Αμόλυβδη 95 οκτ.": {
+                "value": "bad"
+            },  # dict → TypeError when float() called
         },
     }
     payload_bad_unleaded = {
