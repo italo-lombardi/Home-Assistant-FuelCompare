@@ -1081,4 +1081,4 @@ async def test_async_list_stations_label_omits_address_when_absent() -> None:
     sid, label = result[0]
     # Address should not appear in label; only name and short ID
     assert "(#" in label
-    assert ", " not in label or label.startswith(_BASE_STATION.get("displayName", ""))
+    assert ", " not in label
