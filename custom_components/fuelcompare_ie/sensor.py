@@ -685,9 +685,7 @@ class ProviderLabelSensor(SensorEntity):
     _attr_translation_key = "provider_label"
     _attr_should_poll = False
 
-    def __init__(
-        self, provider_label: str, station_id: str, station_name: str
-    ) -> None:
+    def __init__(self, provider_label: str, station_id: str, station_name: str) -> None:
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_provider_label"
         self._attr_native_value = provider_label
