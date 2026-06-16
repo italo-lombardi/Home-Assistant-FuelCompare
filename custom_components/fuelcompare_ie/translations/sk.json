@@ -37,9 +37,10 @@
       },
       "station_picker": {
         "title": "Vyberte stanicu",
-        "description": "Vyberte čerpaciu stanicu. Zobrazené ceny sú pre naftu/benzín.{station_page_url_line}",
+        "description": "Vyberte čerpaciu stanicu. Zobrazené ceny sú pre naftu/benzín.",
         "data": {
-          "station_id": "Stanica"
+          "station_id": "Stanica",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Názov Stanice",
-        "description": "Potvrďte alebo upravte názov tejto stanice.{station_page_url_line}",
+        "description": "Potvrďte alebo upravte názov tejto stanice.",
         "data": {
-          "name": "Názov",
-          "show_on_map": "Show station on map"
+          "name": "Názov"
         }
       }
     },

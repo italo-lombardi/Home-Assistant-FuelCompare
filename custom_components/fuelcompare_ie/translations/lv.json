@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Stacijas Nosaukums",
-        "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.{station_page_url_line}",
+        "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.",
         "data": {
-          "name": "Nosaukums",
-          "show_on_map": "Show station on map"
+          "name": "Nosaukums"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Atlasiet staciju",
-        "description": "Atlasiet degvielas staciju. Rādītās cenas ir dīzeļdegvielai/benzīnam.{station_page_url_line}",
+        "description": "Atlasiet degvielas staciju. Rādītās cenas ir dīzeļdegvielai/benzīnam.",
         "data": {
-          "station_id": "Stacija"
+          "station_id": "Stacija",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

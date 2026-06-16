@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Stationsnaam",
-        "description": "Bevestig of bewerk de naam van dit station.{station_page_url_line}",
+        "description": "Bevestig of bewerk de naam van dit station.",
         "data": {
-          "name": "Naam",
-          "show_on_map": "Show station on map"
+          "name": "Naam"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Selecteer station",
-        "description": "Selecteer een tankstation. Getoonde prijzen zijn voor diesel/benzine.{station_page_url_line}",
+        "description": "Selecteer een tankstation. Getoonde prijzen zijn voor diesel/benzine.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Station",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

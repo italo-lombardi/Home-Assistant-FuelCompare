@@ -37,9 +37,10 @@
       },
       "station_picker": {
         "title": "Statioun auswielen",
-        "description": "Wielt eng Tankstatioun. Déi ugewisene Präisser si fir Diesel/Benzin.{station_page_url_line}",
+        "description": "Wielt eng Tankstatioun. Déi ugewisene Präisser si fir Diesel/Benzin.",
         "data": {
-          "station_id": "Statioun"
+          "station_id": "Statioun",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Statiounsnum",
-        "description": "Confirméiert oder ännert den Numm vun dëser Statioun.{station_page_url_line}",
+        "description": "Confirméiert oder ännert den Numm vun dëser Statioun.",
         "data": {
-          "name": "Numm",
-          "show_on_map": "Show station on map"
+          "name": "Numm"
         }
       }
     },

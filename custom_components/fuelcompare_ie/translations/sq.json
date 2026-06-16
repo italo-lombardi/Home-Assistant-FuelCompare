@@ -37,9 +37,10 @@
       },
       "station_picker": {
         "title": "Zgjidhni Stacionin",
-        "description": "Zgjidhni një stacion karburanti. Çmimet e shfaqura janë për naftë/benzinë.{station_page_url_line}",
+        "description": "Zgjidhni një stacion karburanti. Çmimet e shfaqura janë për naftë/benzinë.",
         "data": {
-          "station_id": "Stacioni"
+          "station_id": "Stacioni",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Emri i Stacionit",
-        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.{station_page_url_line}",
+        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.",
         "data": {
-          "name": "Emri",
-          "show_on_map": "Show station on map"
+          "name": "Emri"
         }
       }
     },

@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Nombre de la Estación",
-        "description": "Confirme o edite el nombre de esta estación.{station_page_url_line}",
+        "description": "Confirme o edite el nombre de esta estación.",
         "data": {
-          "name": "Nombre",
-          "show_on_map": "Show station on map"
+          "name": "Nombre"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Seleccionar estación",
-        "description": "Seleccione una estación de combustible. Los precios mostrados corresponden a diésel/gasolina.{station_page_url_line}",
+        "description": "Seleccione una estación de combustible. Los precios mostrados corresponden a diésel/gasolina.",
         "data": {
-          "station_id": "Estación"
+          "station_id": "Estación",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

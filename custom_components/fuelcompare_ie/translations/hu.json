@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Állomás Neve",
-        "description": "Erősítse meg vagy szerkessze az állomás nevét.{station_page_url_line}",
+        "description": "Erősítse meg vagy szerkessze az állomás nevét.",
         "data": {
-          "name": "Név",
-          "show_on_map": "Show station on map"
+          "name": "Név"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Válasszon állomást",
-        "description": "Válasszon üzemanyag-állomást. A megjelenített árak dízelre/benzinre vonatkoznak.{station_page_url_line}",
+        "description": "Válasszon üzemanyag-állomást. A megjelenített árak dízelre/benzinre vonatkoznak.",
         "data": {
-          "station_id": "Állomás"
+          "station_id": "Állomás",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

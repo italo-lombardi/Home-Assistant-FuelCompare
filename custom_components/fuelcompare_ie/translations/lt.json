@@ -37,9 +37,10 @@
       },
       "station_picker": {
         "title": "Pasirinkite stotį",
-        "description": "Pasirinkite degalų stotį. Rodomos dyzelino / benzino kainos.{station_page_url_line}",
+        "description": "Pasirinkite degalų stotį. Rodomos dyzelino / benzino kainos.",
         "data": {
-          "station_id": "Stotis"
+          "station_id": "Stotis",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Stoties Pavadinimas",
-        "description": "Patvirtinkite arba redaguokite šios stoties pavadinimą.{station_page_url_line}",
+        "description": "Patvirtinkite arba redaguokite šios stoties pavadinimą.",
         "data": {
-          "name": "Pavadinimas",
-          "show_on_map": "Show station on map"
+          "name": "Pavadinimas"
         }
       }
     },

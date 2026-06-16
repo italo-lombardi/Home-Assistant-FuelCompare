@@ -2212,7 +2212,7 @@ async def test_async_step_name_stores_postal_code_in_entry_data(
 async def test_async_step_name_show_on_map_stored_in_options(
     hass: HomeAssistant,
 ) -> None:
-    """async_step_name stores show_on_map=True in options when provider has lat/lon caps."""
+    """show_on_map=True set on flow (_show_on_map) is stored in options after name step."""
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
@@ -2245,11 +2245,10 @@ async def test_async_step_name_show_on_map_stored_in_options(
         flow._latitude = None
         flow._longitude = None
         flow._suggested_name = "Test Station"
+        flow._show_on_map = True  # set as if picker submitted with show_on_map=True
         flow.context = {}
 
-        result = await flow.async_step_name(
-            user_input={"name": "Test Station", CONF_SHOW_ON_MAP: True}
-        )
+        result = await flow.async_step_name(user_input={"name": "Test Station"})
 
         assert result["type"] == "create_entry"
         assert result["options"].get(CONF_SHOW_ON_MAP) is True

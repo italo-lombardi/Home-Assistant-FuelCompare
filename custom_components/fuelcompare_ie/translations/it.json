@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Nome della Stazione",
-        "description": "Conferma o modifica il nome di questa stazione.{station_page_url_line}",
+        "description": "Conferma o modifica il nome di questa stazione.",
         "data": {
-          "name": "Nome",
-          "show_on_map": "Show station on map"
+          "name": "Nome"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Seleziona stazione",
-        "description": "Seleziona una stazione di carburante. I prezzi mostrati sono per diesel/benzina.{station_page_url_line}",
+        "description": "Seleziona una stazione di carburante. I prezzi mostrati sono per diesel/benzina.",
         "data": {
-          "station_id": "Stazione"
+          "station_id": "Stazione",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

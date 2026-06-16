@@ -37,9 +37,10 @@
       },
       "station_picker": {
         "title": "Επιλογή σταθμού",
-        "description": "Επιλέξτε σταθμό καυσίμων. Οι τιμές που εμφανίζονται αφορούν ντίζελ/βενζίνη.{station_page_url_line}",
+        "description": "Επιλέξτε σταθμό καυσίμων. Οι τιμές που εμφανίζονται αφορούν ντίζελ/βενζίνη.",
         "data": {
-          "station_id": "Σταθμός"
+          "station_id": "Σταθμός",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Όνομα Σταθμού",
-        "description": "Επιβεβαιώστε ή επεξεργαστείτε το όνομα αυτού του σταθμού.{station_page_url_line}",
+        "description": "Επιβεβαιώστε ή επεξεργαστείτε το όνομα αυτού του σταθμού.",
         "data": {
-          "name": "Όνομα",
-          "show_on_map": "Show station on map"
+          "name": "Όνομα"
         }
       }
     },

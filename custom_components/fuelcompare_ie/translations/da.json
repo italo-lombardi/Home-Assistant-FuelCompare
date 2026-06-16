@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Stationsnavn",
-        "description": "Bekræft eller rediger navnet på denne station.{station_page_url_line}",
+        "description": "Bekræft eller rediger navnet på denne station.",
         "data": {
-          "name": "Navn",
-          "show_on_map": "Show station on map"
+          "name": "Navn"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Vælg station",
-        "description": "Vælg en benzinstation. Viste priser er for diesel/benzin.{station_page_url_line}",
+        "description": "Vælg en benzinstation. Viste priser er for diesel/benzin.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Station",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

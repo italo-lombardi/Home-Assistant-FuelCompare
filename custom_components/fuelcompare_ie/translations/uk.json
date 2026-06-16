@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Назва Станції",
-        "description": "Підтвердіть або відредагуйте назву цієї станції.{station_page_url_line}",
+        "description": "Підтвердіть або відредагуйте назву цієї станції.",
         "data": {
-          "name": "Назва",
-          "show_on_map": "Show station on map"
+          "name": "Назва"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Виберіть станцію",
-        "description": "Виберіть паливну станцію. Показані ціни на дизель/бензин.{station_page_url_line}",
+        "description": "Виберіть паливну станцію. Показані ціни на дизель/бензин.",
         "data": {
-          "station_id": "Станція"
+          "station_id": "Станція",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {

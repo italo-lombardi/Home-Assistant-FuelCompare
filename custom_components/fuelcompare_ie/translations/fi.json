@@ -37,9 +37,10 @@
       },
       "station_picker": {
         "title": "Valitse asema",
-        "description": "Valitse polttoaineasema. Näytetyt hinnat ovat diesel- ja bensiinipolttoaineille.{station_page_url_line}",
+        "description": "Valitse polttoaineasema. Näytetyt hinnat ovat diesel- ja bensiinipolttoaineille.",
         "data": {
-          "station_id": "Asema"
+          "station_id": "Asema",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Aseman Nimi",
-        "description": "Vahvista tai muuta tämän aseman nimeä.{station_page_url_line}",
+        "description": "Vahvista tai muuta tämän aseman nimeä.",
         "data": {
-          "name": "Nimi",
-          "show_on_map": "Show station on map"
+          "name": "Nimi"
         }
       }
     },

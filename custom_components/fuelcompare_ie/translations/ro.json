@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Numele Stației",
-        "description": "Confirmați sau editați numele acestei stații.{station_page_url_line}",
+        "description": "Confirmați sau editați numele acestei stații.",
         "data": {
-          "name": "Nume",
-          "show_on_map": "Show station on map"
+          "name": "Nume"
         }
       },
       "county": {
@@ -45,9 +44,10 @@
       },
       "station_picker": {
         "title": "Selectați stația",
-        "description": "Selectați o stație de combustibil. Prețurile afișate sunt pentru motorină/benzină.{station_page_url_line}",
+        "description": "Selectați o stație de combustibil. Prețurile afișate sunt pentru motorină/benzină.",
         "data": {
-          "station_id": "Stație"
+          "station_id": "Stație",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
