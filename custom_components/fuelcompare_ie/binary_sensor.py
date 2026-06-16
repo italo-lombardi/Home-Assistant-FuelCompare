@@ -61,6 +61,9 @@ _FACILITY_BINARY_SENSOR_REGISTRY: dict[
     "accepts_contactless": ("accepts_contactless", "mdi:contactless-payment", None),
 }
 
+# Capabilities that imply is_open can be derived (any one is sufficient).
+_HOURS_CAPS: frozenset[str] = frozenset({"is_open", "working_hours", "opening_hours"})
+
 
 def _parse_time(s: str) -> dt_time | None:
     """Parse a time string like '6a.m.' or '10:30p.m.' into a time object."""
@@ -223,7 +226,6 @@ async def async_setup_entry(
     entities: list[BinarySensorEntity] = [
         DataFetchProblemBinarySensor(coordinator, station_id, station_name),
     ]
-    _HOURS_CAPS = {"is_open", "working_hours", "opening_hours"}
     if caps & _HOURS_CAPS:
         entities.insert(
             0, StationIsOpenBinarySensor(coordinator, station_id, station_name)

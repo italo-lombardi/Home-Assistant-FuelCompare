@@ -848,3 +848,54 @@ def test_category_sensor_handle_coordinator_update_clears_cache() -> None:
         sensor._handle_coordinator_update()
 
     assert sensor._cached_category_data is None
+
+
+# ---------------------------------------------------------------------------
+# async_setup_entry — LastSuccessfulFetchSensor always created
+# ---------------------------------------------------------------------------
+
+
+async def test_setup_entry_always_creates_last_successful_fetch() -> None:
+    """async_setup_entry always appends LastSuccessfulFetchSensor regardless of CAPABILITIES."""
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({"diesel": 1.65})
+    coord.provider_capabilities = frozenset()  # empty caps — no optional sensors
+    coord.station_id = "99"
+
+    entry = MagicMock()
+    entry.title = "Test Station"
+    entry.entry_id = "zzz"
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"zzz": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    types = [type(e).__name__ for e in added]
+    assert "LastSuccessfulFetchSensor" in types
+
+
+async def test_setup_entry_last_successful_fetch_not_duplicated() -> None:
+    """LastSuccessfulFetchSensor is created exactly once even when caps is non-empty."""
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({"diesel": 1.65})
+    coord.provider_capabilities = frozenset({"diesel", "lastupdated"})
+    coord.station_id = "100"
+
+    entry = MagicMock()
+    entry.title = "Test Station"
+    entry.entry_id = "zzz2"
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"zzz2": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    count = sum(1 for e in added if type(e).__name__ == "LastSuccessfulFetchSensor")
+    assert count == 1

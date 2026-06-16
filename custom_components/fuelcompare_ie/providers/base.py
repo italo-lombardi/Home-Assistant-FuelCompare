@@ -255,8 +255,10 @@ class BaseProvider(ABC):
     always created unconditionally by the coordinator and is never gated
     by CAPABILITIES.
 
-    'last_successful_fetch' (sensor) — CAN be listed here (opt-in); list it
-    to expose a "Last Successful Fetch" timestamp sensor for this provider.
+    'last_successful_fetch' (sensor) — must NOT be listed here; it is
+    always created unconditionally in sensor.async_setup_entry (same
+    pattern as data_fetch_problem). Listing it would cause a duplicate
+    entity with the same unique_id.
 
     Keys 'source_station_id' and 'tablename' are also injected automatically
     by the coordinator as entity attributes and should not be listed here.
@@ -335,11 +337,7 @@ class BaseProvider(ABC):
                     raise TypeError(
                         f"{cls.__name__} must define class attribute '{attr}'"
                     )
-            unknown = (
-                cls.CAPABILITIES
-                - ALL_SENSOR_KEYS
-                - {"last_successful_fetch", "data_fetch_problem"}
-            )
+            unknown = cls.CAPABILITIES - ALL_SENSOR_KEYS - {"data_fetch_problem"}
             if unknown:
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "
@@ -349,6 +347,7 @@ class BaseProvider(ABC):
                 "source_station_id",
                 "tablename",
                 "data_fetch_problem",  # always created by coordinator, never gated
+                "last_successful_fetch",  # always created by sensor platform, never gated
             }
             forbidden = cls.CAPABILITIES & FORBIDDEN_CAPS
             if forbidden:
@@ -428,7 +427,12 @@ class BaseProvider(ABC):
     def get_station_page_url(self, station_id: str) -> str | None:
         """Return a URL for the station's page on the provider website, or None.
 
-        Called by the config flow after station selection to display a link.
+        Called by the config flow after async_list_stations returns. Providers
+        that populate an internal cache during async_list_stations (e.g. a slug
+        cache) can use that cache here. Must only be called after
+        async_list_stations has returned for the same provider instance —
+        calling it before will yield None even for providers that support URLs.
+
         Override in providers that have a stable station detail page URL.
         The default returns None (no link shown).
         """

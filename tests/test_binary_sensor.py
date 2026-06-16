@@ -707,3 +707,79 @@ def test_day_matches_time_token_segment_returns_true() -> None:
     # A day_spec that starts with a time token — treated as no-day-restriction
     assert _day_matches("07:30", 3) is True
     assert _day_matches("07:30", 0) is True
+
+
+# ---------------------------------------------------------------------------
+# async_setup_entry — is_open created from hours caps
+# ---------------------------------------------------------------------------
+
+
+async def test_setup_entry_creates_is_open_from_working_hours_cap() -> None:
+    """async_setup_entry creates StationIsOpenBinarySensor when only working_hours in caps."""
+    from custom_components.fuelcompare_ie.binary_sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({"working_hours": '{"Monday": "8a.m.-10p.m."}'})
+    coord.provider_capabilities = frozenset({"working_hours"})
+    coord.station_id = "42"
+
+    entry = MagicMock()
+    entry.title = "Test Station"
+    entry.entry_id = "abc"
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"abc": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    types = [type(e).__name__ for e in added]
+    assert "StationIsOpenBinarySensor" in types
+    assert "DataFetchProblemBinarySensor" in types
+
+
+async def test_setup_entry_creates_is_open_from_opening_hours_cap() -> None:
+    """async_setup_entry creates StationIsOpenBinarySensor when only opening_hours in caps."""
+    from custom_components.fuelcompare_ie.binary_sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({"opening_hours": "Mo-Su 07:00-23:00"})
+    coord.provider_capabilities = frozenset({"opening_hours"})
+    coord.station_id = "43"
+
+    entry = MagicMock()
+    entry.title = "Test Station"
+    entry.entry_id = "abc2"
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"abc2": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    types = [type(e).__name__ for e in added]
+    assert "StationIsOpenBinarySensor" in types
+
+
+async def test_setup_entry_no_is_open_without_hours_cap() -> None:
+    """async_setup_entry does NOT create StationIsOpenBinarySensor when no hours cap."""
+    from custom_components.fuelcompare_ie.binary_sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({"diesel": 1.65})
+    coord.provider_capabilities = frozenset({"diesel"})
+    coord.station_id = "44"
+
+    entry = MagicMock()
+    entry.title = "Test Station"
+    entry.entry_id = "abc3"
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"abc3": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    types = [type(e).__name__ for e in added]
+    assert "StationIsOpenBinarySensor" not in types
+    assert "DataFetchProblemBinarySensor" in types
