@@ -24,8 +24,10 @@ from .const import (
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
+    CONF_SHOW_ON_MAP,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
+    CONF_STATION_PAGE_URL,
     DEFAULT_COUNTRY,
     DEFAULT_PROVIDER,
     DEFAULT_RADIUS_KM,
@@ -380,6 +382,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_county: str = ""  # stored for county_search providers
         self._postal_code: str = ""  # for postal-code-centric providers (e.g. be_carbu)
         self._station_list: list[tuple[str, str]] = []  # for station picker
+        self._station_url_map: dict[str, str] = {}  # station_id → provider page URL
+        self._station_page_url: str = (
+            ""  # URL for selected station (shown on name step)
+        )
         self._latitude: float | None = None
         self._longitude: float | None = None
         self._radius_km: float = DEFAULT_RADIUS_KM
@@ -586,6 +592,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     )
                     self._abort_if_unique_id_configured()
                 self._station_id = station_id
+                self._station_page_url = self._station_url_map.get(station_id, "")
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key, self._api_key
                 )
@@ -615,6 +622,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 station_list = await provider_instance.async_list_stations(
                     session, **list_kwargs
                 )
+                # Build URL map — providers override get_station_page_url() when
+                # they have a stable station detail page (e.g. fuelfinder.ie slug).
+                self._station_url_map = {
+                    uid: url
+                    for uid, _ in station_list
+                    if (url := provider_instance.get_station_page_url(uid))
+                }
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Failed to load station list: %s", err)
 
@@ -726,25 +740,47 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             options: dict[str, Any] = {}
             if self._api_key:
                 options[CONF_API_KEY] = self._api_key
+            if user_input.get(CONF_SHOW_ON_MAP):
+                options[CONF_SHOW_ON_MAP] = True
             if self._station_id:
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
                     data[CONF_STATION_COUNTY] = self._station_county
             if self._postal_code:
                 data[CONF_POSTAL_CODE] = self._postal_code
+            if self._station_page_url:
+                data[CONF_STATION_PAGE_URL] = self._station_page_url
             if self._latitude is not None and self._longitude is not None:
                 data[CONF_LATITUDE] = self._latitude
                 data[CONF_LONGITUDE] = self._longitude
                 options[CONF_RADIUS_KM] = self._radius_km
             return self.async_create_entry(title=title, data=data, options=options)
 
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
+        has_location_caps = (
+            provider_cls is not None
+            and {
+                "latitude",
+                "longitude",
+            }
+            <= provider_cls.CAPABILITIES
+        )
+        schema_dict: dict = {
+            vol.Optional(CONF_NAME, default=self._suggested_name): str,
+        }
+        if has_location_caps:
+            schema_dict[vol.Optional(CONF_SHOW_ON_MAP, default=False)] = bool
+
         return self.async_show_form(
             step_id="name",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(CONF_NAME, default=self._suggested_name): str,
-                }
-            ),
+            data_schema=vol.Schema(schema_dict),
+            description_placeholders={
+                "station_page_url_line": (
+                    f"\n\n[View station on provider website]({self._station_page_url})"
+                    if self._station_page_url
+                    else ""
+                ),
+            },
         )
 
 
@@ -759,8 +795,17 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
         provider_key = self.config_entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_key)
         requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
+        has_location_caps = (
+            provider_cls is not None
+            and {
+                "latitude",
+                "longitude",
+            }
+            <= provider_cls.CAPABILITIES
+        )
 
         existing_key = self.config_entry.options.get(CONF_API_KEY, "")
+        current_show_on_map = self.config_entry.options.get(CONF_SHOW_ON_MAP, False)
 
         if is_location_entry:
             current_radius = self.config_entry.options.get(
@@ -777,12 +822,25 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                     vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
                         vol.Coerce(float), vol.Range(min=0.1, max=500)
                     ),
+                    **(
+                        {
+                            vol.Optional(
+                                CONF_SHOW_ON_MAP, default=current_show_on_map
+                            ): bool
+                        }
+                        if has_location_caps
+                        else {}
+                    ),
                 }
             )
         else:
             schema_dict: dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            if has_location_caps:
+                schema_dict[
+                    vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
+                ] = bool
             if user_input is not None:
                 errors: dict[str, str] = {}
                 if (

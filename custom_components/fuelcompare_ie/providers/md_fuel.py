@@ -98,7 +98,10 @@ class MdFuelProvider(BaseProvider):
     LABEL = "ANRE (Moldova)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 43200  # 12 hours — ANRE updates at most once daily
+    POLL_INTERVAL_SECONDS = 43200
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://anre.md"  # 12 hours — ANRE updates at most once daily
+    )
     CURRENCY: ClassVar[str] = "MDL"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

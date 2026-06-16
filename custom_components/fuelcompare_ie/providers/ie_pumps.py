@@ -160,7 +160,10 @@ class IePumpsProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
 
-    POLL_INTERVAL_SECONDS = 3600  # 1 hour; data is crowd-sourced and mostly stale
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://pumps.ie"  # 1 hour; data is crowd-sourced and mostly stale
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

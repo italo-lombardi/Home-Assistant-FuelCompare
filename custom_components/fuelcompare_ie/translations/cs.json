@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Název Stanice",
-        "description": "Potvrďte nebo upravte název této stanice.",
+        "description": "Potvrďte nebo upravte název této stanice.{station_page_url_line}",
         "data": {
-          "name": "Název"
+          "name": "Název",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Pracovní doba"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Přijímá bezkontaktní platby"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Možnosti",
         "data": {
           "api_key": "API klíč",
-          "radius_km": "Poloměr hledání (km)"
+          "radius_km": "Poloměr hledání (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

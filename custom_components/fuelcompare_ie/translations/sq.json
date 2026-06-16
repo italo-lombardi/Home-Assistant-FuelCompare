@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Emri i Stacionit",
-        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.",
+        "description": "Konfirmoni ose ndryshoni emrin e këtij stacioni.{station_page_url_line}",
         "data": {
-          "name": "Emri"
+          "name": "Emri",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Orari i Punës"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Pranon Pagesë Kontaktsore"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Opsionet",
         "data": {
           "api_key": "Çelës API",
-          "radius_km": "Rrezja e kërkimit (km)"
+          "radius_km": "Rrezja e kërkimit (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

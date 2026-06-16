@@ -24,6 +24,7 @@ from .const import (
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
+    CONF_SHOW_ON_MAP,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
     DEFAULT_PROVIDER,
@@ -177,7 +178,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_placeholders={"entry_title": entry.title},
         )
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # Build platform list — always sensor + binary_sensor; add device_tracker
+    # when show_on_map is enabled and the provider exposes lat/lon data.
+    caps = provider.CAPABILITIES
+    platforms = list(PLATFORMS)
+    if (
+        entry.options.get(CONF_SHOW_ON_MAP)
+        and "latitude" in caps
+        and "longitude" in caps
+    ):
+        platforms.append(Platform.DEVICE_TRACKER)
+
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
     # Reload when options change (e.g. radius, api_key) so the new values take effect.
     async def _reload_entry(h: HomeAssistant, e: ConfigEntry) -> None:
@@ -190,7 +202,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    platforms_to_unload = list(PLATFORMS)
+    # Use the live coordinator's caps — same source as async_setup_entry used,
+    # avoids a stale re-lookup when provider_key is unknown/removed.
+    coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if coordinator is not None:
+        live_caps = coordinator.provider_capabilities
+    else:
+        provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
+        provider_cls = PROVIDER_REGISTRY.get(provider_key)
+        live_caps = provider_cls.CAPABILITIES if provider_cls else frozenset()
+    if (
+        entry.options.get(CONF_SHOW_ON_MAP)
+        and "latitude" in live_caps
+        and "longitude" in live_caps
+    ):
+        platforms_to_unload.append(Platform.DEVICE_TRACKER)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry, platforms_to_unload
+    )
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
         # Only delete repair issues when the entry actually unloaded; if unload

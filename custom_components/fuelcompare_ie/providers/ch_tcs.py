@@ -177,7 +177,10 @@ class ChTcsProvider(BaseProvider):
     LABEL = "TCS Benzinpreis-Radar (Switzerland)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 3600  # crowd-sourced data; 1 hour cadence is adequate
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://benzin.tcs.ch"  # crowd-sourced data; 1 hour cadence is adequate
+    )
     CURRENCY: ClassVar[str] = "Fr."
     REQUIRES_API_KEY = False
 

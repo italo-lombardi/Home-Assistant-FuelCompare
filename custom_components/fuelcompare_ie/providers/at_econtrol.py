@@ -60,6 +60,7 @@ class AtEcontrolProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = POLL_INTERVAL
     REQUIRES_API_KEY = False
+    STATION_PAGE_URL: ClassVar[str] = "https://www.e-control.at"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

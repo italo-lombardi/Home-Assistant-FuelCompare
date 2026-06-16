@@ -110,7 +110,10 @@ class EsMineturProvider(BaseProvider):
     LABEL = "MINETUR (Spain)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 1800  # API updates every 30 minutes per Nota field
+    POLL_INTERVAL_SECONDS = 1800
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://geoportalgasolineras.es"  # API updates every 30 minutes per Nota field
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

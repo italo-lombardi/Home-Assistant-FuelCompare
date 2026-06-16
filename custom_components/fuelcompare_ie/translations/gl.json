@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Nome da estación",
-        "description": "Confirme ou edite o nome desta estación.",
+        "description": "Confirme ou edite o nome desta estación.{station_page_url_line}",
         "data": {
-          "name": "Nome"
+          "name": "Nome",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Horario de atención"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Acepta pagamento sen contacto"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Opcións",
         "data": {
           "api_key": "Clave API",
-          "radius_km": "Radio de busca (km)"
+          "radius_km": "Radio de busca (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

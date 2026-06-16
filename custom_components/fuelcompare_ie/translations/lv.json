@@ -23,9 +23,10 @@
       },
       "name": {
         "title": "Stacijas Nosaukums",
-        "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.",
+        "description": "Apstipriniet vai rediģējiet šīs stacijas nosaukumu.{station_page_url_line}",
         "data": {
-          "name": "Nosaukums"
+          "name": "Nosaukums",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Darba laiks"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Pieņem bezkontakta maksājumu"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Opcijas",
         "data": {
           "api_key": "API atslēga",
-          "radius_km": "Meklēšanas rādiuss (km)"
+          "radius_km": "Meklēšanas rādiuss (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

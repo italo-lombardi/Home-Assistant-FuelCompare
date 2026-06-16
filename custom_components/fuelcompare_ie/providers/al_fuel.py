@@ -108,7 +108,10 @@ class AlFuelProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
 
-    POLL_INTERVAL_SECONDS = 86400  # daily — data updates approximately weekly
+    POLL_INTERVAL_SECONDS = 86400
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://www.cargopedia.net"  # daily — data updates approximately weekly
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

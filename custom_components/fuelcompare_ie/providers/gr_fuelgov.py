@@ -136,7 +136,10 @@ class GrFuelgovProvider(BaseProvider):
 
     STATION_LOOKUP_MODE = "location_search"
 
-    POLL_INTERVAL_SECONDS = 86400  # Daily — bulletin updated once per day.
+    POLL_INTERVAL_SECONDS = 86400
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://www.fuelgov.gr"  # Daily — bulletin updated once per day.
+    )
 
     def __init__(
         self,

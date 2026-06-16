@@ -61,7 +61,8 @@ Bensinpriser.nu prices are already in SEK/litre (e.g. 17.54).  No cents
 conversion is applied.  price95 maps to 'unleaded' (standard petrol E10).
 priceDiesel maps to 'diesel'.  priceEtanol maps to 'e85' (E85 flex fuel).
 
-POLL_INTERVAL_SECONDS = 3600 (1 hour) as specified.
+POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = "https://bensinpriser.nu"
 """
 
 from __future__ import annotations
@@ -158,6 +159,7 @@ class SEBensinpriserProvider(BaseProvider):
     Usage
     -----
     STATION_LOOKUP_MODE = 'location_search': the config flow supplies
+    STATION_PAGE_URL: ClassVar[str] = "https://bensinpriser.nu"
     lat/lng + radius_km to async_list_stations(), which filters the full
     dataset by haversine distance and returns nearby stations.
 
@@ -170,6 +172,7 @@ class SEBensinpriserProvider(BaseProvider):
     LABEL = "Bensinpriser.nu (Sweden)"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
+    STATION_PAGE_URL: ClassVar[str] = "https://bensinpriser.nu"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour as specified
     CURRENCY: ClassVar[str] = "kr"
 

@@ -60,7 +60,8 @@ Confidence notes
 Confidence is 6/10: the API is confirmed working (2026-06-13) and returns
 useful daily wholesale data, but it is undocumented/unofficial.
 
-POLL_INTERVAL_SECONDS = 86400 (daily) since prices update at most once per day.
+POLL_INTERVAL_SECONDS = 86400
+    STATION_PAGE_URL: ClassVar[str] = "https://www.orlen.pl"
 """
 
 from __future__ import annotations
@@ -172,6 +173,7 @@ class PlBenzynaProvider(BaseProvider):
     LABEL = "ORLEN Wholesale (Poland)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.orlen.pl"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
     CURRENCY: ClassVar[str] = "zł"
 

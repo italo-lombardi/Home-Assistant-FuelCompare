@@ -104,7 +104,10 @@ class PtDgegProvider(BaseProvider):
     LABEL = "DGEG (Portugal)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 3600  # DGEG updates intraday; 1-hour poll is sufficient
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://precoscombustiveis.dgeg.gov.pt"  # DGEG updates intraday; 1-hour poll is sufficient
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

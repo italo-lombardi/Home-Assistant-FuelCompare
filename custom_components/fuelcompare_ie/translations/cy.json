@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Enw'r Orsaf",
-        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.",
+        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.{station_page_url_line}",
         "data": {
-          "name": "Enw"
+          "name": "Enw",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Oriau Gweithio"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Yn Derbyn Taliad Di-gyffwrdd"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Opsiynau",
         "data": {
           "api_key": "Allwedd API",
-          "radius_km": "Radiws chwilio (km)"
+          "radius_km": "Radiws chwilio (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

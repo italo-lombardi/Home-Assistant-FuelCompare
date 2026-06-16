@@ -146,6 +146,7 @@ class AuVicProvider(BaseProvider):
     # Consumer ID is a registered UUID — equivalent to an API key.
     REQUIRES_API_KEY = True
     API_KEY_REGISTRATION_URL = "https://developer.service.vic.gov.au/"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.service.vic.gov.au"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

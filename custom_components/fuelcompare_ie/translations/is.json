@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Nafn stöðvar",
-        "description": "Staðfestu eða breyttu nafni þessarar stöðvar.",
+        "description": "Staðfestu eða breyttu nafni þessarar stöðvar.{station_page_url_line}",
         "data": {
-          "name": "Nafn"
+          "name": "Nafn",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Vinnutímar"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Tekur við snertilausri greiðslu"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Valkostir",
         "data": {
           "api_key": "API-lykill",
-          "radius_km": "Leitarradíus (km)"
+          "radius_km": "Leitarradíus (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

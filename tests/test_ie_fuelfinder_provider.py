@@ -610,3 +610,24 @@ def test_provider_registered_in_registry() -> None:
 
     assert "ie_fuelfinder" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["ie_fuelfinder"] is IEFuelFinderProvider
+
+
+# ---------------------------------------------------------------------------
+# get_station_page_url
+# ---------------------------------------------------------------------------
+
+
+def test_get_station_page_url_returns_url_when_slug_cached() -> None:
+    """Returns fuelfinder.ie URL when slug is in cache."""
+    provider = IEFuelFinderProvider("some-uuid")
+    provider._slug_cache["some-uuid"] = "circle-k-taney"
+    assert (
+        provider.get_station_page_url("some-uuid")
+        == "https://www.fuelfinder.ie/fuelfinder/station/circle-k-taney"
+    )
+
+
+def test_get_station_page_url_returns_homepage_when_slug_missing() -> None:
+    """Returns homepage URL when station_id not in slug cache."""
+    provider = IEFuelFinderProvider("some-uuid")
+    assert provider.get_station_page_url("unknown-uuid") == "https://www.fuelfinder.ie"

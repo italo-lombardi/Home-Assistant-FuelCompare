@@ -71,7 +71,8 @@ STATION_LOOKUP_MODE = 'location_search'
 
 Poll interval
 -------------
-POLL_INTERVAL_SECONDS = 900 (15 minutes) to match the upstream commit cadence.
+POLL_INTERVAL_SECONDS = 900
+    STATION_PAGE_URL: ClassVar[str] = "https://gasvaktin.is"
 """
 
 from __future__ import annotations
@@ -192,6 +193,7 @@ class IsFuelProvider(BaseProvider):
     Station lookup
     --------------
     STATION_LOOKUP_MODE = 'location_search': the config flow supplies
+    STATION_PAGE_URL: ClassVar[str] = "https://gasvaktin.is"
     lat/lng + radius_km to async_list_stations(), which downloads the full
     dataset, applies haversine filtering, and returns (key, label) tuples.
 
@@ -219,6 +221,7 @@ class IsFuelProvider(BaseProvider):
 
     POLL_INTERVAL_SECONDS = 900  # 15 minutes — matches upstream commit cadence
     CURRENCY: ClassVar[str] = "kr"
+    STATION_PAGE_URL: ClassVar[str] = "https://gasvaktin.is"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

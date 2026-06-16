@@ -167,6 +167,7 @@ class AuQldProvider(BaseProvider):
 
     REQUIRES_API_KEY = True
     API_KEY_REGISTRATION_URL = "https://www.fuelpricesqld.com.au/"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelpricesqld.com.au"
 
     CAPABILITIES: frozenset[str] = frozenset(
         {

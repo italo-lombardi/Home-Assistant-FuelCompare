@@ -23,9 +23,10 @@
       },
       "name": {
         "title": "Ainm an Stáisiúin",
-        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.",
+        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.{station_page_url_line}",
         "data": {
-          "name": "Ainm"
+          "name": "Ainm",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Uaireanta Oibre"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Glacann le híocaíocht gan teagmháil"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Roghanna",
         "data": {
           "api_key": "Eochair API",
-          "radius_km": "Raidias cuardaigh (km)"
+          "radius_km": "Raidias cuardaigh (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

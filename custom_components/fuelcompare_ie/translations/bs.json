@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Naziv Stanice",
-        "description": "Potvrdite ili uredite naziv ove stanice.",
+        "description": "Potvrdite ili uredite naziv ove stanice.{station_page_url_line}",
         "data": {
-          "name": "Naziv"
+          "name": "Naziv",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Radno Vrijeme"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Prima Beskontaktno Plaćanje"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Opcije",
         "data": {
           "api_key": "API ključ",
-          "radius_km": "Polumjer pretraživanja (km)"
+          "radius_km": "Polumjer pretraživanja (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

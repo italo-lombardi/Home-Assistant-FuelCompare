@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Gasolindegiaren izena",
-        "description": "Berretsi edo editatu gasolindegiaren izena.",
+        "description": "Berretsi edo editatu gasolindegiaren izena.{station_page_url_line}",
         "data": {
-          "name": "Izena"
+          "name": "Izena",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Lan-ordutegia"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Kontakturik gabeko ordainketa onartzen du"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Aukerak",
         "data": {
           "api_key": "API gakoa",
-          "radius_km": "Bilaketa-erradioa (km)"
+          "radius_km": "Bilaketa-erradioa (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

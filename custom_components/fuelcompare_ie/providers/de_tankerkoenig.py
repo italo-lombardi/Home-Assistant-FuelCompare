@@ -155,6 +155,10 @@ class DeTankerkoenigProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 1800
+    STATION_PAGE_URL: ClassVar[str] = "https://www.tankerkoenig.de"
+    STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
+        "https://www.tankerkoenig.de/?page=details&id={station_id}"
+    )
     REQUIRES_API_KEY: ClassVar[bool] = True
     API_KEY_REGISTRATION_URL: ClassVar[str] = "https://onboarding.tankerkoenig.de/"
 

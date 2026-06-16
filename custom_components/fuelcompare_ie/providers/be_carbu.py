@@ -47,7 +47,8 @@ transparently so this is safe.
 Throttling
 ----------
 The existing Carbu_com integration (github.com/myTselection/Carbu_com) uses
-a 1-hour poll interval.  We follow that cadence: POLL_INTERVAL_SECONDS=3600.
+a 1-hour poll interval.  We follow that cadence: POLL_INTERVAL_SECONDS=3600
+    STATION_PAGE_URL: ClassVar[str] = "https://carbu.com/belgie"
 
 StationData field mapping
 -------------------------
@@ -362,6 +363,7 @@ class BeCarbuProvider(BaseProvider):
     LABEL = "Carbu.com (Belgium)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
+    STATION_PAGE_URL: ClassVar[str] = "https://carbu.com/belgie"
     POLL_INTERVAL_SECONDS = 3600  # 1 hour — carbu.com rate-limit guidance
     NEEDS_POSTAL_CODE = True
 

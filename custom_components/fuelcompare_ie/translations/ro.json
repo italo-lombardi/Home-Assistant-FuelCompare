@@ -23,9 +23,10 @@
       },
       "name": {
         "title": "Numele Stației",
-        "description": "Confirmați sau editați numele acestei stații.",
+        "description": "Confirmați sau editați numele acestei stații.{station_page_url_line}",
         "data": {
-          "name": "Nume"
+          "name": "Nume",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Program de lucru"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Acceptă plată contactless"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Opțiuni",
         "data": {
           "api_key": "Cheie API",
-          "radius_km": "Raza de căutare (km)"
+          "radius_km": "Raza de căutare (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

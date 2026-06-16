@@ -52,8 +52,16 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
         return self._provider.LABEL
 
     @property
+    def provider_country(self) -> str:
+        return self._provider.COUNTRY
+
+    @property
     def provider_currency(self) -> str:
         return self._provider.CURRENCY
+
+    def get_provider_station_page_url(self, station_id: str) -> str | None:
+        """Return station page URL from provider — per-station or homepage fallback."""
+        return self._provider.get_station_page_url(station_id)
 
     # ---- Update cycle -----------------------------------------------------------
 

@@ -255,8 +255,10 @@ class BaseProvider(ABC):
     always created unconditionally by the coordinator and is never gated
     by CAPABILITIES.
 
-    'last_successful_fetch' (sensor) — CAN be listed here (opt-in); list it
-    to expose a "Last Successful Fetch" timestamp sensor for this provider.
+    'last_successful_fetch' (sensor) — must NOT be listed here; it is
+    always created unconditionally in sensor.async_setup_entry (same
+    pattern as data_fetch_problem). Listing it would cause a duplicate
+    entity with the same unique_id.
 
     Keys 'source_station_id' and 'tablename' are also injected automatically
     by the coordinator as entity attributes and should not be listed here.
@@ -309,6 +311,23 @@ class BaseProvider(ABC):
     to guide the user to the correct registration page.
     """
 
+    STATION_PAGE_URL: ClassVar[str] = ""
+    """Homepage / data source URL for this provider.
+
+    Shown as the Station Page URL sensor when no per-station URL is available.
+    Always set this so every entry gets a clickable URL.
+    Example: 'https://www.tankerkoenig.de'
+    """
+
+    STATION_PAGE_URL_TEMPLATE: ClassVar[str] = ""
+    """URL template for a per-station detail page.
+
+    Use '{station_id}' as the placeholder for the station identifier.
+    When set, get_station_page_url() substitutes {station_id} automatically.
+    When empty, falls back to STATION_PAGE_URL (the provider homepage).
+    Example: 'https://www.tankerkoenig.de/?page=details&id={station_id}'
+    """
+
     CURRENCY: ClassVar[str] = "€"
     """Currency unit for fuel price sensors (unit_of_measurement).
 
@@ -335,11 +354,7 @@ class BaseProvider(ABC):
                     raise TypeError(
                         f"{cls.__name__} must define class attribute '{attr}'"
                     )
-            unknown = (
-                cls.CAPABILITIES
-                - ALL_SENSOR_KEYS
-                - {"last_successful_fetch", "data_fetch_problem"}
-            )
+            unknown = cls.CAPABILITIES - ALL_SENSOR_KEYS - {"data_fetch_problem"}
             if unknown:
                 raise TypeError(
                     f"{cls.__name__}.CAPABILITIES contains unknown keys: {unknown}. "
@@ -349,6 +364,7 @@ class BaseProvider(ABC):
                 "source_station_id",
                 "tablename",
                 "data_fetch_problem",  # always created by coordinator, never gated
+                "last_successful_fetch",  # always created by sensor platform, never gated
             }
             forbidden = cls.CAPABILITIES & FORBIDDEN_CAPS
             if forbidden:
@@ -367,6 +383,15 @@ class BaseProvider(ABC):
                 and "async_list_stations" not in cls.__dict__
             ):
                 raise TypeError(cls.__name__ + " must override async_list_stations")
+            if (
+                cls.STATION_PAGE_URL_TEMPLATE
+                and "{station_id}" not in cls.STATION_PAGE_URL_TEMPLATE
+            ):
+                raise TypeError(
+                    f"{cls.__name__}.STATION_PAGE_URL_TEMPLATE must contain "
+                    "'{station_id}' placeholder, got: "
+                    f"{cls.STATION_PAGE_URL_TEMPLATE!r}"
+                )
 
     # ── Abstract interface ────────────────────────────────────────────────────
 
@@ -424,3 +449,23 @@ class BaseProvider(ABC):
         method. The default implementation returns an empty list (safe fallback).
         """
         return []
+
+    def get_station_page_url(self, station_id: str) -> str | None:
+        """Return a URL for the station's page on the provider website, or None.
+
+        Called by the config flow after async_list_stations returns. Providers
+        that populate an internal cache during async_list_stations (e.g. a slug
+        cache) can use that cache here. Must only be called after
+        async_list_stations has returned for the same provider instance —
+        calling it before will yield None even for providers that support URLs.
+
+        Default behaviour:
+        - If STATION_PAGE_URL_TEMPLATE is set, substitutes {station_id} and returns it.
+        - Else if STATION_PAGE_URL is set, returns the homepage URL.
+        - Else returns None.
+
+        Override in providers that need dynamic URL construction (e.g. slug cache).
+        """
+        if self.STATION_PAGE_URL_TEMPLATE:
+            return self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
+        return self.STATION_PAGE_URL or None

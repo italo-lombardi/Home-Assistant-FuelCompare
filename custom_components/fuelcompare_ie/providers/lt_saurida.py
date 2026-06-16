@@ -360,7 +360,10 @@ class LtSauridaProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
 
-    POLL_INTERVAL_SECONDS = 3600  # prices change ~daily; 1-hour poll is sufficient
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://saurida.lt"  # prices change ~daily; 1-hour poll is sufficient
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

@@ -54,9 +54,10 @@
       },
       "name": {
         "title": "Stasjonsnamn",
-        "description": "Stadfest eller endra namnet på denne stasjonen.",
+        "description": "Stadfest eller endra namnet på denne stasjonen.{station_page_url_line}",
         "data": {
-          "name": "Namn"
+          "name": "Namn",
+          "show_on_map": "Show station on map"
         }
       }
     },
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Arbeidstider"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Godtek kontaktlaus betaling"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Alternativ",
         "data": {
           "api_key": "API-nøkkel",
-          "radius_km": "Søkeradius (km)"
+          "radius_km": "Søkeradius (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

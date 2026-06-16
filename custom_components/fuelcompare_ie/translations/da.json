@@ -23,9 +23,10 @@
       },
       "name": {
         "title": "Stationsnavn",
-        "description": "Bekræft eller rediger navnet på denne station.",
+        "description": "Bekræft eller rediger navnet på denne station.{station_page_url_line}",
         "data": {
-          "name": "Navn"
+          "name": "Navn",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Arbejdstider"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Accepterer kontaktløs betaling"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Indstillinger",
         "data": {
           "api_key": "API-nøgle",
-          "radius_km": "Søgeradius (km)"
+          "radius_km": "Søgeradius (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

@@ -15,6 +15,8 @@ CONF_RADIUS_KM = "radius_km"
 CONF_STATION_COUNTY = "station_county"  # stored for county_search providers
 CONF_API_KEY = "api_key"  # optional API key for providers that require authentication
 CONF_POSTAL_CODE = "postal_code"  # for postal-code-centric providers (e.g. be_carbu)
+CONF_STATION_PAGE_URL = "station_page_url"  # provider page URL for the selected station
+CONF_SHOW_ON_MAP = "show_on_map"  # options toggle: expose station as device_tracker
 
 # Defaults
 DEFAULT_COUNTRY = "IE"

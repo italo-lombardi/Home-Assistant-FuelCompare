@@ -119,6 +119,7 @@ class CzCcsProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
+    STATION_PAGE_URL: ClassVar[str] = "https://www.mfcr.cz"
     CURRENCY: ClassVar[str] = "Kč"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

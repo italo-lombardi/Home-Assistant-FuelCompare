@@ -23,9 +23,10 @@
       },
       "name": {
         "title": "Ime Postaje",
-        "description": "Potrdite ali uredite ime te postaje.",
+        "description": "Potrdite ali uredite ime te postaje.{station_page_url_line}",
         "data": {
-          "name": "Ime"
+          "name": "Ime",
+          "show_on_map": "Show station on map"
         }
       },
       "county": {
@@ -170,6 +171,15 @@
       },
       "working_hours": {
         "name": "Delovni čas"
+      },
+      "provider_label": {
+        "name": "Data Provider"
+      },
+      "country_code": {
+        "name": "Country"
+      },
+      "station_page_url": {
+        "name": "Station Page URL"
       }
     },
     "binary_sensor": {
@@ -209,6 +219,11 @@
       "accepts_contactless": {
         "name": "Sprejema brezstično plačilo"
       }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Location"
+      }
     }
   },
   "options": {
@@ -217,7 +232,8 @@
         "title": "Možnosti",
         "data": {
           "api_key": "API ključ",
-          "radius_km": "Iskalni polmer (km)"
+          "radius_km": "Iskalni polmer (km)",
+          "show_on_map": "Show station on map"
         }
       }
     }

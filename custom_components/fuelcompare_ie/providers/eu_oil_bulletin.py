@@ -186,6 +186,9 @@ class EuOilBulletinProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = _POLL_INTERVAL
     REQUIRES_API_KEY = False
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
+    )
 
     # Class-level workbook cache — shared across all instances so N configured
     # EU-country entries only download the weekly XLSX once per week.
@@ -201,7 +204,6 @@ class EuOilBulletinProvider(BaseProvider):
             "lpg",  # LPG motor fuel
             # Station identity (national average pseudo-station)
             "name",  # Country name
-            "county",  # Country name (region context)
             # Timing
             "lastupdated",  # Week date from Excel header
         }
@@ -651,7 +653,6 @@ def _build_station_data(
         "lpg": record.get("lpg"),  # LPG motor fuel
         # Station identity (national average pseudo-station)
         "name": country_name,
-        "county": country_name,
         # Timing
         "lastupdated": week_label,
         # Source reference
