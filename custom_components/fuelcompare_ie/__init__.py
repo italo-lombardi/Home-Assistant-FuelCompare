@@ -178,19 +178,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_placeholders={"entry_title": entry.title},
         )
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    # Conditionally load device_tracker platform when show_on_map is enabled
-    # and the provider has lat/lon data.
+    # Build platform list — always sensor + binary_sensor; add device_tracker
+    # when show_on_map is enabled and the provider exposes lat/lon data.
     caps = provider.CAPABILITIES
+    platforms = list(PLATFORMS)
     if (
         entry.options.get(CONF_SHOW_ON_MAP)
         and "latitude" in caps
         and "longitude" in caps
     ):
-        await hass.config_entries.async_forward_entry_setups(
-            entry, [Platform.DEVICE_TRACKER]
-        )
+        platforms.append(Platform.DEVICE_TRACKER)
+
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
     # Reload when options change (e.g. radius, api_key) so the new values take effect.
     async def _reload_entry(h: HomeAssistant, e: ConfigEntry) -> None:
@@ -204,13 +203,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     platforms_to_unload = list(PLATFORMS)
-    provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
-    provider_cls = PROVIDER_REGISTRY.get(provider_key)
-    caps = provider_cls.CAPABILITIES if provider_cls else frozenset()
+    # Use the live coordinator's caps — same source as async_setup_entry used,
+    # avoids a stale re-lookup when provider_key is unknown/removed.
+    coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if coordinator is not None:
+        live_caps = coordinator.provider_capabilities
+    else:
+        provider_key = entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
+        provider_cls = PROVIDER_REGISTRY.get(provider_key)
+        live_caps = provider_cls.CAPABILITIES if provider_cls else frozenset()
     if (
         entry.options.get(CONF_SHOW_ON_MAP)
-        and "latitude" in caps
-        and "longitude" in caps
+        and "latitude" in live_caps
+        and "longitude" in live_caps
     ):
         platforms_to_unload.append(Platform.DEVICE_TRACKER)
     unload_ok = await hass.config_entries.async_unload_platforms(

@@ -162,9 +162,12 @@ async def async_setup_entry(
     entities.append(ProviderLabelSensor(coordinator, station_id, station_name))
     entities.append(CountrySensor(coordinator, station_id, station_name))
     station_page_url = entry.data.get(CONF_STATION_PAGE_URL, "")
-    entities.append(
-        StationPageUrlSensor(coordinator, station_id, station_name, station_page_url)
-    )
+    if station_page_url:
+        entities.append(
+            StationPageUrlSensor(
+                coordinator, station_id, station_name, station_page_url
+            )
+        )
 
     async_add_entities(entities)
 
@@ -664,18 +667,19 @@ class LastSuccessfulFetchSensor(
 # ── Identity / diagnostic sensors ─────────────────────────────────────────────
 
 
-class ProviderLabelSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
-    """Diagnostic sensor: name of the data provider."""
+class ProviderLabelSensor(SensorEntity):
+    """Diagnostic sensor: name of the data provider (static, set at setup)."""
 
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:database"
     _attr_has_entity_name = True
     _attr_translation_key = "provider_label"
+    _attr_should_poll = False
 
     def __init__(self, coordinator, station_id, station_name) -> None:
-        super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_provider_label"
+        self._attr_native_value = coordinator.provider_label
         self._attr_device_info = _device_info(
             station_id, station_name, coordinator.provider_label
         )
@@ -683,28 +687,25 @@ class ProviderLabelSensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEnt
     @property
     def available(self) -> bool:
         return True
-
-    @property
-    def native_value(self) -> str:
-        return self.coordinator.provider_label
 
     @property
     def extra_state_attributes(self) -> dict:
         return {"station_id": self._station_id}
 
 
-class CountrySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
-    """Diagnostic sensor: ISO country code of the data provider."""
+class CountrySensor(SensorEntity):
+    """Diagnostic sensor: ISO country code of the data provider (static, set at setup)."""
 
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:earth"
     _attr_has_entity_name = True
     _attr_translation_key = "country_code"
+    _attr_should_poll = False
 
     def __init__(self, coordinator, station_id, station_name) -> None:
-        super().__init__(coordinator)
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_country_code"
+        self._attr_native_value = coordinator.provider_country
         self._attr_device_info = _device_info(
             station_id, station_name, coordinator.provider_label
         )
@@ -712,10 +713,6 @@ class CountrySensor(CoordinatorEntity[FuelCompareIECoordinator], SensorEntity):
     @property
     def available(self) -> bool:
         return True
-
-    @property
-    def native_value(self) -> str:
-        return self.coordinator.provider_country
 
     @property
     def extra_state_attributes(self) -> dict:

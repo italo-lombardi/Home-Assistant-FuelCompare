@@ -907,28 +907,29 @@ async def test_setup_entry_last_successful_fetch_not_duplicated() -> None:
 
 
 def test_provider_label_sensor_native_value() -> None:
-    """ProviderLabelSensor returns coordinator.provider_label."""
+    """ProviderLabelSensor stores provider_label as static _attr_native_value at init."""
     from custom_components.fuelcompare_ie.sensor import ProviderLabelSensor
 
     coord = _make_coordinator({})
     coord.provider_label = "FuelFinder.ie"
+    coord.provider_country = "IE"
     sensor = object.__new__(ProviderLabelSensor)
-    object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "1")
+    object.__setattr__(sensor, "_attr_native_value", "FuelFinder.ie")
     assert sensor.native_value == "FuelFinder.ie"
     assert sensor.available is True
     assert sensor.extra_state_attributes == {"station_id": "1"}
 
 
 def test_country_sensor_native_value() -> None:
-    """CountrySensor returns coordinator.provider_country."""
+    """CountrySensor stores provider_country as static _attr_native_value at init."""
     from custom_components.fuelcompare_ie.sensor import CountrySensor
 
     coord = _make_coordinator({})
     coord.provider_country = "IE"
     sensor = object.__new__(CountrySensor)
-    object.__setattr__(sensor, "coordinator", coord)
     object.__setattr__(sensor, "_station_id", "2")
+    object.__setattr__(sensor, "_attr_native_value", "IE")
     assert sensor.native_value == "IE"
     assert sensor.available is True
     assert sensor.extra_state_attributes == {"station_id": "2"}
@@ -962,9 +963,9 @@ def test_station_page_url_sensor_unavailable_when_empty() -> None:
 
 
 async def test_setup_entry_always_creates_identity_sensors() -> None:
-    """async_setup_entry always creates ProviderLabelSensor, CountrySensor, StationPageUrlSensor."""
+    """async_setup_entry always creates ProviderLabelSensor and CountrySensor; StationPageUrlSensor only when URL set."""
     from custom_components.fuelcompare_ie.sensor import async_setup_entry
-    from custom_components.fuelcompare_ie.const import DOMAIN
+    from custom_components.fuelcompare_ie.const import DOMAIN, CONF_STATION_PAGE_URL
 
     coord = _make_coordinator({})
     coord.provider_capabilities = frozenset()
@@ -974,7 +975,7 @@ async def test_setup_entry_always_creates_identity_sensors() -> None:
     entry = MagicMock()
     entry.title = "Test"
     entry.entry_id = "e1"
-    entry.data = {}
+    entry.data = {CONF_STATION_PAGE_URL: "https://example.com/s/foo"}
 
     hass = MagicMock()
     hass.data = {DOMAIN: {"e1": coord}}
@@ -986,3 +987,30 @@ async def test_setup_entry_always_creates_identity_sensors() -> None:
     assert "ProviderLabelSensor" in type_names
     assert "CountrySensor" in type_names
     assert "StationPageUrlSensor" in type_names
+
+
+async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
+    """async_setup_entry skips StationPageUrlSensor when no URL in config entry data."""
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    coord = _make_coordinator({})
+    coord.provider_capabilities = frozenset()
+    coord.provider_country = "DE"
+    coord.station_id = "id2"
+
+    entry = MagicMock()
+    entry.title = "Test"
+    entry.entry_id = "e2"
+    entry.data = {}  # no CONF_STATION_PAGE_URL
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"e2": coord}}
+
+    added: list = []
+    await async_setup_entry(hass, entry, added.extend)
+
+    type_names = {type(e).__name__ for e in added}
+    assert "ProviderLabelSensor" in type_names
+    assert "CountrySensor" in type_names
+    assert "StationPageUrlSensor" not in type_names
