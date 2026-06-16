@@ -24,6 +24,7 @@ from custom_components.fuelcompare_ie.providers.me_fuel import (  # noqa: E402
     _PRICE_ROW,
     _STATION_ID_ME,
     _parse_price,
+    _parse_prices_from_description,
     _parse_xlsx,
 )
 
@@ -509,12 +510,12 @@ async def test_async_fetch_raises_when_ckan_results_empty() -> None:
 
 @pytest.mark.asyncio
 async def test_async_fetch_raises_when_no_xlsx_resource_found() -> None:
-    """async_fetch raises ProviderError when dataset has no XLSX resource."""
+    """async_fetch raises ProviderError when dataset has no XLSX and no parseable description."""
     ckan_resp = _make_mock_response(200, json_data=_CKAN_NO_XLSX_PAYLOAD)
     session = _make_session(ckan_resp)
 
     provider = _default_provider()
-    with pytest.raises(ProviderError, match="No XLSX"):
+    with pytest.raises(ProviderError, match="no XLSX resource found"):
         await provider.async_fetch(session, _STATION_ID_ME)
 
 
@@ -668,7 +669,7 @@ async def test_fetch_xlsx_url_returns_url_and_modified() -> None:
     session = _make_session(ckan_resp)
 
     provider = _default_provider()
-    url, modified = await provider._fetch_xlsx_url(session)
+    url, modified, _fallback = await provider._fetch_xlsx_url(session)
 
     assert url == _XLSX_URL
     assert modified == _MODIFIED
@@ -701,13 +702,14 @@ async def test_fetch_xlsx_url_raises_when_no_results() -> None:
 
 @pytest.mark.asyncio
 async def test_fetch_xlsx_url_raises_when_no_xlsx_resource() -> None:
-    """_fetch_xlsx_url raises ProviderError when no XLSX resource URL is found."""
+    """_fetch_xlsx_url returns (None, modified, description) when no XLSX resource found."""
     ckan_resp = _make_mock_response(200, json_data=_CKAN_NO_XLSX_PAYLOAD)
     session = _make_session(ckan_resp)
 
     provider = _default_provider()
-    with pytest.raises(ProviderError, match="No XLSX"):
-        await provider._fetch_xlsx_url(session)
+    url, modified, _desc = await provider._fetch_xlsx_url(session)
+    assert url is None
+    assert modified == _MODIFIED
 
 
 # ---------------------------------------------------------------------------
@@ -854,6 +856,51 @@ async def test_parse_xlsx_logs_debug_for_unparseable_cell_value() -> None:
 
 
 @pytest.mark.asyncio
+def test_parse_prices_from_description_valid() -> None:
+    """_parse_prices_from_description extracts all four prices from description text."""
+    desc = (
+        "EUROSUPER 98 1,70 eur +0.02\n"
+        "EUROSUPER 95 1,66 eur +0.02\n"
+        "EURODIEZEL 1,66 eur -0.04\n"
+        "LOŽ ULJE 1,59 eur -0.04"
+    )
+    result = _parse_prices_from_description(desc)
+    assert result["premium_unleaded"] == pytest.approx(1.70)
+    assert result["unleaded"] == pytest.approx(1.66)
+    assert result["diesel"] == pytest.approx(1.66)
+    assert result["kerosene"] == pytest.approx(1.59)
+
+
+def test_parse_prices_from_description_invalid_float() -> None:
+    """_parse_prices_from_description returns None when float() conversion fails."""
+    # Monkeypatch re.search to return a match whose group(1) is non-numeric
+    import re
+    from unittest.mock import patch
+
+    fake_match = re.match(r"(.*)", "not_a_number")
+
+    original_search = re.search
+
+    def patched_search(pattern, string, flags=0):
+        if "EUROSUPER" in pattern and "95" in pattern:
+            return fake_match
+        return original_search(pattern, string, flags)
+
+    with patch(
+        "custom_components.fuelcompare_ie.providers.me_fuel.re.search",
+        side_effect=patched_search,
+    ):
+        result = _parse_prices_from_description("EUROSUPER 95 1,66 eur")
+    assert result["unleaded"] is None
+
+
+def test_parse_prices_from_description_zero_price() -> None:
+    """_parse_prices_from_description returns None when price is zero."""
+    desc = "EUROSUPER 95 0,00 eur"
+    result = _parse_prices_from_description(desc)
+    assert result["unleaded"] is None
+
+
 async def test_parse_xlsx_swallows_wb_close_exception(monkeypatch) -> None:
     """_parse_xlsx swallows any exception from wb.close() without raising (lines 504-505)."""
     from unittest.mock import MagicMock, patch

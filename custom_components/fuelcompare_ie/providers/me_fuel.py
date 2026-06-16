@@ -85,6 +85,7 @@ import asyncio
 import functools
 import io
 import logging
+import re
 from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
@@ -98,7 +99,7 @@ _LOGGER = logging.getLogger(__name__)
 
 _CKAN_SEARCH_URL = (
     "https://data.gov.me/api/3/action/package_search"
-    "?q=gorivo&rows=1&sort=metadata_modified+desc"
+    "?q=gorivo&rows=5&sort=metadata_modified+desc"
 )
 
 _HEADERS: dict[str, str] = {
@@ -208,7 +209,9 @@ class MeFuelProvider(BaseProvider):
         """Fetch the latest government fuel prices from data.gov.me.
 
         Performs a two-step fetch:
-          1. CKAN package_search to get the latest XLSX download URL.
+          1. CKAN package_search to get the latest XLSX download URL (scans
+             up to 5 results).  Falls back to description-text parsing when
+             no XLSX is found across all rows.
           2. XLSX download and parse to extract the MP (Maloprodajna cijena)
              row for EUROSUPER 95, EUROSUPER 98, EURODIESEL, and LOŽ ULJE.
 
@@ -221,12 +224,24 @@ class MeFuelProvider(BaseProvider):
             be None if the XLSX cell is empty or non-numeric).
 
         Raises:
-            ProviderError: CKAN API call failed, no XLSX resource found, or
-                           the XLSX cannot be downloaded/parsed.
+            ProviderError: CKAN API call failed, no XLSX resource found and
+                           description parse also yielded no prices.
         """
-        xlsx_url, modified = await self._fetch_xlsx_url(session)
-        xlsx_bytes = await self._download_xlsx(session, xlsx_url)
-        prices = await _parse_xlsx(xlsx_bytes)
+        xlsx_url, modified, fallback_description = await self._fetch_xlsx_url(session)
+
+        if xlsx_url is not None:
+            xlsx_bytes = await self._download_xlsx(session, xlsx_url)
+            prices = await _parse_xlsx(xlsx_bytes)
+        else:
+            _LOGGER.debug(
+                "MeFuel: no XLSX found across all rows; falling back to description parse"
+            )
+            prices = _parse_prices_from_description(fallback_description or "")
+            if not any(v is not None for v in prices.values()):
+                raise ProviderError(
+                    "MeFuel: no XLSX resource found and description parse yielded no prices. "
+                    "The data.gov.me portal may have changed its format."
+                )
 
         data: StationData = {
             "unleaded": prices.get("unleaded"),
@@ -289,19 +304,24 @@ class MeFuelProvider(BaseProvider):
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
-    async def _fetch_xlsx_url(self, session: ClientSession) -> tuple[str, str | None]:
+    async def _fetch_xlsx_url(
+        self, session: ClientSession
+    ) -> tuple[str | None, str | None, str | None]:
         """Query the CKAN package_search API and return the XLSX download URL.
+
+        Scans up to 5 results (rows=5) to find the first dataset that has a
+        valid XLSX resource.  Returns a 3-tuple:
+          - xlsx_url:             URL string, or None if no XLSX found
+          - metadata_modified:    ISO 8601 string from the XLSX dataset, or
+                                  from results[0] when falling back
+          - fallback_description: description text of results[0] for use when
+                                  no XLSX was found; None otherwise
 
         Args:
             session: aiohttp ClientSession.
 
-        Returns:
-            Tuple of (xlsx_url, metadata_modified) where metadata_modified
-            is an ISO 8601 string or None when absent.
-
         Raises:
-            ProviderError: CKAN API call failed, returned no results, or no
-                           XLSX resource was found in the latest dataset.
+            ProviderError: CKAN API call failed or returned no results.
         """
         _LOGGER.debug("MeFuel: querying CKAN package_search for latest gorivo dataset")
         try:
@@ -332,40 +352,45 @@ class MeFuelProvider(BaseProvider):
                 "The data.gov.me portal may have restructured its dataset naming."
             )
 
-        dataset = results[0]
-        modified: str | None = dataset.get("metadata_modified") or None
+        # Scan all returned results for the first valid XLSX resource.
+        for dataset in results:
+            modified: str | None = dataset.get("metadata_modified") or None
+            resources: list[dict] = dataset.get("resources") or []
+            xlsx_url: str | None = None
 
-        # Find the first XLSX resource in the dataset's resource list.
-        resources: list[dict] = dataset.get("resources") or []
-        xlsx_url: str | None = None
-        for resource in resources:
-            fmt: str = (resource.get("format") or "").upper()
-            url: str = resource.get("url") or ""
-            if fmt == "XLSX" and url:
-                xlsx_url = url
-                break
-
-        if not xlsx_url:
-            # Fall back: check if any resource URL ends in .xlsx
             for resource in resources:
-                url = resource.get("url") or ""
-                if url.lower().endswith(".xlsx"):
+                fmt: str = (resource.get("format") or "").upper()
+                url: str = resource.get("url") or ""
+                if fmt == "XLSX" and url:
                     xlsx_url = url
                     break
 
-        if not xlsx_url:
-            raise ProviderError(
-                "MeFuel: No XLSX resource found in the latest CKAN dataset. "
-                f"Dataset id={dataset.get('id')!r}, "
-                f"resources={[r.get('format') for r in resources]}. "
-                "The data.gov.me portal may have changed resource formats."
-            )
+            if not xlsx_url:
+                for resource in resources:
+                    url = resource.get("url") or ""
+                    if url.lower().endswith(".xlsx"):
+                        xlsx_url = url
+                        break
 
-        if not xlsx_url.startswith("https://data.gov.me/"):
-            raise ProviderError(f"Refusing to download from untrusted host: {xlsx_url}")
+            if xlsx_url:
+                if not xlsx_url.startswith("https://data.gov.me/"):
+                    raise ProviderError(
+                        f"Refusing to download from untrusted host: {xlsx_url}"
+                    )
+                _LOGGER.debug(
+                    "MeFuel: found XLSX URL: %s (modified=%s)", xlsx_url, modified
+                )
+                return xlsx_url, modified, None
 
-        _LOGGER.debug("MeFuel: found XLSX URL: %s (modified=%s)", xlsx_url, modified)
-        return xlsx_url, modified
+        # No XLSX found across all rows — return description of most recent entry.
+        first_dataset = results[0]
+        fallback_modified: str | None = first_dataset.get("metadata_modified") or None
+        fallback_description: str | None = first_dataset.get("notes") or None
+        _LOGGER.debug(
+            "MeFuel: no XLSX found in %d results; will attempt description fallback",
+            len(results),
+        )
+        return None, fallback_modified, fallback_description
 
     async def _download_xlsx(self, session: ClientSession, xlsx_url: str) -> bytes:
         """Download the XLSX file and return its raw bytes.
@@ -425,6 +450,59 @@ def _parse_price(raw: Any) -> float | None:
     if val > 10:
         val = val / 100.0
     return round(val, 3)
+
+
+def _parse_prices_from_description(description: str) -> dict[str, float | None]:
+    """Parse fuel prices from a CKAN dataset description text.
+
+    Used as a fallback when no XLSX resource is found in any of the returned
+    datasets.  The Montenegrin portal sometimes publishes a dataset entry that
+    contains only descriptive text (no attached file) for new price updates.
+
+    Matches patterns like ``EUROSUPER 95 1,66 eur`` where the price uses a
+    comma as the decimal separator.
+
+    Args:
+        description: The ``notes`` field of the most recent CKAN dataset.
+
+    Returns:
+        Dict with keys ``'unleaded'``, ``'premium_unleaded'``, ``'diesel'``,
+        ``'kerosene'``; each value is a float (EUR/litre) or None.
+    """
+    prices: dict[str, float | None] = {
+        "unleaded": None,
+        "premium_unleaded": None,
+        "diesel": None,
+        "kerosene": None,
+    }
+
+    _FUEL_PATTERNS: list[tuple[str, str]] = [
+        (r"EUROSUPER\s+95", "unleaded"),
+        (r"EUROSUPER\s+98", "premium_unleaded"),
+        (r"EURODI(?:EZEL|ESEL|ZIEL)", "diesel"),
+        (r"LO[ŽZ]\s+ULJE", "kerosene"),
+    ]
+
+    for fuel_pattern, key in _FUEL_PATTERNS:
+        match = re.search(
+            fuel_pattern + r"\s+(\d+[,\.]\d+)\s+eur",
+            description,
+            re.IGNORECASE,
+        )
+        if match:
+            raw = match.group(1).replace(",", ".")
+            try:
+                val = float(raw)
+            except ValueError:
+                continue
+            if val > 0:
+                prices[key] = round(val, 3)
+
+    _LOGGER.debug(
+        "MeFuel: description-parsed prices: %s",
+        {k: v for k, v in prices.items() if v is not None},
+    )
+    return prices
 
 
 async def _parse_xlsx(xlsx_bytes: bytes) -> dict[str, float | None]:
