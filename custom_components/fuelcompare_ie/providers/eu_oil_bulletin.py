@@ -186,6 +186,9 @@ class EuOilBulletinProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = _POLL_INTERVAL
     REQUIRES_API_KEY = False
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
+    )
 
     # Class-level workbook cache — shared across all instances so N configured
     # EU-country entries only download the weekly XLSX once per week.

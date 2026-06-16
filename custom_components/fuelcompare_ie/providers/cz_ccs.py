@@ -118,7 +118,10 @@ class CzCcsProvider(BaseProvider):
     LABEL = "MF ČR Price Caps (Czech Republic)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://www.mfcr.cz" * 6
+    )  # updated once per weekday; 6-hour poll is ample
     CURRENCY: ClassVar[str] = "Kč"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

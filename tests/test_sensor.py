@@ -981,7 +981,7 @@ async def test_setup_entry_always_creates_identity_sensors() -> None:
 
 
 async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
-    """async_setup_entry skips StationPageUrlSensor when no URL in config entry data."""
+    """StationPageUrlSensor is skipped only when provider has no URL at all (no homepage, no template)."""
     from custom_components.fuelcompare_ie.sensor import async_setup_entry
     from custom_components.fuelcompare_ie.const import DOMAIN
 
@@ -989,6 +989,7 @@ async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
     coord.provider_capabilities = frozenset()
     coord.provider_country = "DE"
     coord.station_id = "id2"
+    coord.get_provider_station_page_url = lambda sid: None  # provider with no URL
 
     entry = MagicMock()
     entry.title = "Test"

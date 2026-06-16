@@ -43,7 +43,8 @@ Prices are in KM/L (Bosnian Convertible Mark per litre).
 1 KM ≈ 0.51 EUR (fixed peg: 1 EUR = 1.95583 KM).
 Prices are stored as KM/L without conversion; the sensor platform
 renders them as-is.  The currency label is set via the provider's
-CURRENCY class attribute (CURRENCY = "KM").
+CURRENCY class attribute (CURRENCY = "KM"
+    STATION_PAGE_URL: ClassVar[str] = "https://cijenegoriva.ba").
 
 Robots / ToS
 ------------

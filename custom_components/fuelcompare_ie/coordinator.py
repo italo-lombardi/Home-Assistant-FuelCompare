@@ -59,6 +59,10 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
     def provider_currency(self) -> str:
         return self._provider.CURRENCY
 
+    def get_provider_station_page_url(self, station_id: str) -> str | None:
+        """Return station page URL from provider — per-station or homepage fallback."""
+        return self._provider.get_station_page_url(station_id)
+
     # ---- Update cycle -----------------------------------------------------------
 
     async def async_shutdown(self) -> None:

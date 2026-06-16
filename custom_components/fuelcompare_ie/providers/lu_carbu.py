@@ -194,7 +194,8 @@ class LuCarbuProvider(BaseProvider):
     LABEL = "carbu.com Luxembourg"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 1800  # 30 minutes
+    POLL_INTERVAL_SECONDS = 1800
+    STATION_PAGE_URL: ClassVar[str] = "https://carbu.com/luxembourg"  # 30 minutes
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

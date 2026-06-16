@@ -36,7 +36,8 @@ CONFIG_MODE='location': the coordinator/config flow treats this as a
 location-based provider.  async_list_stations returns a single entry for
 the national average.
 
-Update cadence: weekly (Thursdays).  POLL_INTERVAL_SECONDS = 604800 (7 days).
+Update cadence: weekly (Thursdays).  POLL_INTERVAL_SECONDS = 604800
+    STATION_PAGE_URL: ClassVar[str] = "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en" (7 days).
 A shorter interval (e.g. 86400) is also acceptable; the XLSX does not change
 intra-week so extra fetches are wasted bandwidth.
 

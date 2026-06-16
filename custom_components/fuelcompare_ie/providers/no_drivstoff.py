@@ -210,6 +210,7 @@ class NoDrivstoffProvider(BaseProvider):
     STATION_LOOKUP_MODE = "location_search"
     REQUIRES_API_KEY = True
     API_KEY_REGISTRATION_URL = "https://github.com/drivstoffpriser"
+    STATION_PAGE_URL: ClassVar[str] = "https://drivstoffpriser.no"
 
     POLL_INTERVAL_SECONDS = 3600  # 1 hour
     CURRENCY: ClassVar[str] = "kr"

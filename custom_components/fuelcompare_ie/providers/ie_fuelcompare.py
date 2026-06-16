@@ -33,6 +33,10 @@ class IEFuelCompareProvider(BaseProvider):
     PROVIDER_KEY = "ie_fuelcompare"
     LABEL = "fuelcompare.ie"
     POLL_INTERVAL_SECONDS = 1800
+    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelcompare.ie"
+    STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
+        "https://www.fuelcompare.ie/station/{station_id}"
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

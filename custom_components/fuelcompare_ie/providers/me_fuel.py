@@ -162,7 +162,10 @@ class MeFuelProvider(BaseProvider):
     LABEL = "Min. of Energy (Montenegro)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 43200  # 12 hours; source updates approx weekly/bi-weekly
+    POLL_INTERVAL_SECONDS = 43200
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://data.gov.me"  # 12 hours; source updates approx weekly/bi-weekly
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

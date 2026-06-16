@@ -60,7 +60,8 @@ Confidence notes
 Confidence is 6/10: the API is confirmed working (2026-06-13) and returns
 useful daily wholesale data, but it is undocumented/unofficial.
 
-POLL_INTERVAL_SECONDS = 86400 (daily) since prices update at most once per day.
+POLL_INTERVAL_SECONDS = 86400
+    STATION_PAGE_URL: ClassVar[str] = "https://www.orlen.pl" (daily) since prices update at most once per day.
 """
 
 from __future__ import annotations

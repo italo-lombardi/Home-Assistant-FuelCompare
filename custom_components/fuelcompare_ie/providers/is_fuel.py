@@ -71,7 +71,8 @@ STATION_LOOKUP_MODE = 'location_search'
 
 Poll interval
 -------------
-POLL_INTERVAL_SECONDS = 900 (15 minutes) to match the upstream commit cadence.
+POLL_INTERVAL_SECONDS = 900
+    STATION_PAGE_URL: ClassVar[str] = "https://gasvaktin.is" (15 minutes) to match the upstream commit cadence.
 """
 
 from __future__ import annotations

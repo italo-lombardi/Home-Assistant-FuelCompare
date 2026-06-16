@@ -151,6 +151,7 @@ class GbFuelfinderProvider(BaseProvider):
 
     # Updated approximately twice daily; 6-hour poll matches the source refresh cadence.
     POLL_INTERVAL_SECONDS = 21600
+    STATION_PAGE_URL: ClassVar[str] = "https://check-fuel-price.service.gov.uk"
     CURRENCY: ClassVar[str] = "£"
 
     # Class-level CSV cache shared across all instances (avoids re-downloading 7.7 MB).

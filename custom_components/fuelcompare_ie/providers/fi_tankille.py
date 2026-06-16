@@ -265,7 +265,10 @@ class FiTankilleProvider(BaseProvider):
     LABEL = "Statistics Finland — National Average (Finland)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 86400  # daily — data updates at most monthly
+    POLL_INTERVAL_SECONDS = 86400
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://www.stat.fi"  # daily — data updates at most monthly
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

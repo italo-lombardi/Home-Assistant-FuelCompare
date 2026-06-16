@@ -103,7 +103,10 @@ class SiGorivaProvider(BaseProvider):
     LABEL = "goriva.si (Slovenia)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 3600  # server cache is 300 s; 1-hour poll is sufficient
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://goriva.si"  # server cache is 300 s; 1-hour poll is sufficient
+    )
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

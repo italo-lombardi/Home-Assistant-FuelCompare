@@ -248,7 +248,10 @@ class FrCarburantsProvider(BaseProvider):
     LABEL = "Prix Carburants (France)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
-    POLL_INTERVAL_SECONDS = 600  # data refreshed every ~10 minutes
+    POLL_INTERVAL_SECONDS = 600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://www.prix-carburants.gouv.fr"  # data refreshed every ~10 minutes
+    )
 
     # Class-level XML cache — shared across all instances to avoid re-downloading
     # the ~12 MB ZIP on every coordinator refresh when multiple FR stations track.

@@ -304,7 +304,10 @@ class DkFuelFinderProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
 
-    POLL_INTERVAL_SECONDS = 3600  # 1 hour; WAF is strict; data changes ~daily
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://www.fuelfinder.dk"  # 1 hour; WAF is strict; data changes ~daily
+    )
     CURRENCY: ClassVar[str] = "kr"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(

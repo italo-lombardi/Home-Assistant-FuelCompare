@@ -170,7 +170,9 @@ async def async_setup_entry(
             station_name,
         )
     )
-    station_page_url = entry.data.get(CONF_STATION_PAGE_URL, "")
+    station_page_url = entry.data.get(
+        CONF_STATION_PAGE_URL
+    ) or coordinator.get_provider_station_page_url(station_id)
     if station_page_url:
         entities.append(
             StationPageUrlSensor(

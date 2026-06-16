@@ -311,6 +311,23 @@ class BaseProvider(ABC):
     to guide the user to the correct registration page.
     """
 
+    STATION_PAGE_URL: ClassVar[str] = ""
+    """Homepage / data source URL for this provider.
+
+    Shown as the Station Page URL sensor when no per-station URL is available.
+    Always set this so every entry gets a clickable URL.
+    Example: 'https://www.tankerkoenig.de'
+    """
+
+    STATION_PAGE_URL_TEMPLATE: ClassVar[str] = ""
+    """URL template for a per-station detail page.
+
+    Use '{station_id}' as the placeholder for the station identifier.
+    When set, get_station_page_url() substitutes {station_id} automatically.
+    When empty, falls back to STATION_PAGE_URL (the provider homepage).
+    Example: 'https://www.tankerkoenig.de/?page=details&id={station_id}'
+    """
+
     CURRENCY: ClassVar[str] = "€"
     """Currency unit for fuel price sensors (unit_of_measurement).
 
@@ -433,7 +450,13 @@ class BaseProvider(ABC):
         async_list_stations has returned for the same provider instance —
         calling it before will yield None even for providers that support URLs.
 
-        Override in providers that have a stable station detail page URL.
-        The default returns None (no link shown).
+        Default behaviour:
+        - If STATION_PAGE_URL_TEMPLATE is set, substitutes {station_id} and returns it.
+        - Else if STATION_PAGE_URL is set, returns the homepage URL.
+        - Else returns None.
+
+        Override in providers that need dynamic URL construction (e.g. slug cache).
         """
-        return None
+        if self.STATION_PAGE_URL_TEMPLATE:
+            return self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
+        return self.STATION_PAGE_URL or None

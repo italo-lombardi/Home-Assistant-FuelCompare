@@ -349,6 +349,7 @@ class ItMaseProvider(BaseProvider):
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
     POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = "https://www.mimit.gov.it"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {

@@ -61,7 +61,8 @@ Bensinpriser.nu prices are already in SEK/litre (e.g. 17.54).  No cents
 conversion is applied.  price95 maps to 'unleaded' (standard petrol E10).
 priceDiesel maps to 'diesel'.  priceEtanol maps to 'e85' (E85 flex fuel).
 
-POLL_INTERVAL_SECONDS = 3600 (1 hour) as specified.
+POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = "https://bensinpriser.nu" (1 hour) as specified.
 """
 
 from __future__ import annotations

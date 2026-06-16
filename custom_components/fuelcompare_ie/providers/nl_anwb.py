@@ -36,7 +36,8 @@ Confirmed working as of 2026-06-08:
 
 Poll interval
 -------------
-POLL_INTERVAL_SECONDS = 86400 (24 h) — the bulletin is published once per
+POLL_INTERVAL_SECONDS = 86400
+    STATION_PAGE_URL: ClassVar[str] = "https://www.anwb.nl" (24 h) — the bulletin is published once per
 week.  Daily polling avoids re-downloading on non-publication days while
 ensuring the new data is picked up within one day of Thursday publication.
 

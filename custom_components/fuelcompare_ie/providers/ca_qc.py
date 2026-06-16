@@ -235,7 +235,10 @@ class CaQcProvider(BaseProvider):
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
 
-    POLL_INTERVAL_SECONDS = 3600  # 1 hour — data refreshes ~every minute but
+    POLL_INTERVAL_SECONDS = 3600
+    STATION_PAGE_URL: ClassVar[str] = (
+        "https://regieessencequebec.ca"  # 1 hour — data refreshes ~every minute but
+    )
     CURRENCY: ClassVar[str] = "CA$"
     # hourly polling is sufficient and respectful of the CDN.
 

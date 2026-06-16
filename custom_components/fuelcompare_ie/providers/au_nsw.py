@@ -141,6 +141,7 @@ class AuNswProvider(BaseProvider):
         3600  # hourly — matches source update cadence; see module docstring
     )
     CURRENCY: ClassVar[str] = "A$"
+    STATION_PAGE_URL: ClassVar[str] = "https://www.fuelcheck.nsw.gov.au"
 
     CAPABILITIES: ClassVar[frozenset[str]] = frozenset(
         {
