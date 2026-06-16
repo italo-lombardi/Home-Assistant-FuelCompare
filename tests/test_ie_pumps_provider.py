@@ -940,8 +940,8 @@ async def test_async_list_stations_label_omits_address_when_both_addr_empty() ->
     labels = {sid: label for sid, label in result}
     label = labels["7772"]
     # Should be "Texaco No Address (#7772...)" with no comma before the ID
-    assert "(#" in label
-    assert ", " not in label or label.index(", ") > label.index("(#")
+    assert f"(#{'7772'[:8]})" in label
+    assert ", " not in label
 
 
 # ---------------------------------------------------------------------------
