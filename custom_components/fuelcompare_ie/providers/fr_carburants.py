@@ -223,7 +223,6 @@ def _build_station_data(raw: dict[str, Any]) -> StationData:
         "longitude": raw.get("longitude"),
         "is_open": raw.get("is_open"),
         "lastupdated": raw.get("lastupdated"),
-        "source_station_id": raw.get("id"),
     }
     return data
 

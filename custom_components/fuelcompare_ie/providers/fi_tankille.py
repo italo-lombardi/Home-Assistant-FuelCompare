@@ -67,7 +67,7 @@ from __future__ import annotations
 import logging
 from typing import Any, ClassVar
 
-from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from aiohttp import ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
 from .base import BaseProvider, ProviderError, StationData
@@ -462,9 +462,5 @@ class FiTankilleProvider(BaseProvider):
                 payload: dict[str, Any] = await response.json(content_type=None)
         except ProviderError:
             raise
-        except ClientResponseError as exc:
-            raise ProviderError(
-                f"HTTP error {exc.status} from Statistics Finland API"
-            ) from exc
 
         return payload

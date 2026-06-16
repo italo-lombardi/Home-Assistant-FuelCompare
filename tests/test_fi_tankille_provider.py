@@ -825,8 +825,8 @@ def test_extract_prices_time_major_flat_index() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_async_fetch_raises_provider_error_on_raise_for_status() -> None:
-    """async_fetch wraps ClientResponseError from raise_for_status as ProviderError."""
+async def test_async_fetch_propagates_client_response_error_on_raise_for_status() -> None:
+    """async_fetch lets ClientResponseError from raise_for_status propagate (coordinator handles it)."""
     from aiohttp import ClientResponseError
 
     req_info = MagicMock()
@@ -843,7 +843,7 @@ async def test_async_fetch_raises_provider_error_on_raise_for_status() -> None:
     session = _make_session(resp)
 
     provider = _make_provider()
-    with pytest.raises(ProviderError, match="500"):
+    with pytest.raises(ClientResponseError):
         await provider.async_fetch(session, _NATIONAL_STATION_ID)
 
 
@@ -852,10 +852,10 @@ async def test_async_fetch_raises_provider_error_on_raise_for_status() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_async_fetch_raises_provider_error_on_client_response_error_from_post() -> (
+async def test_async_fetch_propagates_client_response_error_from_post() -> (
     None
 ):
-    """async_fetch wraps ClientResponseError raised by session.post as ProviderError."""
+    """async_fetch lets ClientResponseError from session.post propagate (coordinator handles it)."""
     from aiohttp import ClientResponseError
 
     req_info = MagicMock()
@@ -871,5 +871,5 @@ async def test_async_fetch_raises_provider_error_on_client_response_error_from_p
     session.post = MagicMock(side_effect=http_exc)
 
     provider = _make_provider()
-    with pytest.raises(ProviderError, match="HTTP error"):
+    with pytest.raises(ClientResponseError):
         await provider.async_fetch(session, _NATIONAL_STATION_ID)
