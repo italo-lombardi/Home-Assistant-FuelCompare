@@ -159,8 +159,17 @@ async def async_setup_entry(
     entities.append(LastSuccessfulFetchSensor(coordinator, station_id, station_name))
 
     # Always-on identity sensors
-    entities.append(ProviderLabelSensor(coordinator, station_id, station_name))
-    entities.append(CountrySensor(coordinator, station_id, station_name))
+    entities.append(
+        ProviderLabelSensor(coordinator.provider_label, station_id, station_name)
+    )
+    entities.append(
+        CountrySensor(
+            coordinator.provider_label,
+            coordinator.provider_country,
+            station_id,
+            station_name,
+        )
+    )
     station_page_url = entry.data.get(CONF_STATION_PAGE_URL, "")
     if station_page_url:
         entities.append(
@@ -676,13 +685,13 @@ class ProviderLabelSensor(SensorEntity):
     _attr_translation_key = "provider_label"
     _attr_should_poll = False
 
-    def __init__(self, coordinator, station_id, station_name) -> None:
+    def __init__(
+        self, provider_label: str, station_id: str, station_name: str
+    ) -> None:
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_provider_label"
-        self._attr_native_value = coordinator.provider_label
-        self._attr_device_info = _device_info(
-            station_id, station_name, coordinator.provider_label
-        )
+        self._attr_native_value = provider_label
+        self._attr_device_info = _device_info(station_id, station_name, provider_label)
 
     @property
     def available(self) -> bool:
@@ -702,13 +711,17 @@ class CountrySensor(SensorEntity):
     _attr_translation_key = "country_code"
     _attr_should_poll = False
 
-    def __init__(self, coordinator, station_id, station_name) -> None:
+    def __init__(
+        self,
+        provider_label: str,
+        provider_country: str,
+        station_id: str,
+        station_name: str,
+    ) -> None:
         self._station_id = station_id
         self._attr_unique_id = f"{DOMAIN}_{station_id}_country_code"
-        self._attr_native_value = coordinator.provider_country
-        self._attr_device_info = _device_info(
-            station_id, station_name, coordinator.provider_label
-        )
+        self._attr_native_value = provider_country
+        self._attr_device_info = _device_info(station_id, station_name, provider_label)
 
     @property
     def available(self) -> bool:
