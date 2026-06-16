@@ -2203,6 +2203,96 @@ async def test_async_step_name_stores_postal_code_in_entry_data(
         PROVIDER_REGISTRY.pop("be_postal_test_731", None)
 
 
+async def test_async_step_name_show_on_map_stored_in_options(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_name stores show_on_map=True in options when provider has lat/lon caps."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
+
+    class _LatLonProvider(BaseProvider):
+        COUNTRY = "AT"
+        PROVIDER_KEY = "at_latlon_test"
+        LABEL = "LatLon Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CAPABILITIES: frozenset = frozenset({"latitude", "longitude", "diesel"})
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["at_latlon_test"] = _LatLonProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "at_latlon_test"
+        flow._country = "AT"
+        flow._station_id = "99"
+        flow._latitude = None
+        flow._longitude = None
+        flow._suggested_name = "Test Station"
+        flow.context = {}
+
+        result = await flow.async_step_name(
+            user_input={"name": "Test Station", CONF_SHOW_ON_MAP: True}
+        )
+
+        assert result["type"] == "create_entry"
+        assert result["options"].get(CONF_SHOW_ON_MAP) is True
+    finally:
+        PROVIDER_REGISTRY.pop("at_latlon_test", None)
+
+
+async def test_async_step_name_show_on_map_absent_when_no_lat_lon_caps(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_name schema excludes show_on_map when provider has no lat/lon caps."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
+
+    class _NoLatLonProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "ie_nolatlon_test"
+        LABEL = "NoLatLon Test"
+        CAPABILITIES: frozenset = frozenset({"diesel"})
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+    PROVIDER_REGISTRY["ie_nolatlon_test"] = _NoLatLonProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "ie_nolatlon_test"
+        flow._country = "IE"
+        flow._station_id = "42"
+        flow._latitude = None
+        flow._longitude = None
+        flow._suggested_name = "Test Station"
+        flow.context = {}
+
+        # Show the form — schema should NOT include show_on_map
+        result = await flow.async_step_name(user_input=None)
+        assert result["type"] == "form"
+        schema_keys = {str(k) for k in result["data_schema"].schema}
+        assert CONF_SHOW_ON_MAP not in schema_keys
+    finally:
+        PROVIDER_REGISTRY.pop("ie_nolatlon_test", None)
+
+
 # ---------------------------------------------------------------------------
 # Options flow tests  (config_flow.py lines 755-792)
 # ---------------------------------------------------------------------------
