@@ -930,7 +930,6 @@ def test_station_page_url_sensor_available_when_url_set() -> None:
     """StationPageUrlSensor is available and returns URL when url is non-empty."""
     from custom_components.fuelcompare_ie.sensor import StationPageUrlSensor
 
-    coord = _make_coordinator({})
     sensor = object.__new__(StationPageUrlSensor)
     object.__setattr__(sensor, "_station_id", "3")
     object.__setattr__(sensor, "_attr_native_value", "https://example.com/station/foo")
@@ -943,7 +942,6 @@ def test_station_page_url_sensor_unavailable_when_empty() -> None:
     """StationPageUrlSensor is unavailable and returns None when url is empty."""
     from custom_components.fuelcompare_ie.sensor import StationPageUrlSensor
 
-    coord = _make_coordinator({})
     sensor = object.__new__(StationPageUrlSensor)
     object.__setattr__(sensor, "_station_id", "4")
     object.__setattr__(sensor, "_attr_native_value", None)
