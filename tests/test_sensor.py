@@ -907,32 +907,23 @@ async def test_setup_entry_last_successful_fetch_not_duplicated() -> None:
 
 
 def test_provider_label_sensor_native_value() -> None:
-    """ProviderLabelSensor stores provider_label as static _attr_native_value at init."""
+    """ProviderLabelSensor stores provider_label via constructor."""
     from custom_components.fuelcompare_ie.sensor import ProviderLabelSensor
 
-    coord = _make_coordinator({})
-    coord.provider_label = "FuelFinder.ie"
-    coord.provider_country = "IE"
-    sensor = object.__new__(ProviderLabelSensor)
-    object.__setattr__(sensor, "_station_id", "1")
-    object.__setattr__(sensor, "_attr_native_value", "FuelFinder.ie")
+    sensor = ProviderLabelSensor("FuelFinder.ie", "station-1", "Station 1")
     assert sensor.native_value == "FuelFinder.ie"
     assert sensor.available is True
-    assert sensor.extra_state_attributes == {"station_id": "1"}
+    assert sensor.extra_state_attributes == {"station_id": "station-1"}
 
 
 def test_country_sensor_native_value() -> None:
-    """CountrySensor stores provider_country as static _attr_native_value at init."""
+    """CountrySensor stores provider_country via constructor."""
     from custom_components.fuelcompare_ie.sensor import CountrySensor
 
-    coord = _make_coordinator({})
-    coord.provider_country = "IE"
-    sensor = object.__new__(CountrySensor)
-    object.__setattr__(sensor, "_station_id", "2")
-    object.__setattr__(sensor, "_attr_native_value", "IE")
+    sensor = CountrySensor("FuelFinder.ie", "IE", "station-2", "Station 2")
     assert sensor.native_value == "IE"
     assert sensor.available is True
-    assert sensor.extra_state_attributes == {"station_id": "2"}
+    assert sensor.extra_state_attributes == {"station_id": "station-2"}
 
 
 def test_station_page_url_sensor_available_when_url_set() -> None:
