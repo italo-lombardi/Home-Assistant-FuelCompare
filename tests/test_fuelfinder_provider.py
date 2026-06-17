@@ -1235,39 +1235,8 @@ async def test_fetch_stations_returns_none_on_client_response_error() -> None:
 
 
 # ---------------------------------------------------------------------------
-# _normalise_county — None/empty path (lines 684-686)
+# (removed) _normalise_county tests — function deleted as dead code in PR #31
 # ---------------------------------------------------------------------------
-
-
-def test_normalise_county_none_returns_none() -> None:
-    """_normalise_county(None) returns None (covers line 684-685)."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    assert _normalise_county(None) is None
-
-
-def test_normalise_county_empty_returns_none() -> None:
-    """_normalise_county('') returns None (covers line 684-685)."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    assert _normalise_county("") is None
-
-
-def test_normalise_county_whitespace_returns_none() -> None:
-    """_normalise_county whitespace-only string returns None (covers line 686)."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    # "  " is falsy after strip() — but _normalise_county checks `if not county`
-    # where county is passed as-is. "  " is truthy but strip().lower() == ""
-    # Let's test the actual behavior
-    result = _normalise_county("  Dublin  ")
-    assert result == "dublin"
 
 
 def test_base_get_station_page_url_template_exceeds_255_falls_back() -> None:
