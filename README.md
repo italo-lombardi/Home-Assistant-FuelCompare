@@ -15,7 +15,7 @@
 
 ---
 
-> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. **0.7.0 (currently pre-release `0.7.0-beta.1`)** introduces the provider abstraction layer and bundles 36 providers across 27 countries. See [Supported Data Sources](#supported-data-sources) and [Roadmap](#roadmap) below.
+> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. **0.7.0 (currently pre-release `0.7.0-beta.1`)** introduces the provider abstraction layer and bundles 36 providers across 27 countries. See [Supported Data Sources](#supported-data-sources) below.
 
 ---
 
@@ -288,20 +288,6 @@ Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, G
 ## Disclaimer (repeated for clarity)
 
 This project is a personal, community tool. It is **not** the official FuelCompare.ie app or service. The author has no relationship with FuelCompare.ie. If FuelCompare.ie changes their website structure this integration may stop working; please open an issue and it will be looked at when time allows.
-
-## Roadmap
-
-**Completed features:**
-- Provider abstraction layer (`BaseProvider` ABC, `providers/` module) — 0.7.0
-- FuelFinder.ie (Ireland, ~1,000+ stations) — 0.7.0
-- Multi-country support: 36 providers, 27 countries, plugin architecture — 0.7.0
-
-**In flight:**
-- 0.7.0 currently shipping as pre-release `0.7.0-beta.1` for HACS pre-release / soak testing
-
-**Planned:**
-- pumps.ie additional fuel types (kerosene, AdBlue)
-- Additional country providers as open-data APIs become available
 
 ## Sibling integrations
 
