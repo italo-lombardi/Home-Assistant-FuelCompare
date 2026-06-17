@@ -265,12 +265,16 @@ async def _run_setup_capturing_station_id(entry: MagicMock) -> tuple[MagicMock, 
     return hass, captured["station_id"]
 
 
-async def test_location_mode_existing_entry_preserves_4f_station_id() -> None:
-    """An entry that already persisted a .4f-rounded station_id must keep it byte-for-byte.
+async def test_location_mode_persisted_station_id_short_circuits_at_outer_guard() -> (
+    None
+):
+    """An entry with any truthy persisted station_id (legacy .4f, .5f, manual ID) must keep it byte-for-byte.
 
-    Backward compatibility: existing config entries created before the
-    precision was widened cannot have their unique_id changed without a
-    migration — that would orphan registered entities.
+    Backward compatibility is provided by the outer ``if not station_id:``
+    guard, which short-circuits the whole derivation branch. The precision
+    widening only ever applies to entries that have never persisted a
+    station_id — for existing entries the persisted value is preserved
+    without modification, regardless of its precision.
     """
     provider_key = "at_econtrol"
     persisted_id = f"{provider_key}_53.3454_-6.2480"
@@ -284,7 +288,7 @@ async def test_location_mode_existing_entry_preserves_4f_station_id() -> None:
     hass, seen_station_id = await _run_setup_capturing_station_id(entry)
 
     assert seen_station_id == persisted_id
-    # No update_entry call — value already correct.
+    # Outer guard short-circuited — no update_entry call.
     hass.config_entries.async_update_entry.assert_not_called()
 
 

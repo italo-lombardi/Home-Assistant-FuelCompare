@@ -53,30 +53,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # registry entry is stable across restarts.  Include provider_key to
     # prevent ID collisions when two providers share the same coordinates.
     #
-    # Existing entries created before this code path was introduced wrote
-    # ``.4f``-rounded IDs (≈11 m).  Two stations within that radius using the
-    # same provider would collide, disabling the second entry's entities.
-    # Widen precision to ``.5f`` (≈1.1 m) for entries that have NOT yet
-    # persisted CONF_STATION_ID, then write the computed value back into
-    # entry.data so subsequent restarts see the same ID.  Existing entries
-    # already carrying a ``.4f`` id keep that id byte-for-byte (the
-    # truthiness guard on the persisted value — empty-string and missing
-    # keys both fall through to .5f, since the outer branch only runs when
-    # ``station_id`` is already falsy and there is no real id to preserve).
+    # Backward compatibility for ``.4f``-rounded IDs (≈11 m) written by
+    # earlier versions: such entries have a truthy persisted CONF_STATION_ID,
+    # so the outer ``if not station_id:`` guard short-circuits and their id
+    # is preserved byte-for-byte (no migration).  Only entries that have
+    # never persisted a station_id reach this branch — for them we use ``.5f``
+    # (≈1.1 m) precision so two distinct nearby stations using the same
+    # provider do not collide, then write the computed value back into
+    # entry.data so subsequent restarts reuse the same id.
     if not station_id:
         _lat = entry.data.get(CONF_LATITUDE)
         _lng = entry.data.get(CONF_LONGITUDE)
         if _lat is not None and _lng is not None:
-            precision = 4 if entry.data.get(CONF_STATION_ID) else 5
-            station_id = f"{provider_key}_{_lat:.{precision}f}_{_lng:.{precision}f}"
-            if entry.data.get(CONF_STATION_ID) != station_id:
-                # Safe to mutate entry.data here: async_setup_entry runs before
-                # any update listeners are registered for this entry, so the
-                # async_update_entry call cannot re-enter setup.
-                hass.config_entries.async_update_entry(
-                    entry,
-                    data={**entry.data, CONF_STATION_ID: station_id},
-                )
+            station_id = f"{provider_key}_{_lat:.5f}_{_lng:.5f}"
+            # Safe to mutate entry.data here: async_setup_entry runs before
+            # any update listeners are registered for this entry, so the
+            # async_update_entry call cannot re-enter setup.
+            hass.config_entries.async_update_entry(
+                entry,
+                data={**entry.data, CONF_STATION_ID: station_id},
+            )
     if not station_id:
         station_id = entry.entry_id
 
