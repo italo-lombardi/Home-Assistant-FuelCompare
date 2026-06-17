@@ -99,6 +99,11 @@ _LOGGER = logging.getLogger(__name__)
 
 _BASE_URL = "https://www.fuelfinder.ie/api/fuelfinder"
 
+# Slugs ending in a long numeric ID are internal system IDs (observed: 7+ digits)
+# that 404 on the public site — used by get_station_page_url to fall back to homepage.
+_INTERNAL_ID_RE = re.compile(r"-(\d+)$")
+_INTERNAL_ID_MIN_LEN = 7
+
 # Headers required to pass the Vercel edge-middleware bot-detection gate.
 # All read endpoints require these; sending a subset may work on cached
 # responses but will fail on cache misses and no-store endpoints.
@@ -417,10 +422,14 @@ class IEFuelFinderProvider(BaseProvider):
         slug = self._slug_cache.get(station_id)
         if not slug:
             return self.STATION_PAGE_URL or None
-        # Slugs with a trailing numeric ID > 6 digits are internal system IDs
-        # that have no corresponding page on fuelfinder.ie — fall back to homepage.
-        match = re.search(r"-(\d+)$", slug)
-        if match and len(match.group(1)) > 6:
+        # Slugs with a trailing numeric ID >= _INTERNAL_ID_MIN_LEN digits are internal
+        # system IDs that have no corresponding page — fall back to homepage.
+        match = _INTERNAL_ID_RE.search(slug)
+        if match and len(match.group(1)) >= _INTERNAL_ID_MIN_LEN:
+            _LOGGER.debug(
+                "ie_fuelfinder: slug %r looks like internal ID, falling back to homepage",
+                slug,
+            )
             return self.STATION_PAGE_URL or None
         return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
 

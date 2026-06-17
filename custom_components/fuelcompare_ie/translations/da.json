@@ -181,7 +181,7 @@
       "station_page_url": {
         "name": "Station Page URL"
       },
-      "station_id_sensor": {
+      "station_id": {
         "name": "Station ID"
       }
     },

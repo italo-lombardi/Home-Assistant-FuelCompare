@@ -386,9 +386,6 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_page_url: str = (
             ""  # URL for selected station (shown on name step)
         )
-        self._picker_pending_id: str = (
-            ""  # station selected on first submit, awaiting URL confirm
-        )
         self._show_on_map: bool = False
         self._latitude: float | None = None
         self._longitude: float | None = None
@@ -604,7 +601,6 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 return await self.async_step_name()
 
         # Load station list from provider
-        self._picker_pending_id = ""
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
         station_list: list[tuple[str, str]] = []
         if provider_cls:
@@ -633,8 +629,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Failed to load station list: %s", err)
 
-        self._station_list = station_list
         station_list = sorted(station_list, key=lambda x: x[1])
+        self._station_list = station_list
 
         has_location_caps = (
             provider_cls is not None

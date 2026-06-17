@@ -193,7 +193,7 @@
       "working_hours": {
         "name": "Working Hours"
       },
-      "station_id_sensor": {
+      "station_id": {
         "name": "Station ID"
       }
     },
