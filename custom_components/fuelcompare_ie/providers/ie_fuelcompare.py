@@ -47,6 +47,10 @@ class IEFuelCompareProvider(BaseProvider):
             "county",
             "working_hours",
             "brand",
+            "accessibility",
+            "offerings",
+            "amenities",
+            "payments",
         }
     )
 
@@ -373,10 +377,8 @@ class IEFuelCompareProvider(BaseProvider):
                 fuel_data[fuel_type] = None
 
         fuel_data["lastupdated"] = station.get("lastupdated")
-        for field in ["name", "tablename", "working_hours", "county"]:
+        for field in ["name", "tablename", "working_hours", "county", "about"]:
             fuel_data[field] = station.get(field)
-        # brand is declared in CAPABILITIES; populate from the tablename slug
-        fuel_data["brand"] = station.get("tablename")
 
         _LOGGER.debug(
             "Final parsed data for station %s: %s", self._station_id, fuel_data

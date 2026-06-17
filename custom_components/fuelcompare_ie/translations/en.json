@@ -39,7 +39,8 @@
         "title": "Select Station",
         "description": "Select a fuel station. Prices shown are for diesel/petrol.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Station",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Station Name",
-        "description": "Confirm or edit the name for this station.{station_page_url_line}",
+        "description": "Confirm or edit the name for this station.",
         "data": {
-          "name": "Name",
-          "show_on_map": "Show station on map"
+          "name": "Name"
         }
       }
     },
@@ -192,6 +192,9 @@
       },
       "working_hours": {
         "name": "Working Hours"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

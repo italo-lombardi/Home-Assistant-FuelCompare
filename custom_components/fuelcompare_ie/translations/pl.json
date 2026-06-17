@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Nazwa Stacji",
-        "description": "Potwierdź lub edytuj nazwę tej stacji.{station_page_url_line}",
+        "description": "Potwierdź lub edytuj nazwę tej stacji.",
         "data": {
-          "name": "Nazwa",
-          "show_on_map": "Show station on map"
+          "name": "Nazwa"
         }
       },
       "county": {
@@ -47,7 +46,8 @@
         "title": "Wybierz stację",
         "description": "Wybierz stację paliw. Pokazane ceny dotyczą oleju napędowego/benzyny.",
         "data": {
-          "station_id": "Stacja"
+          "station_id": "Stacja",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

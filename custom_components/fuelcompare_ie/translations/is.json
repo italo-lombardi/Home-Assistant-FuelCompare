@@ -39,7 +39,8 @@
         "title": "Veldu stöð",
         "description": "Veldu eldsneytisstöð. Verð sem sýnd eru eru fyrir dísel/bensín.",
         "data": {
-          "station_id": "Stöð"
+          "station_id": "Stöð",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Nafn stöðvar",
-        "description": "Staðfestu eða breyttu nafni þessarar stöðvar.{station_page_url_line}",
+        "description": "Staðfestu eða breyttu nafni þessarar stöðvar.",
         "data": {
-          "name": "Nafn",
-          "show_on_map": "Show station on map"
+          "name": "Nafn"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

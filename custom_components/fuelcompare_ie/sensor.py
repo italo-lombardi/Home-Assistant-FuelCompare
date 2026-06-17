@@ -160,6 +160,9 @@ async def async_setup_entry(
 
     # Always-on identity sensors
     entities.append(
+        StationIdSensor(coordinator.provider_label, station_id, station_name)
+    )
+    entities.append(
         ProviderLabelSensor(coordinator.provider_label, station_id, station_name)
     )
     entities.append(
@@ -676,6 +679,25 @@ class LastSuccessfulFetchSensor(
 
 
 # ── Identity / diagnostic sensors ─────────────────────────────────────────────
+
+
+class StationIdSensor(SensorEntity):
+    """Diagnostic sensor: provider station ID (static, set at setup)."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:identifier"
+    _attr_has_entity_name = True
+    _attr_translation_key = "station_id"
+    _attr_should_poll = False
+
+    def __init__(self, provider_label: str, station_id: str, station_name: str) -> None:
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_station_id"
+        self._attr_native_value = station_id
+        self._attr_device_info = _device_info(station_id, station_name, provider_label)
+
+    @property
+    def available(self) -> bool:
+        return True
 
 
 class ProviderLabelSensor(SensorEntity):

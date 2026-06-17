@@ -39,7 +39,8 @@
         "title": "Изаберите станицу",
         "description": "Изаберите станицу за гориво. Приказане цене су за дизел/бензин.",
         "data": {
-          "station_id": "Станица"
+          "station_id": "Станица",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Назив станице",
-        "description": "Потврдите или измените назив ове станице.{station_page_url_line}",
+        "description": "Потврдите или измените назив ове станице.",
         "data": {
-          "name": "Назив",
-          "show_on_map": "Show station on map"
+          "name": "Назив"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

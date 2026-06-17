@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Stationsname",
-        "description": "Bestätigen oder bearbeiten Sie den Namen dieser Station.{station_page_url_line}",
+        "description": "Bestätigen oder bearbeiten Sie den Namen dieser Station.",
         "data": {
-          "name": "Name",
-          "show_on_map": "Show station on map"
+          "name": "Name"
         }
       },
       "county": {
@@ -47,7 +46,8 @@
         "title": "Tankstelle auswählen",
         "description": "Wählen Sie eine Tankstelle aus. Die angezeigten Preise gelten für Diesel/Benzin.",
         "data": {
-          "station_id": "Tankstelle"
+          "station_id": "Tankstelle",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

@@ -39,7 +39,8 @@
         "title": "Sélectionner une station",
         "description": "Sélectionnez une station-service. Les prix affichés sont pour le diesel/l'essence.",
         "data": {
-          "station_id": "Station"
+          "station_id": "Station",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Nom de la station",
-        "description": "Confirmez ou modifiez le nom de cette station.{station_page_url_line}",
+        "description": "Confirmez ou modifiez le nom de cette station.",
         "data": {
-          "name": "Nom",
-          "show_on_map": "Show station on map"
+          "name": "Nom"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

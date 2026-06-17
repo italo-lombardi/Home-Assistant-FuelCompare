@@ -39,7 +39,8 @@
         "title": "Seleccionar estación",
         "description": "Seleccione unha estación de combustible. Os prezos mostrados corresponden a diésel/gasolina.",
         "data": {
-          "station_id": "Estación"
+          "station_id": "Estación",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Nome da estación",
-        "description": "Confirme ou edite o nome desta estación.{station_page_url_line}",
+        "description": "Confirme ou edite o nome desta estación.",
         "data": {
-          "name": "Nome",
-          "show_on_map": "Show station on map"
+          "name": "Nome"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

@@ -39,7 +39,8 @@
         "title": "Vyberte stanici",
         "description": "Vyberte čerpací stanici. Zobrazené ceny jsou pro naftu/benzín.",
         "data": {
-          "station_id": "Stanice"
+          "station_id": "Stanice",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Název Stanice",
-        "description": "Potvrďte nebo upravte název této stanice.{station_page_url_line}",
+        "description": "Potvrďte nebo upravte název této stanice.",
         "data": {
-          "name": "Název",
-          "show_on_map": "Show station on map"
+          "name": "Název"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

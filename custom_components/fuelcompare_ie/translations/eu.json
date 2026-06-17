@@ -39,7 +39,8 @@
         "title": "Hautatu gasolindegia",
         "description": "Hautatu erregai-gasolindegia. Erakutsitako prezioak diesel/gasolinarenak dira.",
         "data": {
-          "station_id": "Gasolindegia"
+          "station_id": "Gasolindegia",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Gasolindegiaren izena",
-        "description": "Berretsi edo editatu gasolindegiaren izena.{station_page_url_line}",
+        "description": "Berretsi edo editatu gasolindegiaren izena.",
         "data": {
-          "name": "Izena",
-          "show_on_map": "Show station on map"
+          "name": "Izena"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

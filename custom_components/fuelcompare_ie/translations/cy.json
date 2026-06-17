@@ -39,7 +39,8 @@
         "title": "Dewiswch Orsaf",
         "description": "Dewiswch orsaf danwydd. Mae'r prisiau a ddangosir ar gyfer diesel/petrol.",
         "data": {
-          "station_id": "Gorsaf"
+          "station_id": "Gorsaf",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Enw'r Orsaf",
-        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.{station_page_url_line}",
+        "description": "Cadarnhewch neu golygwch enw'r orsaf hon.",
         "data": {
-          "name": "Enw",
-          "show_on_map": "Show station on map"
+          "name": "Enw"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

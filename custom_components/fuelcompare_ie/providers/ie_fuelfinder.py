@@ -87,6 +87,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -97,6 +98,11 @@ from .base import BaseProvider, ProviderError, StationData
 _LOGGER = logging.getLogger(__name__)
 
 _BASE_URL = "https://www.fuelfinder.ie/api/fuelfinder"
+
+# Slugs ending in a long numeric ID are internal system IDs (observed: 7+ digits)
+# that 404 on the public site — used by get_station_page_url to fall back to homepage.
+_INTERNAL_ID_RE = re.compile(r"-(\d+)$")
+_INTERNAL_ID_MIN_LEN = 7
 
 # Headers required to pass the Vercel edge-middleware bot-detection gate.
 # All read endpoints require these; sending a subset may work on cached
@@ -365,21 +371,21 @@ class IEFuelFinderProvider(BaseProvider):
             _LOGGER.debug("async_list_stations failed for county %s: %s", county, err)
             return []
 
-        # Merge per-fuel results into one dict keyed by UUID
+        # Merge per-fuel results into one dict keyed by UUID.
+        # Only include stations that have at least one price available.
         merged: dict[str, dict] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 uid = s.get("id")
-                if uid:
+                if uid and s.get("has_price"):
                     merged[uid] = s
 
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
                 uid = s.get("id")
-                if uid:
-                    if uid not in merged:
-                        merged[uid] = s
+                if uid and s.get("has_price") and uid not in merged:
+                    merged[uid] = s
 
         if not merged:
             return []
@@ -401,20 +407,29 @@ class IEFuelFinderProvider(BaseProvider):
 
             # Build label: include street when present, always append short UUID.
             if street:
-                label = f"{display_name}, {street} (#{uid[:8]})"
+                label = f"{display_name}, {street} (#{uid[:12]})"
             else:
-                label = f"{display_name} (#{uid[:8]})"
+                label = f"{display_name} (#{uid[:12]})"
 
             result.append((uid, label))
 
         # Sort alphabetically by label (case-insensitive).
-        result.sort(key=lambda x: x[0].lower())
+        result.sort(key=lambda x: x[1].lower())
         return result
 
     def get_station_page_url(self, station_id: str) -> str | None:
         """Return the FuelFinder.ie station page URL, or homepage if slug unknown."""
         slug = self._slug_cache.get(station_id)
         if not slug:
+            return self.STATION_PAGE_URL or None
+        # Slugs with a trailing numeric ID >= _INTERNAL_ID_MIN_LEN digits are internal
+        # system IDs that have no corresponding page — fall back to homepage.
+        match = _INTERNAL_ID_RE.search(slug)
+        if match and len(match.group(1)) >= _INTERNAL_ID_MIN_LEN:
+            _LOGGER.debug(
+                "ie_fuelfinder: slug %r looks like internal ID, falling back to homepage",
+                slug,
+            )
             return self.STATION_PAGE_URL or None
         return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
 

@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Ainm an Stáisiúin",
-        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.{station_page_url_line}",
+        "description": "Deimhnigh nó cuir in eagar ainm an stáisiúin seo.",
         "data": {
-          "name": "Ainm",
-          "show_on_map": "Show station on map"
+          "name": "Ainm"
         }
       },
       "county": {
@@ -47,7 +46,8 @@
         "title": "Roghnaigh Stáisiún",
         "description": "Roghnaigh stáisiún breosla. Taispeántar praghsanna díosail/peitril.",
         "data": {
-          "station_id": "Stáisiún"
+          "station_id": "Stáisiún",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

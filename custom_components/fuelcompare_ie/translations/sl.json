@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Ime Postaje",
-        "description": "Potrdite ali uredite ime te postaje.{station_page_url_line}",
+        "description": "Potrdite ali uredite ime te postaje.",
         "data": {
-          "name": "Ime",
-          "show_on_map": "Show station on map"
+          "name": "Ime"
         }
       },
       "county": {
@@ -47,7 +46,8 @@
         "title": "Izberite postajo",
         "description": "Izberite bencinsko postajo. Prikazane cene so za dizel/bencin.",
         "data": {
-          "station_id": "Postaja"
+          "station_id": "Postaja",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

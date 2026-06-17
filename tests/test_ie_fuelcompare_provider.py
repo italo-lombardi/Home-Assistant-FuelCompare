@@ -85,19 +85,40 @@ def test_parse_station_strips_euro_symbol() -> None:
 
 
 def test_parse_station_maps_name_and_tablename() -> None:
-    """_parse_station copies name, tablename, county, working_hours fields."""
+    """_parse_station copies name, tablename, county, working_hours, about fields."""
     provider = _make_provider()
+    about = {
+        "accessibility": {"Wheelchair-accessible car park": True},
+        "amenities": {"Toilets": True},
+    }
     station = {
         "name": "My Station",
         "tablename": "circle_k",
         "county": "Dublin",
         "working_hours": "08:00-22:00",
+        "about": about,
     }
     result = provider._parse_station(station)
     assert result["name"] == "My Station"
     assert result["tablename"] == "circle_k"
     assert result["county"] == "Dublin"
     assert result["working_hours"] == "08:00-22:00"
+    assert result["about"] == about
+
+
+def test_parse_station_brand_not_set_from_tablename() -> None:
+    """_parse_station does not set brand; StationBrandSensor falls through to tablename formatting."""
+    provider = _make_provider()
+    station = {"tablename": "circle_k"}
+    result = provider._parse_station(station)
+    assert result.get("brand") is None
+
+
+def test_capabilities_include_facility_keys() -> None:
+    """CAPABILITIES includes accessibility, amenities, offerings, payments."""
+    caps = IEFuelCompareProvider.CAPABILITIES
+    for key in ("accessibility", "amenities", "offerings", "payments"):
+        assert key in caps, f"{key} missing from CAPABILITIES"
 
 
 # ---------------------------------------------------------------------------

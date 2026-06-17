@@ -23,10 +23,9 @@
       },
       "name": {
         "title": "Jaama Nimi",
-        "description": "Kinnitage või muutke selle jaama nime.{station_page_url_line}",
+        "description": "Kinnitage või muutke selle jaama nime.",
         "data": {
-          "name": "Nimi",
-          "show_on_map": "Show station on map"
+          "name": "Nimi"
         }
       },
       "county": {
@@ -47,7 +46,8 @@
         "title": "Vali tankla",
         "description": "Vali kütusejaam. Näidatud hinnad on diisli/bensiini jaoks.",
         "data": {
-          "station_id": "Tankla"
+          "station_id": "Tankla",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

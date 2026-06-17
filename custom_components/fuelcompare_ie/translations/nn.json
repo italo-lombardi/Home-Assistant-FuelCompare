@@ -39,7 +39,8 @@
         "title": "Vel stasjon",
         "description": "Vel ein bensinstasjon. Prisane som vert viste er for diesel/bensin.",
         "data": {
-          "station_id": "Stasjon"
+          "station_id": "Stasjon",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Stasjonsnamn",
-        "description": "Stadfest eller endra namnet på denne stasjonen.{station_page_url_line}",
+        "description": "Stadfest eller endra namnet på denne stasjonen.",
         "data": {
-          "name": "Namn",
-          "show_on_map": "Show station on map"
+          "name": "Namn"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

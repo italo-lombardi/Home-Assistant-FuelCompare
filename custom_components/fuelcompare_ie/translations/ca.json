@@ -39,7 +39,8 @@
         "title": "Seleccioneu l'estació",
         "description": "Seleccioneu una estació de combustible. Els preus mostrats corresponen a dièsel/gasolina.",
         "data": {
-          "station_id": "Estació"
+          "station_id": "Estació",
+          "show_on_map": "Show station on map"
         }
       },
       "location": {
@@ -54,10 +55,9 @@
       },
       "name": {
         "title": "Nom de l'estació",
-        "description": "Confirmeu o editeu el nom d'aquesta estació.{station_page_url_line}",
+        "description": "Confirmeu o editeu el nom d'aquesta estació.",
         "data": {
-          "name": "Nom",
-          "show_on_map": "Show station on map"
+          "name": "Nom"
         }
       }
     },
@@ -180,6 +180,9 @@
       },
       "station_page_url": {
         "name": "Station Page URL"
+      },
+      "station_id": {
+        "name": "Station ID"
       }
     },
     "binary_sensor": {

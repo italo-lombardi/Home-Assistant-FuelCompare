@@ -902,8 +902,17 @@ async def test_setup_entry_last_successful_fetch_not_duplicated() -> None:
 
 
 # ---------------------------------------------------------------------------
-# ProviderLabelSensor / CountrySensor / StationPageUrlSensor
+# ProviderLabelSensor / CountrySensor / StationPageUrlSensor / StationIdSensor
 # ---------------------------------------------------------------------------
+
+
+def test_station_id_sensor_native_value() -> None:
+    """StationIdSensor stores station_id via constructor."""
+    from custom_components.fuelcompare_ie.sensor import StationIdSensor
+
+    sensor = StationIdSensor("FuelFinder.ie", "790", "Circle K Taney")
+    assert sensor.native_value == "790"
+    assert sensor.available is True
 
 
 def test_provider_label_sensor_native_value() -> None:
@@ -950,7 +959,7 @@ def test_station_page_url_sensor_unavailable_when_empty() -> None:
 
 
 async def test_setup_entry_always_creates_identity_sensors() -> None:
-    """async_setup_entry always creates ProviderLabelSensor and CountrySensor; StationPageUrlSensor only when URL set."""
+    """async_setup_entry always creates StationIdSensor, ProviderLabelSensor and CountrySensor; StationPageUrlSensor only when URL set."""
     from custom_components.fuelcompare_ie.sensor import async_setup_entry
     from custom_components.fuelcompare_ie.const import DOMAIN, CONF_STATION_PAGE_URL
 
@@ -971,6 +980,7 @@ async def test_setup_entry_always_creates_identity_sensors() -> None:
     await async_setup_entry(hass, entry, added.extend)
 
     type_names = {type(e).__name__ for e in added}
+    assert "StationIdSensor" in type_names
     assert "ProviderLabelSensor" in type_names
     assert "CountrySensor" in type_names
     assert "StationPageUrlSensor" in type_names
@@ -999,6 +1009,7 @@ async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
     await async_setup_entry(hass, entry, added.extend)
 
     type_names = {type(e).__name__ for e in added}
+    assert "StationIdSensor" in type_names
     assert "ProviderLabelSensor" in type_names
     assert "CountrySensor" in type_names
     assert "StationPageUrlSensor" not in type_names
