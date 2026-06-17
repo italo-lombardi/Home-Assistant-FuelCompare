@@ -28,6 +28,8 @@ from aiohttp import ClientSession
 
 _EARTH_RADIUS_KM = 6371.0
 
+_MAX_STATION_URL_LEN = 255
+
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Return the great-circle distance in km between two WGS84 points.
@@ -474,7 +476,7 @@ class BaseProvider(ABC):
 
         Override in providers that need dynamic URL construction (e.g. slug cache).
         """
-        _MAX_URL_LEN = 255
+        _MAX_URL_LEN = _MAX_STATION_URL_LEN
         if self.STATION_PAGE_URL_TEMPLATE:
             url = self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
             if len(url) <= _MAX_URL_LEN:

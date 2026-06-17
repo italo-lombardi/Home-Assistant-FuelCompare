@@ -1267,3 +1267,36 @@ def test_normalise_county_whitespace_returns_none() -> None:
     # Let's test the actual behavior
     result = _normalise_county("  Dublin  ")
     assert result == "dublin"
+
+
+def test_base_get_station_page_url_template_exceeds_255_falls_back() -> None:
+    """base.get_station_page_url falls back to STATION_PAGE_URL when template URL > 255 chars."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+    from typing import ClassVar
+    from aiohttp import ClientSession
+
+    class _LongURLProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "test_long_url"
+        LABEL = "Test"
+        CURRENCY = "EUR"
+        CAPABILITIES: ClassVar[frozenset] = frozenset()
+        STATION_PAGE_URL: ClassVar[str] = "https://example.com"
+        STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
+            "https://example.com/" + "x" * 240 + "/{station_id}"
+        )
+
+        def __init__(self, station_id: str) -> None:
+            pass
+
+        async def async_fetch(self, session: ClientSession, station_id: str):
+            return {}
+
+        async def async_fetch_station_name(
+            self, session: ClientSession, station_id: str
+        ):
+            return None
+
+    p = _LongURLProvider("abc")
+    result = p.get_station_page_url("abc")
+    assert result == "https://example.com"

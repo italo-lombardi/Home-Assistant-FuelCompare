@@ -94,10 +94,6 @@ from .base import BaseProvider, ProviderError, StationData, haversine_km
 _LOGGER = logging.getLogger(__name__)
 
 
-# pumps.ie has an expired TLS certificate — verification is disabled.
-# Use HTTPS anyway so the connection is encrypted (just not verified).
-# An explicit SSLContext is safer than ssl=False as it still uses TLS.
-# SSLContext creation deferred to __init__ to avoid module-level warnings.
 def _make_ssl_context() -> ssl.SSLContext:
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
@@ -109,6 +105,11 @@ def _make_ssl_context() -> ssl.SSLContext:
 # Context created at import time (before the HA event loop starts) to avoid
 # blocking-call-in-event-loop warnings from ssl.create_default_context().
 _SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
+_LOGGER.warning(
+    "pumps.ie TLS certificate verification is disabled — the provider's "
+    "SSL certificate is currently invalid. This is a known issue. "
+    "Data is still encrypted in transit."
+)
 
 
 # pumps.ie has an expired TLS certificate — ssl=False is required.
@@ -376,7 +377,7 @@ class IePumpsProvider(BaseProvider):
 
             nearby.append((sid, label))
 
-        nearby.sort(key=lambda x: x[1])
+        nearby.sort(key=lambda x: x[1].lower())
         return nearby
 
     # ── Internal helpers ──────────────────────────────────────────────────────
@@ -438,11 +439,14 @@ class IePumpsProvider(BaseProvider):
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
 
+# NOTE: Only matches self-closing <station ... /> tags — the form pumps.ie
+# currently emits. Open/close tag pairs (e.g. <station ...></station>) are
+# not produced by the API and are intentionally not handled here.
 _STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)/>", re.DOTALL)
 _ATTR_RE = re.compile(r'(\w+)="([^"]*)"')
 
 
-def _parse_xml(xml_text: str, fuel: str) -> list[dict] | None:
+def _parse_xml(xml_text: str, fuel: str) -> list[dict]:
     """Parse the pumps.ie XML response and return a list of station dicts.
 
     Uses regex extraction rather than an XML parser because pumps.ie returns
@@ -454,7 +458,7 @@ def _parse_xml(xml_text: str, fuel: str) -> list[dict] | None:
         fuel:     ``'diesel'`` or ``'petrol'`` — stored on each returned dict.
 
     Returns:
-        List of station dicts, or None if no station tags found.
+        List of station dicts, or Empty list if no station tags found.
     """
     decoded = _html_unescape(xml_text)
     station_tags = _STATION_TAG_RE.findall(decoded)

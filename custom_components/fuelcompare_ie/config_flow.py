@@ -38,7 +38,7 @@ from .providers import PROVIDER_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
 
-_PICKER_LABEL_SUFFIX_RE = re.compile(r"\s*\(#[0-9a-f\-]{6,}\)\s*$", re.IGNORECASE)
+_PICKER_LABEL_SUFFIX_RE = re.compile(r"\s*\(#[0-9a-f\-]{1,}\)\s*$", re.IGNORECASE)
 
 
 def _name_from_picker_label(label: str) -> str:

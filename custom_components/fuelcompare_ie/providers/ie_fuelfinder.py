@@ -93,7 +93,7 @@ from typing import ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import BaseProvider, ProviderError, StationData, _MAX_STATION_URL_LEN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -434,7 +434,7 @@ class IEFuelFinderProvider(BaseProvider):
             )
             return self.STATION_PAGE_URL or None
         url = f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
-        if len(url) > 255:
+        if len(url) > _MAX_STATION_URL_LEN:
             return self.STATION_PAGE_URL or None
         return url
 

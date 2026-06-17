@@ -648,3 +648,11 @@ def test_get_station_page_url_valid_short_numeric_suffix() -> None:
         provider.get_station_page_url("some-uuid")
         == "https://www.fuelfinder.ie/fuelfinder/station/top-top-dublin-285070"
     )
+
+
+def test_get_station_page_url_falls_back_when_url_exceeds_255_chars() -> None:
+    """Falls back to homepage when constructed URL exceeds 255 characters."""
+    provider = IEFuelFinderProvider("some-uuid")
+    long_slug = "a" * 220  # results in URL well over 255 chars
+    provider._slug_cache["some-uuid"] = long_slug
+    assert provider.get_station_page_url("some-uuid") == "https://www.fuelfinder.ie"

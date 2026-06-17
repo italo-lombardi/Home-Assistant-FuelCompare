@@ -246,8 +246,8 @@ def test_parse_xml_empty_xml_returns_empty_list() -> None:
     assert len(stations) == 0
 
 
-def test_parse_xml_malformed_xml_returns_none() -> None:
-    """_parse_xml returns [] when no station tags found (regex-based parser is fault-tolerant)."""
+def test_parse_xml_malformed_xml_returns_empty_list() -> None:
+    """_parse_xml returns [] not None when no station tags found (regex-based parser is fault-tolerant)."""
     result = _parse_xml(_MALFORMED_XML, "diesel")
     assert result == []
 
