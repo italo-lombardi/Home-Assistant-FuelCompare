@@ -11,11 +11,11 @@
 
 > ⚠️ **Alpha software — testers welcome.** This integration is still in an alpha stage. While it ships providers for many countries, only a handful of them have been exercised on real Home Assistant installs. Other providers compile and pass unit tests but have not been validated end-to-end against live data. Please feel free to install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea — feedback is what drives this project forward.
 
-> **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to FuelCompare.ie or its owners. The FuelCompare.ie name and website are the property of their respective owners. This project simply reads publicly available data from their website for personal use.
+> **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to any of the data providers it accesses (including FuelCompare.ie, FuelFinder.ie, pumps.ie, and all other sources listed below). All provider names, websites, and trademarks are the property of their respective owners. This project reads publicly available data from those websites for personal, non-commercial use only.
 
 ---
 
-> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. **0.7.0 (currently pre-release `0.7.0-beta.1`)** introduces the provider abstraction layer and bundles 36 providers across 27 countries — including a second Ireland source, **FuelFinder.ie**. See [Supported Data Sources](#supported-data-sources) and [Roadmap](#roadmap) below.
+> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. **0.7.0 (currently pre-release `0.7.0-beta.1`)** introduces the provider abstraction layer and bundles 36 providers across 27 countries. See [Supported Data Sources](#supported-data-sources) and [Roadmap](#roadmap) below.
 
 ---
 
