@@ -60,14 +60,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # persisted CONF_STATION_ID, then write the computed value back into
     # entry.data so subsequent restarts see the same ID.  Existing entries
     # already carrying a ``.4f`` id keep that id byte-for-byte (the
-    # ``CONF_STATION_ID not in entry.data`` guard).
+    # truthiness guard on the persisted value — empty-string and missing
+    # keys both fall through to .5f, since the outer branch only runs when
+    # ``station_id`` is already falsy and there is no real id to preserve).
     if not station_id:
         _lat = entry.data.get(CONF_LATITUDE)
         _lng = entry.data.get(CONF_LONGITUDE)
         if _lat is not None and _lng is not None:
-            precision = 4 if CONF_STATION_ID in entry.data else 5
+            precision = 4 if entry.data.get(CONF_STATION_ID) else 5
             station_id = f"{provider_key}_{_lat:.{precision}f}_{_lng:.{precision}f}"
             if entry.data.get(CONF_STATION_ID) != station_id:
+                # Safe to mutate entry.data here: async_setup_entry runs before
+                # any update listeners are registered for this entry, so the
+                # async_update_entry call cannot re-enter setup.
                 hass.config_entries.async_update_entry(
                     entry,
                     data={**entry.data, CONF_STATION_ID: station_id},
