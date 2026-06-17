@@ -65,7 +65,8 @@
       "invalid_station_id": "L'ID della stazione non può essere vuoto.",
       "invalid_api_key": "La chiave API non può essere vuota.",
       "invalid_location": "Coordinate non valide. Inserisci valori validi di latitudine e longitudine.",
-      "no_stations_found": "Nessuna stazione trovata per questa contea. Prova una contea diversa."
+      "no_stations_found": "Nessuna stazione trovata per questa contea. Prova una contea diversa.",
+      "no_stations_found_location": "Nessuna stazione trovata nelle vicinanze di queste coordinate. Prova a modificare la posizione o ad aumentare il raggio di ricerca."
     },
     "abort": {
       "already_configured": "Questa stazione è già configurata.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Verifica del certificato TLS di pumps.ie disabilitata",
-      "description": "Il provider pumps.ie per **{entry_title}** ha la verifica del certificato TLS disabilitata perché il certificato del sito non è attualmente valido. I dati sono comunque cifrati durante la trasmissione, ma l'identità del server non è verificata."
+      "description": "Il provider pumps.ie per **{entry_title}** ha la verifica del certificato TLS disabilitata perché il certificato del sito è scaduto. I dati sono comunque cifrati durante la trasmissione, ma l'identità del server non è verificata."
     }
   },
   "entity": {

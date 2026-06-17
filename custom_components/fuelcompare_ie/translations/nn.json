@@ -65,6 +65,7 @@
       "invalid_station_id": "Stasjons-ID kan ikkje vera tom.",
       "invalid_location": "Ugyldige koordinatar. Skriv inn gyldige breidde- og lengdegradsverdiar.",
       "no_stations_found": "Ingen stasjonar funne for dette fylket. Prøv eit anna fylke.",
+      "no_stations_found_location": "Ingen stasjonar funne i nærleiken av desse koordinatane. Prøv å justere plasseringa eller auke søkjeradiusen.",
       "invalid_api_key": "API-nøkkelen kan ikkje vera tom."
     },
     "abort": {
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-sertifikatverifisering deaktivert",
-      "description": "pumps.ie-leverandøren for **{entry_title}** har TLS-sertifikatverifisering deaktivert fordi nettstaden sitt sertifikat er ugyldig for tida. Data er framleis kryptert under overføring, men serveridentiteten vert ikkje stadfesta."
+      "description": "pumps.ie-leverandøren for **{entry_title}** har TLS-sertifikatverifisering deaktivert fordi nettstaden sitt sertifikat er utgått. Data er framleis kryptert under overføring, men serveridentiteten vert ikkje stadfesta."
     }
   },
   "entity": {

@@ -65,7 +65,8 @@
       "invalid_station_id": "Jaama ID ei tohi olla tühi.",
       "invalid_api_key": "API võti ei tohi olla tühi.",
       "invalid_location": "Vigased koordinaadid. Sisesta kehtivad laiuskraadi ja pikkuskraadi väärtused.",
-      "no_stations_found": "Sellest maakonnast ei leitud ühtegi tanklat. Proovi teist maakonda."
+      "no_stations_found": "Sellest maakonnast ei leitud ühtegi tanklat. Proovi teist maakonda.",
+      "no_stations_found_location": "Nende koordinaatide lähedalt ei leitud ühtegi tanklat. Proovi asukohta muuta või suurenda otsinguraadiust."
     },
     "abort": {
       "already_configured": "See jaam on juba seadistatud.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikaadi kontrollimine on keelatud",
-      "description": "Kirje **{entry_title}** pumps.ie pakkuja jaoks on TLS sertifikaadi kontrollimine keelatud, kuna saidi sertifikaat on praegu kehtetu. Andmed on edastuse ajal endiselt krüpteeritud, kuid serveri identiteeti ei kontrollita."
+      "description": "Kirje **{entry_title}** pumps.ie pakkuja jaoks on TLS sertifikaadi kontrollimine keelatud, kuna saidi sertifikaat on aegunud. Andmed on edastuse ajal endiselt krüpteeritud, kuid serveri identiteeti ei kontrollita."
     }
   },
   "entity": {

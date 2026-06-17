@@ -1639,40 +1639,6 @@ def test_build_station_data_lng_none_on_type_error() -> None:
 
 
 # ---------------------------------------------------------------------------
-# _normalise_county (lines 684-686)
-# ---------------------------------------------------------------------------
-
-
-def test_normalise_county_returns_none_for_none_input() -> None:
-    """_normalise_county returns None when input is None."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    assert _normalise_county(None) is None
-
-
-def test_normalise_county_returns_none_for_empty_string() -> None:
-    """_normalise_county returns None when input is empty string."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    assert _normalise_county("") is None
-
-
-def test_normalise_county_lowercases_and_strips() -> None:
-    """_normalise_county returns lowercase stripped county name."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    assert _normalise_county("  Dublin  ") == "dublin"
-    assert _normalise_county("Cork") == "cork"
-    assert _normalise_county("GALWAY") == "galway"
-
-
-# ---------------------------------------------------------------------------
 # Sensor unit tests — lines 106, 402, 609-610, 619
 # ---------------------------------------------------------------------------
 
@@ -2005,7 +1971,7 @@ async def test_async_step_station_picker_exception_in_list_load(
 
         assert result["type"] == "form"
         assert result["step_id"] == "station_picker"
-        assert result["errors"].get("base") == "no_stations_found"
+        assert result["errors"].get("base") == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("ie_broken_list_601", None)
 
@@ -2670,6 +2636,62 @@ async def test_async_step_county_aborts_when_no_counties(hass: HomeAssistant) ->
 # ---------------------------------------------------------------------------
 
 
+async def test_options_flow_location_entry_with_location_caps_shows_show_on_map(
+    hass: HomeAssistant,
+) -> None:
+    """Location entry with latitude/longitude CAPABILITIES shows show_on_map toggle."""
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+        CONF_SHOW_ON_MAP,
+    )
+
+    class _FakeLocLatLon(BaseProvider):
+        COUNTRY = "NO"
+        PROVIDER_KEY = "no_fake_loc_latlon"
+        LABEL = "NO Fake Loc LatLon"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "location_search"
+        CAPABILITIES: frozenset = frozenset({"latitude", "longitude", "diesel"})
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["no_fake_loc_latlon"] = _FakeLocLatLon
+    try:
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            unique_id=f"{DOMAIN}_no_fake_loc_latlon_55",
+            data={
+                CONF_PROVIDER: "no_fake_loc_latlon",
+                CONF_LATITUDE: 59.91,
+                CONF_LONGITUDE: 10.75,
+                CONF_RADIUS_KM: 10.0,
+            },
+            title="Oslo Area",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["type"] == "form"
+        assert result["step_id"] == "init"
+
+        schema_keys = [str(k) for k in result["data_schema"].schema.keys()]
+        assert any(CONF_RADIUS_KM in k for k in schema_keys)
+        assert any(CONF_SHOW_ON_MAP in k for k in schema_keys)
+    finally:
+        PROVIDER_REGISTRY.pop("no_fake_loc_latlon", None)
+
+
 async def test_options_flow_location_entry_invalid_api_key_shows_error(
     hass: HomeAssistant,
 ) -> None:
@@ -2927,3 +2949,114 @@ async def test_options_flow_station_entry_with_lat_lon_shows_show_on_map(
         assert result["data"].get(CONF_SHOW_ON_MAP) is True
     finally:
         PROVIDER_REGISTRY.pop("hr_fake_latlon_opts", None)
+
+
+# ---------------------------------------------------------------------------
+# _name_from_picker_label helper
+# ---------------------------------------------------------------------------
+
+
+def test_name_from_picker_label_strips_uuid_suffix() -> None:
+    """_name_from_picker_label strips (# + hex/numeric) suffix."""
+    from custom_components.fuelcompare_ie.config_flow import _name_from_picker_label
+
+    assert (
+        _name_from_picker_label("Circle K Swords, Main St (#abcd1234ef56)")
+        == "Circle K Swords, Main St"
+    )
+    assert _name_from_picker_label("BP Tallaght (#1234)") == "BP Tallaght"
+    assert _name_from_picker_label("Shell Dublin") == "Shell Dublin"
+
+
+# ---------------------------------------------------------------------------
+# Picker-label name fallback (config_flow.py lines 610-614)
+# ---------------------------------------------------------------------------
+
+
+def test_name_from_picker_label_used_as_fallback_when_fetch_returns_none() -> None:
+    """Lines 610-614: picker label stripped of (#id) suffix becomes suggested_name."""
+    from custom_components.fuelcompare_ie.config_flow import _name_from_picker_label
+
+    station_list = [
+        ("uid-abc123def456", "Circle K Swords, Main St (#abc123def456)"),
+        ("uid-xyz", "BP Tallaght (#xyz)"),
+    ]
+    target_id = "uid-abc123def456"
+    fetched = None  # simulate failed name fetch
+
+    # Replicate lines 610-614 logic
+    if not fetched:
+        picker_label = next(
+            (lbl for uid, lbl in station_list if uid == target_id),
+            None,
+        )
+        fetched = _name_from_picker_label(picker_label) if picker_label else None
+
+    assert fetched == "Circle K Swords, Main St"
+
+
+# ---------------------------------------------------------------------------
+# Picker label fallback integration (config_flow.py lines 610-614)
+# ---------------------------------------------------------------------------
+
+
+async def test_station_picker_picker_label_fallback_reaches_name_step(
+    hass: HomeAssistant,
+) -> None:
+    """Lines 610-614: when _fetch_station_name returns None, picker label used as name."""
+    from unittest.mock import AsyncMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _PickerLabelFallback(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "ie_picker_fallback_test"
+        LABEL = "Picker Fallback"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "county_search"
+        CURRENCY = "EUR"
+        CAPABILITIES: frozenset = frozenset()
+
+        def __init__(self, station_id: str, **kwargs) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return None
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("102", "Shell Sandymount, Strand Rd (#102)")]
+
+    PROVIDER_REGISTRY["ie_picker_fallback_test"] = _PickerLabelFallback
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "ie_picker_fallback_test"
+        flow._station_county = "dublin"
+        flow._latitude = None
+        flow._longitude = None
+        flow._radius_km = 10.0
+        flow._station_list = [("102", "Shell Sandymount, Strand Rd (#102)")]
+        flow._station_url_map = {}
+        flow._api_key = ""
+
+        with (
+            patch.object(flow, "async_set_unique_id", new=AsyncMock(return_value=None)),
+            patch.object(flow, "_abort_if_unique_id_configured", return_value=None),
+            patch(
+                "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
+                new=AsyncMock(return_value=None),
+            ),
+        ):
+            result = await flow.async_step_station_picker(
+                user_input={"station_id": "102"}
+            )
+
+        assert result["step_id"] == "name"
+        assert flow._suggested_name == "Shell Sandymount, Strand Rd"
+    finally:
+        PROVIDER_REGISTRY.pop("ie_picker_fallback_test", None)

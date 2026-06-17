@@ -64,6 +64,7 @@
       "invalid_station_id": "Station ID cannot be empty.",
       "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
       "no_stations_found": "No stations found for this county. Try a different county.",
+      "no_stations_found_location": "No stations found near these coordinates. Try adjusting the location or increasing the search radius.",
       "invalid_api_key": "API key cannot be empty."
     },
     "abort": {
@@ -90,7 +91,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS certificate verification disabled",
-      "description": "The pumps.ie provider for **{entry_title}** has TLS certificate verification disabled because the site's certificate is currently invalid. Data is still encrypted in transit, but the server identity is not verified."
+      "description": "The pumps.ie provider for **{entry_title}** has TLS certificate verification disabled because the site's certificate is expired. Data is still encrypted in transit, but the server identity is not verified."
     }
   },
   "entity": {

@@ -9,11 +9,13 @@
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
 [![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
 
-> **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to FuelCompare.ie or its owners. The FuelCompare.ie name and website are the property of their respective owners. This project simply reads publicly available data from their website for personal use.
+> ⚠️ **Alpha software — testers welcome.** This integration is still in an alpha stage. While it ships providers for many countries, only a handful of them have been exercised on real Home Assistant installs. Other providers compile and pass unit tests but have not been validated end-to-end against live data. Please feel free to install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea — feedback is what drives this project forward.
+
+> **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to any of the data providers it accesses (including FuelCompare.ie, FuelFinder.ie, pumps.ie, and all other sources listed below). All provider names, websites, and trademarks are the property of their respective owners. This project reads publicly available data from those websites for personal, non-commercial use only.
 
 ---
 
-> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. **0.7.0 (currently pre-release `0.7.0-beta.1`)** introduces the provider abstraction layer and bundles 36 providers across 27 countries — including a second Ireland source, **FuelFinder.ie**. See [Supported Data Sources](#supported-data-sources) and [Roadmap](#roadmap) below.
+> **Status notice:** fuelcompare.ie announced closure at end of June 2025. The integration continues to work as long as the site remains online. **0.7.0 (currently pre-release `0.7.0-beta.1`)** introduces the provider abstraction layer and bundles 36 providers across 27 countries. See [Supported Data Sources](#supported-data-sources) below.
 
 ---
 
@@ -286,20 +288,6 @@ Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, G
 ## Disclaimer (repeated for clarity)
 
 This project is a personal, community tool. It is **not** the official FuelCompare.ie app or service. The author has no relationship with FuelCompare.ie. If FuelCompare.ie changes their website structure this integration may stop working; please open an issue and it will be looked at when time allows.
-
-## Roadmap
-
-**Completed features:**
-- Provider abstraction layer (`BaseProvider` ABC, `providers/` module) — 0.7.0
-- FuelFinder.ie (Ireland, ~1,000+ stations) — 0.7.0
-- Multi-country support: 36 providers, 27 countries, plugin architecture — 0.7.0
-
-**In flight:**
-- 0.7.0 currently shipping as pre-release `0.7.0-beta.1` for HACS pre-release / soak testing
-
-**Planned:**
-- pumps.ie additional fuel types (kerosene, AdBlue)
-- Additional country providers as open-data APIs become available
 
 ## Sibling integrations
 

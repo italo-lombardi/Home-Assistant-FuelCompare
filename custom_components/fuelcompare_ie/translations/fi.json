@@ -65,7 +65,8 @@
       "invalid_station_id": "Aseman tunnus ei voi olla tyhjä.",
       "invalid_api_key": "API-avain ei voi olla tyhjä.",
       "invalid_location": "Virheelliset koordinaatit. Syötä kelvolliset leveysaste- ja pituusastearvot.",
-      "no_stations_found": "Tältä lääniltä ei löydy asemia. Kokeile eri lääniä."
+      "no_stations_found": "Tältä lääniltä ei löydy asemia. Kokeile eri lääniä.",
+      "no_stations_found_location": "Näiden koordinaattien läheltä ei löydy asemia. Kokeile muuttaa sijaintia tai kasvata hakusädettä."
     },
     "abort": {
       "already_configured": "Tämä asema on jo määritetty.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-varmenteen tarkistus poistettu käytöstä",
-      "description": "pumps.ie-palveluntarjoajan TLS-varmenteen tarkistus on poistettu käytöstä kohteelle **{entry_title}**, koska sivuston varmenne on tällä hetkellä virheellinen. Tiedot ovat edelleen salattuja siirron aikana, mutta palvelimen henkilöllisyyttä ei varmenneta."
+      "description": "pumps.ie-palveluntarjoajan TLS-varmenteen tarkistus on poistettu käytöstä kohteelle **{entry_title}**, koska sivuston varmenne on vanhentunut. Tiedot ovat edelleen salattuja siirron aikana, mutta palvelimen henkilöllisyyttä ei varmenneta."
     }
   },
   "entity": {

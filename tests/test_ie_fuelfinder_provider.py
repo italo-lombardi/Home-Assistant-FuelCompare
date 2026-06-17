@@ -17,6 +17,7 @@ Coverage areas:
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -25,6 +26,7 @@ from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
     IEFuelFinderProvider,
     _find_station,
+    _warn_403_once,
 )
 
 # ---------------------------------------------------------------------------
@@ -454,9 +456,10 @@ async def test_async_list_stations_returns_sorted_results() -> None:
         result = await provider.async_list_stations(session, county="dublin")
 
     assert len(result) >= 2
-    station_ids = [sid for sid, _ in result]
-    # Sorted alphabetically by UUID: "7ec0..." < "bbbb"
-    assert station_ids.index(_STATION_ID) < station_ids.index("bbbb")
+    labels = [lbl for _, lbl in result]
+    # Sorted alphabetically by label: "Circle K Mulhuddart..." < "Texaco Some Other Station..."
+    assert labels[0].startswith("Circle K Mulhuddart")
+    assert labels[1].startswith("Texaco Some Other Station")
 
 
 async def test_async_list_stations_label_includes_station_name() -> None:
@@ -648,3 +651,39 @@ def test_get_station_page_url_valid_short_numeric_suffix() -> None:
         provider.get_station_page_url("some-uuid")
         == "https://www.fuelfinder.ie/fuelfinder/station/top-top-dublin-285070"
     )
+
+
+def test_get_station_page_url_falls_back_when_url_exceeds_255_chars() -> None:
+    """Falls back to homepage when constructed URL exceeds 255 characters."""
+    provider = IEFuelFinderProvider("some-uuid")
+    long_slug = "a" * 220  # results in URL well over 255 chars
+    provider._slug_cache["some-uuid"] = long_slug
+    assert provider.get_station_page_url("some-uuid") == "https://www.fuelfinder.ie"
+
+
+# ---------------------------------------------------------------------------
+# _warn_403_once
+# ---------------------------------------------------------------------------
+
+
+def test_warn_403_once_logs_warning_exactly_once(caplog) -> None:
+    """_warn_403_once emits exactly one WARNING on repeated calls."""
+    import custom_components.fuelcompare_ie.providers.ie_fuelfinder as _mod
+
+    _mod._403_WARNING_EMITTED = False
+    try:
+        with caplog.at_level(
+            logging.WARNING,
+            logger="custom_components.fuelcompare_ie.providers.ie_fuelfinder",
+        ):
+            _warn_403_once("dublin", "diesel")
+            _warn_403_once("cork", "petrol")
+        warnings = [
+            r
+            for r in caplog.records
+            if r.levelno == logging.WARNING and "403" in r.message
+        ]
+        assert len(warnings) == 1
+        assert "bot-detection" in warnings[0].message
+    finally:
+        _mod._403_WARNING_EMITTED = False

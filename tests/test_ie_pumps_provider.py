@@ -15,6 +15,7 @@ Coverage areas:
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -246,10 +247,19 @@ def test_parse_xml_empty_xml_returns_empty_list() -> None:
     assert len(stations) == 0
 
 
-def test_parse_xml_malformed_xml_returns_none() -> None:
-    """_parse_xml returns None when the XML cannot be parsed."""
+def test_parse_xml_malformed_xml_returns_empty_list() -> None:
+    """_parse_xml returns [] not None when no station tags found (regex-based parser is fault-tolerant)."""
     result = _parse_xml(_MALFORMED_XML, "diesel")
-    assert result is None
+    assert result == []
+
+
+def test_parse_xml_non_self_closing_station_tags_not_parsed() -> None:
+    """_parse_xml ignores non-self-closing <station> tags — only <station ... /> supported."""
+    non_self_closing = (
+        '<stations><station ID="1" Price="1739" Lat="53.3">text</station></stations>'
+    )
+    result = _parse_xml(non_self_closing, "diesel")
+    assert result == []
 
 
 def test_parse_xml_station_id_stored_as_string() -> None:
@@ -347,6 +357,31 @@ def test_build_station_data_lastupdated_from_dateupdated() -> None:
     assert data["lastupdated"] == "2025-06-08 14:23:00"
 
 
+def test_build_station_data_lastupdated_uses_max_across_fuel_types() -> None:
+    """_build_station_data picks the most recent dateupdated across fuel types."""
+    older = {
+        "ID": _STATION_ID,
+        "price_eur": 1.73,
+        "dateupdated": "2025-01-01 08:00:00",
+        "lat": 53.0,
+        "lng": -6.0,
+        "name": "X",
+        "brand": "",
+        "Addr1": "",
+        "Addr2": "",
+        "County": "",
+        "fuel": "diesel",
+    }
+    newer = {
+        **older,
+        "price_eur": 1.75,
+        "dateupdated": "2025-06-15 12:00:00",
+        "fuel": "petrol",
+    }
+    data = _build_station_data(_STATION_ID, older, {"diesel": older, "petrol": newer})
+    assert data["lastupdated"] == "2025-06-15 12:00:00"
+
+
 def test_build_station_data_missing_fuel_returns_none() -> None:
     """_build_station_data returns None for fuel types with no data."""
     diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
@@ -360,14 +395,14 @@ def test_build_station_data_missing_fuel_returns_none() -> None:
 
 
 def test_build_station_data_source_station_id() -> None:
-    """_build_station_data does not set source_station_id (injected by coordinator)."""
+    """_build_station_data populates source_station_id from the station_id parameter."""
     diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
     assert diesel_stations
     record = _find_station(diesel_stations, _STATION_ID)
     assert record
     data = _build_station_data(_STATION_ID, record, {"diesel": record})
 
-    assert "source_station_id" not in data
+    assert data["source_station_id"] == _STATION_ID
 
 
 # ---------------------------------------------------------------------------
@@ -976,3 +1011,31 @@ async def test_async_list_stations_uses_addr1_when_addr2_empty() -> None:
     labels = {sid: label for sid, label in result}
     # Label should include addr1 but not a double-comma
     assert "Main Street Dublin" in labels["7773"]
+
+
+# ---------------------------------------------------------------------------
+# _warn_ssl_once
+# ---------------------------------------------------------------------------
+
+
+def test_warn_ssl_once_logs_warning_exactly_once(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """_warn_ssl_once emits warning on first call only."""
+    import custom_components.fuelcompare_ie.providers.ie_pumps as _mod
+    from custom_components.fuelcompare_ie.providers.ie_pumps import _warn_ssl_once
+
+    original = _mod._SSL_WARNING_EMITTED
+    try:
+        _mod._SSL_WARNING_EMITTED = False
+        with caplog.at_level(
+            logging.WARNING,
+            logger="custom_components.fuelcompare_ie.providers.ie_pumps",
+        ):
+            _warn_ssl_once()
+            _warn_ssl_once()  # second call must be silent
+        warnings = [r for r in caplog.records if "TLS" in r.message]
+        assert len(warnings) == 1
+        assert "expired" in warnings[0].message
+    finally:
+        _mod._SSL_WARNING_EMITTED = original

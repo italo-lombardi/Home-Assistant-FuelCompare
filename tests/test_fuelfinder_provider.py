@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientSession
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
@@ -1234,36 +1235,37 @@ async def test_fetch_stations_returns_none_on_client_response_error() -> None:
 
 
 # ---------------------------------------------------------------------------
-# _normalise_county — None/empty path (lines 684-686)
+# (removed) _normalise_county tests — function deleted as dead code in PR #31
 # ---------------------------------------------------------------------------
 
 
-def test_normalise_county_none_returns_none() -> None:
-    """_normalise_county(None) returns None (covers line 684-685)."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
+def test_base_get_station_page_url_template_exceeds_255_falls_back() -> None:
+    """base.get_station_page_url falls back to STATION_PAGE_URL when template URL > 255 chars."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
 
-    assert _normalise_county(None) is None
+    # STATION_LOOKUP_MODE defaults to "manual_id" in BaseProvider — no async_list_stations override needed.
+    class _LongURLProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "test_long_url"
+        LABEL = "Test"
+        CURRENCY = "EUR"
+        CAPABILITIES: ClassVar[frozenset] = frozenset()
+        STATION_PAGE_URL: ClassVar[str] = "https://example.com"
+        STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
+            "https://example.com/" + "x" * 240 + "/{station_id}"
+        )
 
+        def __init__(self, station_id: str) -> None:
+            pass
 
-def test_normalise_county_empty_returns_none() -> None:
-    """_normalise_county('') returns None (covers line 684-685)."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
+        async def async_fetch(self, session: ClientSession, station_id: str):
+            return {}
 
-    assert _normalise_county("") is None
+        async def async_fetch_station_name(
+            self, session: ClientSession, station_id: str
+        ):
+            return None
 
-
-def test_normalise_county_whitespace_returns_none() -> None:
-    """_normalise_county whitespace-only string returns None (covers line 686)."""
-    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-        _normalise_county,
-    )
-
-    # "  " is falsy after strip() — but _normalise_county checks `if not county`
-    # where county is passed as-is. "  " is truthy but strip().lower() == ""
-    # Let's test the actual behavior
-    result = _normalise_county("  Dublin  ")
-    assert result == "dublin"
+    p = _LongURLProvider("abc")
+    result = p.get_station_page_url("abc")
+    assert result == "https://example.com"

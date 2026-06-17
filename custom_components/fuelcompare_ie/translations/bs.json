@@ -65,6 +65,7 @@
       "invalid_station_id": "ID stanice ne može biti prazan.",
       "invalid_location": "Nevaljane koordinate. Unesite valjane vrijednosti geografske širine i dužine.",
       "no_stations_found": "Nisu pronađene stanice za ovu županiju. Pokušajte s drugom županijom.",
+      "no_stations_found_location": "Nisu pronađene stanice u blizini ovih koordinata. Pokušajte prilagoditi lokaciju ili povećati polumjer pretrage.",
       "invalid_api_key": "API ključ ne može biti prazan."
     },
     "abort": {
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS verifikacija certifikata onemogućena",
-      "description": "pumps.ie provajder za **{entry_title}** ima onemogućenu TLS verifikaciju certifikata jer trenutni certifikat stranice nije validan. Podaci su i dalje šifrovani u prijenosu, ali identitet servera nije provjeren."
+      "description": "pumps.ie provajder za **{entry_title}** ima onemogućenu TLS verifikaciju certifikata jer certifikat stranice je istekao. Podaci su i dalje šifrovani u prijenosu, ali identitet servera nije provjeren."
     }
   },
   "entity": {

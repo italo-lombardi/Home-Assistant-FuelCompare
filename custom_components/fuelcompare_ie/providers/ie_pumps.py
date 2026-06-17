@@ -8,7 +8,7 @@ WARNING — DATA FRESHNESS
 ------------------------
 pumps.ie is in maintenance-mode decline.  As of 2026-06:
 
-- SSL certificate is expired — all requests must use ssl=False.
+- SSL certificate is expired — verification disabled via _SSL_UNVERIFIED SSLContext.
 - The crowd-sourced price data is largely stale:
     * Only ~3 stations have prices updated in 2025.
     * ~961 stations last updated in 2024.
@@ -80,8 +80,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+import re
 import ssl
-import xml.etree.ElementTree as ET
+from html import unescape as _html_unescape
 from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -91,31 +92,33 @@ from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
-# pumps.ie has an expired TLS certificate — verification is disabled.
-# Use HTTPS anyway so the connection is encrypted (just not verified).
-# An explicit SSLContext is safer than ssl=False as it still uses TLS.
-# SSLContext creation deferred to __init__ to avoid module-level warnings.
-_SSL_UNVERIFIED: ssl.SSLContext | None = None
+
+def _make_ssl_context() -> ssl.SSLContext:
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
 
 
-def _get_ssl_context() -> ssl.SSLContext:
-    global _SSL_UNVERIFIED
-    if _SSL_UNVERIFIED is None:
-        # pumps.ie has an expired TLS certificate; cert renewal is pending.
-        # CERT_NONE disables certificate verification so requests succeed.
-        # check_hostname must also be False when verify_mode is CERT_NONE.
-        _SSL_UNVERIFIED = ssl.create_default_context()
-        _SSL_UNVERIFIED.check_hostname = False
-        _SSL_UNVERIFIED.verify_mode = ssl.CERT_NONE
-        _LOGGER.warning(
-            "pumps.ie TLS certificate verification is disabled — the provider's "
-            "SSL certificate is currently invalid. This is a known issue. "
-            "Data is still encrypted in transit."
-        )
-    return _SSL_UNVERIFIED
+# pumps.ie has an expired TLS certificate; cert renewal is pending.
+# Context created at import time (before the HA event loop starts) to avoid
+# blocking-call-in-event-loop warnings from ssl.create_default_context().
+_SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
+_SSL_WARNING_EMITTED = False
 
 
-# pumps.ie has an expired TLS certificate — ssl=False is required.
+def _warn_ssl_once() -> None:
+    global _SSL_WARNING_EMITTED
+    if _SSL_WARNING_EMITTED:
+        return
+    _SSL_WARNING_EMITTED = True
+    _LOGGER.warning(
+        "pumps.ie TLS certificate verification is disabled — the provider's "
+        "SSL certificate is expired. This is a known issue. "
+        "Data is still encrypted in transit."
+    )
+
+
 # Use HTTPS anyway so the connection is encrypted (just not verified).
 _BASE_URL = "https://pumps.ie/api/getStationsByPriceAPI.php"
 
@@ -263,15 +266,16 @@ class IePumpsProvider(BaseProvider):
             station_id: pumps.ie integer station ID string.
         """
         try:
-            stations = await self._fetch_stations(session, fuel="diesel")
-            if stations:
-                record = _find_station(stations, station_id)
+            diesel_stations, petrol_stations = await asyncio.gather(
+                self._fetch_stations(session, fuel="diesel"),
+                self._fetch_stations(session, fuel="petrol"),
+            )
+            if diesel_stations:
+                record = _find_station(diesel_stations, station_id)
                 if record:
                     return record.get("name") or None
-            # Try petrol list if not found in diesel.
-            stations_petrol = await self._fetch_stations(session, fuel="petrol")
-            if stations_petrol:
-                record = _find_station(stations_petrol, station_id)
+            if petrol_stations:
+                record = _find_station(petrol_stations, station_id)
                 if record:
                     return record.get("name") or None
         except Exception as err:  # noqa: BLE001
@@ -306,7 +310,7 @@ class IePumpsProvider(BaseProvider):
         """
         lat: float | None = kwargs.get("lat")  # type: ignore[assignment]
         lng: float | None = kwargs.get("lng")  # type: ignore[assignment]
-        radius_km: float = float(kwargs.get("radius_km") or 10.0)
+        radius_km: float = float(kwargs.get("radius_km", 10.0))
 
         # is-not-None coord checks (not falsy — 0.0 is a valid coordinate)
         if lat is None or lng is None:
@@ -336,9 +340,8 @@ class IePumpsProvider(BaseProvider):
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
                 sid = s.get("ID")
-                if sid:
-                    if sid not in merged:
-                        merged[sid] = s
+                if sid and sid not in merged:
+                    merged[sid] = s
 
         if not merged:
             return []
@@ -380,7 +383,7 @@ class IePumpsProvider(BaseProvider):
 
             nearby.append((sid, label))
 
-        nearby.sort(key=lambda x: x[1])
+        nearby.sort(key=lambda x: x[1].lower())
         return nearby
 
     # ── Internal helpers ──────────────────────────────────────────────────────
@@ -401,7 +404,8 @@ class IePumpsProvider(BaseProvider):
             fuel:    ``'diesel'`` or ``'petrol'``.
 
         Returns:
-            List of parsed station dicts on success, or None on error.
+            List of station dicts on success (may be empty if API returned no stations).
+            None on HTTP error or exception.
             Each dict has keys: ID, name, brand, addr1, addr2, lat, lng,
             price_eur, fuel, trend, dateupdated, Zone, County.
         """
@@ -414,14 +418,14 @@ class IePumpsProvider(BaseProvider):
             "fuel": fuel,
             "noCache": str(random.randint(1, 999999)),
         }
-        _LOGGER.debug("Fetching pumps.ie stations: fuel=%s", fuel)
+        _warn_ssl_once()
         try:
             async with session.get(
                 _BASE_URL,
                 params=params,
                 headers=_HEADERS,
                 timeout=_TIMEOUT,
-                ssl=_get_ssl_context(),
+                ssl=_SSL_UNVERIFIED,
             ) as response:
                 response.raise_for_status()
                 xml_text: str = await response.text(encoding="utf-8", errors="replace")
@@ -442,46 +446,47 @@ class IePumpsProvider(BaseProvider):
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
 
-def _parse_xml(xml_text: str, fuel: str) -> list[dict] | None:
+# pumps.ie XML uses only self-closing <station ... /> tags. Open/close form
+# not emitted by current API; if it ever changes, update this regex.
+_STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)/>", re.DOTALL)
+_ATTR_RE = re.compile(r'(\w+)="([^"]*)"')
+
+
+def _parse_xml(xml_text: str, fuel: str) -> list[dict]:
     """Parse the pumps.ie XML response and return a list of station dicts.
 
-    Each station is returned as a plain dict with normalised keys.  Prices
-    are converted from cents-per-litre to EUR/litre.
+    Uses regex extraction rather than an XML parser because pumps.ie returns
+    malformed XML (HTML entities like &aacute;, double-quoted attributes like
+    Updater="foo"") that breaks standard parsers.
 
     Args:
         xml_text: Raw XML string from the API response.
         fuel:     ``'diesel'`` or ``'petrol'`` — stored on each returned dict.
 
     Returns:
-        List of station dicts, or None if the XML cannot be parsed.
+        List of station dicts, or empty list when no <station/> tags found.
     """
-    try:
-        root = ET.fromstring(xml_text)
-    except ET.ParseError as err:
-        _LOGGER.debug("pumps.ie XML parse error: %s", err)
-        return None
+    decoded = _html_unescape(xml_text)
+    station_tags = _STATION_TAG_RE.findall(decoded)
+    if not station_tags:
+        _LOGGER.debug("pumps.ie XML: no <station .../> tags found in response")
+        return []
 
     stations: list[dict] = []
 
-    # The root element varies by API version; iterate all <station> descendants.
-    for elem in root.iter("station"):
-        attrib = elem.attrib
+    for tag_attrs in station_tags:
+        attrib = dict(_ATTR_RE.findall(tag_attrs))
 
         station_id = attrib.get("ID") or attrib.get("id") or None
         if not station_id:
             continue
 
-        # Coordinates
         lat = _parse_float(attrib.get("Lat") or attrib.get("lat"))
         lng = _parse_float(attrib.get("Lng") or attrib.get("lng"))
 
-        # Price: cents-per-litre → EUR/litre
         price_raw = _parse_float(attrib.get("price"))
-        price_eur: float | None = None
-        if price_raw is not None and price_raw > 0:
-            price_eur = round(price_raw / 100.0, 4)
+        price_eur = round(price_raw / 100.0, 4) if price_raw and price_raw > 0 else None
 
-        # Address: combine addr1 + addr2 with comma separator when both present.
         addr1 = (attrib.get("addr1") or "").strip()
         addr2 = (attrib.get("addr2") or "").strip()
         if addr1 and addr2:
@@ -590,14 +595,13 @@ def _build_station_data(
     county: str | None = meta.get("county") or None
 
     # ── Timing: use the most recent dateupdated across fuel types ─────────
-    dateupdated: str | None = None
-    for fuel in _FUEL_TYPES:
-        record = prices_by_fuel.get(fuel)
-        if record is not None:
-            ts = record.get("dateupdated")
-            if ts:
-                dateupdated = ts
-                break
+    # pumps.ie uses "YYYY-MM-DD HH:MM:SS" — lexical max == chronological max.
+    ts_candidates = [
+        record.get("dateupdated")
+        for record in (prices_by_fuel.get(f) for f in _FUEL_TYPES)
+        if record is not None and record.get("dateupdated")
+    ]
+    dateupdated: str | None = max(ts_candidates) if ts_candidates else None
 
     # ── Assemble dict ────────────────────────────────────────────────────
 
@@ -615,6 +619,8 @@ def _build_station_data(
         "county": county,
         "latitude": lat,
         "longitude": lng,
+        # Station page
+        "source_station_id": station_id,
         # Timing
         "lastupdated": dateupdated,
     }

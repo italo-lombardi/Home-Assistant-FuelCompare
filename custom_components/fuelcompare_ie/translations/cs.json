@@ -65,7 +65,8 @@
       "invalid_station_id": "ID stanice nesmí být prázdné.",
       "invalid_api_key": "Klíč API nesmí být prázdný.",
       "invalid_location": "Neplatné souřadnice. Zadejte platné hodnoty zeměpisné šířky a délky.",
-      "no_stations_found": "Pro tento okres nebyly nalezeny žádné stanice. Zkuste jiný okres."
+      "no_stations_found": "Pro tento okres nebyly nalezeny žádné stanice. Zkuste jiný okres.",
+      "no_stations_found_location": "V blízkosti těchto souřadnic nebyly nalezeny žádné stanice. Zkuste upravit polohu nebo zvětšit poloměr hledání."
     },
     "abort": {
       "already_configured": "Tato stanice je již nakonfigurována.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Ověření TLS certifikátu pumps.ie je zakázáno",
-      "description": "Poskytovatel pumps.ie pro **{entry_title}** má zakázáno ověřování TLS certifikátu, protože certifikát webu je momentálně neplatný. Data jsou při přenosu stále šifrována, ale identita serveru není ověřena."
+      "description": "Poskytovatel pumps.ie pro **{entry_title}** má zakázáno ověřování TLS certifikátu, protože certifikát webu vypršel. Data jsou při přenosu stále šifrována, ale identita serveru není ověřena."
     }
   },
   "entity": {

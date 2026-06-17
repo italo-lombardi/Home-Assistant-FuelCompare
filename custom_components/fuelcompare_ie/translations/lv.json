@@ -65,7 +65,8 @@
       "invalid_station_id": "Stacijas ID nedrīkst būt tukšs.",
       "invalid_api_key": "API atslēga nedrīkst būt tukša.",
       "invalid_location": "Nederīgas koordinātes. Ievadiet derīgas platuma un garuma vērtības.",
-      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu."
+      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu.",
+      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Mēģiniet pielāgot atrašanās vietu vai palielināt meklēšanas rādiusu."
     },
     "abort": {
       "already_configured": "Šī stacija jau ir konfigurēta.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikāta verifikācija atspējota",
-      "description": "pumps.ie pakalpojumu sniedzējs **{entry_title}** ierakstam ir atspējota TLS sertifikāta verifikācija, jo vietnes sertifikāts pašlaik nav derīgs. Dati tranzītā joprojām ir šifrēti, taču servera identitāte netiek pārbaudīta."
+      "description": "pumps.ie pakalpojumu sniedzējs **{entry_title}** ierakstam ir atspējota TLS sertifikāta verifikācija, jo vietnes sertifikāts ir beidzis derēt. Dati tranzītā joprojām ir šifrēti, taču servera identitāte netiek pārbaudīta."
     }
   },
   "entity": {

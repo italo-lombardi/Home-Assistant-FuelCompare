@@ -65,7 +65,8 @@
       "invalid_station_id": "Ní féidir le haitheantas an stáisiúin a bheith folamh.",
       "invalid_api_key": "Ní féidir an eochair API a bheith folamh.",
       "invalid_location": "Comhordanáidí neamhbhailí. Cuir isteach luachanna domhanleithead agus domhanfhaid bhailí.",
-      "no_stations_found": "Níor aimsíodh stáisiúin don chontae seo. Bain triail as contae eile."
+      "no_stations_found": "Níor aimsíodh stáisiúin don chontae seo. Bain triail as contae eile.",
+      "no_stations_found_location": "Níor aimsíodh stáisiúin in aice leis na comhordanáidí seo. Bain triail as an suíomh a choigeartú nó an ga cuardaigh a mhéadú."
     },
     "abort": {
       "already_configured": "Tá an stáisiún seo cumraithe cheana féin.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Fíordheimhniú deimhnithe TLS pumps.ie díchumasaithe",
-      "description": "Tá fíordheimhniú deimhnithe TLS díchumasaithe ag soláthraí pumps.ie do **{entry_title}** toisc go bhfuil deimhniú an tsuímh neamhbhailí faoi láthair. Tá na sonraí fós criptithe le linn tarchurtha, ach ní fíordheimhnítear céannacht an fhreastalaí."
+      "description": "Tá fíordheimhniú deimhnithe TLS díchumasaithe ag soláthraí pumps.ie do **{entry_title}** toisc go bhfuil deimhniú an tsuímh imithe in éag. Tá na sonraí fós criptithe le linn tarchurtha, ach ní fíordheimhnítear céannacht an fhreastalaí."
     }
   },
   "entity": {

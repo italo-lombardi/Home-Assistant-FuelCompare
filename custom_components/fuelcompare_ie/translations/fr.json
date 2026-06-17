@@ -65,7 +65,8 @@
       "invalid_station_id": "L'identifiant de la station ne peut pas être vide.",
       "invalid_api_key": "La clé API ne peut pas être vide.",
       "invalid_location": "Coordonnées invalides. Entrez des valeurs valides de latitude et longitude.",
-      "no_stations_found": "Aucune station trouvée pour ce comté. Essayez un autre comté."
+      "no_stations_found": "Aucune station trouvée pour ce comté. Essayez un autre comté.",
+      "no_stations_found_location": "Aucune station trouvée à proximité de ces coordonnées. Essayez d'ajuster l'emplacement ou d'augmenter le rayon de recherche."
     },
     "abort": {
       "already_configured": "Cette station est déjà configurée.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Vérification du certificat TLS de pumps.ie désactivée",
-      "description": "Le fournisseur pumps.ie pour **{entry_title}** a la vérification du certificat TLS désactivée car le certificat du site est actuellement invalide. Les données restent chiffrées en transit, mais l'identité du serveur n'est pas vérifiée."
+      "description": "Le fournisseur pumps.ie pour **{entry_title}** a la vérification du certificat TLS désactivée car le certificat du site a expiré. Les données restent chiffrées en transit, mais l'identité du serveur n'est pas vérifiée."
     }
   },
   "entity": {

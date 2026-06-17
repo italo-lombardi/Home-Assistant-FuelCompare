@@ -65,7 +65,8 @@
       "invalid_station_id": "ID stacji nie może być puste.",
       "invalid_api_key": "Klucz API nie może być pusty.",
       "invalid_location": "Nieprawidłowe współrzędne. Wprowadź prawidłowe wartości szerokości i długości geograficznej.",
-      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa."
+      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa.",
+      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Spróbuj zmienić lokalizację lub zwiększyć promień wyszukiwania."
     },
     "abort": {
       "already_configured": "Ta stacja jest już skonfigurowana.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Weryfikacja certyfikatu TLS pumps.ie wyłączona",
-      "description": "Dostawca pumps.ie dla **{entry_title}** ma wyłączoną weryfikację certyfikatu TLS, ponieważ certyfikat strony jest obecnie nieważny. Dane są nadal szyfrowane podczas transmisji, ale tożsamość serwera nie jest weryfikowana."
+      "description": "Dostawca pumps.ie dla **{entry_title}** ma wyłączoną weryfikację certyfikatu TLS, ponieważ certyfikat strony wygasł. Dane są nadal szyfrowane podczas transmisji, ale tożsamość serwera nie jest weryfikowana."
     }
   },
   "entity": {

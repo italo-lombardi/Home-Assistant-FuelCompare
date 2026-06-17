@@ -65,6 +65,7 @@
       "invalid_station_id": "ID-ja e stacionit nuk mund të jetë e zbrazët.",
       "invalid_location": "Koordinata të pavlefshme. Shkruani vlera të vlefshme të gjerësisë dhe gjatësisë gjeografike.",
       "no_stations_found": "Nuk u gjetën stacione për këtë rreth. Provoni një rreth tjetër.",
+      "no_stations_found_location": "Nuk u gjetën stacione pranë këtyre koordinatave. Provoni të rregulloni vendndodhjen ose të rrisni rrezën e kërkimit.",
       "invalid_api_key": "Çelësi API nuk mund të jetë i zbrazët."
     },
     "abort": {
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Verifikimi i certifikatës TLS të pumps.ie është çaktivizuar",
-      "description": "Ofruesi pumps.ie për **{entry_title}** ka verifikimin e certifikatës TLS të çaktivizuar sepse certifikata e faqes është aktualisht e pavlefshme. Të dhënat janë ende të enkriptuara gjatë transmetimit, por identiteti i serverit nuk verifikohet."
+      "description": "Ofruesi pumps.ie për **{entry_title}** ka verifikimin e certifikatës TLS të çaktivizuar sepse certifikata e faqes ka skaduar. Të dhënat janë ende të enkriptuara gjatë transmetimit, por identiteti i serverit nuk verifikohet."
     }
   },
   "entity": {

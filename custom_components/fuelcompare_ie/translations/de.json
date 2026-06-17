@@ -65,7 +65,8 @@
       "invalid_station_id": "Die Stations-ID darf nicht leer sein.",
       "invalid_api_key": "Der API-Schlüssel darf nicht leer sein.",
       "invalid_location": "Ungültige Koordinaten. Bitte geben Sie gültige Breiten- und Längengradwerte ein.",
-      "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk."
+      "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk.",
+      "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Passen Sie den Standort an oder vergrößern Sie den Suchradius."
     },
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",
@@ -80,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-Zertifikatsüberprüfung deaktiviert",
-      "description": "Der pumps.ie-Anbieter für **{entry_title}** hat die TLS-Zertifikatsüberprüfung deaktiviert, da das Zertifikat der Website derzeit ungültig ist. Die Daten werden weiterhin verschlüsselt übertragen, die Serveridentität wird jedoch nicht überprüft."
+      "description": "Der pumps.ie-Anbieter für **{entry_title}** hat die TLS-Zertifikatsüberprüfung deaktiviert, da das Zertifikat der Website abgelaufen ist. Die Daten werden weiterhin verschlüsselt übertragen, die Serveridentität wird jedoch nicht überprüft."
     }
   },
   "entity": {

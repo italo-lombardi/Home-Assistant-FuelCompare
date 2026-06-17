@@ -53,8 +53,8 @@ FuelFinder field  → StationData key   Notes
 -----------------   ----------------   -----
 price (diesel)    → diesel             float EUR/litre, no conversion
 price (petrol)    → unleaded           renamed for StationData compat
-price (kerosene)  → (extra attr only)  no StationData key for kerosene
-price (cng)       → (extra attr only)  no StationData key for cng
+price (kerosene)  → kerosene           float EUR/litre; StationData key declared in base.py
+price (cng)       → cng                float EUR/litre; StationData key declared in base.py
 updated_at        → lastupdated        ISO8601+TZ string
 name              → name               clean display name, no transform
 brand             → tablename + brand  brand is display string; tablename
@@ -78,9 +78,10 @@ travel as attribute passthrough only):
   slug          — URL slug for the station detail page
   logo_url      — Google Favicon CDN URL
   has_price     — bool: any community price exists for this station
-  kerosene      — float|None EUR/litre kerosene price
-  cng           — float|None EUR/litre CNG price
   source_station_id — the UUID (mirrored into StationData.source_station_id)
+
+Note: ``kerosene`` and ``cng`` are declared in CAPABILITIES (and thus get
+real sensor entities) — they are NOT extra-attribute passthrough.
 """
 
 from __future__ import annotations
@@ -93,7 +94,7 @@ from typing import ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from .base import BaseProvider, ProviderError, StationData, MAX_STATION_URL_LEN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -118,6 +119,24 @@ _HEADERS: dict[str, str] = {
 
 _TIMEOUT = ClientTimeout(total=API_TIMEOUT)
 
+_403_WARNING_EMITTED = False
+
+
+def _warn_403_once(city: str, fuel: str) -> None:
+    global _403_WARNING_EMITTED
+    if _403_WARNING_EMITTED:
+        return
+    _403_WARNING_EMITTED = True
+    _LOGGER.warning(
+        "FuelFinder.ie returned HTTP 403 for city=%s fuel=%s. "
+        "The bot-detection headers may have changed.  "
+        "Please open an issue at "
+        "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues",
+        city,
+        fuel,
+    )
+
+
 # Fuel types to fan out per poll cycle.  CNG is last and treated as
 # optional — sparse data means many stations will return None for it.
 _FUEL_TYPES: tuple[str, ...] = ("diesel", "petrol", "kerosene", "cng")
@@ -128,7 +147,8 @@ _FUEL_TYPES: tuple[str, ...] = ("diesel", "petrol", "kerosene", "cng")
 _FUEL_TO_DATA_KEY: dict[str, str] = {
     "diesel": "diesel",
     "petrol": "unleaded",
-    # kerosene and cng have no StationData key; stored as extra fields
+    "kerosene": "kerosene",
+    "cng": "cng",
 }
 
 # The city value used for a full national search when the station county
@@ -372,19 +392,21 @@ class IEFuelFinderProvider(BaseProvider):
             return []
 
         # Merge per-fuel results into one dict keyed by UUID.
-        # Only include stations that have at least one price available.
+        # Include all stations regardless of price availability — stations
+        # without current community-submitted prices will populate
+        # automatically once a price is reported.
         merged: dict[str, dict] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 uid = s.get("id")
-                if uid and s.get("has_price"):
+                if uid:
                     merged[uid] = s
 
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
                 uid = s.get("id")
-                if uid and s.get("has_price") and uid not in merged:
+                if uid and uid not in merged:
                     merged[uid] = s
 
         if not merged:
@@ -431,7 +453,10 @@ class IEFuelFinderProvider(BaseProvider):
                 slug,
             )
             return self.STATION_PAGE_URL or None
-        return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
+        url = f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
+        if len(url) > MAX_STATION_URL_LEN:
+            return self.STATION_PAGE_URL or None
+        return url
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
@@ -472,14 +497,7 @@ class IEFuelFinderProvider(BaseProvider):
                 timeout=_TIMEOUT,
             ) as response:
                 if response.status == 403:
-                    _LOGGER.warning(
-                        "FuelFinder.ie returned HTTP 403 for city=%s fuel=%s. "
-                        "The bot-detection headers may have changed.  "
-                        "Please open an issue at "
-                        "https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues",
-                        city,
-                        fuel,
-                    )
+                    _warn_403_once(city, fuel)
                     return None
                 response.raise_for_status()
                 payload: dict = await response.json()
@@ -663,21 +681,3 @@ def _find_station(stations: list[dict], station_id: str) -> dict | None:
         if station.get("id") == station_id:
             return station
     return None
-
-
-def _normalise_county(county: str | None) -> str | None:
-    """Return the lowercase county name for use as the /stations ?city= param.
-
-    The API accepts lowercase county names (e.g. ``'dublin'``, ``'cork'``).
-    The response returns title-case (e.g. ``'Dublin'``).  This function
-    converts title-case API responses back to the lowercase query form.
-
-    Args:
-        county: County name string, or None.
-
-    Returns:
-        Lowercase county string, or None if input is None or empty.
-    """
-    if not county:
-        return None
-    return county.strip().lower()

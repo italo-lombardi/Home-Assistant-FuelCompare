@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -36,6 +37,14 @@ from .const import (
 from .providers import PROVIDER_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
+
+_PICKER_LABEL_SUFFIX_RE = re.compile(r"\s*\(#[0-9a-f-]+\)\s*$", re.IGNORECASE)
+
+
+def _name_from_picker_label(label: str) -> str:
+    """Strip the trailing '(#uuid)' suffix from a station picker label."""
+    return _PICKER_LABEL_SUFFIX_RE.sub("", label).strip()
+
 
 _COUNTRY_NAMES: dict[str, str] = {
     # Ireland — primary market
@@ -537,7 +546,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key, self._api_key
                 )
-                self._suggested_name = fetched or f"Station {station_id}"
+                self._suggested_name = fetched or f"Station {station_id[:8]}"
                 return await self.async_step_name()
 
         provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
@@ -597,7 +606,15 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 fetched = await _fetch_station_name(
                     self.hass, station_id, self._provider_key, self._api_key
                 )
-                self._suggested_name = fetched or f"Station {station_id}"
+                if not fetched:
+                    picker_label = next(
+                        (lbl for uid, lbl in self._station_list if uid == station_id),
+                        None,
+                    )
+                    fetched = (
+                        _name_from_picker_label(picker_label) if picker_label else None
+                    )
+                self._suggested_name = fetched or f"Station {station_id[:8]}"
                 return await self.async_step_name()
 
         # Load station list from provider
@@ -629,18 +646,27 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Failed to load station list: %s", err)
 
-        station_list = sorted(station_list, key=lambda x: x[1])
+        station_list = sorted(station_list, key=lambda x: x[1].lower())
         self._station_list = station_list
 
         has_location_caps = (
             provider_cls is not None
             and {"latitude", "longitude"} <= provider_cls.CAPABILITIES
         )
+        needs_station_id = (
+            provider_cls is not None
+            and getattr(provider_cls, "CONFIG_MODE", "station_id") == "station_id"
+        )
         schema_dict: dict = {}
         if not station_list:
-            if self.unique_id:
+            if self.unique_id and not needs_station_id:
                 return await self.async_step_name()
-            errors["base"] = "no_stations_found"
+            is_location_mode = self._latitude is not None
+            errors["base"] = (
+                "no_stations_found_location"
+                if is_location_mode
+                else "no_stations_found"
+            )
             schema_dict[vol.Required(CONF_STATION_ID)] = str
         else:
             schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
@@ -710,10 +736,20 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             unique = f"{DOMAIN}_{self._provider_key}_{self._latitude:.4f}_{self._longitude:.4f}"
             await self.async_set_unique_id(unique)
             self._abort_if_unique_id_configured()
-            self._suggested_name = (
-                f"{_COUNTRY_NAMES.get(self._country, self._country)} "
-                f"({self._latitude:.3f}, {self._longitude:.3f})"
+            # Suggested name: set a location-based fallback here only for
+            # providers that don't require a station ID (location-only).
+            # Station-picker providers overwrite this after the user picks a station.
+            provider_cls_loc = PROVIDER_REGISTRY.get(self._provider_key)
+            _is_station_id_mode = (
+                provider_cls_loc is not None
+                and getattr(provider_cls_loc, "CONFIG_MODE", "station_id")
+                == "station_id"
             )
+            if not _is_station_id_mode:
+                self._suggested_name = (
+                    f"{_COUNTRY_NAMES.get(self._country, self._country)} "
+                    f"({self._latitude:.3f}, {self._longitude:.3f})"
+                )
             return await self.async_step_station_picker()
 
         return self.async_show_form(
@@ -791,50 +827,29 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                 CONF_RADIUS_KM,
                 self.config_entry.data.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM),
             )
-            schema = vol.Schema(
-                {
-                    **(
-                        {vol.Optional(CONF_API_KEY, default=existing_key): str}
-                        if requires_api_key
-                        else {}
-                    ),
-                    vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
-                        vol.Coerce(float), vol.Range(min=0.1, max=500)
-                    ),
-                    **(
-                        {
-                            vol.Optional(
-                                CONF_SHOW_ON_MAP, default=current_show_on_map
-                            ): bool
-                        }
-                        if has_location_caps
-                        else {}
-                    ),
-                }
-            )
-        else:
             schema_dict: dict = {}
+            if requires_api_key:
+                schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            schema_dict[vol.Optional(CONF_RADIUS_KM, default=current_radius)] = vol.All(
+                vol.Coerce(float), vol.Range(min=0.1, max=500)
+            )
+            if has_location_caps:
+                schema_dict[
+                    vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
+                ] = bool
+        else:
+            schema_dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
             if has_location_caps:
                 schema_dict[
                     vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
                 ] = bool
-            if user_input is not None:
-                errors: dict[str, str] = {}
-                if (
-                    CONF_API_KEY in user_input
-                    and not (user_input[CONF_API_KEY] or "").strip()
-                ):
-                    errors[CONF_API_KEY] = "invalid_api_key"
-                    schema = vol.Schema(schema_dict)
-                    return self.async_show_form(
-                        step_id="init", data_schema=schema, errors=errors
-                    )
-                return self.async_create_entry(data=user_input)
-            if not schema_dict:
+            # Non-location entries with no configurable options finalise immediately.
+            if not schema_dict and user_input is None:
                 return self.async_create_entry(data={})
-            schema = vol.Schema(schema_dict)
+
+        schema = vol.Schema(schema_dict)
 
         if user_input is not None:
             errors: dict[str, str] = {}
