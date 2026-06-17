@@ -15,6 +15,7 @@ Coverage areas:
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -976,3 +977,31 @@ async def test_async_list_stations_uses_addr1_when_addr2_empty() -> None:
     labels = {sid: label for sid, label in result}
     # Label should include addr1 but not a double-comma
     assert "Main Street Dublin" in labels["7773"]
+
+
+# ---------------------------------------------------------------------------
+# _warn_ssl_once
+# ---------------------------------------------------------------------------
+
+
+def test_warn_ssl_once_logs_warning_exactly_once(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """_warn_ssl_once emits warning on first call only."""
+    import custom_components.fuelcompare_ie.providers.ie_pumps as _mod
+    from custom_components.fuelcompare_ie.providers.ie_pumps import _warn_ssl_once
+
+    original = _mod._SSL_WARNING_EMITTED
+    try:
+        _mod._SSL_WARNING_EMITTED = False
+        with caplog.at_level(
+            logging.WARNING,
+            logger="custom_components.fuelcompare_ie.providers.ie_pumps",
+        ):
+            _warn_ssl_once()
+            _warn_ssl_once()  # second call must be silent
+        warnings = [r for r in caplog.records if "TLS" in r.message]
+        assert len(warnings) == 1
+        assert "expired" in warnings[0].message
+    finally:
+        _mod._SSL_WARNING_EMITTED = original

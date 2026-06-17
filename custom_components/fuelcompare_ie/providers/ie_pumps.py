@@ -8,7 +8,7 @@ WARNING — DATA FRESHNESS
 ------------------------
 pumps.ie is in maintenance-mode decline.  As of 2026-06:
 
-- SSL certificate is expired — all requests must use ssl=False.
+- SSL certificate is expired — verification disabled via _SSL_UNVERIFIED SSLContext.
 - The crowd-sourced price data is largely stale:
     * Only ~3 stations have prices updated in 2025.
     * ~961 stations last updated in 2024.
@@ -114,7 +114,7 @@ def _warn_ssl_once() -> None:
     _SSL_WARNING_EMITTED = True
     _LOGGER.warning(
         "pumps.ie TLS certificate verification is disabled — the provider's "
-        "SSL certificate is currently invalid. This is a known issue. "
+        "SSL certificate is expired. This is a known issue. "
         "Data is still encrypted in transit."
     )
 
@@ -266,15 +266,16 @@ class IePumpsProvider(BaseProvider):
             station_id: pumps.ie integer station ID string.
         """
         try:
-            stations = await self._fetch_stations(session, fuel="diesel")
-            if stations:
-                record = _find_station(stations, station_id)
+            diesel_stations, petrol_stations = await asyncio.gather(
+                self._fetch_stations(session, fuel="diesel"),
+                self._fetch_stations(session, fuel="petrol"),
+            )
+            if diesel_stations:
+                record = _find_station(diesel_stations, station_id)
                 if record:
                     return record.get("name") or None
-            # Try petrol list if not found in diesel.
-            stations_petrol = await self._fetch_stations(session, fuel="petrol")
-            if stations_petrol:
-                record = _find_station(stations_petrol, station_id)
+            if petrol_stations:
+                record = _find_station(petrol_stations, station_id)
                 if record:
                     return record.get("name") or None
         except Exception as err:  # noqa: BLE001
@@ -309,7 +310,7 @@ class IePumpsProvider(BaseProvider):
         """
         lat: float | None = kwargs.get("lat")  # type: ignore[assignment]
         lng: float | None = kwargs.get("lng")  # type: ignore[assignment]
-        radius_km: float = float(kwargs.get("radius_km") or 10.0)
+        radius_km: float = float(kwargs.get("radius_km", 10.0))
 
         # is-not-None coord checks (not falsy — 0.0 is a valid coordinate)
         if lat is None or lng is None:
@@ -339,9 +340,8 @@ class IePumpsProvider(BaseProvider):
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
                 sid = s.get("ID")
-                if sid:
-                    if sid not in merged:
-                        merged[sid] = s
+                if sid and sid not in merged:
+                    merged[sid] = s
 
         if not merged:
             return []
@@ -404,7 +404,8 @@ class IePumpsProvider(BaseProvider):
             fuel:    ``'diesel'`` or ``'petrol'``.
 
         Returns:
-            List of parsed station dicts on success, or None on error.
+            List of station dicts on success (may be empty if API returned no stations).
+            None on HTTP error or exception.
             Each dict has keys: ID, name, brand, addr1, addr2, lat, lng,
             price_eur, fuel, trend, dateupdated, Zone, County.
         """
@@ -484,9 +485,7 @@ def _parse_xml(xml_text: str, fuel: str) -> list[dict]:
         lng = _parse_float(attrib.get("Lng") or attrib.get("lng"))
 
         price_raw = _parse_float(attrib.get("price"))
-        price_eur: float | None = None
-        if price_raw is not None and price_raw > 0:
-            price_eur = round(price_raw / 100.0, 4)
+        price_eur = round(price_raw / 100.0, 4) if price_raw and price_raw > 0 else None
 
         addr1 = (attrib.get("addr1") or "").strip()
         addr2 = (attrib.get("addr2") or "").strip()
