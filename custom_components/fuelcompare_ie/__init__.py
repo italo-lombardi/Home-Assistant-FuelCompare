@@ -52,11 +52,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # substitute from the rounded lat/lng stored in entry.data so the device
     # registry entry is stable across restarts.  Include provider_key to
     # prevent ID collisions when two providers share the same coordinates.
+    #
+    # Backward compatibility for ``.4f``-rounded IDs (≈11 m) written by
+    # earlier versions: such entries have a truthy persisted CONF_STATION_ID,
+    # so the outer ``if not station_id:`` guard short-circuits and their id
+    # is preserved byte-for-byte (no migration).  Only entries that have
+    # never persisted a station_id reach this branch — for them we use ``.5f``
+    # (≈1.1 m) precision so two distinct nearby stations using the same
+    # provider do not collide, then write the computed value back into
+    # entry.data so subsequent restarts reuse the same id.
     if not station_id:
         _lat = entry.data.get(CONF_LATITUDE)
         _lng = entry.data.get(CONF_LONGITUDE)
         if _lat is not None and _lng is not None:
-            station_id = f"{provider_key}_{_lat:.4f}_{_lng:.4f}"
+            station_id = f"{provider_key}_{_lat:.5f}_{_lng:.5f}"
+            # Safe to mutate entry.data here: async_setup_entry runs before
+            # any update listeners are registered for this entry, so the
+            # async_update_entry call cannot re-enter setup.
+            hass.config_entries.async_update_entry(
+                entry,
+                data={**entry.data, CONF_STATION_ID: station_id},
+            )
     if not station_id:
         station_id = entry.entry_id
 

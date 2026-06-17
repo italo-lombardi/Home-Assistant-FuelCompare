@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 
 from custom_components.fuelcompare_ie.const import (
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
     CONF_PROVIDER,
     CONF_SHOW_ON_MAP,
     CONF_STATION_ID,
@@ -220,3 +222,127 @@ async def test_unload_entry_coordinator_none_fallback() -> None:
     await async_unload_entry(hass, entry)
 
     assert Platform.DEVICE_TRACKER in unloaded_platforms
+
+
+# ---------------------------------------------------------------------------
+# Location-mode station_id derivation — collision avoidance
+# ---------------------------------------------------------------------------
+
+
+async def _run_setup_capturing_station_id(entry: MagicMock) -> tuple[MagicMock, str]:
+    """Drive async_setup_entry far enough to capture the station_id passed to coordinator.
+
+    Returns (hass, station_id_seen_by_coordinator).
+    """
+    from custom_components.fuelcompare_ie import async_setup_entry
+
+    hass = MagicMock()
+    hass.config = MagicMock()
+    hass.data = {}
+
+    coordinator_mock = MagicMock()
+    coordinator_mock.async_config_entry_first_refresh = AsyncMock()
+
+    async def capture_forward(e, platforms):
+        return None
+
+    hass.config_entries = MagicMock()
+    hass.config_entries.async_forward_entry_setups = capture_forward
+    hass.config_entries.async_update_entry = MagicMock()
+
+    captured: dict[str, str] = {}
+
+    def _factory(_hass, _provider, station_id="", config_entry=None):
+        captured["station_id"] = station_id
+        return coordinator_mock
+
+    with patch(
+        "custom_components.fuelcompare_ie.FuelCompareIECoordinator",
+        side_effect=_factory,
+    ):
+        await async_setup_entry(hass, entry)
+
+    return hass, captured["station_id"]
+
+
+async def test_location_mode_persisted_station_id_short_circuits_at_outer_guard() -> (
+    None
+):
+    """An entry with any truthy persisted station_id (legacy .4f, .5f, manual ID) must keep it byte-for-byte.
+
+    Backward compatibility is provided by the outer ``if not station_id:``
+    guard, which short-circuits the whole derivation branch. The precision
+    widening only ever applies to entries that have never persisted a
+    station_id — for existing entries the persisted value is preserved
+    without modification, regardless of its precision.
+    """
+    provider_key = "at_econtrol"
+    persisted_id = f"{provider_key}_53.3454_-6.2480"
+
+    entry = _make_entry(
+        provider_key=provider_key,
+        station_id=persisted_id,
+        data_extra={CONF_LATITUDE: 53.34540123, CONF_LONGITUDE: -6.24801234},
+    )
+
+    hass, seen_station_id = await _run_setup_capturing_station_id(entry)
+
+    assert seen_station_id == persisted_id
+    # Outer guard short-circuited — no update_entry call.
+    hass.config_entries.async_update_entry.assert_not_called()
+
+
+async def test_location_mode_new_entry_uses_5f_precision_and_persists() -> None:
+    """A fresh entry with no persisted station_id must be assigned a .5f-precision id.
+
+    The computed value must be written back into entry.data via
+    async_update_entry so subsequent restarts see the same id.
+    """
+    provider_key = "at_econtrol"
+
+    entry = _make_entry(
+        provider_key=provider_key,
+        station_id="",
+        data_extra={CONF_LATITUDE: 53.34540123, CONF_LONGITUDE: -6.24801234},
+    )
+    # Strip CONF_STATION_ID entirely so the precision-widening guard fires.
+    entry.data = {
+        CONF_PROVIDER: provider_key,
+        CONF_LATITUDE: 53.34540123,
+        CONF_LONGITUDE: -6.24801234,
+    }
+
+    hass, seen_station_id = await _run_setup_capturing_station_id(entry)
+
+    expected = f"{provider_key}_53.34540_-6.24801"
+    assert seen_station_id == expected
+    # Persisted back into entry.data.
+    hass.config_entries.async_update_entry.assert_called_once()
+    _, kwargs = hass.config_entries.async_update_entry.call_args
+    assert kwargs["data"][CONF_STATION_ID] == expected
+
+
+async def test_location_mode_two_close_stations_get_distinct_ids() -> None:
+    """Two new entries within ≈11 m of each other must produce distinct station_ids.
+
+    Pre-fix .4f rounding (≈11 m) collided here; .5f (≈1.1 m) keeps them apart.
+    """
+    provider_key = "at_econtrol"
+
+    entry_a = _make_entry(provider_key=provider_key, station_id="")
+    entry_a.data = {
+        CONF_PROVIDER: provider_key,
+        CONF_LATITUDE: 53.34541,
+        CONF_LONGITUDE: -6.24800,
+    }
+    entry_b = _make_entry(provider_key=provider_key, station_id="")
+    entry_b.data = {
+        CONF_PROVIDER: provider_key,
+        CONF_LATITUDE: 53.34549,
+        CONF_LONGITUDE: -6.24800,
+    }
+
+    _, id_a = await _run_setup_capturing_station_id(entry_a)
+    _, id_b = await _run_setup_capturing_station_id(entry_b)
+
+    assert id_a != id_b
