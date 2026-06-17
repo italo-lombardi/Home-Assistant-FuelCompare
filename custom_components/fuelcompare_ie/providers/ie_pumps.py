@@ -105,14 +105,10 @@ def _make_ssl_context() -> ssl.SSLContext:
 # Context created at import time (before the HA event loop starts) to avoid
 # blocking-call-in-event-loop warnings from ssl.create_default_context().
 _SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
-_LOGGER.warning(
-    "pumps.ie TLS certificate verification is disabled — the provider's "
-    "SSL certificate is currently invalid. This is a known issue. "
-    "Data is still encrypted in transit."
-)
+_SSL_WARNING_EMITTED: bool = False
 
 
-# pumps.ie has an expired TLS certificate — ssl=False is required.
+# pumps.ie has an expired TLS certificate — ssl=_SSL_UNVERIFIED is used (TLS without cert verification).
 # Use HTTPS anyway so the connection is encrypted (just not verified).
 _BASE_URL = "https://pumps.ie/api/getStationsByPriceAPI.php"
 
@@ -411,6 +407,14 @@ class IePumpsProvider(BaseProvider):
             "fuel": fuel,
             "noCache": str(random.randint(1, 999999)),
         }
+        global _SSL_WARNING_EMITTED
+        if not _SSL_WARNING_EMITTED:
+            _SSL_WARNING_EMITTED = True
+            _LOGGER.warning(
+                "pumps.ie TLS certificate verification is disabled — the provider's "
+                "SSL certificate is currently invalid. This is a known issue. "
+                "Data is still encrypted in transit."
+            )
         _LOGGER.debug("Fetching pumps.ie stations: fuel=%s", fuel)
         try:
             async with session.get(
@@ -439,10 +443,9 @@ class IePumpsProvider(BaseProvider):
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
 
-# NOTE: Only matches self-closing <station ... /> tags — the form pumps.ie
-# currently emits. Open/close tag pairs (e.g. <station ...></station>) are
-# not produced by the API and are intentionally not handled here.
-_STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)/>", re.DOTALL)
+# NOTE: Matches both self-closing <station ... /> tags and open/close
+# <station ...></station> pairs — handles current and future API emission forms.
+_STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)(?:/>|>.*?</station>)", re.DOTALL)
 _ATTR_RE = re.compile(r'(\w+)="([^"]*)"')
 
 
@@ -458,7 +461,7 @@ def _parse_xml(xml_text: str, fuel: str) -> list[dict]:
         fuel:     ``'diesel'`` or ``'petrol'`` — stored on each returned dict.
 
     Returns:
-        List of station dicts, or Empty list if no station tags found.
+        List of station dicts, or empty list when no <station/> tags found.
     """
     decoded = _html_unescape(xml_text)
     station_tags = _STATION_TAG_RE.findall(decoded)
@@ -514,7 +517,7 @@ def _parse_xml(xml_text: str, fuel: str) -> list[dict]:
         )
 
     _LOGGER.debug("pumps.ie parsed %d stations for fuel=%s", len(stations), fuel)
-    return stations if stations else []
+    return stations
 
 
 def _find_station(stations: list[dict], station_id: str) -> dict | None:

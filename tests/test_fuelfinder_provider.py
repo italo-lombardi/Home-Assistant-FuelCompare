@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientSession
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
@@ -1272,8 +1273,6 @@ def test_normalise_county_whitespace_returns_none() -> None:
 def test_base_get_station_page_url_template_exceeds_255_falls_back() -> None:
     """base.get_station_page_url falls back to STATION_PAGE_URL when template URL > 255 chars."""
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
-    from typing import ClassVar
-    from aiohttp import ClientSession
 
     class _LongURLProvider(BaseProvider):
         COUNTRY = "IE"
