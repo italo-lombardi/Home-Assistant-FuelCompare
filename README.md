@@ -23,44 +23,44 @@
 
 36 providers across 27 countries. Select a country in the config flow to see available providers.
 
-| Provider | Country | Key Fuel Types | Lookup |
-|----------|---------|----------------|--------|
-| Albania National Average (cargopedia.net) | Albania | Unleaded, Diesel, LPG | Location + picker |
-| e-control (Austria) | Austria | Unleaded, Diesel, CNG | Location + picker |
-| Fuel Prices QLD (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker |
-| FuelCheck NSW (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker |
-| FuelWatch (Australia WA) | Australia | Unleaded, Diesel, E10, LPG | Location + picker |
-| Servo Saver VIC (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker |
-| cijenegoriva.ba (Bosnia and Herzegovina) | Bosnia & Herzegovina | Diesel, LPG | Location + picker |
-| Carbu.com (Belgium) | Belgium | Unleaded, Diesel, LPG, CNG | Location + picker |
-| Régie de l'énergie (Canada — QC) | Canada | Unleaded, Diesel, Premium | Location + picker |
-| TCS Benzinpreis-Radar (Switzerland) | Switzerland | Unleaded, Diesel, Premium | Location + picker |
-| MF ČR Price Caps (Czech Republic) | Czech Republic | Unleaded, Diesel | Location + picker |
-| Tankerkoenig (Germany) | Germany | Unleaded, Diesel, E10 | Location + picker (API key required) |
-| FuelFinder (Denmark) | Denmark | Unleaded, Diesel, Premium | Location + picker |
-| EC Weekly Oil Bulletin (EU) | European Union | Unleaded, Diesel, LPG, Kerosene | Location + picker |
-| MINETUR (Spain) | Spain | Unleaded, Diesel, Premium, LPG | Location + picker |
-| Statistics Finland — National Average | Finland | Unleaded, Diesel, E10, Kerosene | Location + picker |
-| Prix Carburants (France) | France | Unleaded, Diesel, E10, E85, LPG | Location + picker |
-| Fuel Finder (UK) | United Kingdom | Unleaded, Diesel, Premium | Location + picker |
-| Greek Ministry of Energy | Greece | Unleaded, Diesel, Premium, LPG | Location + picker |
-| MINGOR (Croatia) | Croatia | Unleaded, Diesel, LPG | County picker → station |
-| FuelFinder.ie | Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station |
-| fuelcompare.ie | Ireland | Unleaded, Diesel | Numeric station ID |
-| pumps.ie | Ireland | Unleaded, Diesel, Petrol | Location + picker |
-| Gasvaktin (Iceland) | Iceland | Unleaded, Diesel, Premium | Location + picker |
-| MIMIT/MASE (Italy) | Italy | Unleaded, Diesel, LPG, CNG | Location + picker |
-| Saurida (Lithuania) | Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker |
-| carbu.com Luxembourg | Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker |
-| ANRE (Moldova) | Moldova | Unleaded, Diesel | Location + picker |
-| Min. of Energy (Montenegro) | Montenegro | Unleaded, Diesel, Kerosene | Location + picker |
-| Malta | Malta | Unleaded, Diesel, LPG, Kerosene | Location + picker |
-| Netherlands (ANWB) | Netherlands | Diesel, E10, LPG, Kerosene | Location + picker |
-| Drivstoffpriser (Norway) | Norway | Unleaded, Diesel, Premium | Location + picker |
-| ORLEN Wholesale (Poland) | Poland | Unleaded, Diesel, E85, LPG, Kerosene | Location + picker |
-| DGEG (Portugal) | Portugal | Unleaded, Diesel, LPG | Location + picker |
-| Bensinpriser.nu (Sweden) | Sweden | Unleaded, Diesel, E85 | Location + picker |
-| goriva.si (Slovenia) | Slovenia | Unleaded, Diesel, Premium, LPG | Location + picker |
+| Provider | Country | Key Fuel Types | Lookup | Tested |
+|----------|---------|----------------|--------|--------|
+| Albania National Average (cargopedia.net) | Albania | Unleaded, Diesel, LPG | Location + picker | ⬜ Untested |
+| e-control (Austria) | Austria | Unleaded, Diesel, CNG | Location + picker | ⬜ Untested |
+| Fuel Prices QLD (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | ⬜ Untested |
+| FuelCheck NSW (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | ⬜ Untested |
+| FuelWatch (Australia WA) | Australia | Unleaded, Diesel, E10, LPG | Location + picker | ⬜ Untested |
+| Servo Saver VIC (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | ⬜ Untested |
+| cijenegoriva.ba (Bosnia and Herzegovina) | Bosnia & Herzegovina | Diesel, LPG | Location + picker | ⬜ Untested |
+| Carbu.com (Belgium) | Belgium | Unleaded, Diesel, LPG, CNG | Location + picker | ⬜ Untested |
+| Régie de l'énergie (Canada — QC) | Canada | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
+| TCS Benzinpreis-Radar (Switzerland) | Switzerland | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
+| MF ČR Price Caps (Czech Republic) | Czech Republic | Unleaded, Diesel | Location + picker | ⬜ Untested |
+| Tankerkoenig (Germany) | Germany | Unleaded, Diesel, E10 | Location + picker (API key required) | ⬜ Untested |
+| FuelFinder (Denmark) | Denmark | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
+| EC Weekly Oil Bulletin (EU) | European Union | Unleaded, Diesel, LPG, Kerosene | Location + picker | ⬜ Untested |
+| MINETUR (Spain) | Spain | Unleaded, Diesel, Premium, LPG | Location + picker | ⬜ Untested |
+| Statistics Finland — National Average | Finland | Unleaded, Diesel, E10, Kerosene | Location + picker | ⬜ Untested |
+| Prix Carburants (France) | France | Unleaded, Diesel, E10, E85, LPG | Location + picker | ⬜ Untested |
+| Fuel Finder (UK) | United Kingdom | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
+| Greek Ministry of Energy | Greece | Unleaded, Diesel, Premium, LPG | Location + picker | ⬜ Untested |
+| MINGOR (Croatia) | Croatia | Unleaded, Diesel, LPG | County picker → station | ⬜ Untested |
+| FuelFinder.ie | Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station | ✅ Tested |
+| fuelcompare.ie | Ireland | Unleaded, Diesel | Numeric station ID | ✅ Tested |
+| pumps.ie | Ireland | Unleaded, Diesel, Petrol | Location + picker | ✅ Tested |
+| Gasvaktin (Iceland) | Iceland | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
+| MIMIT/MASE (Italy) | Italy | Unleaded, Diesel, LPG, CNG | Location + picker | ⬜ Untested |
+| Saurida (Lithuania) | Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker | ⬜ Untested |
+| carbu.com Luxembourg | Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker | ⬜ Untested |
+| ANRE (Moldova) | Moldova | Unleaded, Diesel | Location + picker | ⬜ Untested |
+| Min. of Energy (Montenegro) | Montenegro | Unleaded, Diesel, Kerosene | Location + picker | ⬜ Untested |
+| Malta | Malta | Unleaded, Diesel, LPG, Kerosene | Location + picker | ⬜ Untested |
+| Netherlands (ANWB) | Netherlands | Diesel, E10, LPG, Kerosene | Location + picker | ⬜ Untested |
+| Drivstoffpriser (Norway) | Norway | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
+| ORLEN Wholesale (Poland) | Poland | Unleaded, Diesel, E85, LPG, Kerosene | Location + picker | ⬜ Untested |
+| DGEG (Portugal) | Portugal | Unleaded, Diesel, LPG | Location + picker | ⬜ Untested |
+| Bensinpriser.nu (Sweden) | Sweden | Unleaded, Diesel, E85 | Location + picker | ⬜ Untested |
+| goriva.si (Slovenia) | Slovenia | Unleaded, Diesel, Premium, LPG | Location + picker | ⬜ Untested |
 
 ### Adding a station
 
