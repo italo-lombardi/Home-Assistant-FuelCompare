@@ -93,7 +93,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS certificate verification disabled",
-      "description": "The pumps.ie provider for **{entry_title}** has TLS certificate verification disabled because the site's certificate is currently invalid. Data is still encrypted in transit, but the server identity is not verified."
+      "description": "The pumps.ie provider for **{entry_title}** has TLS certificate verification disabled because the site's certificate is expired. Data is still encrypted in transit, but the server identity is not verified."
     }
   },
   "entity": {
