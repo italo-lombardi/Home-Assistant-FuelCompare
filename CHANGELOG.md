@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0-beta.2] - 2026-06-17
+
+> **Pre-release** — Ireland provider fixes and config flow UX improvements.
+
+### Fixed
+- **pumps.ie**: XML parser replaced with regex — handles malformed HTML entities (`&aacute;`) and double-quoted attributes that caused silent empty-station-list failures
+- **pumps.ie**: `async_fetch_station_name` now concurrent (`asyncio.gather`) instead of sequential
+- **pumps.ie**: SSL warning emitted lazily on first fetch (was at module import, spamming logs for all users)
+- **ie_fuelfinder**: removed `has_price` filter from picker — all stations now shown; priceless ones populate automatically once prices are submitted
+- Config flow: station picker sorted case-insensitively
+- Config flow: picker label used as suggested name fallback (was raw UUID)
+- Config flow: flow blocked when location-search returns empty list for station-id providers
+- Config flow: `no_stations_found_location` error message (was generic county message for coordinate searches)
+- URL length guard: `get_station_page_url()` falls back to homepage when URL exceeds 255-char HA state limit
+
+### Changed
+- README: alpha warning banner added; disclaimer extended to cover all providers; roadmap section removed
+- 35 translation files updated with `no_stations_found_location` key
+
 ## [0.7.0-beta.1] - 2026-06-17
 
 > **Pre-release** — packaged for HACS pre-release channel and GitHub pre-release tag (`v0.7.0-beta.1`). Promotes to `0.7.0` stable after a soak window with no blocker reports.
