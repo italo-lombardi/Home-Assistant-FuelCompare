@@ -855,7 +855,6 @@ async def test_parse_xlsx_logs_debug_for_unparseable_cell_value() -> None:
     assert data["diesel"] == pytest.approx(_PRICE_EDIESEL)
 
 
-@pytest.mark.asyncio
 def test_parse_prices_from_description_valid() -> None:
     """_parse_prices_from_description extracts all four prices from description text."""
     desc = (

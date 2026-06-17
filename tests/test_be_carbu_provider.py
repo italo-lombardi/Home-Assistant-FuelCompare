@@ -1210,8 +1210,17 @@ async def test_async_list_stations_gather_exception_returns_empty() -> None:
     provider._location_cache[_POSTAL_CODE] = (_TOWN, _LOCATION_ID)
     session = MagicMock()
 
+    async def _gather_raises(*coros, **_kwargs):
+        # Close the un-awaited input coroutines so pytest doesn't emit a
+        # "coroutine was never awaited" RuntimeWarning when the gather
+        # mock raises before scheduling them.
+        for c in coros:
+            if hasattr(c, "close"):
+                c.close()
+        raise RuntimeError("gather failed")
+
     mock_asyncio = MagicMock()
-    mock_asyncio.gather = AsyncMock(side_effect=RuntimeError("gather failed"))
+    mock_asyncio.gather = _gather_raises
     _be_carbu_mod.asyncio = mock_asyncio
     try:
         results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
