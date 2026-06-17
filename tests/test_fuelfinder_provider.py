@@ -1274,6 +1274,7 @@ def test_base_get_station_page_url_template_exceeds_255_falls_back() -> None:
     """base.get_station_page_url falls back to STATION_PAGE_URL when template URL > 255 chars."""
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
 
+    # STATION_LOOKUP_MODE defaults to "manual_id" in BaseProvider — no async_list_stations override needed.
     class _LongURLProvider(BaseProvider):
         COUNTRY = "IE"
         PROVIDER_KEY = "test_long_url"

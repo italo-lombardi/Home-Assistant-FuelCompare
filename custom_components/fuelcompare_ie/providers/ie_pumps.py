@@ -81,9 +81,8 @@ import asyncio
 import logging
 import random
 import re
-from html import unescape as _html_unescape
 import ssl
-
+from html import unescape as _html_unescape
 from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -105,10 +104,21 @@ def _make_ssl_context() -> ssl.SSLContext:
 # Context created at import time (before the HA event loop starts) to avoid
 # blocking-call-in-event-loop warnings from ssl.create_default_context().
 _SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
-_SSL_WARNING_EMITTED: bool = False
+_SSL_WARNING_EMITTED = False
 
 
-# pumps.ie has an expired TLS certificate — ssl=_SSL_UNVERIFIED is used (TLS without cert verification).
+def _warn_ssl_once() -> None:
+    global _SSL_WARNING_EMITTED
+    if _SSL_WARNING_EMITTED:
+        return
+    _SSL_WARNING_EMITTED = True
+    _LOGGER.warning(
+        "pumps.ie TLS certificate verification is disabled — the provider's "
+        "SSL certificate is currently invalid. This is a known issue. "
+        "Data is still encrypted in transit."
+    )
+
+
 # Use HTTPS anyway so the connection is encrypted (just not verified).
 _BASE_URL = "https://pumps.ie/api/getStationsByPriceAPI.php"
 
@@ -407,15 +417,7 @@ class IePumpsProvider(BaseProvider):
             "fuel": fuel,
             "noCache": str(random.randint(1, 999999)),
         }
-        global _SSL_WARNING_EMITTED
-        if not _SSL_WARNING_EMITTED:
-            _SSL_WARNING_EMITTED = True
-            _LOGGER.warning(
-                "pumps.ie TLS certificate verification is disabled — the provider's "
-                "SSL certificate is currently invalid. This is a known issue. "
-                "Data is still encrypted in transit."
-            )
-        _LOGGER.debug("Fetching pumps.ie stations: fuel=%s", fuel)
+        _warn_ssl_once()
         try:
             async with session.get(
                 _BASE_URL,
@@ -443,9 +445,9 @@ class IePumpsProvider(BaseProvider):
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
 
-# NOTE: Matches both self-closing <station ... /> tags and open/close
-# <station ...></station> pairs — handles current and future API emission forms.
-_STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)(?:/>|>.*?</station>)", re.DOTALL)
+# pumps.ie XML uses only self-closing <station ... /> tags. Open/close form
+# not emitted by current API; if it ever changes, update this regex.
+_STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)/>", re.DOTALL)
 _ATTR_RE = re.compile(r'(\w+)="([^"]*)"')
 
 
