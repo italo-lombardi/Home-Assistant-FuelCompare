@@ -611,7 +611,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                         (lbl for uid, lbl in self._station_list if uid == station_id),
                         None,
                     )
-                    fetched = _name_from_picker_label(picker_label) if picker_label else None
+                    fetched = (
+                        _name_from_picker_label(picker_label) if picker_label else None
+                    )
                 self._suggested_name = fetched or f"Station {station_id[:8]}"
                 return await self.async_step_name()
 
@@ -661,7 +663,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 return await self.async_step_name()
             is_location_mode = self._latitude is not None
             errors["base"] = (
-                "no_stations_found_location" if is_location_mode else "no_stations_found"
+                "no_stations_found_location"
+                if is_location_mode
+                else "no_stations_found"
             )
             schema_dict[vol.Required(CONF_STATION_ID)] = str
         else:
@@ -738,7 +742,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             provider_cls_loc = PROVIDER_REGISTRY.get(self._provider_key)
             _is_station_id_mode = (
                 provider_cls_loc is not None
-                and getattr(provider_cls_loc, "CONFIG_MODE", "station_id") == "station_id"
+                and getattr(provider_cls_loc, "CONFIG_MODE", "station_id")
+                == "station_id"
             )
             if not _is_station_id_mode:
                 self._suggested_name = (

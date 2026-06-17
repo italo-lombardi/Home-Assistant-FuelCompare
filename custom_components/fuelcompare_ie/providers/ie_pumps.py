@@ -93,6 +93,7 @@ from .base import BaseProvider, ProviderError, StationData, haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
+
 # pumps.ie has an expired TLS certificate — verification is disabled.
 # Use HTTPS anyway so the connection is encrypted (just not verified).
 # An explicit SSLContext is safer than ssl=False as it still uses TLS.
@@ -108,7 +109,6 @@ def _make_ssl_context() -> ssl.SSLContext:
 # Context created at import time (before the HA event loop starts) to avoid
 # blocking-call-in-event-loop warnings from ssl.create_default_context().
 _SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
-
 
 
 # pumps.ie has an expired TLS certificate — ssl=False is required.
