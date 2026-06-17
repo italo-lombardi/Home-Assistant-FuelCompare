@@ -386,7 +386,9 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._station_page_url: str = (
             ""  # URL for selected station (shown on name step)
         )
-        self._picker_pending_id: str = ""  # station selected on first submit, awaiting URL confirm
+        self._picker_pending_id: str = (
+            ""  # station selected on first submit, awaiting URL confirm
+        )
         self._show_on_map: bool = False
         self._latitude: float | None = None
         self._longitude: float | None = None

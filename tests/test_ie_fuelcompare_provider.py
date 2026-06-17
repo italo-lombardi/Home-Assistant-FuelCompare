@@ -87,7 +87,10 @@ def test_parse_station_strips_euro_symbol() -> None:
 def test_parse_station_maps_name_and_tablename() -> None:
     """_parse_station copies name, tablename, county, working_hours, about fields."""
     provider = _make_provider()
-    about = {"accessibility": {"Wheelchair-accessible car park": True}, "amenities": {"Toilets": True}}
+    about = {
+        "accessibility": {"Wheelchair-accessible car park": True},
+        "amenities": {"Toilets": True},
+    }
     station = {
         "name": "My Station",
         "tablename": "circle_k",

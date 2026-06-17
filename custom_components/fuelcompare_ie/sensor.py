@@ -159,7 +159,9 @@ async def async_setup_entry(
     entities.append(LastSuccessfulFetchSensor(coordinator, station_id, station_name))
 
     # Always-on identity sensors
-    entities.append(StationIdSensor(coordinator.provider_label, station_id, station_name))
+    entities.append(
+        StationIdSensor(coordinator.provider_label, station_id, station_name)
+    )
     entities.append(
         ProviderLabelSensor(coordinator.provider_label, station_id, station_name)
     )

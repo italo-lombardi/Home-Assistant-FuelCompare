@@ -1918,6 +1918,44 @@ async def test_async_step_station_picker_empty_id_shows_error(
 
 
 # ---------------------------------------------------------------------------
+# test_async_step_station_picker_show_on_map_sets_flag  (config_flow.py line 599)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_step_station_picker_show_on_map_sets_flag(
+    hass: HomeAssistant,
+) -> None:
+    """station_picker submit with show_on_map=True sets flow._show_on_map (line 599)."""
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = DEFAULT_PROVIDER
+    flow._station_list = [("abc", "Station ABC")]
+    flow._station_url_map = {"abc": "https://example.com/abc"}
+    # Mutable context dict so async_set_unique_id can write
+    flow.context = {"unique_id": f"{DOMAIN}_{DEFAULT_PROVIDER}_abc"}
+
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
+            new=AsyncMock(return_value="Station ABC"),
+        ),
+    ):
+        result = await flow.async_step_station_picker(
+            user_input={CONF_STATION_ID: "abc", CONF_SHOW_ON_MAP: True}
+        )
+
+    assert flow._show_on_map is True
+    assert flow._station_id == "abc"
+    assert result["step_id"] == "name"
+
+
+# ---------------------------------------------------------------------------
 # test_async_step_station_picker_exception_in_list_load  (config_flow.py lines 601-602)
 # ---------------------------------------------------------------------------
 
