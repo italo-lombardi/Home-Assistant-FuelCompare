@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json as _json
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -236,7 +237,7 @@ async def test_async_update_data_missing_station(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Station data not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
 
 
@@ -795,7 +796,7 @@ async def test_encrypted_api_both_paths_fail_raises(hass: HomeAssistant) -> None
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Station data not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
 
 
@@ -825,7 +826,7 @@ async def test_encrypted_api_decrypt_key_unavailable_skips_api(
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Station data not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
 
 
@@ -899,7 +900,7 @@ async def test_encrypted_api_empty_data_field(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Station data not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
 
 
@@ -926,7 +927,7 @@ async def test_encrypted_api_empty_stations_list(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Station data not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
 
 
@@ -1031,7 +1032,7 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Station data not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
 
 
@@ -1564,7 +1565,13 @@ async def test_ie_fuelcompare_fetch_station_name_returns_none_when_no_data() -> 
 
 
 async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
-    """ProviderError raised by the provider results in UpdateFailed from the coordinator."""
+    """ProviderError raised by the provider results in UpdateFailed from the coordinator.
+
+    The UpdateFailed message intentionally carries only the exception class
+    name — the original error text is logged at WARNING level so operators
+    can still see it, but it is not surfaced to HA's repairs UI where it
+    could leak provider-supplied content (URLs, payload snippets, etc.).
+    """
     from custom_components.fuelcompare_ie.providers.base import ProviderError
 
     provider = MagicMock()
@@ -1578,8 +1585,39 @@ async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=MagicMock(),
     ):
-        with pytest.raises(UpdateFailed, match="station not found"):
+        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
             await coordinator._async_update_data()
+
+
+async def test_provider_error_message_does_not_leak_original_text(
+    hass: HomeAssistant, caplog: pytest.LogCaptureFixture
+) -> None:
+    """ProviderError text containing sensitive data must not appear in UpdateFailed."""
+    from custom_components.fuelcompare_ie.providers.base import ProviderError
+
+    secret_fragment = "api_key=SECRET_TOKEN_DO_NOT_LEAK"
+    provider = MagicMock()
+    provider.PROVIDER_KEY = "test_provider"
+    provider.POLL_INTERVAL_SECONDS = 300
+    provider.async_fetch = AsyncMock(
+        side_effect=ProviderError(f"upstream rejected request: {secret_fragment}")
+    )
+
+    coordinator = FuelCompareIECoordinator(hass, provider, "12345")
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=MagicMock(),
+    ):
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(UpdateFailed) as exc_info:
+                await coordinator._async_update_data()
+
+    # Public UpdateFailed message must NOT contain the leaked fragment.
+    assert secret_fragment not in str(exc_info.value)
+    assert str(exc_info.value) == "Provider error: ProviderError"
+    # The original error text must still be logged so operators can debug.
+    assert secret_fragment in caplog.text
 
 
 async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:

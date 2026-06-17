@@ -52,11 +52,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # substitute from the rounded lat/lng stored in entry.data so the device
     # registry entry is stable across restarts.  Include provider_key to
     # prevent ID collisions when two providers share the same coordinates.
+    #
+    # Existing entries created before this code path was introduced wrote
+    # ``.4f``-rounded IDs (≈11 m).  Two stations within that radius using the
+    # same provider would collide, disabling the second entry's entities.
+    # Widen precision to ``.5f`` (≈1.1 m) for entries that have NOT yet
+    # persisted CONF_STATION_ID, then write the computed value back into
+    # entry.data so subsequent restarts see the same ID.  Existing entries
+    # already carrying a ``.4f`` id keep that id byte-for-byte (the
+    # ``CONF_STATION_ID not in entry.data`` guard).
     if not station_id:
         _lat = entry.data.get(CONF_LATITUDE)
         _lng = entry.data.get(CONF_LONGITUDE)
         if _lat is not None and _lng is not None:
-            station_id = f"{provider_key}_{_lat:.4f}_{_lng:.4f}"
+            precision = 4 if CONF_STATION_ID in entry.data else 5
+            station_id = f"{provider_key}_{_lat:.{precision}f}_{_lng:.{precision}f}"
+            if entry.data.get(CONF_STATION_ID) != station_id:
+                hass.config_entries.async_update_entry(
+                    entry,
+                    data={**entry.data, CONF_STATION_ID: station_id},
+                )
     if not station_id:
         station_id = entry.entry_id
 

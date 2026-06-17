@@ -260,8 +260,13 @@ class BaseProvider(ABC):
     pattern as data_fetch_problem). Listing it would cause a duplicate
     entity with the same unique_id.
 
-    Keys 'source_station_id' and 'tablename' are also injected automatically
-    by the coordinator as entity attributes and should not be listed here.
+    Keys 'source_station_id' and 'tablename' must NOT be listed here either.
+    A provider may still populate them in the dict it returns from
+    async_fetch — the sensor platform reads them directly from coordinator
+    data (source_station_id surfaces as a device attribute on the diagnostic
+    Station ID sensor; tablename acts as a fallback brand label when 'brand'
+    is absent). Because they bypass the CAPABILITIES gating mechanism a
+    declaration here is rejected by __init_subclass__ (see FORBIDDEN_CAPS).
     """
 
     STATION_ID_HINT: ClassVar[str] = "Enter the station ID from the station URL."

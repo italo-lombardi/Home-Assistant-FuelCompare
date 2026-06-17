@@ -86,8 +86,14 @@ class FuelCompareIECoordinator(DataUpdateCoordinator[StationData]):
                 f"Error communicating with API: {type(err).__name__}"
             ) from err
         except ProviderError as err:
+            # Full error text goes to the warning log via %s.  The UpdateFailed
+            # message that HA surfaces in repairs / diagnostics intentionally
+            # only carries the exception class name — provider error strings
+            # may contain API URLs, payload snippets, or (rarely) authentication
+            # tokens forwarded from upstream HTTP libraries.  Keeping the public
+            # message type-only matches the sibling ClientError branch above.
             _LOGGER.warning("Provider error for station %s: %s", self.station_id, err)
-            raise UpdateFailed(str(err)) from err
+            raise UpdateFailed(f"Provider error: {type(err).__name__}") from err
         except UpdateFailed:
             raise
         except Exception as err:
