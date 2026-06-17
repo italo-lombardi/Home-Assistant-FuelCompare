@@ -1,5 +1,7 @@
 # Fuel Compare for Home Assistant
 
+> ⚠️ **Pre-release: `0.7.0-beta.1`** — install via HACS with **Show beta versions** enabled, or grab the GitHub pre-release tag `v0.7.0-beta.1`. Stable `0.7.0` follows after a soak window.
+
 Live fuel prices from 36 providers across 27 countries — Ireland, UK, Germany, France, Australia, and more — straight into your Home Assistant dashboard. Covers unleaded, diesel, E10, LPG, and premium grades where available. No YAML required.
 
 ![Sensors](assets/sensors.png)
