@@ -65,7 +65,8 @@
       "invalid_station_id": "Az állomás azonosítója nem lehet üres.",
       "invalid_api_key": "Az API kulcs nem lehet üres.",
       "invalid_location": "Érvénytelen koordináták. Adjon meg érvényes szélességi és hosszúsági fokot.",
-      "no_stations_found": "Nem találhatók állomások ebben a megyében. Próbáljon másik megyét."
+      "no_stations_found": "Nem találhatók állomások ebben a megyében. Próbáljon másik megyét.",
+      "no_stations_found_location": "Nem találhatók állomások ezen koordináták közelében. Módosítsa a helyszínt, vagy növelje a keresési sugarat."
     },
     "abort": {
       "already_configured": "Ez az állomás már konfigurálva van.",

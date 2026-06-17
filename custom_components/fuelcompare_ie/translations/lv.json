@@ -65,7 +65,8 @@
       "invalid_station_id": "Stacijas ID nedrīkst būt tukšs.",
       "invalid_api_key": "API atslēga nedrīkst būt tukša.",
       "invalid_location": "Nederīgas koordinātes. Ievadiet derīgas platuma un garuma vērtības.",
-      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu."
+      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu.",
+      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Mēģiniet pielāgot atrašanās vietu vai palielināt meklēšanas rādiusu."
     },
     "abort": {
       "already_configured": "Šī stacija jau ir konfigurēta.",

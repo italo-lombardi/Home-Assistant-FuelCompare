@@ -65,7 +65,8 @@
       "invalid_station_id": "Station-ID mag niet leeg zijn.",
       "invalid_api_key": "API-sleutel mag niet leeg zijn.",
       "invalid_location": "Ongeldige coördinaten. Voer geldige breedte- en lengtegraadwaarden in.",
-      "no_stations_found": "Geen stations gevonden voor deze provincie. Probeer een andere provincie."
+      "no_stations_found": "Geen stations gevonden voor deze provincie. Probeer een andere provincie.",
+      "no_stations_found_location": "Geen stations gevonden in de buurt van deze coördinaten. Pas de locatie aan of vergroot de zoekradius."
     },
     "abort": {
       "already_configured": "Dit station is al geconfigureerd.",

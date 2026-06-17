@@ -65,6 +65,7 @@
       "invalid_station_id": "Ni all ID yr orsaf fod yn wag.",
       "invalid_location": "Cyfesurynnau annilys. Rhowch werthoedd lledred a hydred dilys.",
       "no_stations_found": "Ni chanfuwyd gorsafoedd ar gyfer y sir hon. Rhowch gynnig ar sir wahanol.",
+      "no_stations_found_location": "Ni chanfuwyd gorsafoedd yn agos at y cyfesurynnau hyn. Rhowch gynnig ar addasu'r lleoliad neu gynyddu'r radiws chwilio.",
       "invalid_api_key": "Ni all yr allwedd API fod yn wag."
     },
     "abort": {

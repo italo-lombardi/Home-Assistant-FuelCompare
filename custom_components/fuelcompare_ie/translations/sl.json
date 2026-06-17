@@ -65,7 +65,8 @@
       "invalid_station_id": "ID postaje ne sme biti prazno.",
       "invalid_api_key": "API-ključ ne sme biti prazen.",
       "invalid_location": "Neveljavne koordinate. Vnesite veljavne vrednosti zemljepisne širine in dolžine.",
-      "no_stations_found": "Za to okrožje ni bilo najdenih postaj. Poskusite z drugim okrožjem."
+      "no_stations_found": "Za to okrožje ni bilo najdenih postaj. Poskusite z drugim okrožjem.",
+      "no_stations_found_location": "V bližini teh koordinat ni bilo najdenih postaj. Poskusite prilagoditi lokacijo ali povečati polmer iskanja."
     },
     "abort": {
       "already_configured": "Ta postaja je že nastavljena.",

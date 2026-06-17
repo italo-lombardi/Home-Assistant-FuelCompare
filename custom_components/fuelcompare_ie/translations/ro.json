@@ -65,7 +65,8 @@
       "invalid_station_id": "ID-ul stației nu poate fi gol.",
       "invalid_api_key": "Cheia API nu poate fi goală.",
       "invalid_location": "Coordonate invalide. Introduceți valori valide pentru latitudine și longitudine.",
-      "no_stations_found": "Nu s-au găsit stații pentru acest județ. Încercați un alt județ."
+      "no_stations_found": "Nu s-au găsit stații pentru acest județ. Încercați un alt județ.",
+      "no_stations_found_location": "Nu s-au găsit stații în apropierea acestor coordonate. Încercați să ajustați locația sau să măriți raza de căutare."
     },
     "abort": {
       "already_configured": "Această stație este deja configurată.",

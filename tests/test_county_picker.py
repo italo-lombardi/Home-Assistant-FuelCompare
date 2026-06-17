@@ -339,7 +339,7 @@ def _make_ff_response(data: dict) -> AsyncMock:
 async def test_ff_async_list_stations_returns_sorted_cheapest_first() -> None:
     s1 = _ff_station("uuid-1", "Shell Dun Laoghaire", 1.90)
     s2 = _ff_station("uuid-2", "Circle K Swords", 1.83)
-    s3 = _ff_station("uuid-3", "BP Tallaght", None)  # no price — excluded
+    s3 = _ff_station("uuid-3", "BP Tallaght", None)  # no price — still included
 
     diesel_resp = _make_ff_response(_ff_stations_response([s1, s2, s3], "diesel"))
     petrol_resp = _make_ff_response(_ff_stations_response([], "petrol"))
@@ -351,12 +351,14 @@ async def test_ff_async_list_stations_returns_sorted_cheapest_first() -> None:
     provider = IEFuelFinderProvider("")
     stations = await provider.async_list_stations(session, county="dublin")
 
-    # BP Tallaght excluded (no price); remaining sorted alphabetically: Circle K < Shell
+    # All stations included regardless of price; sorted alphabetically
+    # case-insensitive: BP < Circle K < Shell.
     uids = [uid for uid, _ in stations]
-    assert "uuid-3" not in uids
+    assert "uuid-3" in uids
     labels = [label for _, label in stations]
-    assert labels[0].startswith("Circle K")
-    assert labels[1].startswith("Shell")
+    assert labels[0].startswith("BP")
+    assert labels[1].startswith("Circle K")
+    assert labels[2].startswith("Shell")
 
 
 async def test_ff_async_list_stations_empty_on_network_error() -> None:

@@ -469,8 +469,15 @@ class BaseProvider(ABC):
         - Else if STATION_PAGE_URL is set, returns the homepage URL.
         - Else returns None.
 
+        URLs longer than 255 characters (HA state value limit) fall back to
+        the provider homepage (STATION_PAGE_URL).
+
         Override in providers that need dynamic URL construction (e.g. slug cache).
         """
+        _MAX_URL_LEN = 255
         if self.STATION_PAGE_URL_TEMPLATE:
-            return self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
+            url = self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
+            if len(url) <= _MAX_URL_LEN:
+                return url
+            return self.STATION_PAGE_URL or None
         return self.STATION_PAGE_URL or None

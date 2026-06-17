@@ -372,19 +372,21 @@ class IEFuelFinderProvider(BaseProvider):
             return []
 
         # Merge per-fuel results into one dict keyed by UUID.
-        # Only include stations that have at least one price available.
+        # Include all stations regardless of price availability — stations
+        # without current community-submitted prices will populate
+        # automatically once a price is reported.
         merged: dict[str, dict] = {}
 
         if isinstance(diesel_resp, list):
             for s in diesel_resp:
                 uid = s.get("id")
-                if uid and s.get("has_price"):
+                if uid:
                     merged[uid] = s
 
         if isinstance(petrol_resp, list):
             for s in petrol_resp:
                 uid = s.get("id")
-                if uid and s.get("has_price") and uid not in merged:
+                if uid and uid not in merged:
                     merged[uid] = s
 
         if not merged:
@@ -431,7 +433,10 @@ class IEFuelFinderProvider(BaseProvider):
                 slug,
             )
             return self.STATION_PAGE_URL or None
-        return f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
+        url = f"https://www.fuelfinder.ie/fuelfinder/station/{slug}"
+        if len(url) > 255:
+            return self.STATION_PAGE_URL or None
+        return url
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

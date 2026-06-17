@@ -65,7 +65,8 @@
       "invalid_station_id": "ID stacji nie może być puste.",
       "invalid_api_key": "Klucz API nie może być pusty.",
       "invalid_location": "Nieprawidłowe współrzędne. Wprowadź prawidłowe wartości szerokości i długości geograficznej.",
-      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa."
+      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa.",
+      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Spróbuj zmienić lokalizację lub zwiększyć promień wyszukiwania."
     },
     "abort": {
       "already_configured": "Ta stacja jest już skonfigurowana.",

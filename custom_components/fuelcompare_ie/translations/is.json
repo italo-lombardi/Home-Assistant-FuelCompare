@@ -65,6 +65,7 @@
       "invalid_station_id": "Stöðvarauðkenni má ekki vera tómt.",
       "invalid_location": "Ógildar hnit. Sláðu inn gildar breiddargráður og lengdargráður.",
       "no_stations_found": "Engar stöðvar fundust í þessari sýslu. Prófaðu aðra sýslu.",
+      "no_stations_found_location": "Engar stöðvar fundust nálægt þessum hnitum. Prófaðu að breyta staðsetningu eða stækka leitarradíusinn.",
       "invalid_api_key": "API-lykill má ekki vera tómur."
     },
     "abort": {

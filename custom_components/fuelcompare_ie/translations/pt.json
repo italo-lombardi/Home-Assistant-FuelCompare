@@ -65,7 +65,8 @@
       "invalid_station_id": "O ID da estação não pode estar vazio.",
       "invalid_api_key": "A chave de API não pode estar vazia.",
       "invalid_location": "Coordenadas inválidas. Introduza valores válidos de latitude e longitude.",
-      "no_stations_found": "Nenhuma estação encontrada para este condado. Tente um condado diferente."
+      "no_stations_found": "Nenhuma estação encontrada para este condado. Tente um condado diferente.",
+      "no_stations_found_location": "Nenhuma estação encontrada perto destas coordenadas. Tente ajustar a localização ou aumentar o raio de pesquisa."
     },
     "abort": {
       "already_configured": "Esta estação já está configurada.",

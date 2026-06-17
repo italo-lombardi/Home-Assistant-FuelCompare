@@ -65,7 +65,8 @@
       "invalid_station_id": "Stoties ID negali būti tuščias.",
       "invalid_api_key": "API raktas negali būti tuščias.",
       "invalid_location": "Neteisingos koordinatės. Įveskite galiojančias platumos ir ilgumos reikšmes.",
-      "no_stations_found": "Šioje apskrityje stočių nerasta. Bandykite kitą apskritį."
+      "no_stations_found": "Šioje apskrityje stočių nerasta. Bandykite kitą apskritį.",
+      "no_stations_found_location": "Prie šių koordinačių stočių nerasta. Pabandykite pakeisti vietą arba padidinti paieškos spindulį."
     },
     "abort": {
       "already_configured": "Ši stotis jau sukonfigūruota.",

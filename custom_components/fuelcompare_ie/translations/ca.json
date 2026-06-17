@@ -65,6 +65,7 @@
       "invalid_station_id": "L'ID de l'estació no pot estar buit.",
       "invalid_location": "Coordenades no vàlides. Introduïu valors de latitud i longitud vàlids.",
       "no_stations_found": "No s'han trobat estacions per a aquest comtat. Proveu amb un comtat diferent.",
+      "no_stations_found_location": "No s'han trobat estacions properes a aquestes coordenades. Proveu d'ajustar la ubicació o d'augmentar el radi de cerca.",
       "invalid_api_key": "La clau d'API no pot estar buida."
     },
     "abort": {

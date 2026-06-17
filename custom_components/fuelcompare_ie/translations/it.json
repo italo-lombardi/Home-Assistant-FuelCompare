@@ -65,7 +65,8 @@
       "invalid_station_id": "L'ID della stazione non può essere vuoto.",
       "invalid_api_key": "La chiave API non può essere vuota.",
       "invalid_location": "Coordinate non valide. Inserisci valori validi di latitudine e longitudine.",
-      "no_stations_found": "Nessuna stazione trovata per questa contea. Prova una contea diversa."
+      "no_stations_found": "Nessuna stazione trovata per questa contea. Prova una contea diversa.",
+      "no_stations_found_location": "Nessuna stazione trovata nelle vicinanze di queste coordinate. Prova a modificare la posizione o ad aumentare il raggio di ricerca."
     },
     "abort": {
       "already_configured": "Questa stazione è già configurata.",

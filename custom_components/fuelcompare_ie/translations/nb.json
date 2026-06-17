@@ -65,7 +65,8 @@
       "invalid_station_id": "Stasjons-ID kan ikke være tom.",
       "invalid_api_key": "API-nøkkelen kan ikke være tom.",
       "invalid_location": "Ugyldige koordinater. Skriv inn gyldige verdier for breddegrad og lengdegrad.",
-      "no_stations_found": "Ingen stasjoner funnet for dette fylket. Prøv et annet fylke."
+      "no_stations_found": "Ingen stasjoner funnet for dette fylket. Prøv et annet fylke.",
+      "no_stations_found_location": "Ingen stasjoner funnet i nærheten av disse koordinatene. Prøv å justere plasseringen eller øke søkeradius."
     },
     "abort": {
       "already_configured": "Denne stasjonen er allerede konfigurert.",

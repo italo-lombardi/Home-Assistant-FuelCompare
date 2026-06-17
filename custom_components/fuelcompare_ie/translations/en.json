@@ -65,6 +65,7 @@
       "invalid_station_id": "Station ID cannot be empty.",
       "invalid_location": "Invalid coordinates. Enter valid latitude and longitude values.",
       "no_stations_found": "No stations found for this county. Try a different county.",
+      "no_stations_found_location": "No stations found near these coordinates. Try adjusting the location or increasing the search radius.",
       "invalid_api_key": "API key cannot be empty."
     },
     "abort": {

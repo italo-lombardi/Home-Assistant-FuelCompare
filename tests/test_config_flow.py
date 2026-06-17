@@ -2005,7 +2005,7 @@ async def test_async_step_station_picker_exception_in_list_load(
 
         assert result["type"] == "form"
         assert result["step_id"] == "station_picker"
-        assert result["errors"].get("base") == "no_stations_found"
+        assert result["errors"].get("base") == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("ie_broken_list_601", None)
 

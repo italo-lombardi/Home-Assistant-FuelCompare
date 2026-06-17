@@ -9,6 +9,8 @@
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
 [![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
 
+> ⚠️ **Alpha software — testers welcome.** This integration is still in an alpha stage. While it ships providers for many countries, only a handful of them have been exercised on real Home Assistant installs. Other providers compile and pass unit tests but have not been validated end-to-end against live data. Please feel free to install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea — feedback is what drives this project forward.
+
 > **Disclaimer:** This is an independent, unofficial custom integration for Home Assistant. It is not affiliated with, endorsed by, or in any way connected to FuelCompare.ie or its owners. The FuelCompare.ie name and website are the property of their respective owners. This project simply reads publicly available data from their website for personal use.
 
 ---

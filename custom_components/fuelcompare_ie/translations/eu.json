@@ -65,6 +65,7 @@
       "invalid_station_id": "Gasolindegiaren IDa ezin da hutsik egon.",
       "invalid_location": "Koordinatu baliogabeak. Sartu latitudea eta longitudea balio baliozkoak.",
       "no_stations_found": "Ez da gasolindegirik aurkitu konderri honetan. Saiatu beste konderri batekin.",
+      "no_stations_found_location": "Ez da gasolindegirik aurkitu koordenatu hauen inguruan. Saiatu kokapena doitzen edo bilaketa-erradioa handitzen.",
       "invalid_api_key": "API gakoa ezin da hutsik egon."
     },
     "abort": {

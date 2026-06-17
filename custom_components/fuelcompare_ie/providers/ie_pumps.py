@@ -80,8 +80,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+import re
+from html import unescape as _html_unescape
 import ssl
-import xml.etree.ElementTree as ET
+
 from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
@@ -95,24 +97,18 @@ _LOGGER = logging.getLogger(__name__)
 # Use HTTPS anyway so the connection is encrypted (just not verified).
 # An explicit SSLContext is safer than ssl=False as it still uses TLS.
 # SSLContext creation deferred to __init__ to avoid module-level warnings.
-_SSL_UNVERIFIED: ssl.SSLContext | None = None
+def _make_ssl_context() -> ssl.SSLContext:
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
 
 
-def _get_ssl_context() -> ssl.SSLContext:
-    global _SSL_UNVERIFIED
-    if _SSL_UNVERIFIED is None:
-        # pumps.ie has an expired TLS certificate; cert renewal is pending.
-        # CERT_NONE disables certificate verification so requests succeed.
-        # check_hostname must also be False when verify_mode is CERT_NONE.
-        _SSL_UNVERIFIED = ssl.create_default_context()
-        _SSL_UNVERIFIED.check_hostname = False
-        _SSL_UNVERIFIED.verify_mode = ssl.CERT_NONE
-        _LOGGER.warning(
-            "pumps.ie TLS certificate verification is disabled — the provider's "
-            "SSL certificate is currently invalid. This is a known issue. "
-            "Data is still encrypted in transit."
-        )
-    return _SSL_UNVERIFIED
+# pumps.ie has an expired TLS certificate; cert renewal is pending.
+# Context created at import time (before the HA event loop starts) to avoid
+# blocking-call-in-event-loop warnings from ssl.create_default_context().
+_SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
+
 
 
 # pumps.ie has an expired TLS certificate — ssl=False is required.
@@ -421,7 +417,7 @@ class IePumpsProvider(BaseProvider):
                 params=params,
                 headers=_HEADERS,
                 timeout=_TIMEOUT,
-                ssl=_get_ssl_context(),
+                ssl=_SSL_UNVERIFIED,
             ) as response:
                 response.raise_for_status()
                 xml_text: str = await response.text(encoding="utf-8", errors="replace")
@@ -442,46 +438,47 @@ class IePumpsProvider(BaseProvider):
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
 
+_STATION_TAG_RE = re.compile(r"<station\s+([^>]+?)/>", re.DOTALL)
+_ATTR_RE = re.compile(r'(\w+)="([^"]*)"')
+
+
 def _parse_xml(xml_text: str, fuel: str) -> list[dict] | None:
     """Parse the pumps.ie XML response and return a list of station dicts.
 
-    Each station is returned as a plain dict with normalised keys.  Prices
-    are converted from cents-per-litre to EUR/litre.
+    Uses regex extraction rather than an XML parser because pumps.ie returns
+    malformed XML (HTML entities like &aacute;, double-quoted attributes like
+    Updater="foo"") that breaks standard parsers.
 
     Args:
         xml_text: Raw XML string from the API response.
         fuel:     ``'diesel'`` or ``'petrol'`` — stored on each returned dict.
 
     Returns:
-        List of station dicts, or None if the XML cannot be parsed.
+        List of station dicts, or None if no station tags found.
     """
-    try:
-        root = ET.fromstring(xml_text)
-    except ET.ParseError as err:
-        _LOGGER.debug("pumps.ie XML parse error: %s", err)
-        return None
+    decoded = _html_unescape(xml_text)
+    station_tags = _STATION_TAG_RE.findall(decoded)
+    if not station_tags:
+        _LOGGER.debug("pumps.ie XML: no <station .../> tags found in response")
+        return []
 
     stations: list[dict] = []
 
-    # The root element varies by API version; iterate all <station> descendants.
-    for elem in root.iter("station"):
-        attrib = elem.attrib
+    for tag_attrs in station_tags:
+        attrib = dict(_ATTR_RE.findall(tag_attrs))
 
         station_id = attrib.get("ID") or attrib.get("id") or None
         if not station_id:
             continue
 
-        # Coordinates
         lat = _parse_float(attrib.get("Lat") or attrib.get("lat"))
         lng = _parse_float(attrib.get("Lng") or attrib.get("lng"))
 
-        # Price: cents-per-litre → EUR/litre
         price_raw = _parse_float(attrib.get("price"))
         price_eur: float | None = None
         if price_raw is not None and price_raw > 0:
             price_eur = round(price_raw / 100.0, 4)
 
-        # Address: combine addr1 + addr2 with comma separator when both present.
         addr1 = (attrib.get("addr1") or "").strip()
         addr2 = (attrib.get("addr2") or "").strip()
         if addr1 and addr2:
@@ -513,7 +510,7 @@ def _parse_xml(xml_text: str, fuel: str) -> list[dict] | None:
         )
 
     _LOGGER.debug("pumps.ie parsed %d stations for fuel=%s", len(stations), fuel)
-    return stations
+    return stations if stations else []
 
 
 def _find_station(stations: list[dict], station_id: str) -> dict | None:

@@ -65,6 +65,7 @@
       "invalid_station_id": "Statiounskennung dierf net eidel sinn.",
       "invalid_location": "Ongülteg Koordinaten. Gitt gülteg Breed- a Längegrader an.",
       "no_stations_found": "Keng Statiounen fir dëse Kanton fonnt. Probéiert en anere Kanton.",
+      "no_stations_found_location": "Keng Statiounen an der Géigend vun dëse Koordinate fonnt. Probéiert de Standuert unzepassen oder de Sichradius ze vergréisseren.",
       "invalid_api_key": "API-Schlëssel dierf net eidel sinn."
     },
     "abort": {

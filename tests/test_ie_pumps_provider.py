@@ -247,9 +247,9 @@ def test_parse_xml_empty_xml_returns_empty_list() -> None:
 
 
 def test_parse_xml_malformed_xml_returns_none() -> None:
-    """_parse_xml returns None when the XML cannot be parsed."""
+    """_parse_xml returns [] when no station tags found (regex-based parser is fault-tolerant)."""
     result = _parse_xml(_MALFORMED_XML, "diesel")
-    assert result is None
+    assert result == []
 
 
 def test_parse_xml_station_id_stored_as_string() -> None:

@@ -65,6 +65,7 @@
       "invalid_station_id": "ID stanice ne može biti prazan.",
       "invalid_location": "Nevaljane koordinate. Unesite valjane vrijednosti geografske širine i dužine.",
       "no_stations_found": "Nisu pronađene stanice za ovu županiju. Pokušajte s drugom županijom.",
+      "no_stations_found_location": "Nisu pronađene stanice u blizini ovih koordinata. Pokušajte prilagoditi lokaciju ili povećati polumjer pretrage.",
       "invalid_api_key": "API ključ ne može biti prazan."
     },
     "abort": {
