@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Preverjanje TLS certifikata pumps.ie onemogočeno",
-      "description": "Ponudnik pumps.ie za **{entry_title}** ima onemogočeno preverjanje TLS certifikata, ker je certifikat spletnega mesta trenutno neveljaven. Podatki so med prenosom še vedno šifrirani, vendar identiteta strežnika ni preverjena."
+      "description": "Ponudnik pumps.ie za **{entry_title}** ima onemogočeno preverjanje TLS certifikata, ker je certifikat spletnega mesta potekel. Podatki so med prenosom še vedno šifrirani, vendar identiteta strežnika ni preverjena."
     }
   },
   "entity": {

@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Overenie TLS certifikátu pumps.ie je vypnuté",
-      "description": "Poskytovateľ pumps.ie pre **{entry_title}** má vypnuté overenie TLS certifikátu, pretože certifikát stránky je momentálne neplatný. Dáta sú počas prenosu stále šifrované, ale identita servera nie je overená."
+      "description": "Poskytovateľ pumps.ie pre **{entry_title}** má vypnuté overenie TLS certifikátu, pretože platnosť certifikátu stránky vypršala. Dáta sú počas prenosu stále šifrované, ale identita servera nie je overená."
     }
   },
   "entity": {

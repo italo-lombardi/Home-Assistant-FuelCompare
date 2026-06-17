@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS tanúsítvány-ellenőrzés letiltva",
-      "description": "A **{entry_title}** pumps.ie szolgáltatójánál a TLS tanúsítvány-ellenőrzés le van tiltva, mert a webhely tanúsítványa jelenleg érvénytelen. Az adatok továbbra is titkosítva kerülnek átvitelre, azonban a szerver személyazonossága nincs ellenőrizve."
+      "description": "A **{entry_title}** pumps.ie szolgáltatójánál a TLS tanúsítvány-ellenőrzés le van tiltva, mert a webhely tanúsítványa lejárt. Az adatok továbbra is titkosítva kerülnek átvitelre, azonban a szerver személyazonossága nincs ellenőrizve."
     }
   },
   "entity": {

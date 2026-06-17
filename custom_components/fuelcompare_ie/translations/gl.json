@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Verificación do certificado TLS de pumps.ie desactivada",
-      "description": "O provedor pumps.ie para **{entry_title}** ten a verificación do certificado TLS desactivada porque o certificado do sitio non é válido actualmente. Os datos seguen cifrados en tránsito, pero non se verifica a identidade do servidor."
+      "description": "O provedor pumps.ie para **{entry_title}** ten a verificación do certificado TLS desactivada porque o certificado do sitio caducou. Os datos seguen cifrados en tránsito, pero non se verifica a identidade do servidor."
     }
   },
   "entity": {

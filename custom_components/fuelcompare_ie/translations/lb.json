@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-Zertifikaatsprüfung deaktivéiert",
-      "description": "Den pumps.ie-Ubidder fir **{entry_title}** huet d'TLS-Zertifikaatsprüfung deaktivéiert, well d'Zertifikat vun der Säit am Moment net gëlteg ass. D'Daten gi weiderhin verschlësselt iwwerdroe, mä d'Identitéit vum Server gëtt net iwwerpréift."
+      "description": "Den pumps.ie-Ubidder fir **{entry_title}** huet d'TLS-Zertifikaatsprüfung deaktivéiert, well d'Zertifikat vun der Säit ofgelaf ass. D'Daten gi weiderhin verschlësselt iwwerdroe, mä d'Identitéit vum Server gëtt net iwwerpréift."
     }
   },
   "entity": {

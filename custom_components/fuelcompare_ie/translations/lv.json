@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikāta verifikācija atspējota",
-      "description": "pumps.ie pakalpojumu sniedzējs **{entry_title}** ierakstam ir atspējota TLS sertifikāta verifikācija, jo vietnes sertifikāts pašlaik nav derīgs. Dati tranzītā joprojām ir šifrēti, taču servera identitāte netiek pārbaudīta."
+      "description": "pumps.ie pakalpojumu sniedzējs **{entry_title}** ierakstam ir atspējota TLS sertifikāta verifikācija, jo vietnes sertifikāts ir beidzis derēt. Dati tranzītā joprojām ir šifrēti, taču servera identitāte netiek pārbaudīta."
     }
   },
   "entity": {

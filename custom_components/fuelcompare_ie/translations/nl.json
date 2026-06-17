@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-certificaatverificatie uitgeschakeld",
-      "description": "De pumps.ie-provider voor **{entry_title}** heeft TLS-certificaatverificatie uitgeschakeld omdat het certificaat van de site momenteel ongeldig is. De gegevens zijn nog steeds versleuteld tijdens verzending, maar de identiteit van de server wordt niet geverifieerd."
+      "description": "De pumps.ie-provider voor **{entry_title}** heeft TLS-certificaatverificatie uitgeschakeld omdat het certificaat van de site verlopen is. De gegevens zijn nog steeds versleuteld tijdens verzending, maar de identiteit van de server wordt niet geverifieerd."
     }
   },
   "entity": {

@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-certifikatbekræftelse deaktiveret",
-      "description": "pumps.ie-udbyderen for **{entry_title}** har TLS-certifikatbekræftelse deaktiveret, fordi webstedets certifikat i øjeblikket er ugyldigt. Data er stadig krypteret under overførslen, men serverens identitet bekræftes ikke."
+      "description": "pumps.ie-udbyderen for **{entry_title}** har TLS-certifikatbekræftelse deaktiveret, fordi webstedets certifikat er udløbet. Data er stadig krypteret under overførslen, men serverens identitet bekræftes ikke."
     }
   },
   "entity": {

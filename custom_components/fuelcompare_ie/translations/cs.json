@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Ověření TLS certifikátu pumps.ie je zakázáno",
-      "description": "Poskytovatel pumps.ie pro **{entry_title}** má zakázáno ověřování TLS certifikátu, protože certifikát webu je momentálně neplatný. Data jsou při přenosu stále šifrována, ale identita serveru není ověřena."
+      "description": "Poskytovatel pumps.ie pro **{entry_title}** má zakázáno ověřování TLS certifikátu, protože certifikát webu vypršel. Data jsou při přenosu stále šifrována, ale identita serveru není ověřena."
     }
   },
   "entity": {

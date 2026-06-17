@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS ziurtagiriaren egiaztapena desgaituta",
-      "description": "**{entry_title}**-ren pumps.ie hornitzaileak TLS ziurtagiriaren egiaztapena desgaituta du guneko ziurtagiria une honetan baliogabea delako. Datuak transmisioan enkriptatuta jarraitzen dute, baina zerbitzariaren nortasuna ez da egiaztatzen."
+      "description": "**{entry_title}**-ren pumps.ie hornitzaileak TLS ziurtagiriaren egiaztapena desgaituta du guneko ziurtagiria iraungitu delako. Datuak transmisioan enkriptatuta jarraitzen dute, baina zerbitzariaren nortasuna ez da egiaztatzen."
     }
   },
   "entity": {

@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Fíordheimhniú deimhnithe TLS pumps.ie díchumasaithe",
-      "description": "Tá fíordheimhniú deimhnithe TLS díchumasaithe ag soláthraí pumps.ie do **{entry_title}** toisc go bhfuil deimhniú an tsuímh neamhbhailí faoi láthair. Tá na sonraí fós criptithe le linn tarchurtha, ach ní fíordheimhnítear céannacht an fhreastalaí."
+      "description": "Tá fíordheimhniú deimhnithe TLS díchumasaithe ag soláthraí pumps.ie do **{entry_title}** toisc go bhfuil deimhniú an tsuímh imithe in éag. Tá na sonraí fós criptithe le linn tarchurtha, ach ní fíordheimhnítear céannacht an fhreastalaí."
     }
   },
   "entity": {

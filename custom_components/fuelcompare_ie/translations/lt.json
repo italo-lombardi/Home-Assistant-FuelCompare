@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikato patikrinimas išjungtas",
-      "description": "pumps.ie teikėjas, skirtas **{entry_title}**, turi išjungtą TLS sertifikato patikrinimą, nes svetainės sertifikatas šiuo metu yra netinkamas. Duomenys perduodami užšifruoti, tačiau serverio tapatybė nėra tikrinama."
+      "description": "pumps.ie teikėjas, skirtas **{entry_title}**, turi išjungtą TLS sertifikato patikrinimą, nes svetainės sertifikatas pasibaigė. Duomenys perduodami užšifruoti, tačiau serverio tapatybė nėra tikrinama."
     }
   },
   "entity": {

@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-varmenteen tarkistus poistettu käytöstä",
-      "description": "pumps.ie-palveluntarjoajan TLS-varmenteen tarkistus on poistettu käytöstä kohteelle **{entry_title}**, koska sivuston varmenne on tällä hetkellä virheellinen. Tiedot ovat edelleen salattuja siirron aikana, mutta palvelimen henkilöllisyyttä ei varmenneta."
+      "description": "pumps.ie-palveluntarjoajan TLS-varmenteen tarkistus on poistettu käytöstä kohteelle **{entry_title}**, koska sivuston varmenne on vanhentunut. Tiedot ovat edelleen salattuja siirron aikana, mutta palvelimen henkilöllisyyttä ei varmenneta."
     }
   },
   "entity": {

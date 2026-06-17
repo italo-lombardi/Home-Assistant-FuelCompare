@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-vottorðsstaðfesting óvirk",
-      "description": "pumps.ie-veitandinn fyrir **{entry_title}** er með TLS-vottorðsstaðfestingu óvirka vegna þess að vottorð síðunnar er ekki gilt að svo stöddu. Gögn eru enn dulkóðuð við flutning, en auðkenni þjónsins er ekki staðfest."
+      "description": "pumps.ie-veitandinn fyrir **{entry_title}** er með TLS-vottorðsstaðfestingu óvirka vegna þess að vottorð síðunnar er útrunnið. Gögn eru enn dulkóðuð við flutning, en auðkenni þjónsins er ekki staðfest."
     }
   },
   "entity": {

@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-certifikatverifiering inaktiverad",
-      "description": "Leverantören pumps.ie för **{entry_title}** har TLS-certifikatverifiering inaktiverad eftersom webbplatsens certifikat för närvarande är ogiltigt. Data är fortfarande krypterad under överföring, men serverns identitet verifieras inte."
+      "description": "Leverantören pumps.ie för **{entry_title}** har TLS-certifikatverifiering inaktiverad eftersom webbplatsens certifikat har gått ut. Data är fortfarande krypterad under överföring, men serverns identitet verifieras inte."
     }
   },
   "entity": {

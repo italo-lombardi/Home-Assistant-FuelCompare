@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-Zertifikatsüberprüfung deaktiviert",
-      "description": "Der pumps.ie-Anbieter für **{entry_title}** hat die TLS-Zertifikatsüberprüfung deaktiviert, da das Zertifikat der Website derzeit ungültig ist. Die Daten werden weiterhin verschlüsselt übertragen, die Serveridentität wird jedoch nicht überprüft."
+      "description": "Der pumps.ie-Anbieter für **{entry_title}** hat die TLS-Zertifikatsüberprüfung deaktiviert, da das Zertifikat der Website abgelaufen ist. Die Daten werden weiterhin verschlüsselt übertragen, die Serveridentität wird jedoch nicht überprüft."
     }
   },
   "entity": {

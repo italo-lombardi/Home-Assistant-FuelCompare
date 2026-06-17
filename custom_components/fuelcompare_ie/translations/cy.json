@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Dilysu tystysgrif TLS pumps.ie wedi'i analluogi",
-      "description": "Mae darparwr pumps.ie ar gyfer **{entry_title}** wedi analluogi dilysu tystysgrif TLS oherwydd bod tystysgrif y wefan yn annilys ar hyn o bryd. Mae'r data yn dal i gael ei amgryptio wrth ei drosglwyddo, ond nid yw hunaniaeth y gweinydd yn cael ei dilysu."
+      "description": "Mae darparwr pumps.ie ar gyfer **{entry_title}** wedi analluogi dilysu tystysgrif TLS oherwydd bod tystysgrif y wefan wedi dod i ben. Mae'r data yn dal i gael ei amgryptio wrth ei drosglwyddo, ond nid yw hunaniaeth y gweinydd yn cael ei dilysu."
     }
   },
   "entity": {

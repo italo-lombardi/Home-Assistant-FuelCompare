@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Verifikimi i certifikatës TLS të pumps.ie është çaktivizuar",
-      "description": "Ofruesi pumps.ie për **{entry_title}** ka verifikimin e certifikatës TLS të çaktivizuar sepse certifikata e faqes është aktualisht e pavlefshme. Të dhënat janë ende të enkriptuara gjatë transmetimit, por identiteti i serverit nuk verifikohet."
+      "description": "Ofruesi pumps.ie për **{entry_title}** ka verifikimin e certifikatës TLS të çaktivizuar sepse certifikata e faqes ka skaduar. Të dhënat janë ende të enkriptuara gjatë transmetimit, por identiteti i serverit nuk verifikohet."
     }
   },
   "entity": {

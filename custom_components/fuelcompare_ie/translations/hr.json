@@ -81,7 +81,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Provjera TLS certifikata za pumps.ie onemogućena",
-      "description": "Davatelj pumps.ie za **{entry_title}** ima onemogućenu provjeru TLS certifikata jer trenutačni certifikat stranice nije valjan. Podaci su i dalje šifrirani u prijenosu, ali identitet poslužitelja nije provjeren."
+      "description": "Davatelj pumps.ie za **{entry_title}** ima onemogućenu provjeru TLS certifikata jer certifikat stranice je istekao. Podaci su i dalje šifrirani u prijenosu, ali identitet poslužitelja nije provjeren."
     }
   },
   "entity": {
