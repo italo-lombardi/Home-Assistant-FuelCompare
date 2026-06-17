@@ -1154,7 +1154,16 @@ async def test_async_list_stations_returns_empty_on_ble001_gather_exception() ->
     provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
     session = MagicMock()
 
-    with patch("asyncio.gather", side_effect=RuntimeError("gather boom")):
+    def _gather_boom(*coros, **_kwargs):
+        # Close the un-awaited input coroutines so pytest doesn't emit a
+        # "coroutine was never awaited" RuntimeWarning when the gather
+        # mock raises before scheduling them.
+        for c in coros:
+            if hasattr(c, "close"):
+                c.close()
+        raise RuntimeError("gather boom")
+
+    with patch("asyncio.gather", side_effect=_gather_boom):
         result = await provider.async_list_stations(
             session, lat=49.617, lng=6.076, radius_km=10.0
         )
