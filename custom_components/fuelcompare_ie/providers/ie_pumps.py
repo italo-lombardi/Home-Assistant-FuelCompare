@@ -595,14 +595,13 @@ def _build_station_data(
     county: str | None = meta.get("county") or None
 
     # ── Timing: use the most recent dateupdated across fuel types ─────────
-    dateupdated: str | None = None
-    for fuel in _FUEL_TYPES:
-        record = prices_by_fuel.get(fuel)
-        if record is not None:
-            ts = record.get("dateupdated")
-            if ts:
-                dateupdated = ts
-                break
+    # pumps.ie uses "YYYY-MM-DD HH:MM:SS" — lexical max == chronological max.
+    ts_candidates = [
+        record.get("dateupdated")
+        for record in (prices_by_fuel.get(f) for f in _FUEL_TYPES)
+        if record is not None and record.get("dateupdated")
+    ]
+    dateupdated: str | None = max(ts_candidates) if ts_candidates else None
 
     # ── Assemble dict ────────────────────────────────────────────────────
 
@@ -620,6 +619,8 @@ def _build_station_data(
         "county": county,
         "latitude": lat,
         "longitude": lng,
+        # Station page
+        "source_station_id": station_id,
         # Timing
         "lastupdated": dateupdated,
     }

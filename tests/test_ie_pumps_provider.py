@@ -253,6 +253,15 @@ def test_parse_xml_malformed_xml_returns_empty_list() -> None:
     assert result == []
 
 
+def test_parse_xml_non_self_closing_station_tags_not_parsed() -> None:
+    """_parse_xml ignores non-self-closing <station> tags — only <station ... /> supported."""
+    non_self_closing = (
+        '<stations><station ID="1" Price="1739" Lat="53.3">text</station></stations>'
+    )
+    result = _parse_xml(non_self_closing, "diesel")
+    assert result == []
+
+
 def test_parse_xml_station_id_stored_as_string() -> None:
     """_parse_xml stores station ID as a string."""
     stations = _parse_xml(_DIESEL_XML, "diesel")
@@ -348,6 +357,31 @@ def test_build_station_data_lastupdated_from_dateupdated() -> None:
     assert data["lastupdated"] == "2025-06-08 14:23:00"
 
 
+def test_build_station_data_lastupdated_uses_max_across_fuel_types() -> None:
+    """_build_station_data picks the most recent dateupdated across fuel types."""
+    older = {
+        "ID": _STATION_ID,
+        "price_eur": 1.73,
+        "dateupdated": "2025-01-01 08:00:00",
+        "lat": 53.0,
+        "lng": -6.0,
+        "name": "X",
+        "brand": "",
+        "Addr1": "",
+        "Addr2": "",
+        "County": "",
+        "fuel": "diesel",
+    }
+    newer = {
+        **older,
+        "price_eur": 1.75,
+        "dateupdated": "2025-06-15 12:00:00",
+        "fuel": "petrol",
+    }
+    data = _build_station_data(_STATION_ID, older, {"diesel": older, "petrol": newer})
+    assert data["lastupdated"] == "2025-06-15 12:00:00"
+
+
 def test_build_station_data_missing_fuel_returns_none() -> None:
     """_build_station_data returns None for fuel types with no data."""
     diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
@@ -361,14 +395,14 @@ def test_build_station_data_missing_fuel_returns_none() -> None:
 
 
 def test_build_station_data_source_station_id() -> None:
-    """_build_station_data does not set source_station_id (injected by coordinator)."""
+    """_build_station_data populates source_station_id from the station_id parameter."""
     diesel_stations = _parse_xml(_DIESEL_XML, "diesel")
     assert diesel_stations
     record = _find_station(diesel_stations, _STATION_ID)
     assert record
     data = _build_station_data(_STATION_ID, record, {"diesel": record})
 
-    assert "source_station_id" not in data
+    assert data["source_station_id"] == _STATION_ID
 
 
 # ---------------------------------------------------------------------------

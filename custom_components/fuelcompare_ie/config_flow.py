@@ -827,50 +827,29 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                 CONF_RADIUS_KM,
                 self.config_entry.data.get(CONF_RADIUS_KM, DEFAULT_RADIUS_KM),
             )
-            schema = vol.Schema(
-                {
-                    **(
-                        {vol.Optional(CONF_API_KEY, default=existing_key): str}
-                        if requires_api_key
-                        else {}
-                    ),
-                    vol.Optional(CONF_RADIUS_KM, default=current_radius): vol.All(
-                        vol.Coerce(float), vol.Range(min=0.1, max=500)
-                    ),
-                    **(
-                        {
-                            vol.Optional(
-                                CONF_SHOW_ON_MAP, default=current_show_on_map
-                            ): bool
-                        }
-                        if has_location_caps
-                        else {}
-                    ),
-                }
-            )
-        else:
             schema_dict: dict = {}
+            if requires_api_key:
+                schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
+            schema_dict[vol.Optional(CONF_RADIUS_KM, default=current_radius)] = vol.All(
+                vol.Coerce(float), vol.Range(min=0.1, max=500)
+            )
+            if has_location_caps:
+                schema_dict[
+                    vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
+                ] = bool
+        else:
+            schema_dict = {}
             if requires_api_key:
                 schema_dict[vol.Optional(CONF_API_KEY, default=existing_key)] = str
             if has_location_caps:
                 schema_dict[
                     vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
                 ] = bool
-            if user_input is not None:
-                errors: dict[str, str] = {}
-                if (
-                    CONF_API_KEY in user_input
-                    and not (user_input[CONF_API_KEY] or "").strip()
-                ):
-                    errors[CONF_API_KEY] = "invalid_api_key"
-                    schema = vol.Schema(schema_dict)
-                    return self.async_show_form(
-                        step_id="init", data_schema=schema, errors=errors
-                    )
-                return self.async_create_entry(data=user_input)
-            if not schema_dict:
+            # Non-location entries with no configurable options finalise immediately.
+            if not schema_dict and user_input is None:
                 return self.async_create_entry(data={})
-            schema = vol.Schema(schema_dict)
+
+        schema = vol.Schema(schema_dict)
 
         if user_input is not None:
             errors: dict[str, str] = {}

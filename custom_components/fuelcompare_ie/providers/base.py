@@ -28,7 +28,7 @@ from aiohttp import ClientSession
 
 _EARTH_RADIUS_KM = 6371.0
 
-_MAX_STATION_URL_LEN = 255
+MAX_STATION_URL_LEN = 255
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -471,14 +471,14 @@ class BaseProvider(ABC):
         - Else if STATION_PAGE_URL is set, returns the homepage URL.
         - Else returns None.
 
-        URLs longer than _MAX_STATION_URL_LEN characters (HA state value limit) fall back to
-        the provider homepage (STATION_PAGE_URL).
+        URLs longer than MAX_STATION_URL_LEN characters (HA state value limit) fall back to
+        the provider homepage (STATION_PAGE_URL), or None if no homepage is set.
 
         Override in providers that need dynamic URL construction (e.g. slug cache).
         """
         if self.STATION_PAGE_URL_TEMPLATE:
             url = self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
-            if len(url) > _MAX_STATION_URL_LEN:
+            if len(url) > MAX_STATION_URL_LEN:
                 return self.STATION_PAGE_URL or None
             return url
         return self.STATION_PAGE_URL or None
