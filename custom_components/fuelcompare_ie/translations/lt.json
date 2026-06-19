@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Pasirinkite stotį",
-        "description": "Pasirinkite degalų stotį. Rodomos dyzelino / benzino kainos.",
+        "description": "Pasirinkite stotį, regioną arba šalį iš toliau pateikto sąrašo.",
         "data": {
           "station_id": "Stotis",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API raktas negali būti tuščias.",
       "invalid_location": "Neteisingos koordinatės. Įveskite galiojančias platumos ir ilgumos reikšmes.",
       "no_stations_found": "Šioje apskrityje stočių nerasta. Bandykite kitą apskritį.",
-      "no_stations_found_location": "Prie šių koordinačių stočių nerasta. Pabandykite pakeisti vietą arba padidinti paieškos spindulį."
+      "no_stations_found_location": "Prie šių koordinačių stočių nerasta. Pabandykite pakeisti vietą arba padidinti paieškos spindulį.",
+      "no_stations_found_global": "Nepavyko įkelti tiekėjo sąrašo. Šaltinis gali būti neprieinamas arba trūksta reikalingos priklausomybės. Daugiau informacijos rasite Home Assistant žurnaluose."
     },
     "abort": {
       "already_configured": "Ši stotis jau sukonfigūruota.",

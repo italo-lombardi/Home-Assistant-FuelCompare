@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Tankstelle auswählen",
-        "description": "Wählen Sie eine Tankstelle aus. Die angezeigten Preise gelten für Diesel/Benzin.",
+        "description": "Wähle eine Station, Region oder ein Land aus der folgenden Liste aus.",
         "data": {
           "station_id": "Tankstelle",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "Der API-Schlüssel darf nicht leer sein.",
       "invalid_location": "Ungültige Koordinaten. Bitte geben Sie gültige Breiten- und Längengradwerte ein.",
       "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk.",
-      "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Passen Sie den Standort an oder vergrößern Sie den Suchradius."
+      "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Passen Sie den Standort an oder vergrößern Sie den Suchradius.",
+      "no_stations_found_global": "Die Liste des Anbieters konnte nicht geladen werden. Möglicherweise ist die Quelle nicht erreichbar oder eine erforderliche Abhängigkeit fehlt. Details findest du im Home-Assistant-Log."
     },
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",

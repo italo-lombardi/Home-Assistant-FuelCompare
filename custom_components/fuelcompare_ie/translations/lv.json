@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Atlasiet staciju",
-        "description": "Atlasiet degvielas staciju. Rādītās cenas ir dīzeļdegvielai/benzīnam.",
+        "description": "Izvēlieties staciju, reģionu vai valsti no zemāk redzamā saraksta.",
         "data": {
           "station_id": "Stacija",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API atslēga nedrīkst būt tukša.",
       "invalid_location": "Nederīgas koordinātes. Ievadiet derīgas platuma un garuma vērtības.",
       "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu.",
-      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Mēģiniet pielāgot atrašanās vietu vai palielināt meklēšanas rādiusu."
+      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Mēģiniet pielāgot atrašanās vietu vai palielināt meklēšanas rādiusu.",
+      "no_stations_found_global": "Nevarēja ielādēt sniedzēja sarakstu. Avots var nebūt pieejams vai trūkst nepieciešamās atkarības. Sīkāku informāciju skatiet Home Assistant žurnālos."
     },
     "abort": {
       "already_configured": "Šī stacija jau ir konfigurēta.",

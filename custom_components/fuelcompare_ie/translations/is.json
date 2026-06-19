@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Veldu stöð",
-        "description": "Veldu eldsneytisstöð. Verð sem sýnd eru eru fyrir dísel/bensín.",
+        "description": "Veldu stöð, svæði eða land af listanum hér að neðan.",
         "data": {
           "station_id": "Stöð",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_location": "Ógildar hnit. Sláðu inn gildar breiddargráður og lengdargráður.",
       "no_stations_found": "Engar stöðvar fundust í þessari sýslu. Prófaðu aðra sýslu.",
       "no_stations_found_location": "Engar stöðvar fundust nálægt þessum hnitum. Prófaðu að breyta staðsetningu eða stækka leitarradíusinn.",
-      "invalid_api_key": "API-lykill má ekki vera tómur."
+      "invalid_api_key": "API-lykill má ekki vera tómur.",
+      "no_stations_found_global": "Ekki tókst að hlaða lista veitunnar. Heimildin gæti verið niðri eða nauðsynlegan pakka vantar. Skoðaðu Home Assistant atburðaskrána fyrir nánari upplýsingar."
     },
     "abort": {
       "already_configured": "Þessi stöð er þegar stillt.",

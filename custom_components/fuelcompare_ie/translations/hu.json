@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Válasszon állomást",
-        "description": "Válasszon üzemanyag-állomást. A megjelenített árak dízelre/benzinre vonatkoznak.",
+        "description": "Válassz egy állomást, régiót vagy országot az alábbi listából.",
         "data": {
           "station_id": "Állomás",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "Az API kulcs nem lehet üres.",
       "invalid_location": "Érvénytelen koordináták. Adjon meg érvényes szélességi és hosszúsági fokot.",
       "no_stations_found": "Nem találhatók állomások ebben a megyében. Próbáljon másik megyét.",
-      "no_stations_found_location": "Nem találhatók állomások ezen koordináták közelében. Módosítsa a helyszínt, vagy növelje a keresési sugarat."
+      "no_stations_found_location": "Nem találhatók állomások ezen koordináták közelében. Módosítsa a helyszínt, vagy növelje a keresési sugarat.",
+      "no_stations_found_global": "A szolgáltató listáját nem sikerült betölteni. A forrás elérhetetlen lehet, vagy egy szükséges függőség hiányzik. A részletekért nézd meg a Home Assistant naplóit."
     },
     "abort": {
       "already_configured": "Ez az állomás már konfigurálva van.",

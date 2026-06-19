@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Wybierz stację",
-        "description": "Wybierz stację paliw. Pokazane ceny dotyczą oleju napędowego/benzyny.",
+        "description": "Wybierz stację, region lub kraj z poniższej listy.",
         "data": {
           "station_id": "Stacja",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "Klucz API nie może być pusty.",
       "invalid_location": "Nieprawidłowe współrzędne. Wprowadź prawidłowe wartości szerokości i długości geograficznej.",
       "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa.",
-      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Spróbuj zmienić lokalizację lub zwiększyć promień wyszukiwania."
+      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Spróbuj zmienić lokalizację lub zwiększyć promień wyszukiwania.",
+      "no_stations_found_global": "Nie udało się wczytać listy dostawcy. Źródło może być niedostępne lub brakuje wymaganej zależności. Sprawdź dzienniki Home Assistanta, aby uzyskać szczegóły."
     },
     "abort": {
       "already_configured": "Ta stacja jest już skonfigurowana.",
