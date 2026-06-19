@@ -87,9 +87,14 @@ _COUNTRY_NAMES: dict[str, str] = {
 
 
 def _countries_from_registry() -> list[tuple[str, str]]:
-    """Derive (ISO code, display label) list from PROVIDER_REGISTRY."""
+    """Derive (ISO code, display label) list from PROVIDER_REGISTRY.
+
+    Hides countries whose every provider is DISABLED.
+    """
     seen: set[str] = set()
     for cls in PROVIDER_REGISTRY.values():
+        if getattr(cls, "DISABLED", False):
+            continue
         seen.add(cls.COUNTRY)
     pairs = [(code, _COUNTRY_NAMES.get(code, code)) for code in seen]
     pairs.sort(key=lambda x: x[1])
@@ -97,11 +102,16 @@ def _countries_from_registry() -> list[tuple[str, str]]:
 
 
 def _providers_for_country(country: str) -> list[tuple[str, str]]:
-    """Return (provider_key, label) pairs for a given country code."""
+    """Return (provider_key, label) pairs for a given country code.
+
+    Hides any provider with DISABLED=True so the user can't pick a known-broken
+    upstream. Existing entries keep loading because the registry still contains
+    the class.
+    """
     pairs = [
         (cls.PROVIDER_KEY, cls.LABEL)
         for cls in PROVIDER_REGISTRY.values()
-        if cls.COUNTRY == country
+        if cls.COUNTRY == country and not getattr(cls, "DISABLED", False)
     ]
     pairs.sort(key=lambda x: x[1])
     return pairs

@@ -104,6 +104,9 @@ class AlFuelProvider(BaseProvider):
 
     COUNTRY = "AL"
     PROVIDER_KEY = "al_fuel"
+    DISABLED = (
+        True  # 0.7.0: upstream failing in live verification — disable until fixed
+    )
     LABEL = "Albania National Average (cargopedia.net)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

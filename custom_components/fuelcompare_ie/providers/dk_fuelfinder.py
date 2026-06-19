@@ -300,6 +300,9 @@ class DkFuelFinderProvider(BaseProvider):
 
     COUNTRY = "DK"
     PROVIDER_KEY = "dk_fuelfinder"
+    DISABLED = (
+        True  # 0.7.0: upstream failing in live verification — disable until fixed
+    )
     LABEL = "FuelFinder (Denmark)"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"

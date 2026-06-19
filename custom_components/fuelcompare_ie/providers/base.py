@@ -324,6 +324,16 @@ class BaseProvider(ABC):
     The config flow uses this flag instead of inspect.signature() detection.
     """
 
+    DISABLED: ClassVar[bool] = False
+    """If True, the provider is hidden from the config flow country/provider list.
+
+    Use this to soft-disable a provider whose upstream is broken, has changed
+    its API contract, or is otherwise known-failing. The provider class stays
+    importable and registered (so existing config entries keep loading and
+    don't blow up with KeyError) but new entries cannot be created. Flip back
+    to False once the provider is fixed.
+    """
+
     API_KEY_REGISTRATION_URL: ClassVar[str] = ""
     """URL where the user can register for an API key.
 

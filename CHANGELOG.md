@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Provider disable mechanism**: new `DISABLED: ClassVar[bool] = False` on
+  `BaseProvider`. Setting `True` hides the provider from the config flow
+  country/provider selectors so users cannot create new entries against a
+  known-broken upstream. Existing entries keep loading from cache; their
+  sensors fall to `unavailable` when polls fail. Flip back to `False` once
+  the upstream contract is fixed.
+- **Smoke tests**: new top-level `smoke/` directory (outside `tests/` to
+  avoid the pytest_homeassistant_custom_component socket block). Tests are
+  skipped unless `FUELCOMPARE_RUN_SMOKE=1` is set; run with
+  `FUELCOMPARE_RUN_SMOKE=1 pytest smoke -p no:homeassistant`. One test per
+  provider hits the live upstream from a capital-city probe and asserts a
+  non-empty station list / fetch.
+
+### Changed
+- **Provider audit (live verification)**: 12 providers disabled after live
+  smoke testing returned empty results, HTTP 4xx, or stale-cache failures —
+  `al_fuel`, `ba_fuel`, `cz_ccs`, `dk_fuelfinder`, `es_minetur`,
+  `fi_tankille`, `lu_carbu`, `md_fuel`, `mt_fuel`, `nl_anwb`, `pl_benzyna`,
+  `pt_dgeg`. README updated with new ⚠️ Disabled marker and 🤖 Smoke-tested
+  tier for the 16 providers verified end-to-end on a dev HA install.
+
 ### Fixed
 - Coordinator now surfaces the provider's own error text in `UpdateFailed`
   (e.g. `Provider error: Country code 'XX' not found in EC Oil Bulletin data`)

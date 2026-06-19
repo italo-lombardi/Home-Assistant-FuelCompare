@@ -101,6 +101,9 @@ class PtDgegProvider(BaseProvider):
 
     COUNTRY = "PT"
     PROVIDER_KEY = "pt_dgeg"
+    DISABLED = (
+        True  # 0.7.0: upstream failing in live verification — disable until fixed
+    )
     LABEL = "DGEG (Portugal)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"
