@@ -174,9 +174,10 @@ class EuOilBulletinProvider(BaseProvider):
 
     Usage in config flow
     --------------------
-    CONFIG_MODE='location' is used here not because we need coordinates but
-    because the station_id is the country code (not a numeric ID).  The user
-    selects a country from the async_list_stations dropdown.
+    STATION_LOOKUP_MODE='global_list' tells the config flow to skip the
+    coordinates step and route the user straight to the country picker
+    (async_list_stations returns all 27 member states + aggregates).
+    The picked country code becomes the entry's station_id.
     """
 
     COUNTRY = "EU"
@@ -230,9 +231,10 @@ class EuOilBulletinProvider(BaseProvider):
         Args:
             station_id:  ISO country code or aggregate key ('EU27', 'EURO').
                          Stored for use in async_fetch.
-            latitude:    Unused; accepted for BaseProvider location-mode compat.
-            longitude:   Unused; accepted for BaseProvider location-mode compat.
-            radius_km:   Unused; accepted for BaseProvider location-mode compat.
+            latitude:    Unused. Kept for back-compat with pre-global_list
+                         entries (and entry.data) that still carry coordinates.
+            longitude:   Unused. See latitude.
+            radius_km:   Unused. See latitude.
         """
         self._station_id = station_id.upper() if station_id else "EU27"
         self._latitude = latitude

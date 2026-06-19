@@ -54,7 +54,20 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 class ProviderError(Exception):
-    """Raised by a provider when it cannot retrieve station data."""
+    """Raised by a provider when it cannot retrieve station data.
+
+    Contributor note: the message string passed to ProviderError is
+    USER-VISIBLE — it surfaces in Home Assistant's repairs / diagnostics
+    UI via UpdateFailed. Keep it actionable and free of credentials:
+
+    - DO include: country/postal codes, station IDs, HTTP status, parser
+      cause, endpoint URL (without query-string secrets).
+    - DO NOT include: API keys, bearer tokens, Authorization headers,
+      raw upstream response bodies that may carry session cookies.
+
+    The coordinator caps the surfaced text at ~240 chars but does NOT
+    redact — providers are responsible for keeping the message clean.
+    """
 
 
 class StationData(TypedDict, total=False):
