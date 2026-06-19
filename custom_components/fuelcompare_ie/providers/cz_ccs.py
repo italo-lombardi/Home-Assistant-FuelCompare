@@ -115,9 +115,7 @@ class CzCcsProvider(BaseProvider):
 
     COUNTRY = "CZ"
     PROVIDER_KEY = "cz_ccs"
-    DISABLED = (
-        True  # 0.7.0: upstream failing in live verification — disable until fixed
-    )
+    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "MF ČR Price Caps (Czech Republic)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

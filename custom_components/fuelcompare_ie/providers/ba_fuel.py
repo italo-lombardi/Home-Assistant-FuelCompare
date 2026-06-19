@@ -126,7 +126,7 @@ class BaFuelProvider(BaseProvider):
 
     COUNTRY = "BA"
     PROVIDER_KEY = "ba_fuel"
-    DISABLED = True  # 0.7.0: smoke-test failure (empty list / HTTP 4xx) — disable until upstream fixed
+    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "cijenegoriva.ba (Bosnia and Herzegovina)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

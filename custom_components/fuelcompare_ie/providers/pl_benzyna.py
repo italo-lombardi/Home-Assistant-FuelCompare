@@ -170,9 +170,7 @@ class PlBenzynaProvider(BaseProvider):
 
     COUNTRY = "PL"
     PROVIDER_KEY = "pl_benzyna"
-    DISABLED = (
-        True  # 0.7.0: upstream failing in live verification — disable until fixed
-    )
+    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "ORLEN Wholesale (Poland)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

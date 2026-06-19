@@ -332,6 +332,10 @@ class BaseProvider(ABC):
     importable and registered (so existing config entries keep loading and
     don't blow up with KeyError) but new entries cannot be created. Flip back
     to False once the provider is fixed.
+
+    UX note: if every provider for a given country has DISABLED=True, the
+    country itself disappears from the config flow's country picker — the
+    user is never offered a country with no working providers.
     """
 
     API_KEY_REGISTRATION_URL: ClassVar[str] = ""

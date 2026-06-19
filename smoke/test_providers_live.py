@@ -1,4 +1,4 @@
-"""Live smoke tests for Group C providers (untested-yet).
+"""Live smoke tests for providers without prior end-to-end verification.
 
 One test per provider key. Each spawns a real provider, queries the
 upstream API for a capital-city or canonical sample, and asserts that
@@ -7,6 +7,15 @@ at least one station was returned with at least one fuel price.
 Capital coordinates are the lowest-friction "this country exists"
 probe. Real users will pick stations in their own town; if the capital
 returns nothing the upstream is broken, geo-blocked, or has changed.
+
+This file mixes two cohorts:
+  - providers currently DISABLED in custom_components/.../providers/
+    (ba_fuel, es_minetur, fi_tankille, lu_carbu) — kept here so a
+    re-run after an upstream fix flips them green and the provider
+    can be re-enabled.
+  - providers requiring an API key the project does not have
+    (au_qld, au_vic, de_tankerkoenig, no_drivstoff) — skipped unless
+    the corresponding env var is supplied.
 """
 
 from __future__ import annotations
@@ -29,23 +38,6 @@ from custom_components.fuelcompare_ie.providers.no_drivstoff import (
 
 
 pytestmark = [pytest.mark.smoke, pytest.mark.asyncio]
-
-
-def _has_price(station: tuple) -> bool:
-    """Return True if the (id, label) tuple's label hints any fuel price was set.
-
-    The picker label is provider-defined; we look for a digit followed by
-    punctuation (e.g. "1.65", "€1,65/L"). Absent that we accept any label
-    that names a fuel keyword, since some providers don't bake prices into
-    the dropdown text.
-    """
-    _id, label = station
-    if not label:
-        return False
-    return any(ch.isdigit() for ch in label) or any(
-        kw in label.lower()
-        for kw in ("diesel", "unleaded", "petrol", "lpg", "e10", "e85")
-    )
 
 
 # ── BA: cijenegoriva.ba — Sarajevo ──────────────────────────────────────────

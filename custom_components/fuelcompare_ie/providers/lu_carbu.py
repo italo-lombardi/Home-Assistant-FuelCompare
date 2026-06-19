@@ -191,7 +191,7 @@ class LuCarbuProvider(BaseProvider):
 
     COUNTRY = "LU"
     PROVIDER_KEY = "lu_carbu"
-    DISABLED = True  # 0.7.0: smoke-test failure (empty list / HTTP 4xx) — disable until upstream fixed
+    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "carbu.com Luxembourg"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"

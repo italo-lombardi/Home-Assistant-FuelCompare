@@ -205,6 +205,7 @@ class NoDrivstoffProvider(BaseProvider):
 
     COUNTRY = "NO"
     PROVIDER_KEY = "no_drivstoff"
+    DISABLED = True  # 0.7.0: untested — API key required, no creds available
     LABEL = "Drivstoffpriser (Norway)"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"

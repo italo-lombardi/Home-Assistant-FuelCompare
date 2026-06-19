@@ -346,3 +346,45 @@ async def test_location_mode_two_close_stations_get_distinct_ids() -> None:
     _, id_b = await _run_setup_capturing_station_id(entry_b)
 
     assert id_a != id_b
+
+
+# ---------------------------------------------------------------------------
+# DISABLED contract — existing entries with a DISABLED provider keep loading
+# (the class is still in PROVIDER_REGISTRY; only the config flow filter hides it).
+# ---------------------------------------------------------------------------
+
+
+async def test_setup_entry_succeeds_when_provider_is_disabled() -> None:
+    """An existing config entry whose provider has DISABLED=True still loads.
+
+    The DISABLED filter applies only to the config flow (so users can't create
+    new entries against a known-broken upstream). The provider class itself
+    stays in PROVIDER_REGISTRY so previously-created entries continue to set
+    up; their sensors will simply fall to 'unavailable' if upstream polls fail.
+    """
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    entry = _make_entry(provider_key="ie_fuelcompare", station_id="123")
+
+    hass = MagicMock()
+    hass.config = MagicMock()
+    hass.data = {}
+    hass.config_entries = MagicMock()
+    hass.config_entries.async_forward_entry_setups = AsyncMock()
+
+    coordinator_mock = MagicMock()
+    coordinator_mock.async_config_entry_first_refresh = AsyncMock()
+    coordinator_mock.provider_capabilities = frozenset({"unleaded", "diesel"})
+
+    IEFuelCompareProvider.DISABLED = True
+    try:
+        with patch(
+            "custom_components.fuelcompare_ie.FuelCompareIECoordinator",
+            return_value=coordinator_mock,
+        ):
+            assert await async_setup_entry(hass, entry) is True
+    finally:
+        IEFuelCompareProvider.DISABLED = False
