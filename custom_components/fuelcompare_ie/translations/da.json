@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Vælg station",
-        "description": "Vælg en benzinstation. Viste priser er for diesel/benzin.",
+        "description": "Vælg en station, region eller et land fra listen nedenfor.",
         "data": {
           "station_id": "Station",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API-nøgle må ikke være tom.",
       "invalid_location": "Ugyldige koordinater. Indtast gyldige værdier for bredde- og længdegrad.",
       "no_stations_found": "Ingen stationer fundet i dette amt. Prøv et andet amt.",
-      "no_stations_found_location": "Ingen stationer fundet i nærheden af disse koordinater. Prøv at justere placeringen eller øge søgeradius."
+      "no_stations_found_location": "Ingen stationer fundet i nærheden af disse koordinater. Prøv at justere placeringen eller øge søgeradius.",
+      "no_stations_found_global": "Kunne ikke indlæse udbyderens liste. Kilden kan være nede, eller en påkrævet afhængighed mangler. Se Home Assistant-loggen for detaljer."
     },
     "abort": {
       "already_configured": "Denne station er allerede konfigureret.",

@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Dewiswch Orsaf",
-        "description": "Dewiswch orsaf danwydd. Mae'r prisiau a ddangosir ar gyfer diesel/petrol.",
+        "description": "Dewiswch orsaf, rhanbarth neu wlad o'r rhestr isod.",
         "data": {
           "station_id": "Gorsaf",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_location": "Cyfesurynnau annilys. Rhowch werthoedd lledred a hydred dilys.",
       "no_stations_found": "Ni chanfuwyd gorsafoedd ar gyfer y sir hon. Rhowch gynnig ar sir wahanol.",
       "no_stations_found_location": "Ni chanfuwyd gorsafoedd yn agos at y cyfesurynnau hyn. Rhowch gynnig ar addasu'r lleoliad neu gynyddu'r radiws chwilio.",
-      "invalid_api_key": "Ni all yr allwedd API fod yn wag."
+      "invalid_api_key": "Ni all yr allwedd API fod yn wag.",
+      "no_stations_found_global": "Methwyd llwytho rhestr y darparwr. Efallai bod y ffynhonnell i lawr neu fod dibyniaeth ofynnol ar goll. Edrychwch ar logiau Home Assistant am fanylion."
     },
     "abort": {
       "already_configured": "Mae'r orsaf hon eisoes wedi'i ffurfweddu.",

@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Vel stasjon",
-        "description": "Vel ein bensinstasjon. Prisane som vert viste er for diesel/bensin.",
+        "description": "Vel ein stasjon, region eller eit land frå lista nedanfor.",
         "data": {
           "station_id": "Stasjon",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_location": "Ugyldige koordinatar. Skriv inn gyldige breidde- og lengdegradsverdiar.",
       "no_stations_found": "Ingen stasjonar funne for dette fylket. Prøv eit anna fylke.",
       "no_stations_found_location": "Ingen stasjonar funne i nærleiken av desse koordinatane. Prøv å justere plasseringa eller auke søkjeradiusen.",
-      "invalid_api_key": "API-nøkkelen kan ikkje vera tom."
+      "invalid_api_key": "API-nøkkelen kan ikkje vera tom.",
+      "no_stations_found_global": "Kunne ikkje laste lista frå leverandøren. Kjelda kan vere nede, eller ein påkravd avhengnad manglar. Sjå Home Assistant-loggane for fleire detaljar."
     },
     "abort": {
       "already_configured": "Denne stasjonen er allereie konfigurert.",

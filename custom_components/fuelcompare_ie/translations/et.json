@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Vali tankla",
-        "description": "Vali kütusejaam. Näidatud hinnad on diisli/bensiini jaoks.",
+        "description": "Vali allolevast loendist tankla, piirkond või riik.",
         "data": {
           "station_id": "Tankla",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API võti ei tohi olla tühi.",
       "invalid_location": "Vigased koordinaadid. Sisesta kehtivad laiuskraadi ja pikkuskraadi väärtused.",
       "no_stations_found": "Sellest maakonnast ei leitud ühtegi tanklat. Proovi teist maakonda.",
-      "no_stations_found_location": "Nende koordinaatide lähedalt ei leitud ühtegi tanklat. Proovi asukohta muuta või suurenda otsinguraadiust."
+      "no_stations_found_location": "Nende koordinaatide lähedalt ei leitud ühtegi tanklat. Proovi asukohta muuta või suurenda otsinguraadiust.",
+      "no_stations_found_global": "Pakkuja loendi laadimine ebaõnnestus. Allikas võib olla maas või on nõutav sõltuvus puudu. Üksikasjade jaoks vaata Home Assistanti logisid."
     },
     "abort": {
       "already_configured": "See jaam on juba seadistatud.",

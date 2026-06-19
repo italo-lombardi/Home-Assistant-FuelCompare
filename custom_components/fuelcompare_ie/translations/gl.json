@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Seleccionar estación",
-        "description": "Seleccione unha estación de combustible. Os prezos mostrados corresponden a diésel/gasolina.",
+        "description": "Selecciona unha estación, rexión ou país da lista de abaixo.",
         "data": {
           "station_id": "Estación",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_location": "Coordenadas non válidas. Introduza valores de latitude e lonxitude válidos.",
       "no_stations_found": "Non se atoparon estacións para este condado. Probe con outro condado.",
       "no_stations_found_location": "Non se atoparon estacións preto destas coordenadas. Probe a axustar a localización ou a aumentar o radio de busca.",
-      "invalid_api_key": "A clave de API non pode estar baleira."
+      "invalid_api_key": "A clave de API non pode estar baleira.",
+      "no_stations_found_global": "Non se puido cargar a lista do provedor. É posible que o servizo non estea dispoñible ou que falte unha dependencia obrigatoria. Consulta os rexistros de Home Assistant para máis detalles."
     },
     "abort": {
       "already_configured": "Esta estación xa está configurada.",

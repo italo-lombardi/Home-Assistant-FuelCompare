@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0-beta.4] - 2026-06-19
+
+> **Pre-release** — EU Oil Bulletin hotfix.
+
+### Fixed
+- **EU Oil Bulletin**: provider returned empty country list in real Home Assistant installs because `openpyxl` was missing from `manifest.json` requirements. Home Assistant skipped installing the dep on integration setup, the lazy import failed, and `async_list_stations` swallowed the error returning `[]`. The config-flow station picker then showed `No stations found for this county. Try a different county.` — wrong wording for a country-list provider, and the underlying cause (missing dependency) was hidden. Three fixes:
+  - Add `openpyxl>=3.1.0` to `manifest.json` requirements so HA installs it on first setup.
+  - Replace the stale `Select a fuel station. Prices shown are for diesel/petrol.` station-picker description with a generic `Pick a station, region, or country from the list below.`
+  - Add a new `no_stations_found_global` error key (mode-aware) so global-list providers surface a meaningful message instead of the county-search wording.
+
 ## [0.7.0-beta.3] - 2026-06-19
 
 > **Pre-release** — provider disable mechanism, smoke-test infrastructure, and a 16-provider live audit. Existing entries are unaffected; only new-entry creation is filtered for currently-broken upstreams.

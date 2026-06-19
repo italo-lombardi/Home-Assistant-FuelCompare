@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Välj station",
-        "description": "Välj en bensinstation. Priser visas för diesel/bensin.",
+        "description": "Välj en station, region eller ett land från listan nedan.",
         "data": {
           "station_id": "Station",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API-nyckeln får inte vara tom.",
       "invalid_location": "Ogiltiga koordinater. Ange giltiga latitud- och longitudvärden.",
       "no_stations_found": "Inga stationer hittades för detta län. Prova ett annat län.",
-      "no_stations_found_location": "Inga stationer hittades i närheten av dessa koordinater. Prova att justera platsen eller öka sökradien."
+      "no_stations_found_location": "Inga stationer hittades i närheten av dessa koordinater. Prova att justera platsen eller öka sökradien.",
+      "no_stations_found_global": "Det gick inte att läsa in leverantörens lista. Källan kan vara nere eller så saknas ett obligatoriskt beroende. Se Home Assistant-loggen för detaljer."
     },
     "abort": {
       "already_configured": "Denna station är redan konfigurerad.",

@@ -37,7 +37,7 @@
       },
       "station_picker": {
         "title": "Sélectionner une station",
-        "description": "Sélectionnez une station-service. Les prix affichés sont pour le diesel/l'essence.",
+        "description": "Choisissez une station, une région ou un pays dans la liste ci-dessous.",
         "data": {
           "station_id": "Station",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "La clé API ne peut pas être vide.",
       "invalid_location": "Coordonnées invalides. Entrez des valeurs valides de latitude et longitude.",
       "no_stations_found": "Aucune station trouvée pour ce comté. Essayez un autre comté.",
-      "no_stations_found_location": "Aucune station trouvée à proximité de ces coordonnées. Essayez d'ajuster l'emplacement ou d'augmenter le rayon de recherche."
+      "no_stations_found_location": "Aucune station trouvée à proximité de ces coordonnées. Essayez d'ajuster l'emplacement ou d'augmenter le rayon de recherche.",
+      "no_stations_found_global": "Impossible de charger la liste du fournisseur. La source est peut-être indisponible ou une dépendance requise est manquante. Consultez les journaux Home Assistant pour plus de détails."
     },
     "abort": {
       "already_configured": "Cette station est déjà configurée.",

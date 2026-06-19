@@ -676,12 +676,18 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         if not station_list:
             if self.unique_id and not needs_station_id:
                 return await self.async_step_name()
-            is_location_mode = self._latitude is not None
-            errors["base"] = (
-                "no_stations_found_location"
-                if is_location_mode
-                else "no_stations_found"
+            mode = (
+                getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
+                if provider_cls
+                else "manual_id"
             )
+            is_location_mode = self._latitude is not None
+            if mode == "global_list":
+                errors["base"] = "no_stations_found_global"
+            elif is_location_mode:
+                errors["base"] = "no_stations_found_location"
+            else:
+                errors["base"] = "no_stations_found"
             schema_dict[vol.Required(CONF_STATION_ID)] = str
         else:
             schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(

@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Selecteer station",
-        "description": "Selecteer een tankstation. Getoonde prijzen zijn voor diesel/benzine.",
+        "description": "Kies een station, regio of land uit de onderstaande lijst.",
         "data": {
           "station_id": "Station",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API-sleutel mag niet leeg zijn.",
       "invalid_location": "Ongeldige coördinaten. Voer geldige breedte- en lengtegraadwaarden in.",
       "no_stations_found": "Geen stations gevonden voor deze provincie. Probeer een andere provincie.",
-      "no_stations_found_location": "Geen stations gevonden in de buurt van deze coördinaten. Pas de locatie aan of vergroot de zoekradius."
+      "no_stations_found_location": "Geen stations gevonden in de buurt van deze coördinaten. Pas de locatie aan of vergroot de zoekradius.",
+      "no_stations_found_global": "De lijst van de provider kon niet worden geladen. Mogelijk is de bron niet beschikbaar of ontbreekt een vereiste afhankelijkheid. Raadpleeg de Home Assistant-logboeken voor details."
     },
     "abort": {
       "already_configured": "Dit station is al geconfigureerd.",

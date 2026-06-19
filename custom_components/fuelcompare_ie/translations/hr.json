@@ -44,7 +44,7 @@
       },
       "station_picker": {
         "title": "Odaberite postaju",
-        "description": "Odaberite benzinsku postaju. Prikazane cijene odnose se na dizel/benzin.",
+        "description": "Odaberite stanicu, regiju ili državu s donjeg popisa.",
         "data": {
           "station_id": "Postaja",
           "show_on_map": "Show station on map"
@@ -66,7 +66,8 @@
       "invalid_api_key": "API ključ ne smije biti prazan.",
       "invalid_location": "Nevažeće koordinate. Unesite valjane vrijednosti zemljopisne širine i dužine.",
       "no_stations_found": "Nisu pronađene postaje za ovu županiju. Pokušajte s drugom županijom.",
-      "no_stations_found_location": "Nisu pronađene postaje u blizini ovih koordinata. Pokušajte prilagoditi lokaciju ili povećati polumjer pretrage."
+      "no_stations_found_location": "Nisu pronađene postaje u blizini ovih koordinata. Pokušajte prilagoditi lokaciju ili povećati polumjer pretrage.",
+      "no_stations_found_global": "Nije moguće učitati popis pružatelja. Izvor je možda nedostupan ili nedostaje potrebna ovisnost. Pojedinosti potražite u zapisnicima Home Assistanta."
     },
     "abort": {
       "already_configured": "Ova stanica je već konfigurirana.",
