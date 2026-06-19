@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0-beta.3] - 2026-06-19
+
+> **Pre-release** — provider disable mechanism, smoke-test infrastructure, and a 16-provider live audit. Existing entries are unaffected; only new-entry creation is filtered for currently-broken upstreams.
+
 ### Added
 - **Provider disable mechanism**: new `DISABLED: ClassVar[bool] = False` on
   `BaseProvider`. Setting `True` hides the provider from the config flow
