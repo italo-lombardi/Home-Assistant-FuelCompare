@@ -128,14 +128,14 @@ def test_provider_label_contains_eu() -> None:
     assert "EU" in label or "Oil Bulletin" in label
 
 
-def test_provider_config_mode_is_location() -> None:
-    """CONFIG_MODE is 'location'."""
-    assert EuOilBulletinProvider.CONFIG_MODE == "location"
+def test_provider_config_mode_is_station_id() -> None:
+    """CONFIG_MODE is 'station_id' — country picker, no coordinates needed."""
+    assert EuOilBulletinProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_station_lookup_mode() -> None:
-    """STATION_LOOKUP_MODE is 'location_search'."""
-    assert EuOilBulletinProvider.STATION_LOOKUP_MODE == "location_search"
+    """STATION_LOOKUP_MODE is 'global_list' — fixed list of all EU countries."""
+    assert EuOilBulletinProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_poll_interval_is_weekly() -> None:
@@ -740,8 +740,12 @@ async def test_async_list_stations_returns_list_of_tuples() -> None:
 
 
 @_skip_if_no_openpyxl
-async def test_async_list_stations_label_includes_diesel_price() -> None:
-    """async_list_stations label includes the diesel price."""
+async def test_async_list_stations_label_is_country_name_only() -> None:
+    """async_list_stations label is the country name only — no fuel prices.
+
+    Prices change every poll (weekly) and would make the picker dropdown
+    look stale; the picker is purely a country selector.
+    """
     wb_bytes = _make_bulletin_workbook(
         [("Germany", 1800.0, 1650.0, 900.0, 800.0, 700.0, 600.0)]
     )
@@ -754,7 +758,9 @@ async def test_async_list_stations_label_includes_diesel_price() -> None:
     de_entry = next((r for r in result if r[0] == "DE"), None)
     assert de_entry is not None
     _, label = de_entry
-    assert "Diesel" in label or "1.65" in label
+    assert label == "Germany"
+    assert "€" not in label
+    assert "Diesel" not in label
 
 
 @_skip_if_no_openpyxl

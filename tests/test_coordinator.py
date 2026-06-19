@@ -237,7 +237,7 @@ async def test_async_update_data_missing_station(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
@@ -796,7 +796,7 @@ async def test_encrypted_api_both_paths_fail_raises(hass: HomeAssistant) -> None
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
@@ -826,7 +826,7 @@ async def test_encrypted_api_decrypt_key_unavailable_skips_api(
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
@@ -900,7 +900,7 @@ async def test_encrypted_api_empty_data_field(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
@@ -927,7 +927,7 @@ async def test_encrypted_api_empty_stations_list(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
@@ -1032,7 +1032,7 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=session,
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
@@ -1585,23 +1585,27 @@ async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
         "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
         return_value=MagicMock(),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: ProviderError"):
+        with pytest.raises(UpdateFailed, match="Provider error: "):
             await coordinator._async_update_data()
 
 
-async def test_provider_error_message_does_not_leak_original_text(
+async def test_provider_error_message_is_surfaced(
     hass: HomeAssistant, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """ProviderError text containing sensitive data must not appear in UpdateFailed."""
+    """ProviderError text is surfaced to UpdateFailed for actionable repairs UI.
+
+    Providers are responsible for keeping ProviderError messages free of
+    secrets (API keys, tokens) — they may include endpoint URLs, parameter
+    names, and human-readable causes. The coordinator caps very long messages
+    to prevent UI flooding but otherwise passes the text through verbatim.
+    """
     from custom_components.fuelcompare_ie.providers.base import ProviderError
 
-    secret_fragment = "api_key=SECRET_TOKEN_DO_NOT_LEAK"
+    msg = "Country code 'XX' not found in EC Oil Bulletin data"
     provider = MagicMock()
     provider.PROVIDER_KEY = "test_provider"
     provider.POLL_INTERVAL_SECONDS = 300
-    provider.async_fetch = AsyncMock(
-        side_effect=ProviderError(f"upstream rejected request: {secret_fragment}")
-    )
+    provider.async_fetch = AsyncMock(side_effect=ProviderError(msg))
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
@@ -1613,11 +1617,35 @@ async def test_provider_error_message_does_not_leak_original_text(
             with pytest.raises(UpdateFailed) as exc_info:
                 await coordinator._async_update_data()
 
-    # Public UpdateFailed message must NOT contain the leaked fragment.
-    assert secret_fragment not in str(exc_info.value)
-    assert str(exc_info.value) == "Provider error: ProviderError"
-    # The original error text must still be logged so operators can debug.
-    assert secret_fragment in caplog.text
+    assert str(exc_info.value) == f"Provider error: {msg}"
+    assert msg in caplog.text
+
+
+async def test_provider_error_message_truncated_if_too_long(
+    hass: HomeAssistant,
+) -> None:
+    """Very long ProviderError text is truncated to keep UI usable."""
+    from custom_components.fuelcompare_ie.providers.base import ProviderError
+
+    msg = "x" * 500
+    provider = MagicMock()
+    provider.PROVIDER_KEY = "test_provider"
+    provider.POLL_INTERVAL_SECONDS = 300
+    provider.async_fetch = AsyncMock(side_effect=ProviderError(msg))
+
+    coordinator = FuelCompareIECoordinator(hass, provider, "12345")
+
+    with patch(
+        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+        return_value=MagicMock(),
+    ):
+        with pytest.raises(UpdateFailed) as exc_info:
+            await coordinator._async_update_data()
+
+    surfaced = str(exc_info.value)
+    assert surfaced.startswith("Provider error: ")
+    assert surfaced.endswith("...")
+    assert len(surfaced) <= 260
 
 
 async def test_full_lifecycle_async_refresh(hass: HomeAssistant) -> None:

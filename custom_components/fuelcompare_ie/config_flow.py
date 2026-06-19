@@ -457,6 +457,11 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
+        if mode == "global_list":
+            # Provider returns a fixed global list of stations/regions
+            # (e.g. EU Oil Bulletin: 27 member states + aggregates).
+            # No coordinates or county needed — go straight to the picker.
+            return await self.async_step_station_picker()
         if (
             getattr(provider_cls, "CONFIG_MODE", None) == "location"
             or mode == "location_search"

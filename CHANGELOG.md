@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Coordinator now surfaces the provider's own error text in `UpdateFailed`
+  (e.g. `Provider error: Country code 'XX' not found in EC Oil Bulletin data`)
+  instead of the bare class name `Provider error: ProviderError`. Messages
+  longer than 240 chars are truncated to keep the repairs UI usable. Providers
+  remain responsible for keeping `ProviderError` text free of secrets.
+- **EU Oil Bulletin**: config flow no longer asks for coordinates. The EC
+  publishes only national weighted averages, so the user picks a country
+  directly from the list of 27 member states + EU27/Euro-area aggregates.
+  New `STATION_LOOKUP_MODE = "global_list"` for providers serving a fixed,
+  spatially uniform list.
+- **EU Oil Bulletin**: country picker label now shows just the country
+  name (was `Country — Diesel €X.XXX/L, E5 €X.XXX/L`); prices change
+  weekly and made the dropdown look stale between polls.
+- **EU Oil Bulletin**: suggested entry name now follows the convention
+  `EC Weekly Oil Bulletin (EU) - <Country>` (e.g. `EC Weekly Oil Bulletin (EU) - Ireland`).
+
 ## [0.7.0-beta.2] - 2026-06-17
 
 > **Pre-release** — Ireland provider fixes and config flow UX improvements.

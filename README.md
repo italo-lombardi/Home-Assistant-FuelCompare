@@ -42,7 +42,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | MF ČR Price Caps (Czech Republic) | Czech Republic | Unleaded, Diesel | Location + picker | ⬜ Untested |
 | Tankerkoenig (Germany) | Germany | Unleaded, Diesel, E10 | Location + picker (API key required) | ⬜ Untested |
 | FuelFinder (Denmark) | Denmark | Unleaded, Diesel, Premium | Location + picker | ⬜ Untested |
-| EC Weekly Oil Bulletin (EU) | European Union | Unleaded, Diesel, LPG, Kerosene | Location + picker | ⬜ Untested |
+| EC Weekly Oil Bulletin (EU) | European Union | Unleaded, Diesel, LPG, Kerosene | Country picker | ✅ Tested |
 | MINETUR (Spain) | Spain | Unleaded, Diesel, Premium, LPG | Location + picker | ⬜ Untested |
 | Statistics Finland — National Average | Finland | Unleaded, Diesel, E10, Kerosene | Location + picker | ⬜ Untested |
 | Prix Carburants (France) | France | Unleaded, Diesel, E10, E85, LPG | Location + picker | ⬜ Untested |
