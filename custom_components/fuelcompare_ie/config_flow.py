@@ -681,10 +681,15 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 if provider_cls
                 else "manual_id"
             )
-            is_location_mode = self._latitude is not None
+            # Mode-aware error message. Order matters: global_list always wins
+            # over coordinates/county fallbacks because a global-list provider
+            # may also carry stale lat/lng on the flow (e.g. EU Oil Bulletin
+            # entries created before the global_list dispatch was added).
             if mode == "global_list":
                 errors["base"] = "no_stations_found_global"
-            elif is_location_mode:
+            elif mode in ("location_search",) or (
+                self._latitude is not None and mode != "county_search"
+            ):
                 errors["base"] = "no_stations_found_location"
             else:
                 errors["base"] = "no_stations_found"
