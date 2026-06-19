@@ -9,7 +9,7 @@
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
 [![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
 
-> ⚠️ **Alpha software — testers welcome.** This integration ships providers for many countries, but only a handful have been exercised on real Home Assistant installs. Others compile and pass unit tests but have not been validated end-to-end against live data. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
+> ⚠️ **Early multi-country release — testers welcome.** 4 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×3 + EU Oil Bulletin), 16 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 16 are currently disabled because their upstream is broken (12) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
 
 > **Disclaimer:** This is an independent, unofficial custom integration. It is not affiliated with, endorsed by, or connected to any of the data providers it accesses. All provider names, websites, and trademarks are the property of their respective owners. This project reads publicly available data for personal, non-commercial use only.
 
@@ -17,7 +17,7 @@
 
 ## What this is
 
-A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices and station information from 36 providers across 27 countries. Each station you configure creates a set of sensors covering prices, opening hours, location, and real-time open/closed status.
+A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices and station information from 36 providers across 30 countries (plus an EU-wide regional source). Each station you configure creates a set of sensors covering prices, opening hours, location, and real-time open/closed status.
 
 Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinator`. Most providers require no API key.
 
@@ -25,7 +25,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 
 ## Supported Data Sources
 
-36 providers across 27 countries. Select a country in the config flow to see available providers.
+36 providers across 30 countries (plus EU). Select a country in the config flow to see available providers.
 
 | Provider | Country | Key Fuel Types | Lookup | Requires API Key | Status |
 |----------|---------|----------------|--------|------------------|--------|
@@ -180,7 +180,7 @@ Example automation:
 
 ## Supported languages
 
-Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, German, Greek, Hungarian, Irish, Italian, Latvian, Lithuanian, Norwegian, Polish, Portuguese, Romanian, Slovak, Slovenian, Spanish, Swedish, Ukrainian.
+35 translations: Albanian, Basque, Bosnian, Bulgarian, Catalan, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, Galician, German, Greek, Hungarian, Icelandic, Irish, Italian, Latvian, Lithuanian, Luxembourgish, Norwegian Bokmål, Norwegian Nynorsk, Polish, Portuguese, Romanian, Serbian, Slovak, Slovenian, Spanish, Swedish, Ukrainian, Welsh.
 
 ## Sibling integrations
 
