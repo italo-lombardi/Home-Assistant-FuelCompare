@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -661,6 +662,7 @@ async def test_async_step_api_key_initial_display_no_user_input(
 
 async def test_germany_provider_routes_through_api_key_step(
     hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Selecting Germany / Tankerkoenig routes through the api_key step."""
     from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
@@ -670,30 +672,28 @@ async def test_germany_provider_routes_through_api_key_step(
     # de_tankerkoenig is DISABLED in 0.7.0 (no API key in CI). Re-enable for
     # this test so the config flow exposes it and we can exercise the api_key
     # step.
-    DeTankerkoenigProvider.DISABLED = False
-    try:
-        result = await hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_USER}
+    monkeypatch.setattr(DeTankerkoenigProvider, "DISABLED", False)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    # Country selection step
+    if result.get("step_id") == "user":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_COUNTRY: "DE"}
         )
 
-        # Country selection step
-        if result.get("step_id") == "user":
-            result = await hass.config_entries.flow.async_configure(
-                result["flow_id"], user_input={CONF_COUNTRY: "DE"}
-            )
+    # Provider selection step (DE has only Tankerkoenig)
+    if result.get("step_id") == "provider":
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_PROVIDER: "de_tankerkoenig"},
+        )
 
-        # Provider selection step (DE has only Tankerkoenig)
-        if result.get("step_id") == "provider":
-            result = await hass.config_entries.flow.async_configure(
-                result["flow_id"],
-                user_input={CONF_PROVIDER: "de_tankerkoenig"},
-            )
-
-        # Must land on api_key step
-        assert result["type"] == "form"
-        assert result["step_id"] == "api_key"
-    finally:
-        DeTankerkoenigProvider.DISABLED = True
+    # Must land on api_key step
+    assert result["type"] == "form"
+    assert result["step_id"] == "api_key"
 
 
 async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
@@ -1890,7 +1890,9 @@ async def test_dispatch_after_provider_global_list_routes_to_picker(
 # ---------------------------------------------------------------------------
 
 
-def test_disabled_provider_hidden_from_country_list() -> None:
+def test_disabled_provider_hidden_from_country_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """A country whose only provider is DISABLED disappears from _countries_from_registry."""
     from custom_components.fuelcompare_ie.config_flow import _countries_from_registry
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
@@ -1906,14 +1908,13 @@ def test_disabled_provider_hidden_from_country_list() -> None:
     eu_providers = [c for c in PROVIDER_REGISTRY.values() if c.COUNTRY == "EU"]
     assert eu_providers == [EuOilBulletinProvider]
 
-    EuOilBulletinProvider.DISABLED = True
-    try:
-        assert all(code != "EU" for code, _ in _countries_from_registry())
-    finally:
-        EuOilBulletinProvider.DISABLED = False
+    monkeypatch.setattr(EuOilBulletinProvider, "DISABLED", True)
+    assert all(code != "EU" for code, _ in _countries_from_registry())
 
 
-def test_disabled_provider_hidden_from_provider_list() -> None:
+def test_disabled_provider_hidden_from_provider_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """_providers_for_country filters out DISABLED providers but keeps others."""
     from custom_components.fuelcompare_ie.config_flow import _providers_for_country
     from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
@@ -1928,13 +1929,10 @@ def test_disabled_provider_hidden_from_provider_list() -> None:
     assert IEFuelCompareProvider.PROVIDER_KEY in keys_before
     assert IEFuelFinderProvider.PROVIDER_KEY in keys_before
 
-    IEFuelCompareProvider.DISABLED = True
-    try:
-        keys_after = {k for k, _ in _providers_for_country("IE")}
-        assert IEFuelCompareProvider.PROVIDER_KEY not in keys_after
-        assert IEFuelFinderProvider.PROVIDER_KEY in keys_after
-    finally:
-        IEFuelCompareProvider.DISABLED = False
+    monkeypatch.setattr(IEFuelCompareProvider, "DISABLED", True)
+    keys_after = {k for k, _ in _providers_for_country("IE")}
+    assert IEFuelCompareProvider.PROVIDER_KEY not in keys_after
+    assert IEFuelFinderProvider.PROVIDER_KEY in keys_after
 
 
 def test_disabled_provider_default_is_false_on_base() -> None:

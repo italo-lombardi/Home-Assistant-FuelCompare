@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 
 from custom_components.fuelcompare_ie.const import (
     CONF_LATITUDE,
@@ -354,7 +355,9 @@ async def test_location_mode_two_close_stations_get_distinct_ids() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_setup_entry_succeeds_when_provider_is_disabled() -> None:
+async def test_setup_entry_succeeds_when_provider_is_disabled(
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
     """An existing config entry whose provider has DISABLED=True still loads.
 
     The DISABLED filter applies only to the config flow (so users can't create
@@ -377,14 +380,10 @@ async def test_setup_entry_succeeds_when_provider_is_disabled() -> None:
 
     coordinator_mock = MagicMock()
     coordinator_mock.async_config_entry_first_refresh = AsyncMock()
-    coordinator_mock.provider_capabilities = frozenset({"unleaded", "diesel"})
 
-    IEFuelCompareProvider.DISABLED = True
-    try:
-        with patch(
-            "custom_components.fuelcompare_ie.FuelCompareIECoordinator",
-            return_value=coordinator_mock,
-        ):
-            assert await async_setup_entry(hass, entry) is True
-    finally:
-        IEFuelCompareProvider.DISABLED = False
+    monkeypatch.setattr(IEFuelCompareProvider, "DISABLED", True)
+    with patch(
+        "custom_components.fuelcompare_ie.FuelCompareIECoordinator",
+        return_value=coordinator_mock,
+    ):
+        assert await async_setup_entry(hass, entry) is True

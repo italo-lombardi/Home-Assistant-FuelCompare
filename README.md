@@ -27,51 +27,51 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 
 36 providers across 27 countries. Select a country in the config flow to see available providers.
 
-| Provider | Country | Key Fuel Types | Lookup | API Key | Status |
-|----------|---------|----------------|--------|---------|--------|
-| Albania National Average (cargopedia.net) | Albania | Unleaded, Diesel, LPG | Location + picker | No | ⚠️ Disabled |
-| e-control (Austria) | Austria | Unleaded, Diesel, CNG | Location + picker | No | 🤖 Smoke-tested |
-| Fuel Prices QLD (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | Yes | ⚠️ Disabled (untested, API key required) |
-| FuelCheck NSW (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | No | 🤖 Smoke-tested |
-| FuelWatch (Australia WA) | Australia | Unleaded, Diesel, E10, LPG | Location + picker | No | 🤖 Smoke-tested |
-| Servo Saver VIC (Australia) | Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | Yes | ⚠️ Disabled (untested, API key required) |
-| cijenegoriva.ba (Bosnia and Herzegovina) | Bosnia & Herzegovina | Diesel, LPG | Location + picker | No | ⚠️ Disabled |
-| Carbu.com (Belgium) | Belgium | Unleaded, Diesel, LPG, CNG | Location + picker | No | 🤖 Smoke-tested |
-| Régie de l'énergie (Canada — QC) | Canada | Unleaded, Diesel, Premium | Location + picker | No | 🤖 Smoke-tested |
-| TCS Benzinpreis-Radar (Switzerland) | Switzerland | Unleaded, Diesel, Premium | Location + picker | No | 🤖 Smoke-tested |
-| MF ČR Price Caps (Czech Republic) | Czech Republic | Unleaded, Diesel | Location + picker | No | ⚠️ Disabled |
-| Tankerkoenig (Germany) | Germany | Unleaded, Diesel, E10 | Location + picker (API key required) | Yes | ⚠️ Disabled (untested, API key required) |
-| FuelFinder (Denmark) | Denmark | Unleaded, Diesel, Premium | Location + picker | No | ⚠️ Disabled |
-| EC Weekly Oil Bulletin (EU) | European Union | Unleaded, Diesel, LPG, Kerosene | Country picker | No | ✅ Tested |
-| MINETUR (Spain) | Spain | Unleaded, Diesel, Premium, LPG | Location + picker | No | ⚠️ Disabled |
-| Statistics Finland — National Average | Finland | Unleaded, Diesel, E10, Kerosene | Location + picker | No | ⚠️ Disabled |
-| Prix Carburants (France) | France | Unleaded, Diesel, E10, E85, LPG | Location + picker | No | 🤖 Smoke-tested |
-| Fuel Finder (UK) | United Kingdom | Unleaded, Diesel, Premium | Location + picker | No | 🤖 Smoke-tested |
-| Greek Ministry of Energy | Greece | Unleaded, Diesel, Premium, LPG | Location + picker | No | 🤖 Smoke-tested |
-| MINGOR (Croatia) | Croatia | Unleaded, Diesel, LPG | County picker → station | No | 🤖 Smoke-tested |
-| FuelFinder.ie | Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station | No | ✅ Tested |
-| fuelcompare.ie | Ireland | Unleaded, Diesel | Numeric station ID | No | ✅ Tested |
-| pumps.ie | Ireland | Unleaded, Diesel, Petrol | Location + picker | No | ✅ Tested |
-| Gasvaktin (Iceland) | Iceland | Unleaded, Diesel, Premium | Location + picker | No | 🤖 Smoke-tested |
-| MIMIT/MASE (Italy) | Italy | Unleaded, Diesel, LPG, CNG | Location + picker | No | 🤖 Smoke-tested |
-| Saurida (Lithuania) | Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker | No | 🤖 Smoke-tested |
-| carbu.com Luxembourg | Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker | No | ⚠️ Disabled |
-| ANRE (Moldova) | Moldova | Unleaded, Diesel | Location + picker | No | ⚠️ Disabled |
-| Min. of Energy (Montenegro) | Montenegro | Unleaded, Diesel, Kerosene | Location + picker | No | 🤖 Smoke-tested |
-| Malta | Malta | Unleaded, Diesel, LPG, Kerosene | Location + picker | No | ⚠️ Disabled |
-| Netherlands (ANWB) | Netherlands | Diesel, E10, LPG, Kerosene | Location + picker | No | ⚠️ Disabled |
-| Drivstoffpriser (Norway) | Norway | Unleaded, Diesel, Premium | Location + picker | Yes | ⚠️ Disabled (untested, API key required) |
-| ORLEN Wholesale (Poland) | Poland | Unleaded, Diesel, E85, LPG, Kerosene | Location + picker | No | ⚠️ Disabled |
-| DGEG (Portugal) | Portugal | Unleaded, Diesel, LPG | Location + picker | No | ⚠️ Disabled |
-| Bensinpriser.nu (Sweden) | Sweden | Unleaded, Diesel, E85 | Location + picker | No | 🤖 Smoke-tested |
-| goriva.si (Slovenia) | Slovenia | Unleaded, Diesel, Premium, LPG | Location + picker | No | 🤖 Smoke-tested |
+| Provider | Country | Key Fuel Types | Lookup | Requires API Key | Status |
+|----------|---------|----------------|--------|------------------|--------|
+| Albania National Average (cargopedia.net) | 🇦🇱 Albania | Unleaded, Diesel, LPG | Location + picker | — | ⚠️ Disabled |
+| e-control (Austria) | 🇦🇹 Austria | Unleaded, Diesel, CNG | Location + picker | — | 🤖 Smoke-tested |
+| Fuel Prices QLD (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
+| FuelCheck NSW (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | — | 🤖 Smoke-tested |
+| FuelWatch (Australia WA) | 🇦🇺 Australia | Unleaded, Diesel, E10, LPG | Location + picker | — | 🤖 Smoke-tested |
+| Servo Saver VIC (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
+| cijenegoriva.ba (Bosnia and Herzegovina) | 🇧🇦 Bosnia & Herzegovina | Diesel, LPG | Location + picker | — | ⚠️ Disabled |
+| Carbu.com (Belgium) | 🇧🇪 Belgium | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |
+| Régie de l'énergie (Canada — QC) | 🇨🇦 Canada | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
+| TCS Benzinpreis-Radar (Switzerland) | 🇨🇭 Switzerland | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
+| MF ČR Price Caps (Czech Republic) | 🇨🇿 Czech Republic | Unleaded, Diesel | Location + picker | — | ⚠️ Disabled |
+| Tankerkoenig (Germany) | 🇩🇪 Germany | Unleaded, Diesel, E10 | Location + picker (API key required) | 🔑 | ⚠️ Disabled (untested, API key required) |
+| FuelFinder (Denmark) | 🇩🇰 Denmark | Unleaded, Diesel, Premium | Location + picker | — | ⚠️ Disabled |
+| EC Weekly Oil Bulletin (EU) | 🇪🇺 European Union | Unleaded, Diesel, LPG, Kerosene | Country picker | — | ✅ Tested |
+| MINETUR (Spain) | 🇪🇸 Spain | Unleaded, Diesel, Premium, LPG | Location + picker | — | ⚠️ Disabled |
+| Statistics Finland — National Average | 🇫🇮 Finland | Unleaded, Diesel, E10, Kerosene | Location + picker | — | ⚠️ Disabled |
+| Prix Carburants (France) | 🇫🇷 France | Unleaded, Diesel, E10, E85, LPG | Location + picker | — | 🤖 Smoke-tested |
+| Fuel Finder (UK) | 🇬🇧 United Kingdom | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
+| Greek Ministry of Energy | 🇬🇷 Greece | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
+| MINGOR (Croatia) | 🇭🇷 Croatia | Unleaded, Diesel, LPG | County picker → station | — | 🤖 Smoke-tested |
+| FuelFinder.ie | 🇮🇪 Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station | — | ✅ Tested |
+| fuelcompare.ie | 🇮🇪 Ireland | Unleaded, Diesel | Numeric station ID | — | ✅ Tested |
+| pumps.ie | 🇮🇪 Ireland | Unleaded, Diesel, Petrol | Location + picker | — | ✅ Tested |
+| Gasvaktin (Iceland) | 🇮🇸 Iceland | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
+| MIMIT/MASE (Italy) | 🇮🇹 Italy | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |
+| Saurida (Lithuania) | 🇱🇹 Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
+| carbu.com Luxembourg | 🇱🇺 Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker | — | ⚠️ Disabled |
+| ANRE (Moldova) | 🇲🇩 Moldova | Unleaded, Diesel | Location + picker | — | ⚠️ Disabled |
+| Min. of Energy (Montenegro) | 🇲🇪 Montenegro | Unleaded, Diesel, Kerosene | Location + picker | — | 🤖 Smoke-tested |
+| Malta | 🇲🇹 Malta | Unleaded, Diesel, LPG, Kerosene | Location + picker | — | ⚠️ Disabled |
+| Netherlands (ANWB) | 🇳🇱 Netherlands | Diesel, E10, LPG, Kerosene | Location + picker | — | ⚠️ Disabled |
+| Drivstoffpriser (Norway) | 🇳🇴 Norway | Unleaded, Diesel, Premium | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
+| ORLEN Wholesale (Poland) | 🇵🇱 Poland | Unleaded, Diesel, E85, LPG, Kerosene | Location + picker | — | ⚠️ Disabled |
+| DGEG (Portugal) | 🇵🇹 Portugal | Unleaded, Diesel, LPG | Location + picker | — | ⚠️ Disabled |
+| Bensinpriser.nu (Sweden) | 🇸🇪 Sweden | Unleaded, Diesel, E85 | Location + picker | — | 🤖 Smoke-tested |
+| goriva.si (Slovenia) | 🇸🇮 Slovenia | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
 
 **Status legend:**
 - ✅ **Tested** — verified on a production Home Assistant install with live upstream data over multiple polls.
 - 🤖 **Smoke-tested** — deployed in a dev Home Assistant; `async_list_stations` and `async_fetch` returned populated sensors (`fetch_problem` = off, fuel prices live). Not yet long-running tested.
-- 🔑 **API key required** — provider needs an upstream API key the project does not have. Implementation looks correct but is not verifiable end-to-end without credentials. Please open an issue with logs if you have a key and try one.
 - ⚠️ **Disabled** — provider is currently failing against its upstream (empty list, HTTP 4xx/5xx, or stale cache without refresh) **or** requires an API key the project does not have. Hidden from the config flow so new entries cannot be created. Existing entries continue loading from cache. Will be re-enabled once the upstream contract is fixed or a tester confirms the API-key flow works.
-- ⬜ **Untested** — no verification yet. May still work; please open an issue with logs if you try one.
+
+**Requires API Key:** 🔑 = key required (free registration usually). — = no key, public endpoint.
 
 > **Disabled provider for your country?** If you have an API key, want to volunteer testing time, or already verified one of these against your real upstream — please [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues/new) and I will re-enable it. Most disabled rows are one polling round of confirmation away from going green.
 
