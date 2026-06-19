@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -661,8 +662,18 @@ async def test_async_step_api_key_initial_display_no_user_input(
 
 async def test_germany_provider_routes_through_api_key_step(
     hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Selecting Germany / Tankerkoenig routes through the api_key step."""
+    from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
+        DeTankerkoenigProvider,
+    )
+
+    # de_tankerkoenig is DISABLED in 0.7.0 (no API key in CI). Re-enable for
+    # this test so the config flow exposes it and we can exercise the api_key
+    # step.
+    monkeypatch.setattr(DeTankerkoenigProvider, "DISABLED", False)
+
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
@@ -701,6 +712,7 @@ async def test_api_key_stored_in_entry_options(hass: HomeAssistant) -> None:
     class _FakeDEProvider(DeTankerkoenigProvider):
         PROVIDER_KEY = "de_tankerkoenig_test_key"
         COUNTRY = "DE"
+        DISABLED = False  # parent is DISABLED in 0.7.0; re-enable for the test
         REQUIRES_API_KEY = True
         CONFIG_MODE = "location"
         STATION_LOOKUP_MODE = "location_search"
@@ -1835,6 +1847,99 @@ async def test_dispatch_after_provider_unknown_key_falls_back_to_station(
     result = await flow._dispatch_after_provider()
     assert result["type"] == "form"
     assert result["step_id"] == "station"
+
+
+# ---------------------------------------------------------------------------
+# test_dispatch_after_provider_global_list_routes_to_picker  (config_flow.py line 474)
+# ---------------------------------------------------------------------------
+
+
+async def test_dispatch_after_provider_global_list_routes_to_picker(
+    hass: HomeAssistant,
+) -> None:
+    """_dispatch_after_provider routes to station_picker for STATION_LOOKUP_MODE='global_list'.
+
+    EU Oil Bulletin uses this mode: no coordinates / county needed, the
+    user picks straight from the country list. We don't run the picker
+    step itself (it would try a real network call); we only confirm the
+    dispatcher selected it.
+    """
+    from unittest.mock import AsyncMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = hass
+    flow._provider_key = "eu_oil_bulletin"
+
+    sentinel = {"type": "form", "step_id": "station_picker"}
+    with patch.object(
+        FuelCompareIEConfigFlow,
+        "async_step_station_picker",
+        new=AsyncMock(return_value=sentinel),
+    ) as mock_picker:
+        result = await flow._dispatch_after_provider()
+
+    mock_picker.assert_awaited_once()
+    assert result is sentinel
+
+
+# ---------------------------------------------------------------------------
+# DISABLED contract — providers with DISABLED=True hidden from config flow
+# but existing entries continue to load.
+# ---------------------------------------------------------------------------
+
+
+def test_disabled_provider_hidden_from_country_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A country whose only provider is DISABLED disappears from _countries_from_registry."""
+    from custom_components.fuelcompare_ie.config_flow import _countries_from_registry
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.eu_oil_bulletin import (
+        EuOilBulletinProvider,
+    )
+
+    # EU has only one provider (eu_oil_bulletin). Confirm it appears, then
+    # flip DISABLED and confirm the country is hidden.
+    assert any(code == "EU" for code, _ in _countries_from_registry())
+
+    # Sanity check: this is the only EU provider in the registry.
+    eu_providers = [c for c in PROVIDER_REGISTRY.values() if c.COUNTRY == "EU"]
+    assert eu_providers == [EuOilBulletinProvider]
+
+    monkeypatch.setattr(EuOilBulletinProvider, "DISABLED", True)
+    assert all(code != "EU" for code, _ in _countries_from_registry())
+
+
+def test_disabled_provider_hidden_from_provider_list(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_providers_for_country filters out DISABLED providers but keeps others."""
+    from custom_components.fuelcompare_ie.config_flow import _providers_for_country
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+    from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
+        IEFuelFinderProvider,
+    )
+
+    # Ireland has multiple providers. Disable one, confirm it's gone, others stay.
+    keys_before = {k for k, _ in _providers_for_country("IE")}
+    assert IEFuelCompareProvider.PROVIDER_KEY in keys_before
+    assert IEFuelFinderProvider.PROVIDER_KEY in keys_before
+
+    monkeypatch.setattr(IEFuelCompareProvider, "DISABLED", True)
+    keys_after = {k for k, _ in _providers_for_country("IE")}
+    assert IEFuelCompareProvider.PROVIDER_KEY not in keys_after
+    assert IEFuelFinderProvider.PROVIDER_KEY in keys_after
+
+
+def test_disabled_provider_default_is_false_on_base() -> None:
+    """BaseProvider.DISABLED defaults to False so untouched providers stay visible."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    assert BaseProvider.DISABLED is False
 
 
 # ---------------------------------------------------------------------------

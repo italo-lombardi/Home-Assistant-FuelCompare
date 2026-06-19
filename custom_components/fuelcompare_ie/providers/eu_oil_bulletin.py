@@ -174,16 +174,20 @@ class EuOilBulletinProvider(BaseProvider):
 
     Usage in config flow
     --------------------
-    CONFIG_MODE='location' is used here not because we need coordinates but
-    because the station_id is the country code (not a numeric ID).  The user
-    selects a country from the async_list_stations dropdown.
+    STATION_LOOKUP_MODE='global_list' tells the config flow to skip the
+    coordinates step and route the user straight to the country picker
+    (async_list_stations returns all 27 member states + aggregates).
+    The picked country code becomes the entry's station_id.
     """
 
     COUNTRY = "EU"
     PROVIDER_KEY = "eu_oil_bulletin"
     LABEL = "EC Weekly Oil Bulletin (EU)"
-    CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    # Country-picker mode: the user picks a country from the global list of
+    # EU member states + aggregate rows.  No coordinates or county are needed
+    # because the EC publishes only national weighted averages.
+    CONFIG_MODE = "station_id"
+    STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = _POLL_INTERVAL
     REQUIRES_API_KEY = False
     STATION_PAGE_URL: ClassVar[str] = (
@@ -227,9 +231,10 @@ class EuOilBulletinProvider(BaseProvider):
         Args:
             station_id:  ISO country code or aggregate key ('EU27', 'EURO').
                          Stored for use in async_fetch.
-            latitude:    Unused; accepted for BaseProvider location-mode compat.
-            longitude:   Unused; accepted for BaseProvider location-mode compat.
-            radius_km:   Unused; accepted for BaseProvider location-mode compat.
+            latitude:    Unused. Kept for back-compat with pre-global_list
+                         entries (and entry.data) that still carry coordinates.
+            longitude:   Unused. See latitude.
+            radius_km:   Unused. See latitude.
         """
         self._station_id = station_id.upper() if station_id else "EU27"
         self._latitude = latitude
@@ -340,26 +345,30 @@ class EuOilBulletinProvider(BaseProvider):
         session: ClientSession,
         station_id: str,
     ) -> str | None:
-        """Return a display name for the country code, or None.
+        """Return display name for the country code, or None.
 
-        Attempts a quick name lookup from the static mapping table without
-        downloading the Excel file.
+        Format: 'EC Weekly Oil Bulletin (EU) - <Country>'.  Used by the
+        config flow as the suggested entry name after the user picks a
+        country in the station picker.
 
         Args:
             session:    aiohttp ClientSession (not used; name derived locally).
             station_id: ISO country code.
 
         Returns:
-            Country name string, or None.
+            Formatted name string, or None.
         """
         code = (station_id or "").upper()
-        # Reverse lookup in the name → code map
+        country: str | None = None
         for name, iso in _COUNTRY_NAME_TO_CODE.items():
             if iso == code:
-                return name.title()
-        if code:
-            return f"EU ({code})"
-        return None
+                country = name.title()
+                break
+        if not country and code:
+            country = code
+        if not country:
+            return None
+        return f"{self.LABEL} - {country}"
 
     async def async_list_stations(
         self,
@@ -438,18 +447,9 @@ class EuOilBulletinProvider(BaseProvider):
         result: list[tuple[str, str]] = []
         for code, rec in sorted(rows_parsed.items()):
             country_name = rec.get("country_name") or code
-            diesel = rec.get("diesel")
-            e5 = rec.get("e5")
-            parts = []
-            if diesel is not None:
-                parts.append(f"Diesel €{diesel:.3f}/L")
-            if e5 is not None:
-                parts.append(f"E5 €{e5:.3f}/L")
-            if parts:
-                label = f"{country_name} — {', '.join(parts)}"
-            else:
-                label = country_name
-            result.append((code, label))
+            # Picker label is just the country name — fuel prices change weekly
+            # and would make the dropdown look stale between polls.
+            result.append((code, country_name))
 
         return result
 

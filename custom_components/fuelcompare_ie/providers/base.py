@@ -54,7 +54,20 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 class ProviderError(Exception):
-    """Raised by a provider when it cannot retrieve station data."""
+    """Raised by a provider when it cannot retrieve station data.
+
+    Contributor note: the message string passed to ProviderError is
+    USER-VISIBLE — it surfaces in Home Assistant's repairs / diagnostics
+    UI via UpdateFailed. Keep it actionable and free of credentials:
+
+    - DO include: country/postal codes, station IDs, HTTP status, parser
+      cause, endpoint URL (without query-string secrets).
+    - DO NOT include: API keys, bearer tokens, Authorization headers,
+      raw upstream response bodies that may carry session cookies.
+
+    The coordinator caps the surfaced text at ~240 chars but does NOT
+    redact — providers are responsible for keeping the message clean.
+    """
 
 
 class StationData(TypedDict, total=False):
@@ -309,6 +322,20 @@ class BaseProvider(ABC):
 
     Set to True in subclasses whose __init__ accepts a postal_code parameter.
     The config flow uses this flag instead of inspect.signature() detection.
+    """
+
+    DISABLED: ClassVar[bool] = False
+    """If True, the provider is hidden from the config flow country/provider list.
+
+    Use this to soft-disable a provider whose upstream is broken, has changed
+    its API contract, or is otherwise known-failing. The provider class stays
+    importable and registered (so existing config entries keep loading and
+    don't blow up with KeyError) but new entries cannot be created. Flip back
+    to False once the provider is fixed.
+
+    UX note: if every provider for a given country has DISABLED=True, the
+    country itself disappears from the config flow's country picker — the
+    user is never offered a country with no working providers.
     """
 
     API_KEY_REGISTRATION_URL: ClassVar[str] = ""

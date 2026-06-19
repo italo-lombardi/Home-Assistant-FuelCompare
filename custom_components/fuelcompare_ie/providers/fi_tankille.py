@@ -262,6 +262,7 @@ class FiTankilleProvider(BaseProvider):
 
     COUNTRY = "FI"
     PROVIDER_KEY = "fi_tankille"
+    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "Statistics Finland — National Average (Finland)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

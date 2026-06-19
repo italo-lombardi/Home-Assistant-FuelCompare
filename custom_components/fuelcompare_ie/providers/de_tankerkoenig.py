@@ -151,6 +151,7 @@ class DeTankerkoenigProvider(BaseProvider):
 
     COUNTRY = "DE"
     PROVIDER_KEY = "de_tankerkoenig"
+    DISABLED = True  # 0.7.0: untested — API key required, no creds available
     LABEL = "Tankerkoenig (Germany)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

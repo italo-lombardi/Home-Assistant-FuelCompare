@@ -135,6 +135,7 @@ class AuVicProvider(BaseProvider):
 
     COUNTRY = "AU"
     PROVIDER_KEY = "au_vic"
+    DISABLED = True  # 0.7.0: untested — API key required, no creds available
     LABEL = "Servo Saver VIC (Australia)"
     CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "location_search"
