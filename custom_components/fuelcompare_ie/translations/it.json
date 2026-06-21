@@ -91,12 +91,11 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Connessione non sicura — pumps.ie ({entry_title})",
-      "description": "La verifica TLS è disattivata per **{entry_title}**. Il certificato di pumps.ie non viene verificato. Chiunque sulla rete può leggere o alterare le tue richieste. Premi **Invia** per disattivare questa opzione e ripristinare la verifica sicura.",
       "fix_flow": {
         "step": {
           "confirm": {
             "title": "Ripristina verifica TLS",
-            "description": "Verrà disattivata l'opzione 'allow_insecure_tls' per **pumps.ie** e l'integrazione verrà ricaricata. Le richieste useranno TLS verificato — falliranno finché il certificato di pumps.ie non sarà valido, ma il traffico non sarà più esposto a MITM."
+            "description": "La verifica TLS è disattivata per **{entry_title}**. Il certificato di pumps.ie non viene verificato, quindi chiunque sulla rete può leggere o alterare le tue richieste. Premi Invia per disattivare l'opzione 'allow_insecure_tls' per **pumps.ie** e ricaricare l'integrazione. Le richieste useranno TLS verificato — falliranno finché il certificato di pumps.ie non sarà valido, ma il traffico non sarà più esposto a MITM."
           }
         }
       }

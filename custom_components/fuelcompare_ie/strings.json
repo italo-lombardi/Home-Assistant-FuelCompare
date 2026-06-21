@@ -108,12 +108,11 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "Insecure connection — pumps.ie ({entry_title})",
-      "description": "TLS verification is disabled for **{entry_title}**. The pumps.ie certificate is not verified. Anyone on the network path can read or alter your queries. Pick **Submit** below to disable this option and restore secure verification.",
       "fix_flow": {
         "step": {
           "confirm": {
             "title": "Restore TLS verification",
-            "description": "This will turn off the 'allow_insecure_tls' option for **pumps.ie** and reload the entry. After this, requests will use verified TLS — they will fail while pumps.ie's certificate is invalid, but your traffic will not be exposed to MITM."
+            "description": "TLS verification is disabled for **{entry_title}**. The pumps.ie certificate is not verified, so anyone on the network path can read or alter your queries. Submit to turn off the 'allow_insecure_tls' option for **pumps.ie** and reload the entry. After this, requests will use verified TLS — they will fail while pumps.ie's certificate is invalid, but your traffic will not be exposed to MITM."
           }
         }
       }
