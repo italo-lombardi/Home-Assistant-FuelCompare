@@ -18,6 +18,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import (
+    CONF_ALLOW_INSECURE_TLS,
     CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
@@ -154,6 +155,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         kwargs["longitude"] = longitude
     if radius_km is not None and (has_var_kwargs or "radius_km" in sig.parameters):
         kwargs["radius_km"] = radius_km
+    # ie_pumps-only: explicit opt-in to TLS verification bypass.  Stored in
+    # entry.options so the user can toggle without removing the integration.
+    # Default False — fail-secure on first load after upgrade.
+    if "allow_insecure_tls" in sig.parameters or has_var_kwargs:
+        allow_insecure = bool(entry.options.get(CONF_ALLOW_INSECURE_TLS, False))
+        if allow_insecure:
+            kwargs["allow_insecure_tls"] = True
     if kwargs:
         provider = provider_cls(station_id, **kwargs)
     else:
@@ -182,17 +190,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_placeholders={"entry_title": entry.title},
         )
 
-    # Warn users of ie_pumps that TLS certificate verification is disabled.
+    # ie_pumps: TLS verification is enforced by default.  Only when the user
+    # has explicitly opted in via CONF_ALLOW_INSECURE_TLS do we attach a
+    # CERT_NONE SSLContext to outbound requests AND raise a persistent SEV-1
+    # ERROR repair issue.  Re-created on every restart while opt-in is active.
     if provider_key == "ie_pumps":
-        async_create_issue(
-            hass,
-            DOMAIN,
-            f"ie_pumps_tls_disabled_{entry.entry_id}",
-            is_fixable=False,
-            severity=IssueSeverity.WARNING,
-            translation_key="ie_pumps_tls_disabled",
-            translation_placeholders={"entry_title": entry.title},
-        )
+        issue_id = f"ie_pumps_tls_disabled_{entry.entry_id}"
+        if entry.options.get(CONF_ALLOW_INSECURE_TLS, False):
+            async_create_issue(
+                hass,
+                DOMAIN,
+                issue_id,
+                is_fixable=True,
+                is_persistent=True,
+                severity=IssueSeverity.ERROR,
+                translation_key="ie_pumps_tls_disabled",
+                translation_placeholders={"entry_title": entry.title},
+                data={"entry_id": entry.entry_id},
+            )
+        else:
+            # Fail-secure default — emit a one-shot migration notice so users
+            # whose previous install relied on the silent bypass understand
+            # why the integration suddenly errors on an invalid upstream cert.
+            async_delete_issue(hass, DOMAIN, issue_id)
+            _LOGGER.info(
+                "fuelcompare_ie: TLS verification is enforced for ie_pumps. "
+                "If your setup previously depended on the silent bypass, "
+                "re-enable via integration options (allow_insecure_tls). "
+                "SECURITY WARNING: enabling that option exposes your queries "
+                "to MITM attacks."
+            )
 
     # Build platform list — always sensor + binary_sensor; add device_tracker
     # when show_on_map is enabled and the provider exposes lat/lon data.

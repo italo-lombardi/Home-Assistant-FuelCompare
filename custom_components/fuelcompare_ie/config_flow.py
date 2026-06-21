@@ -18,6 +18,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
+    CONF_ALLOW_INSECURE_TLS,
     CONF_API_KEY,
     CONF_COUNTRY,
     CONF_LATITUDE,
@@ -25,6 +26,7 @@ from .const import (
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_RADIUS_KM,
+    CONF_RISK_ACKNOWLEDGED,
     CONF_SHOW_ON_MAP,
     CONF_STATION_COUNTY,
     CONF_STATION_ID,
@@ -411,6 +413,8 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._radius_km: float = DEFAULT_RADIUS_KM
         self._suggested_name: str = ""
         self._api_key: str = ""  # optional API key for providers that require it
+        self._allow_insecure_tls: bool = False  # ie_pumps-only opt-in
+        self._tls_choice_made: bool = False  # ie_pumps confirmation step seen
 
     # ---- Step 1: country --------------------------------------------------------
 
@@ -464,6 +468,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         # Providers that require an API key get an extra step first
         if getattr(provider_cls, "REQUIRES_API_KEY", False) and not self._api_key:
             return await self.async_step_api_key()
+        # ie_pumps-only: present TLS opt-in / refusal screen up front so the
+        # user makes an informed choice before we attempt any network call to
+        # pumps.ie (whose certificate is expired).  Default option keeps TLS
+        # verification enforced; user must tick a separate "I understand"
+        # checkbox to enable the bypass.
+        if self._provider_key == "ie_pumps" and not self._tls_choice_made:
+            return await self.async_step_ie_pumps_tls()
         mode = getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
         if mode == "county_search":
             return await self.async_step_county()
@@ -506,6 +517,46 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 if any(key == "ie_fuelcompare" for key, _ in providers)
                 else "",
             },
+        )
+
+    # ---- Step: ie_pumps TLS opt-in (security gate) ------------------------------
+
+    async def async_step_ie_pumps_tls(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Force the user to make an informed choice about TLS bypass.
+
+        Default option leaves TLS verification enforced — pumps.ie will fail
+        to fetch while its certificate is invalid, but the user is not
+        exposed to MITM on every poll.  To bypass, the user must explicitly
+        flip ``allow_insecure_tls`` AND tick the separate "I understand"
+        risk-acknowledgement checkbox.  Both must be set; the schema makes
+        ``allow_insecure_tls`` default to False so a user who hits Submit
+        without changing anything stays secure.
+        """
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            allow = bool(user_input.get(CONF_ALLOW_INSECURE_TLS, False))
+            ack = bool(user_input.get(CONF_RISK_ACKNOWLEDGED, False))
+            if allow and not ack:
+                errors[CONF_RISK_ACKNOWLEDGED] = "tls_risk_not_acknowledged"
+            else:
+                self._allow_insecure_tls = allow
+                self._tls_choice_made = True
+                return await self._dispatch_after_provider()
+
+        schema = vol.Schema(
+            {
+                vol.Optional(CONF_ALLOW_INSECURE_TLS, default=False): bool,
+                vol.Optional(CONF_RISK_ACKNOWLEDGED, default=False): bool,
+            }
+        )
+        return self.async_show_form(
+            step_id="ie_pumps_tls",
+            data_schema=schema,
+            errors=errors,
         )
 
     # ---- Step 3a: station ID (manual_id mode) -----------------------------------
@@ -641,6 +692,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 init_kwargs: dict[str, Any] = {}
                 if self._api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
                     init_kwargs["api_key"] = self._api_key
+                # ie_pumps-only: forward TLS opt-in so the station picker
+                # fetch uses the same trust setting as the live coordinator.
+                if self._provider_key == "ie_pumps" and self._allow_insecure_tls:
+                    init_kwargs["allow_insecure_tls"] = True
                 provider_instance = provider_cls("", **init_kwargs)
                 list_kwargs: dict[str, Any] = {"county": self._station_county}
                 if self._postal_code:
@@ -801,6 +856,11 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 options[CONF_API_KEY] = self._api_key
             if self._show_on_map:
                 options[CONF_SHOW_ON_MAP] = True
+            # ie_pumps-only: persist TLS opt-in so the runtime knows whether
+            # to attach the CERT_NONE context.  Default False preserves
+            # fail-secure behaviour for any future entry creation path.
+            if self._provider_key == "ie_pumps" and self._allow_insecure_tls:
+                options[CONF_ALLOW_INSECURE_TLS] = True
             if self._station_id:
                 data[CONF_STATION_ID] = self._station_id
                 if self._station_county:
@@ -836,6 +896,7 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
         provider_key = self.config_entry.data.get(CONF_PROVIDER, DEFAULT_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_key)
         requires_api_key = getattr(provider_cls, "REQUIRES_API_KEY", False)
+        is_ie_pumps = provider_key == "ie_pumps"
         has_location_caps = (
             provider_cls is not None
             and {
@@ -847,6 +908,9 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
 
         existing_key = self.config_entry.options.get(CONF_API_KEY, "")
         current_show_on_map = self.config_entry.options.get(CONF_SHOW_ON_MAP, False)
+        current_allow_insecure = self.config_entry.options.get(
+            CONF_ALLOW_INSECURE_TLS, False
+        )
 
         if is_location_entry:
             current_radius = self.config_entry.options.get(
@@ -863,6 +927,13 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                 schema_dict[
                     vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
                 ] = bool
+            if is_ie_pumps:
+                schema_dict[
+                    vol.Optional(
+                        CONF_ALLOW_INSECURE_TLS, default=current_allow_insecure
+                    )
+                ] = bool
+                schema_dict[vol.Optional(CONF_RISK_ACKNOWLEDGED, default=False)] = bool
         else:
             schema_dict = {}
             if requires_api_key:
@@ -871,6 +942,13 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                 schema_dict[
                     vol.Optional(CONF_SHOW_ON_MAP, default=current_show_on_map)
                 ] = bool
+            if is_ie_pumps:
+                schema_dict[
+                    vol.Optional(
+                        CONF_ALLOW_INSECURE_TLS, default=current_allow_insecure
+                    )
+                ] = bool
+                schema_dict[vol.Optional(CONF_RISK_ACKNOWLEDGED, default=False)] = bool
             # Non-location entries with no configurable options finalise immediately.
             if not schema_dict and user_input is None:
                 return self.async_create_entry(data={})
@@ -887,6 +965,19 @@ class FuelCompareIEOptionsFlow(OptionsFlowWithConfigEntry):
                 return self.async_show_form(
                     step_id="init", data_schema=schema, errors=errors
                 )
+            # ie_pumps: enabling allow_insecure_tls requires a separate ack tick.
+            # Disabling it (or leaving off) is unconditional — that's the safe
+            # state.  We strip the transient ack key before persisting so the
+            # checkbox always re-renders unticked next time the dialog opens.
+            if is_ie_pumps:
+                requested_allow = bool(user_input.get(CONF_ALLOW_INSECURE_TLS, False))
+                acknowledged = bool(user_input.get(CONF_RISK_ACKNOWLEDGED, False))
+                if requested_allow and not current_allow_insecure and not acknowledged:
+                    errors[CONF_RISK_ACKNOWLEDGED] = "tls_risk_not_acknowledged"
+                    return self.async_show_form(
+                        step_id="init", data_schema=schema, errors=errors
+                    )
+                user_input.pop(CONF_RISK_ACKNOWLEDGED, None)
             return self.async_create_entry(data=user_input)
 
         return self.async_show_form(step_id="init", data_schema=schema)

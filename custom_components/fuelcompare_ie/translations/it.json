@@ -42,6 +42,14 @@
           "api_key": "Chiave API"
         }
       },
+      "ie_pumps_tls": {
+        "title": "Connessione non sicura",
+        "description": "Il certificato TLS di pumps.ie non è valido. Con la verifica attiva, le richieste falliranno. Con la verifica disattivata, chiunque sulla rete può leggere o alterare le tue richieste. L'impostazione predefinita è OFF (la scelta sicura). Per attivarla, spunta ENTRAMBE le caselle.",
+        "data": {
+          "allow_insecure_tls": "Disattiva la verifica TLS per pumps.ie",
+          "risk_acknowledged": "Comprendo il rischio"
+        }
+      },
       "station_picker": {
         "title": "Seleziona stazione",
         "description": "Seleziona una stazione, regione o paese dall'elenco qui sotto.",
@@ -67,7 +75,8 @@
       "invalid_location": "Coordinate non valide. Inserisci valori validi di latitudine e longitudine.",
       "no_stations_found": "Nessuna stazione trovata per questa contea. Prova una contea diversa.",
       "no_stations_found_location": "Nessuna stazione trovata nelle vicinanze di queste coordinate. Prova a modificare la posizione o ad aumentare il raggio di ricerca.",
-      "no_stations_found_global": "Impossibile caricare l'elenco del fornitore. La fonte potrebbe non essere disponibile o manca una dipendenza richiesta. Controlla i log di Home Assistant per i dettagli."
+      "no_stations_found_global": "Impossibile caricare l'elenco del fornitore. La fonte potrebbe non essere disponibile o manca una dipendenza richiesta. Controlla i log di Home Assistant per i dettagli.",
+      "tls_risk_not_acknowledged": "Spunta la casella 'Comprendo il rischio' per disattivare la verifica TLS."
     },
     "abort": {
       "already_configured": "Questa stazione è già configurata.",
@@ -81,8 +90,16 @@
       "description": "Il sito fuelcompare.ie è previsto per la chiusura il **30 giugno 2026**. La tua stazione **{entry_title}** smetterà di ricevere aggiornamenti sui prezzi dopo tale data. Considera di passare a un'altra fonte di prezzi del carburante irlandese, come FuelFinder IE o IE Pumps."
     },
     "ie_pumps_tls_disabled": {
-      "title": "Verifica del certificato TLS di pumps.ie disabilitata",
-      "description": "Il provider pumps.ie per **{entry_title}** ha la verifica del certificato TLS disabilitata perché il certificato del sito è scaduto. I dati sono comunque cifrati durante la trasmissione, ma l'identità del server non è verificata."
+      "title": "Connessione non sicura — pumps.ie ({entry_title})",
+      "description": "La verifica TLS è disattivata per **{entry_title}**. Il certificato di pumps.ie non viene verificato. Chiunque sulla rete può leggere o alterare le tue richieste. Premi **Invia** per disattivare questa opzione e ripristinare la verifica sicura.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Ripristina verifica TLS",
+            "description": "Verrà disattivata l'opzione 'allow_insecure_tls' per **pumps.ie** e l'integrazione verrà ricaricata. Le richieste useranno TLS verificato — falliranno finché il certificato di pumps.ie non sarà valido, ma il traffico non sarà più esposto a MITM."
+          }
+        }
+      }
     }
   },
   "entity": {
@@ -238,9 +255,15 @@
         "data": {
           "api_key": "Chiave API",
           "radius_km": "Raggio di ricerca (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Show station on map",
+          "allow_insecure_tls": "Disattiva la verifica TLS per pumps.ie",
+          "risk_acknowledged": "Comprendo il rischio"
         }
       }
+    },
+    "error": {
+      "tls_risk_not_acknowledged": "Spunta la casella 'Comprendo il rischio' per disattivare la verifica TLS.",
+      "invalid_api_key": "La chiave API non può essere vuota."
     }
   }
 }

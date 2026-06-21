@@ -2920,24 +2920,26 @@ async def test_options_flow_station_entry_invalid_api_key_shows_error(
 async def test_async_setup_entry_ie_pumps_creates_tls_issue(
     hass: HomeAssistant,
 ) -> None:
-    """async_setup_entry creates ie_pumps_tls_disabled repair issue for ie_pumps entries."""
+    """async_setup_entry creates SEV-1 repair issue when allow_insecure_tls is opted in."""
     from unittest.mock import patch
 
     from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.const import CONF_ALLOW_INSECURE_TLS
     from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
 
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=f"{DOMAIN}_ie_pumps_tls_issue_test",
         data={CONF_STATION_ID: "99", CONF_PROVIDER: "ie_pumps"},
+        options={CONF_ALLOW_INSECURE_TLS: True},
         title="IE Pumps TLS Test",
     )
     entry.add_to_hass(hass)
 
-    created_issues: list[str] = []
+    captured: list[tuple[str, dict]] = []
 
     def _capture_issue(hass, domain, issue_id, **kwargs):  # noqa: ANN001
-        created_issues.append(issue_id)
+        captured.append((issue_id, kwargs))
 
     with (
         patch.object(
@@ -2958,7 +2960,64 @@ async def test_async_setup_entry_ie_pumps_creates_tls_issue(
         result = await async_setup_entry(hass, entry)
 
     assert result is True
-    assert any("ie_pumps_tls_disabled" in issue_id for issue_id in created_issues)
+    matching = [(iid, kw) for iid, kw in captured if "ie_pumps_tls_disabled" in iid]
+    assert matching, "expected ie_pumps_tls_disabled repair issue"
+    _, kwargs = matching[0]
+    # SEV-1 ERROR + fixable + persistent + carries entry_id for the fix flow
+    from homeassistant.helpers.issue_registry import IssueSeverity  # noqa: PLC0415
+
+    assert kwargs.get("severity") == IssueSeverity.ERROR
+    assert kwargs.get("is_fixable") is True
+    assert kwargs.get("is_persistent") is True
+    assert kwargs.get("data", {}).get("entry_id") == entry.entry_id
+
+
+async def test_async_setup_entry_ie_pumps_default_no_tls_issue(
+    hass: HomeAssistant,
+) -> None:
+    """Default (no opt-in): repair issue is NOT created and prior copy is deleted."""
+    from unittest.mock import patch
+
+    from custom_components.fuelcompare_ie import async_setup_entry
+    from custom_components.fuelcompare_ie.coordinator import FuelCompareIECoordinator
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=f"{DOMAIN}_ie_pumps_tls_no_optin_test",
+        data={CONF_STATION_ID: "99", CONF_PROVIDER: "ie_pumps"},
+        # no options → opt-in defaults to False
+        title="IE Pumps Default Test",
+    )
+    entry.add_to_hass(hass)
+
+    created: list[str] = []
+    deleted: list[str] = []
+
+    with (
+        patch.object(
+            FuelCompareIECoordinator,
+            "async_config_entry_first_refresh",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.async_create_issue",
+            side_effect=lambda h, d, iid, **kw: created.append(iid),
+        ),
+        patch(
+            "custom_components.fuelcompare_ie.async_delete_issue",
+            side_effect=lambda h, d, iid: deleted.append(iid),
+        ),
+    ):
+        result = await async_setup_entry(hass, entry)
+
+    assert result is True
+    assert not any("ie_pumps_tls_disabled" in iid for iid in created)
+    assert any("ie_pumps_tls_disabled" in iid for iid in deleted)
 
 
 # ---------------------------------------------------------------------------

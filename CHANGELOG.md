@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-21
+
+### BREAKING CHANGES
+- **`ie_pumps`: TLS verification is enforced by default.** Previous releases
+  silently bypassed certificate verification because pumps.ie's upstream cert
+  is expired. After upgrading, existing `ie_pumps` entries that relied on
+  the silent bypass will start failing with TLS errors. Re-enable the
+  bypass via the integration options (`Disable TLS verification for
+  pumps.ie` + `I understand this risk`) only if you accept the MITM risk.
+
+### SECURITY
+- Fail-secure default for `ie_pumps`: requests now use the system trust
+  store. The previous default sent queries over a connection where the
+  server's identity could not be verified, allowing any on-path attacker
+  to read or alter the response. Audit reference: v55 PERSONA INTEGRATIONS
+  AUDIT — finding FC-1 (HIGH).
+- New per-entry option `allow_insecure_tls` (ie_pumps only) — explicit
+  opt-in gated behind a separate "I understand this risk" checkbox in
+  both the config flow and the options flow.
+- New persistent SEV-1 (`ERROR`) repair issue raised on every restart
+  while the opt-in is active. The repair is fixable: confirming the fix
+  flow disables `allow_insecure_tls` and reloads the entry.
+- New `repairs.py` module wires the fix flow.
+
 ## [0.7.0] - 2026-06-19
 
 First multi-country release. The integration now ships 36 providers across

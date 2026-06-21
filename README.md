@@ -15,6 +15,48 @@
 
 ---
 
+## Security
+
+### `ie_pumps` (pumps.ie) — TLS opt-in
+
+The `pumps.ie` upstream has shipped an **invalid TLS certificate** for an
+extended period. Releases up to and including `0.7.0` silently disabled
+certificate verification so the provider would keep working. Starting with
+`1.0.0`, **TLS verification is enforced by default** — `ie_pumps` will fail
+to fetch while the upstream cert is invalid.
+
+Why this matters: with verification disabled, any device on the network
+path between Home Assistant and pumps.ie can read or replace the response.
+The integration parses that response and feeds it into long-term Home
+Assistant statistics, so a tampered response permanently corrupts your
+price history.
+
+If you accept the risk, you can re-enable the bypass per-entry:
+
+1. Settings → Devices & services → Fuel Compare → **Configure** on the
+   `ie_pumps` entry.
+2. Tick **Disable TLS verification for pumps.ie**.
+3. Tick **I understand this risk** in the same dialog.
+4. Submit.
+
+While the opt-in is active, a persistent **error-severity** repair issue
+sits in Settings → System → Repairs. Use its fix flow to turn the bypass
+off and restore secure verification.
+
+If pumps.ie ever fixes its certificate, file an issue here so we can
+update the README and consider re-enabling the provider for new entries
+without the bypass.
+
+> Audit reference: a 2026-06 third-party persona-driven audit raised this
+> as finding **FC-1 (HIGH)** — the previous silent bypass without explicit
+> user consent was treated as a security defect, not a quality-of-life
+> choice.
+
+If you find a security defect that has not been disclosed, please follow
+the process in [`SECURITY.md`](SECURITY.md).
+
+---
+
 ## What this is
 
 A [Home Assistant](https://www.home-assistant.io/) custom integration that tracks live fuel prices and station information from 36 providers across 30 countries (plus an EU-wide regional source). Each station you configure creates a set of sensors covering prices, opening hours, location, and real-time open/closed status.

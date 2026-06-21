@@ -8,7 +8,11 @@ WARNING — DATA FRESHNESS
 ------------------------
 pumps.ie is in maintenance-mode decline.  As of 2026-06:
 
-- SSL certificate is expired — verification disabled via _SSL_UNVERIFIED SSLContext.
+- SSL certificate is expired.  By default the provider requires a valid
+  upstream cert and will fail to fetch when the cert is invalid; users may
+  opt in to TLS-verification bypass via the integration option
+  ``allow_insecure_tls`` (see config_flow / options_flow).  Opting in
+  raises a persistent SEV-1 repair issue.
 - The crowd-sourced price data is largely stale:
     * Only ~3 stations have prices updated in 2025.
     * ~961 stations last updated in 2024.
@@ -100,9 +104,13 @@ def _make_ssl_context() -> ssl.SSLContext:
     return ctx
 
 
-# pumps.ie has an expired TLS certificate; cert renewal is pending.
-# Context created at import time (before the HA event loop starts) to avoid
-# blocking-call-in-event-loop warnings from ssl.create_default_context().
+# pumps.ie has an expired TLS certificate.  Built at import time (before the HA
+# event loop starts) to avoid blocking-call-in-event-loop warnings from
+# ssl.create_default_context().  The context is ONLY attached to outbound
+# requests when the user has explicitly opted in via the integration option
+# CONF_ALLOW_INSECURE_TLS.  Default behaviour is fail-secure: requests use
+# aiohttp's default verified TLS and surface ClientConnectorCertificateError /
+# similar so the coordinator marks the entry unavailable.
 _SSL_UNVERIFIED: ssl.SSLContext = _make_ssl_context()
 _SSL_WARNING_EMITTED = False
 
@@ -113,9 +121,11 @@ def _warn_ssl_once() -> None:
         return
     _SSL_WARNING_EMITTED = True
     _LOGGER.warning(
-        "pumps.ie TLS certificate verification is disabled — the provider's "
-        "SSL certificate is expired. This is a known issue. "
-        "Data is still encrypted in transit."
+        "pumps.ie TLS certificate verification is DISABLED for this entry "
+        "(user opted in). Credentials and queries are sent without verifying "
+        "the server's identity. Anyone on the network path can read or alter "
+        "the response. Disable 'allow_insecure_tls' in the integration "
+        "options to restore security."
     )
 
 
@@ -192,13 +202,25 @@ class IePumpsProvider(BaseProvider):
         "fuelfinder.ie (provider key: ie_fuelfinder) is recommended instead."
     )
 
-    def __init__(self, station_id: str) -> None:
+    def __init__(
+        self,
+        station_id: str,
+        *,
+        allow_insecure_tls: bool = False,
+    ) -> None:
         """Initialise the provider with the pumps.ie station ID.
 
         Args:
             station_id: pumps.ie integer station ID as a string (e.g. '1234').
+            allow_insecure_tls: When True, disable TLS certificate verification
+                for outbound requests to pumps.ie.  Default False — requests
+                use the system trust store and fail with a TLS error if the
+                upstream cert is invalid.  Opt-in is gated behind a config-flow
+                acknowledgement step + a persistent SEV-1 repair issue; do NOT
+                flip this on without reviewing the security implications.
         """
         self._station_id = station_id
+        self._allow_insecure_tls = bool(allow_insecure_tls)
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -418,14 +440,20 @@ class IePumpsProvider(BaseProvider):
             "fuel": fuel,
             "noCache": str(random.randint(1, 999999)),
         }
-        _warn_ssl_once()
+        # Default: aiohttp's verified TLS (ssl=True).  Only attach the
+        # CERT_NONE context when the user has explicitly opted in.
+        if self._allow_insecure_tls:
+            _warn_ssl_once()
+            ssl_arg: ssl.SSLContext | bool = _SSL_UNVERIFIED
+        else:
+            ssl_arg = True
         try:
             async with session.get(
                 _BASE_URL,
                 params=params,
                 headers=_HEADERS,
                 timeout=_TIMEOUT,
-                ssl=_SSL_UNVERIFIED,
+                ssl=ssl_arg,
             ) as response:
                 response.raise_for_status()
                 xml_text: str = await response.text(encoding="utf-8", errors="replace")

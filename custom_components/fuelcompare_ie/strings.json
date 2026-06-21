@@ -28,6 +28,14 @@
           "api_key": "API Key"
         }
       },
+      "ie_pumps_tls": {
+        "title": "Insecure connection",
+        "description": "pumps.ie's TLS certificate is invalid. With verification on, fetches will fail. With verification off, anyone on the network path can read or alter your queries. Default is OFF (the safe choice). To turn it on, tick BOTH boxes.",
+        "data": {
+          "allow_insecure_tls": "Disable TLS verification for pumps.ie",
+          "risk_acknowledged": "I understand this risk"
+        }
+      },
       "station": {
         "title": "Add Station",
         "description": "{hint}",
@@ -66,7 +74,8 @@
       "no_stations_found": "No stations found for this county. Try a different county.",
       "no_stations_found_location": "No stations found near these coordinates. Try adjusting the location or increasing the search radius.",
       "no_stations_found_global": "Could not load the provider's list. The upstream may be down, or a required dependency is missing. Check Home Assistant logs for details.",
-      "invalid_api_key": "API key cannot be empty."
+      "invalid_api_key": "API key cannot be empty.",
+      "tls_risk_not_acknowledged": "Tick the 'I understand this risk' box to disable TLS verification."
     },
     "abort": {
       "already_configured": "This station is already configured.",
@@ -80,9 +89,16 @@
         "title": "Options",
         "data": {
           "api_key": "API Key",
-          "radius_km": "Search radius (km)"
+          "radius_km": "Search radius (km)",
+          "show_on_map": "Show station on map",
+          "allow_insecure_tls": "Disable TLS verification for pumps.ie",
+          "risk_acknowledged": "I understand this risk"
         }
       }
+    },
+    "error": {
+      "tls_risk_not_acknowledged": "Tick the 'I understand this risk' box to disable TLS verification.",
+      "invalid_api_key": "API key cannot be empty."
     }
   },
   "issues": {
@@ -91,8 +107,16 @@
       "description": "The fuelcompare.ie website is scheduled to shut down on **30 June 2026**. Your station **{entry_title}** will stop receiving price updates after that date. Consider switching to a different Irish fuel price source, such as FuelFinder IE or IE Pumps."
     },
     "ie_pumps_tls_disabled": {
-      "title": "pumps.ie TLS certificate verification disabled",
-      "description": "The pumps.ie provider for **{entry_title}** has TLS certificate verification disabled because the site's certificate is expired. Data is still encrypted in transit, but the server identity is not verified."
+      "title": "Insecure connection — pumps.ie ({entry_title})",
+      "description": "TLS verification is disabled for **{entry_title}**. The pumps.ie certificate is not verified. Anyone on the network path can read or alter your queries. Pick **Submit** below to disable this option and restore secure verification.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Restore TLS verification",
+            "description": "This will turn off the 'allow_insecure_tls' option for **pumps.ie** and reload the entry. After this, requests will use verified TLS — they will fail while pumps.ie's certificate is invalid, but your traffic will not be exposed to MITM."
+          }
+        }
+      }
     }
   },
   "entity": {

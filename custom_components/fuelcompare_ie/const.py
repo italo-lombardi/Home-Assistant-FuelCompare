@@ -17,6 +17,11 @@ CONF_API_KEY = "api_key"  # optional API key for providers that require authenti
 CONF_POSTAL_CODE = "postal_code"  # for postal-code-centric providers (e.g. be_carbu)
 CONF_STATION_PAGE_URL = "station_page_url"  # provider page URL for the selected station
 CONF_SHOW_ON_MAP = "show_on_map"  # options toggle: expose station as device_tracker
+# ie_pumps-only: explicit opt-in to bypass TLS certificate verification when the
+# upstream cert is invalid/expired.  Default False — fail-secure.  See
+# providers/ie_pumps.py and the README "Security" section.
+CONF_ALLOW_INSECURE_TLS = "allow_insecure_tls"
+CONF_RISK_ACKNOWLEDGED = "risk_acknowledged"  # config-flow gate, never persisted
 
 # Defaults
 DEFAULT_COUNTRY = "IE"

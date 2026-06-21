@@ -621,14 +621,12 @@ async def test_async_list_stations_returns_empty_on_network_error() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 11. SSLContext with verification disabled is used for all requests
+# 11. TLS opt-in: default verifies, opt-in disables
 # ---------------------------------------------------------------------------
 
 
-async def test_async_fetch_passes_ssl_false() -> None:
-    """Every GET request to pumps.ie uses an SSLContext with cert verification disabled."""
-    import ssl  # noqa: PLC0415
-
+async def test_async_fetch_default_uses_verified_tls() -> None:
+    """Default constructor: every GET passes ssl=True (verified system trust)."""
     diesel_resp = _make_mock_response(200, _DIESEL_XML)
     petrol_resp = _make_mock_response(200, _PETROL_XML)
     session = _make_session(diesel_resp, petrol_resp)
@@ -636,12 +634,58 @@ async def test_async_fetch_passes_ssl_false() -> None:
     provider = IePumpsProvider(_STATION_ID)
     await provider.async_fetch(session, _STATION_ID)
 
+    assert session.get.call_args_list, "expected at least one GET"
+    for call in session.get.call_args_list:
+        ssl_kwarg = call.kwargs.get("ssl")
+        assert ssl_kwarg is True, (
+            f"Expected ssl=True (verified) but got ssl={ssl_kwarg!r}"
+        )
+
+
+async def test_async_fetch_opt_in_uses_cert_none_context() -> None:
+    """allow_insecure_tls=True: every GET passes an SSLContext with CERT_NONE."""
+    import ssl  # noqa: PLC0415
+
+    diesel_resp = _make_mock_response(200, _DIESEL_XML)
+    petrol_resp = _make_mock_response(200, _PETROL_XML)
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider(_STATION_ID, allow_insecure_tls=True)
+    await provider.async_fetch(session, _STATION_ID)
+
     for call in session.get.call_args_list:
         ssl_kwarg = call.kwargs.get("ssl")
         assert isinstance(ssl_kwarg, ssl.SSLContext), (
-            f"Expected ssl.SSLContext in GET call but got ssl={ssl_kwarg!r}"
+            f"Expected ssl.SSLContext but got ssl={ssl_kwarg!r}"
         )
         assert ssl_kwarg.verify_mode == ssl.CERT_NONE
+
+
+async def test_async_fetch_default_propagates_invalid_cert_failure() -> None:
+    """Default install: invalid upstream cert raises ProviderError (fail-secure)."""
+    from ssl import SSLCertVerificationError  # noqa: PLC0415
+
+    session = MagicMock()
+    session.get = MagicMock(
+        side_effect=SSLCertVerificationError(1, "[SSL: CERTIFICATE_VERIFY_FAILED]")
+    )
+
+    provider = IePumpsProvider(_STATION_ID)
+    with pytest.raises(ProviderError):
+        await provider.async_fetch(session, _STATION_ID)
+
+
+def test_provider_default_constructor_does_not_allow_insecure_tls() -> None:
+    """Constructing without kwargs leaves the bypass off."""
+    provider = IePumpsProvider(_STATION_ID)
+    # private attr is the contract for the provider's internal toggle
+    assert provider._allow_insecure_tls is False  # noqa: SLF001
+
+
+def test_provider_opt_in_constructor_records_flag() -> None:
+    """Passing allow_insecure_tls=True records on the instance."""
+    provider = IePumpsProvider(_STATION_ID, allow_insecure_tls=True)
+    assert provider._allow_insecure_tls is True  # noqa: SLF001
 
 
 # ---------------------------------------------------------------------------
@@ -1036,6 +1080,8 @@ def test_warn_ssl_once_logs_warning_exactly_once(
             _warn_ssl_once()  # second call must be silent
         warnings = [r for r in caplog.records if "TLS" in r.message]
         assert len(warnings) == 1
-        assert "expired" in warnings[0].message
+        # Warning text changed in 1.0.0: now spells out the security risk.
+        assert "DISABLED" in warnings[0].message
+        assert "MITM" in warnings[0].message or "alter" in warnings[0].message
     finally:
         _mod._SSL_WARNING_EMITTED = original
