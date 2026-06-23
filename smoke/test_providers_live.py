@@ -22,19 +22,39 @@ from __future__ import annotations
 
 import pytest
 
+from custom_components.fuelcompare_ie.providers.at_econtrol import AtEcontrolProvider
+from custom_components.fuelcompare_ie.providers.au_fuelwatch import AuFuelwatchProvider
+from custom_components.fuelcompare_ie.providers.au_nsw import AuNswProvider
 from custom_components.fuelcompare_ie.providers.au_qld import AuQldProvider
 from custom_components.fuelcompare_ie.providers.au_vic import AuVicProvider
 from custom_components.fuelcompare_ie.providers.ba_fuel import BaFuelProvider
+from custom_components.fuelcompare_ie.providers.be_carbu import BeCarbuProvider
+from custom_components.fuelcompare_ie.providers.ca_qc import CaQcProvider
+from custom_components.fuelcompare_ie.providers.ch_tcs import ChTcsProvider
 from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
     DeTankerkoenigProvider,
 )
 from custom_components.fuelcompare_ie.providers.es_minetur import EsMineturProvider
 from custom_components.fuelcompare_ie.providers.fi_tankille import FiTankilleProvider
+from custom_components.fuelcompare_ie.providers.fr_carburants import (
+    FrCarburantsProvider,
+)
+from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
+    GbFuelfinderProvider,
+)
+from custom_components.fuelcompare_ie.providers.gr_fuelgov import GrFuelgovProvider
+from custom_components.fuelcompare_ie.providers.is_fuel import IsFuelProvider
+from custom_components.fuelcompare_ie.providers.it_mase import ItMaseProvider
+from custom_components.fuelcompare_ie.providers.lt_saurida import LtSauridaProvider
 from custom_components.fuelcompare_ie.providers.lu_carbu import LuCarbuProvider
 from custom_components.fuelcompare_ie.providers.me_fuel import MeFuelProvider
 from custom_components.fuelcompare_ie.providers.no_drivstoff import (
     NoDrivstoffProvider,
 )
+from custom_components.fuelcompare_ie.providers.se_bensinpriser import (
+    SEBensinpriserProvider,
+)
+from custom_components.fuelcompare_ie.providers.si_goriva import SiGorivaProvider
 
 
 pytestmark = [pytest.mark.smoke, pytest.mark.asyncio]
@@ -157,21 +177,6 @@ async def test_au_vic_melbourne(session) -> None:
 
 # ── location_search multi-station providers (affected by #44 unique_id fix) ─
 
-from custom_components.fuelcompare_ie.providers.at_econtrol import AtEcontrolProvider
-from custom_components.fuelcompare_ie.providers.au_fuelwatch import AuFuelwatchProvider
-from custom_components.fuelcompare_ie.providers.au_nsw import AuNswProvider
-from custom_components.fuelcompare_ie.providers.be_carbu import BeCarbuProvider
-from custom_components.fuelcompare_ie.providers.ca_qc import CaQcProvider
-from custom_components.fuelcompare_ie.providers.ch_tcs import ChTcsProvider
-from custom_components.fuelcompare_ie.providers.fr_carburants import FrCarburantsProvider
-from custom_components.fuelcompare_ie.providers.gb_fuelfinder import GbFuelfinderProvider
-from custom_components.fuelcompare_ie.providers.gr_fuelgov import GrFuelgovProvider
-from custom_components.fuelcompare_ie.providers.is_fuel import IsFuelProvider
-from custom_components.fuelcompare_ie.providers.it_mase import ItMaseProvider
-from custom_components.fuelcompare_ie.providers.lt_saurida import LtSauridaProvider
-from custom_components.fuelcompare_ie.providers.se_bensinpriser import SEBensinpriserProvider
-from custom_components.fuelcompare_ie.providers.si_goriva import SiGorivaProvider
-
 
 # ── AT: econtrol.at — Vienna ────────────────────────────────────────────────
 async def test_at_econtrol_vienna(session) -> None:
@@ -293,7 +298,9 @@ async def test_lt_saurida_vilnius(session) -> None:
 
 # ── SE: bensinpriser.se — Stockholm ─────────────────────────────────────────
 async def test_se_bensinpriser_stockholm(session) -> None:
-    prov = SEBensinpriserProvider("", latitude=59.3293, longitude=18.0686, radius_km=10.0)
+    prov = SEBensinpriserProvider(
+        "", latitude=59.3293, longitude=18.0686, radius_km=10.0
+    )
     stations = await prov.async_list_stations(
         session, lat=59.3293, lng=18.0686, radius_km=10.0
     )
