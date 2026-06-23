@@ -139,7 +139,7 @@ class MtFuelProvider(BaseProvider):
     COUNTRY = "MT"
     PROVIDER_KEY = "mt_fuel"
     LABEL = "EU Oil Bulletin (Malta)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = (
         "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
@@ -268,8 +268,9 @@ class MtFuelProvider(BaseProvider):
         single ("MT", "Malta — national average (EU Oil Bulletin)") entry.
         No HTTP request is made.
 
-        Keyword args (from config flow location_search) are accepted but
-        ignored — coordinates are irrelevant for a national-average source.
+        Keyword args are accepted (the provider runs in global_list mode so
+        the config flow does not pass coordinates) but ignored — only one
+        national-average row exists.
 
         Args:
             session: aiohttp ClientSession (not used).

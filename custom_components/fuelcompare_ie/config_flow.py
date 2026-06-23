@@ -646,10 +646,15 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._suggested_name = fetched or f"Station {station_id[:8]}"
                 return await self.async_step_name()
 
-        # Re-render path after a validation error reuses the previously-loaded
-        # station list rather than refetching, so users don't pay the upstream
-        # round-trip just to see an error message redisplayed.
-        if user_input is not None and self._station_list:
+        # Re-render path after a validation error (empty station_id submitted)
+        # reuses the previously-loaded station list rather than refetching, so
+        # users don't pay the upstream round-trip just to see the error
+        # message redisplayed. Tightened to require both: (a) we got here from
+        # a user submission, (b) the validation produced an error, AND
+        # (c) we have a cached list from the first render. Without the
+        # `errors` check the cache would also kick in on legitimate retries
+        # where the user navigated back to this step expecting a fresh fetch.
+        if user_input is not None and errors and self._station_list:
             station_list: list[tuple[str, str]] = self._station_list
         else:
             station_list = []
@@ -699,31 +704,39 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 if provider_cls
                 else "manual_id"
             )
-            # Silent-create path: only safe for providers that genuinely have
-            # no station list (national-average / global_list one-entry
-            # providers).
-            if (
-                self.unique_id
-                and not needs_station_id
-                and mode not in ("location_search", "county_search")
-            ):
-                self._abort_if_unique_id_configured()
-                return await self.async_step_name()
-            # For location_search / county_search the empty list means "no
-            # stations in the searched area". Send the user back to the
-            # previous step with an error banner so they can adjust
-            # coords/radius or pick a different county without restarting
-            # the whole flow.
+            # Order matters here. Each branch returns; the comments below
+            # spell out why this exact ordering is necessary.
+            #
+            # 1. global_list — provider is expected to ALWAYS return its
+            #    fixed list (EU member states, ORLEN wholesale, …). An
+            #    empty list means the upstream is genuinely broken. Aborting
+            #    is the only safe action because the user has no parameter
+            #    to adjust. Must run BEFORE the silent-create branch below,
+            #    which would otherwise jump to async_step_name with no
+            #    station_id and create an unresolvable entry.
+            if mode == "global_list":
+                return self.async_abort(reason="no_stations_found_global")
+            # 2. location_search / county_search — empty list means "no
+            #    stations in the searched area". Loop back to the previous
+            #    step with an error banner so the user can adjust
+            #    coords/radius or pick a different county without
+            #    restarting the flow.
             if mode == "location_search":
                 self._pending_error = "no_stations_found_location"
                 return await self.async_step_location()
             if mode == "county_search":
                 self._pending_error = "no_stations_found"
                 return await self.async_step_county()
-            # global_list / other: nothing to re-prompt — abort with the
-            # mode-aware reason (UI shows a Cancel button).
-            if mode == "global_list":
-                return self.async_abort(reason="no_stations_found_global")
+            # 3. Silent-create — only reachable for non-list lookup modes
+            #    (manual_id, country, etc.) that build their identity from
+            #    earlier flow state instead of a station picker. Guarded by
+            #    `unique_id` (must already have one) and `not
+            #    needs_station_id` (CONFIG_MODE != "station_id"). Aborts on
+            #    duplicate then creates the entry.
+            if self.unique_id and not needs_station_id:
+                self._abort_if_unique_id_configured()
+                return await self.async_step_name()
+            # 4. Fallback abort for any combination we don't recognise.
             return self.async_abort(reason="no_stations_found")
         schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
             {uid: label for uid, label in station_list}

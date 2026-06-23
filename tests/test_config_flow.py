@@ -2414,15 +2414,17 @@ async def test_async_step_station_picker_exception_in_list_load(
 async def test_async_step_station_picker_no_stations_with_unique_id_routes_to_name(
     hass: HomeAssistant,
 ) -> None:
-    """station_picker stays on the picker form (not fall through to name) when
-    the station list is empty for a location_search provider, even if a
-    lat/lng unique_id is already set on the flow.
+    """station_picker loops back to async_step_location with a
+    no_stations_found_location error banner when the station list is empty
+    for a location_search provider — even if a lat/lng unique_id is already
+    set on the flow.
 
     Originally the code routed an empty list + unique_id straight to the name
     step, which silently created an entry with no station_id (then the
     runtime synthesised a station_id from lat/lng that no provider could
     resolve). The fix narrows that shortcut to non-location_search providers
-    so location-search users see a recoverable error.
+    and bounces the user back to the location step so they can widen the
+    radius or move the coordinates.
     """
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY

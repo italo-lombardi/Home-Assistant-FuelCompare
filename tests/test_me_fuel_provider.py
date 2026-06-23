@@ -198,8 +198,8 @@ def test_provider_label_contains_montenegro() -> None:
 
 
 def test_provider_config_mode_is_location() -> None:
-    """CONFIG_MODE is 'location' (national average, no station selection)."""
-    assert MeFuelProvider.CONFIG_MODE == "location"
+    """CONFIG_MODE is "station_id" (national average, no station selection)."""
+    assert MeFuelProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_station_lookup_mode_is_global_list() -> None:

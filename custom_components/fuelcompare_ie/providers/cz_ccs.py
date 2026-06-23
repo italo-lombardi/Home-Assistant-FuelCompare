@@ -116,7 +116,7 @@ class CzCcsProvider(BaseProvider):
     COUNTRY = "CZ"
     PROVIDER_KEY = "cz_ccs"
     LABEL = "MF ČR Price Caps (Czech Republic)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
     STATION_PAGE_URL: ClassVar[str] = "https://www.mfcr.cz"
@@ -198,7 +198,7 @@ class CzCcsProvider(BaseProvider):
     ) -> list[tuple[str, str]]:
         """Return a single entry for the national average.
 
-        Called by the config flow location_search step.  For national-average
+        Called by the config flow global_list step.  For national-average
         providers there is exactly one "station" — the country-wide cap price.
 
         Args:

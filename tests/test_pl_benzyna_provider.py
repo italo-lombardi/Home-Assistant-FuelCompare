@@ -113,8 +113,8 @@ def test_provider_label_contains_orlen() -> None:
 
 
 def test_provider_config_mode_is_location() -> None:
-    """PlBenzynaProvider uses CONFIG_MODE='location'."""
-    assert PlBenzynaProvider.CONFIG_MODE == "location"
+    """PlBenzynaProvider uses CONFIG_MODE='station_id'."""
+    assert PlBenzynaProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_station_lookup_mode_is_global_list() -> None:

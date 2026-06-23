@@ -96,7 +96,7 @@ class MdFuelProvider(BaseProvider):
     COUNTRY = "MD"
     PROVIDER_KEY = "md_fuel"
     LABEL = "ANRE (Moldova)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = 43200
     STATION_PAGE_URL: ClassVar[str] = (

@@ -86,6 +86,15 @@ if __name__ == "__main__":
     assert filter_within_radius(items, None, None, None) == items
     assert filter_within_radius(items, 0.0, 0.0, 0) == items
 
+    # filter_within_radius: radius_km=0 explicitly disables filter and
+    # preserves no-coord stations (which an active filter would drop).
+    mixed = [
+        ("with_coords", {"latitude": 0.0, "longitude": 0.0}),
+        ("no_coords", {"latitude": None, "longitude": None}),
+    ]
+    assert filter_within_radius(mixed, 0.0, 0.0, 0) == mixed
+    assert filter_within_radius(mixed, 0.0, 0.0, None) == mixed
+
     # filter_within_radius: drops far station
     rows = [
         ("near", {"latitude": -31.95, "longitude": 115.86}),

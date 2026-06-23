@@ -137,8 +137,8 @@ def test_provider_metadata_label_contains_albania() -> None:
 
 
 def test_provider_metadata_config_mode_is_location() -> None:
-    """CONFIG_MODE is 'location'."""
-    assert AlFuelProvider.CONFIG_MODE == "location"
+    """CONFIG_MODE is "station_id"."""
+    assert AlFuelProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_metadata_station_lookup_mode_is_global_list() -> None:

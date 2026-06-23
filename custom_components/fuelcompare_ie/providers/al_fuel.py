@@ -105,7 +105,7 @@ class AlFuelProvider(BaseProvider):
     COUNTRY = "AL"
     PROVIDER_KEY = "al_fuel"
     LABEL = "Albania National Average (cargopedia.net)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
 
     POLL_INTERVAL_SECONDS = 86400

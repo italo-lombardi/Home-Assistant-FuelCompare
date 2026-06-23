@@ -151,8 +151,8 @@ def test_provider_label_contains_anre() -> None:
 
 
 def test_provider_config_mode_is_location() -> None:
-    """MdFuelProvider uses CONFIG_MODE='location' (national data only)."""
-    assert MdFuelProvider.CONFIG_MODE == "location"
+    """MdFuelProvider uses CONFIG_MODE='station_id' (national data only)."""
+    assert MdFuelProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_station_lookup_mode() -> None:

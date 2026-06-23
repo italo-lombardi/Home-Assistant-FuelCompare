@@ -64,11 +64,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   private `_haversine_km` copy (au_nsw/au_qld/au_vic/be_carbu/ca_qc/
   ch_tcs/es_minetur/fr_carburants/gb_fuelfinder/ie_pumps/is_fuel/it_mase/
   pt_dgeg/se_bensinpriser/si_goriva/no_drivstoff) now import from
-  `providers._geo`. Flat client-side filter loops are collapsed into
-  one `filter_within_radius(...)` call; distance-display-only call sites
-  use `_geo.haversine_km` directly. The duplicate `base.haversine_km`
-  (atan2 formula, numerically identical to within ~1e-12 km) is deleted.
-  No behaviour change.
+  `providers._geo`. Providers whose filter loop matched the helper's
+  drop-on-missing-coords contract collapsed their loop into a single
+  `filter_within_radius(...)` call (at_econtrol, au_fuelwatch, au_nsw,
+  au_qld, au_vic, ch_tcs, ie_pumps, pt_dgeg). The rest (be_carbu, ca_qc,
+  es_minetur, fr_carburants, gb_fuelfinder, is_fuel, it_mase,
+  no_drivstoff, se_bensinpriser, si_goriva) kept their inline loop —
+  each has provider-specific gating (e.g. keep-on-missing-coords,
+  late-extracted station IDs) that differs from the helper's strict
+  contract — and only swapped the haversine math to `_geo.haversine_km`.
+  The duplicate `base.haversine_km` (atan2 formula, numerically
+  identical to within ~1e-12 km) is deleted. No behaviour change.
 - Dropped unused `latitude`/`longitude`/`radius_km` constructor parameters
   from national-average / no-coords providers (`al_fuel`, `ba_fuel`,
   `dk_fuelfinder`, `eu_oil_bulletin`, `lt_saurida`, `md_fuel`, `me_fuel`,

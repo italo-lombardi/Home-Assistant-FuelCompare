@@ -42,7 +42,7 @@ week.  Daily polling avoids re-downloading on non-publication days while
 ensuring the new data is picked up within one day of Thursday publication.
 
 CONFIG_MODE = 'location'
-STATION_LOOKUP_MODE = 'location_search'
+STATION_LOOKUP_MODE = 'global_list'
 
 station_id is always "NL" (the country code) for this national-average
 provider.  The coordinator calls async_fetch(session, "NL") on each poll.
@@ -129,7 +129,7 @@ class NlAnwbProvider(BaseProvider):
     COUNTRY = "NL"
     PROVIDER_KEY = "nl_anwb"
     LABEL = "EU Oil Bulletin (Netherlands national average)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = "https://www.anwb.nl"
 
@@ -217,7 +217,7 @@ class NlAnwbProvider(BaseProvider):
         """Return a single entry for the national-average virtual station.
 
         The config flow calls this method when STATION_LOOKUP_MODE is
-        'location_search'.  Since this is a national-average provider there
+        'global_list'.  Since this is a national-average provider there
         is only one station, represented by the country-code station_id 'NL'.
 
         Args:

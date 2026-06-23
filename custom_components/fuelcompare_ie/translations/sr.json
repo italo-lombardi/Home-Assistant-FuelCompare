@@ -67,7 +67,7 @@
       "no_stations_found": "Нису пронађене станице за овај округ. Покушајте са другим округом.",
       "no_stations_found_location": "Нису пронађене станице у близини ових координата. Покушајте да прилагодите локацију или повећате радијус претраге.",
       "invalid_api_key": "API кључ не може бити празан.",
-      "no_stations_found_global": "Lista pružaoca nije mogla biti učitana. Izvor je možda nedostupan ili nedostaje potrebna zavisnost. Detalje potražite u Home Assistant zapisnicima."
+      "no_stations_found_global": "Листа добављача није могла бити учитана. Извор је можда недоступан или недостаје потребна зависност. Детаље потражите у Home Assistant записницима."
     },
     "abort": {
       "already_configured": "Ова станица је већ конфигурисана.",
@@ -75,7 +75,7 @@
       "no_counties_for_country": "За одабрану земљу нису конфигурисани окрузи.",
       "no_stations_found": "Нису пронађене станице за овај округ. Покушајте са другим округом.",
       "no_stations_found_location": "Нису пронађене станице у близини ових координата. Покушајте да прилагодите локацију или повећате радијус претраге.",
-      "no_stations_found_global": "Lista pružaoca nije mogla biti učitana. Izvor je možda nedostupan ili nedostaje potrebna zavisnost. Detalje potražite u Home Assistant zapisnicima."
+      "no_stations_found_global": "Листа добављача није могла бити учитана. Извор је можда недоступан или недостаје потребна зависност. Детаље потражите у Home Assistant записницима."
     }
   },
   "issues": {

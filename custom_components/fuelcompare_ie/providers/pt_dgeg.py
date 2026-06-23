@@ -281,8 +281,12 @@ class PtDgegProvider(BaseProvider):
                     # Keep first (cheapest, list is sorted asc by price)
                     stations[sid]["prices"].setdefault(key, price)
 
-        # Filter by proximity when coordinates available
-        if lat is not None and lng is not None:
+        # Filter by proximity when coordinates AND a positive radius are
+        # supplied. radius_km=0 explicitly disables the filter — return the
+        # full list including stations with missing coords (they would
+        # otherwise be silently dropped by filter_within_radius, which is
+        # surprising for a "no filter" request).
+        if lat is not None and lng is not None and radius_km:
             stations = dict(filter_within_radius(stations.items(), lat, lng, radius_km))
 
         # Sort alphabetically by label

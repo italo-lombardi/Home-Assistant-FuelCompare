@@ -121,8 +121,8 @@ def test_provider_label() -> None:
 
 
 def test_provider_config_mode() -> None:
-    """MtFuelProvider.CONFIG_MODE is 'location'."""
-    assert MtFuelProvider.CONFIG_MODE == "location"
+    """MtFuelProvider.CONFIG_MODE is "station_id"."""
+    assert MtFuelProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_station_lookup_mode() -> None:

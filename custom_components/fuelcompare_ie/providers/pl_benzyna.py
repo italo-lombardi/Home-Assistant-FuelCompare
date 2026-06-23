@@ -171,7 +171,7 @@ class PlBenzynaProvider(BaseProvider):
     COUNTRY = "PL"
     PROVIDER_KEY = "pl_benzyna"
     LABEL = "ORLEN Wholesale (Poland)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = "https://www.orlen.pl"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
@@ -263,8 +263,8 @@ class PlBenzynaProvider(BaseProvider):
         This method always returns the single national ORLEN wholesale record
         regardless of lat/lng arguments.
 
-        Required: STATION_LOOKUP_MODE = 'location_search' (spec).
-        The config flow passes lat/lng kwargs which are accepted but ignored.
+        STATION_LOOKUP_MODE = 'global_list' (single-row provider — the
+        config flow skips the location step entirely).
 
         Args:
             session:   aiohttp ClientSession.

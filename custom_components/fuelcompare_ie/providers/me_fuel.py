@@ -160,7 +160,7 @@ class MeFuelProvider(BaseProvider):
     COUNTRY = "ME"
     PROVIDER_KEY = "me_fuel"
     LABEL = "Min. of Energy (Montenegro)"
-    CONFIG_MODE = "location"
+    CONFIG_MODE = "station_id"
     STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = 43200
     STATION_PAGE_URL: ClassVar[str] = (
