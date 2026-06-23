@@ -57,7 +57,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | Saurida (Lithuania) | 🇱🇹 Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
 | carbu.com Luxembourg | 🇱🇺 Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker | — | ⚠️ Disabled |
 | ANRE (Moldova) | 🇲🇩 Moldova | Unleaded, Diesel | Country picker | — | 🤖 Smoke-tested |
-| Min. of Energy (Montenegro) | 🇲🇪 Montenegro | Unleaded, Diesel, Kerosene | Location + picker | — | 🤖 Smoke-tested |
+| Min. of Energy (Montenegro) | 🇲🇪 Montenegro | Unleaded, Diesel, Kerosene | Country picker | — | 🤖 Smoke-tested |
 | Malta | 🇲🇹 Malta | Unleaded, Diesel, LPG, Kerosene | Country picker | — | 🤖 Smoke-tested |
 | Netherlands (ANWB) | 🇳🇱 Netherlands | Diesel, E10, LPG, Kerosene | Country picker | — | 🤖 Smoke-tested |
 | Drivstoffpriser (Norway) | 🇳🇴 Norway | Unleaded, Diesel, Premium | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |

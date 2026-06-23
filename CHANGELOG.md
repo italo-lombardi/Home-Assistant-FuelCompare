@@ -37,13 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   average / `global_list` providers (which genuinely have one synthetic
   entry) keep the silent-create shortcut; the EU Oil Bulletin path is
   unchanged.
-- **National-average providers asked for coordinates** — Albania, Malta,
-  Moldova, Montenegro and Poland (ORLEN) publish only a single national
-  reference row; the config flow nonetheless prompted for lat/lng/radius
-  on setup and then discarded them. These providers now use
-  `STATION_LOOKUP_MODE = "global_list"` (matching EU Oil Bulletin), so
-  the location step is skipped and the user goes straight from provider
-  → station picker → entry creation.
+- **National-average providers asked for coordinates** — Albania, Czech
+  Republic, Malta, Moldova, Montenegro, Netherlands and Poland (ORLEN)
+  publish only a single national reference row; the config flow
+  nonetheless prompted for lat/lng/radius on setup and then discarded
+  them. These providers now use `STATION_LOOKUP_MODE = "global_list"`
+  (matching EU Oil Bulletin), so the location step is skipped and the
+  user goes straight from provider → station picker → entry creation.
 
 ### Changed
 - Re-enabled six providers verified live against their real upstreams
@@ -83,11 +83,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Twelve providers used `kwargs.get("radius_km") or self._radius_km`,
   which silently rewrote an explicit `0` back to the constructor default
   (au_nsw, au_qld, au_vic, be_carbu, ca_qc, ch_tcs, de_tankerkoenig,
-  es_minetur, fr_carburants, pt_dgeg, se_bensinpriser, si_goriva); they
-  now use an explicit `kwargs.get(...) is not None` ternary that
-  preserves a user-supplied `0`. `ca_qc.__init__` and `pt_dgeg.__init__`
-  also dropped their similar `radius_km or 10.0` rewrites in favour of
-  the strict `is not None` check.
+  es_minetur, fr_carburants, pt_dgeg, se_bensinpriser, si_goriva); three
+  more (`at_econtrol`, `au_fuelwatch`, `ie_pumps`) used
+  `kwargs.get("radius_km", default)` which preserves `0` but differs
+  cosmetically. All fifteen now use the same
+  `kwargs["radius_km"] if kwargs.get("radius_km") is not None else <default>`
+  ternary that preserves a user-supplied `0`. `ca_qc.__init__` and
+  `pt_dgeg.__init__` also dropped their `radius_km or 10.0` init
+  rewrites in favour of the strict `is not None` check.
 - Added the `no_stations_found` / `no_stations_found_location` /
   `no_stations_found_global` keys to `strings.json` and every locale's
   `config.abort` block (matching the existing `config.error` entries) so

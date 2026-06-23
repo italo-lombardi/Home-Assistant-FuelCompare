@@ -219,7 +219,11 @@ class AuFuelwatchProvider(BaseProvider):
 
         lat = kwargs.get("lat", self._latitude)
         lng = kwargs.get("lng", self._longitude)
-        radius_km = kwargs.get("radius_km", self._radius_km)
+        radius_km = (
+            kwargs["radius_km"]
+            if kwargs.get("radius_km") is not None
+            else self._radius_km
+        )
 
         try:
             merged = await self._fetch_all_products(session, region_code)

@@ -110,9 +110,9 @@ def test_provider_config_mode_is_location() -> None:
     assert CzCcsProvider.CONFIG_MODE == "location"
 
 
-def test_provider_station_lookup_mode_is_location_search() -> None:
-    """STATION_LOOKUP_MODE is 'location_search'."""
-    assert CzCcsProvider.STATION_LOOKUP_MODE == "location_search"
+def test_provider_station_lookup_mode_is_global_list() -> None:
+    """STATION_LOOKUP_MODE is 'global_list'."""
+    assert CzCcsProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_poll_interval_is_reasonable() -> None:

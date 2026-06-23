@@ -311,7 +311,11 @@ class IePumpsProvider(BaseProvider):
         """
         lat: float | None = kwargs.get("lat")  # type: ignore[assignment]
         lng: float | None = kwargs.get("lng")  # type: ignore[assignment]
-        radius_km: float = float(kwargs.get("radius_km", 10.0))
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else 10.0
+        )
 
         # is-not-None coord checks (not falsy — 0.0 is a valid coordinate)
         if lat is None or lng is None:

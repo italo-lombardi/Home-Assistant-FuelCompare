@@ -130,7 +130,7 @@ class NlAnwbProvider(BaseProvider):
     PROVIDER_KEY = "nl_anwb"
     LABEL = "EU Oil Bulletin (Netherlands national average)"
     CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = "https://www.anwb.nl"
 
     POLL_INTERVAL_SECONDS = 86400  # daily; bulletin is published weekly (Thursdays)

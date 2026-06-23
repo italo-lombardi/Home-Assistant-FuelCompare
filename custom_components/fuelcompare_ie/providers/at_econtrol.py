@@ -174,7 +174,11 @@ class AtEcontrolProvider(BaseProvider):
             return []
         lat = float(raw_lat)
         lng = float(raw_lng)
-        radius_km = kwargs.get("radius_km", self._radius_km)
+        radius_km = (
+            kwargs["radius_km"]
+            if kwargs.get("radius_km") is not None
+            else self._radius_km
+        )
 
         try:
             merged = await self._fetch_all_fuel_types(session, lat, lng)
