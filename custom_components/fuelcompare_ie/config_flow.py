@@ -609,11 +609,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
             else:
-                if not self.unique_id:
-                    await self.async_set_unique_id(
-                        f"{DOMAIN}_{self._provider_key}_{station_id}"
-                    )
-                    self._abort_if_unique_id_configured()
+                await self.async_set_unique_id(
+                    f"{DOMAIN}_{self._provider_key}_{station_id}"
+                )
+                self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 self._station_page_url = self._station_url_map.get(station_id, "")
                 if user_input.get(CONF_SHOW_ON_MAP):
