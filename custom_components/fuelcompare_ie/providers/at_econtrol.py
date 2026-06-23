@@ -25,6 +25,7 @@ from typing import Any, ClassVar
 from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
+from ._geo import haversine_km
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -158,7 +159,11 @@ class AtEcontrolProvider(BaseProvider):
         Kwargs:
             lat (float): Latitude.
             lng (float): Longitude.
-            radius_km (float): Search radius in km (informational; API ignores it).
+            radius_km (float): Search radius in km. The e-control API returns
+                               up to 10 nearest stations and does not honour a
+                               radius parameter, so the list is filtered
+                               client-side (haversine). Filter is skipped when
+                               radius_km is missing/falsy.
         """
         raw_lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
         raw_lng = (
@@ -169,6 +174,7 @@ class AtEcontrolProvider(BaseProvider):
             return []
         lat = float(raw_lat)
         lng = float(raw_lng)
+        radius_km = kwargs.get("radius_km", self._radius_km)
 
         try:
             merged = await self._fetch_all_fuel_types(session, lat, lng)
@@ -178,6 +184,19 @@ class AtEcontrolProvider(BaseProvider):
 
         result: list[tuple[str, str]] = []
         for sid, raw in merged.items():
+            if radius_km:
+                location = raw.get("location") or {}
+                slat = location.get("latitude")
+                slng = location.get("longitude")
+                if slat is None or slng is None:
+                    continue
+                try:
+                    if haversine_km(lat, lng, float(slat), float(slng)) > float(
+                        radius_km
+                    ):
+                        continue
+                except (TypeError, ValueError):
+                    continue
             name = raw.get("name") or f"Station {sid}"
             location = raw.get("location") or {}
             address = _format_address(location)

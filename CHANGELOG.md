@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `async_list_stations` now applies a great-circle (haversine) filter
   client-side when `lat`, `lng` and `radius_km` are supplied, so the station
   picker shows only stations within the configured radius. Reported in #44.
+- **e-control (at_econtrol) ignored the search radius** — same class of bug:
+  the API hard-caps to 10 nearest stations and exposes no radius parameter,
+  so `radius_km` was silently a no-op. `async_list_stations` now applies a
+  client-side haversine filter, sharing `haversine_km` from the new
+  `providers/_geo` module with au_fuelwatch.
+
+### Internal
+- New `providers/_geo.py` module with a shared `haversine_km` function plus
+  a `filter_within_radius` helper (currently used by au_fuelwatch for its
+  flat-coord shape). A nested-coord variant covers at_econtrol's
+  `data["location"]["latitude"]` shape inline for now; unifying both
+  call-sites behind one helper API is tracked as a follow-up cleanup.
+  The 14 other providers carrying private haversine copies will be
+  migrated in the same follow-up.
 
 ## [0.7.1] - 2026-06-23
 

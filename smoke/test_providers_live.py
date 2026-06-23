@@ -187,6 +187,26 @@ async def test_at_econtrol_vienna(session) -> None:
     assert stations, "AT econtrol: no Vienna stations"
 
 
+async def test_at_econtrol_vienna_radius_filter(session) -> None:
+    """radius_km narrows the Vienna list (PR #46 follow-up: at_econtrol).
+
+    Fetch with a generous radius first, then again with a small radius —
+    the small-radius list must be strictly smaller (or equal but no larger).
+    """
+    prov = AtEcontrolProvider("", latitude=48.2082, longitude=16.3738)
+    wide = await prov.async_list_stations(
+        session, lat=48.2082, lng=16.3738, radius_km=50.0
+    )
+    narrow = await prov.async_list_stations(
+        session, lat=48.2082, lng=16.3738, radius_km=1.0
+    )
+    assert narrow, "AT econtrol: no stations within 1 km of Vienna centre"
+    assert len(narrow) <= len(wide), (
+        f"AT econtrol: 1 km radius not narrower than 50 km "
+        f"({len(narrow)} vs {len(wide)})"
+    )
+
+
 # ── AU WA: FuelWatch — Perth Metro (Region 25) ──────────────────────────────
 async def test_au_fuelwatch_perth(session) -> None:
     prov = AuFuelwatchProvider("", county="25")

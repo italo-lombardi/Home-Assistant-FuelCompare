@@ -1632,3 +1632,90 @@ async def test_fetch_stations_merged_skips_failing_fuel_type_non_client_error() 
     assert data["unleaded"] == pytest.approx(1.679)
     # cng is None because GAS call raised
     assert data["cng"] is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — radius_km filter (issue #44 follow-up)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_radius_km_drops_distant_station() -> None:
+    """radius_km filters out stations beyond the haversine distance.
+
+    e-control returns up to 10 nearest stations regardless of radius; without
+    a client-side filter the user's radius_km setting is a no-op.
+    """
+    # Near: Vienna (_LAT, _LNG). Far: Salzburg (~47.80, 13.05) ≈ 250 km from Vienna.
+    near_station = _BASE_STATION_RAW
+    far_station = {
+        "id": 99999,
+        "name": "Far Salzburg Station",
+        "location": {
+            **_BASE_LOCATION,
+            "latitude": 47.80,
+            "longitude": 13.05,
+            "city": "Salzburg",
+        },
+        "open": True,
+        "prices": [{"fuelType": "DIE", "amount": 1.599}],
+    }
+    die_resp = _make_mock_response(200, json_data=[near_station, far_station])
+    sup_resp = _make_mock_response(200, json_data=[])
+    gas_resp = _make_mock_response(200, json_data=[])
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG, radius_km=10.0)
+
+    sids = [sid for sid, _ in result]
+    assert _STATION_ID in sids
+    assert "99999" not in sids
+
+
+async def test_async_list_stations_no_radius_kwarg_keeps_all() -> None:
+    """Without radius_km, client-side filter is skipped (back-compat)."""
+    far_station = {
+        "id": 99999,
+        "name": "Far Salzburg Station",
+        "location": {
+            **_BASE_LOCATION,
+            "latitude": 47.80,
+            "longitude": 13.05,
+        },
+        "open": True,
+        "prices": [{"fuelType": "DIE", "amount": 1.599}],
+    }
+    die_resp = _make_mock_response(200, json_data=[_BASE_STATION_RAW, far_station])
+    sup_resp = _make_mock_response(200, json_data=[])
+    gas_resp = _make_mock_response(200, json_data=[])
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    # Construct provider WITHOUT radius_km (default None) and don't pass kwarg.
+    p = AtEcontrolProvider(_STATION_ID, latitude=_LAT, longitude=_LNG)
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    sids = [sid for sid, _ in result]
+    assert _STATION_ID in sids
+    assert "99999" in sids
+
+
+async def test_async_list_stations_radius_km_drops_station_without_coords() -> None:
+    """Stations whose location lacks coords are dropped when filter is active."""
+    nocoords_station = {
+        "id": 88888,
+        "name": "No Coords Station",
+        "location": {"address": "?", "postalCode": "0000", "city": "?"},
+        "open": True,
+        "prices": [{"fuelType": "DIE", "amount": 1.599}],
+    }
+    die_resp = _make_mock_response(200, json_data=[_BASE_STATION_RAW, nocoords_station])
+    sup_resp = _make_mock_response(200, json_data=[])
+    gas_resp = _make_mock_response(200, json_data=[])
+    session = _make_session(die_resp, sup_resp, gas_resp)
+
+    p = _provider()
+    result = await p.async_list_stations(session, lat=_LAT, lng=_LNG, radius_km=10.0)
+
+    sids = [sid for sid, _ in result]
+    assert _STATION_ID in sids
+    assert "88888" not in sids
