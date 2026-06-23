@@ -624,6 +624,12 @@ async def test_async_step_location_non_location_search_aborts_on_duplicate(
         flow._api_key = ""
         flow._postal_code = ""
 
+        abort_called = False
+
+        def _record_abort():
+            nonlocal abort_called
+            abort_called = True
+
         with (
             patch.object(
                 flow,
@@ -633,18 +639,21 @@ async def test_async_step_location_non_location_search_aborts_on_duplicate(
             patch.object(
                 flow,
                 "_abort_if_unique_id_configured",
-                side_effect=Exception("abort_called"),
+                side_effect=_record_abort,
+            ),
+            patch.object(
+                flow,
+                "async_step_station_picker",
+                new=AsyncMock(
+                    return_value={"type": "form", "step_id": "station_picker"}
+                ),
             ),
         ):
-            try:
-                await flow.async_step_location(
-                    user_input={CONF_LATITUDE: 48.0, CONF_LONGITUDE: 16.0}
-                )
-                aborted = False
-            except Exception as exc:
-                aborted = str(exc) == "abort_called"
+            await flow.async_step_location(
+                user_input={CONF_LATITUDE: 48.0, CONF_LONGITUDE: 16.0}
+            )
 
-        assert aborted, (
+        assert abort_called, (
             "Expected _abort_if_unique_id_configured to be called for non-location_search providers"
         )
     finally:
