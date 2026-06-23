@@ -138,7 +138,6 @@ class MtFuelProvider(BaseProvider):
 
     COUNTRY = "MT"
     PROVIDER_KEY = "mt_fuel"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "EU Oil Bulletin (Malta)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "global_list"

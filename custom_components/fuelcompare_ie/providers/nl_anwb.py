@@ -128,7 +128,6 @@ class NlAnwbProvider(BaseProvider):
 
     COUNTRY = "NL"
     PROVIDER_KEY = "nl_anwb"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "EU Oil Bulletin (Netherlands national average)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "location_search"

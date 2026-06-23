@@ -45,6 +45,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the location step is skipped and the user goes straight from provider
   → station picker → entry creation.
 
+### Changed
+- Re-enabled six providers verified live against their real upstreams
+  during this audit: `al_fuel` (Albania), `cz_ccs` (Czech Republic),
+  `md_fuel` (Moldova), `mt_fuel` (Malta), `nl_anwb` (Netherlands) and
+  `pl_benzyna` (Poland / ORLEN). README status flipped from ⚠️ Disabled
+  to 🤖 Smoke-tested for each. The remaining six providers in the
+  "upstream broken" bucket (`ba_fuel`, `dk_fuelfinder`, `es_minetur`,
+  `fi_tankille`, `lu_carbu`, `pt_dgeg`) still fail their live probe —
+  these stay disabled.
+
 ### Internal
 - New `providers/_geo.py` module with a shared `haversine_km` function plus
   a `filter_within_radius` helper. Extended with an optional `get_coords`

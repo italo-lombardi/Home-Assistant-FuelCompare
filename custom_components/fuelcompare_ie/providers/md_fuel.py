@@ -95,7 +95,6 @@ class MdFuelProvider(BaseProvider):
 
     COUNTRY = "MD"
     PROVIDER_KEY = "md_fuel"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "ANRE (Moldova)"
     CONFIG_MODE = "location"
     STATION_LOOKUP_MODE = "global_list"
