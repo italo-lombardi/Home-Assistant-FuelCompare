@@ -863,7 +863,7 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
         flow._show_on_map = False
         # Simulate unique_id set by async_step_location
         flow.context["unique_id"] = (
-            "fuelcompare_ie_au_empty_clobber_test_-33.8688_151.2093"
+            "fuelcompare_ie_au_empty_clobber_test_-33.86880_151.20930"
         )
 
         abort_called = False
@@ -900,13 +900,15 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
         # a partial entry creation either way.
         assert not abort_called, (
             "_abort_if_unique_id_configured must NOT be called — the flow "
-            "should abort via async_abort(reason=...) instead"
+            "loops back to async_step_location with an error banner instead"
         )
-        # Should abort the flow with the mode-aware reason; HA renders this
-        # as a dismissable error, preventing the user from typing a bogus
-        # station_id into a free-text fallback form.
-        assert result["type"] == "abort"
-        assert result["reason"] == "no_stations_found_location"
+        # Should re-render async_step_location with the no-stations error so
+        # the user can adjust coords/radius without restarting the whole
+        # flow (no free-text station_id fallback that could create a broken
+        # entry).
+        assert result["type"] == "form"
+        assert result["step_id"] == "location"
+        assert result["errors"].get("base") == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("au_empty_clobber_test", None)
 
@@ -2397,8 +2399,9 @@ async def test_async_step_station_picker_exception_in_list_load(
         ):
             result = await flow.async_step_station_picker(user_input=None)
 
-        assert result["type"] == "abort"
-        assert result["reason"] == "no_stations_found_location"
+        assert result["type"] == "form"
+        assert result["step_id"] == "location"
+        assert result["errors"].get("base") == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("ie_broken_list_601", None)
 
@@ -2463,8 +2466,9 @@ async def test_async_step_station_picker_no_stations_with_unique_id_routes_to_na
         ):
             result = await flow.async_step_station_picker(user_input=None)
 
-        assert result["type"] == "abort"
-        assert result["reason"] == "no_stations_found_location"
+        assert result["type"] == "form"
+        assert result["step_id"] == "location"
+        assert result["errors"].get("base") == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("ie_empty_list_610_new", None)
 

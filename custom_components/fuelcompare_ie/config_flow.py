@@ -411,6 +411,12 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._radius_km: float = DEFAULT_RADIUS_KM
         self._suggested_name: str = ""
         self._api_key: str = ""  # optional API key for providers that require it
+        # Set by async_step_station_picker when the station list comes back
+        # empty for a location_search / county_search provider; consumed by
+        # the next async_step_location / async_step_county call which
+        # re-renders its form with this error key in `errors["base"]` so the
+        # user can adjust coords/county without restarting the whole flow.
+        self._pending_error: str = ""
 
     # ---- Step 1: country --------------------------------------------------------
 
@@ -587,6 +593,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         county_options = _counties_for_country(self._country)
         if not county_options:
             return self.async_abort(reason="no_counties_for_country")
+
+        # Surface a no-stations-from-picker error on re-entry, then clear it.
+        errors: dict[str, str] = {}
+        if self._pending_error:
+            errors["base"] = self._pending_error
+            self._pending_error = ""
+
         return self.async_show_form(
             step_id="county",
             data_schema=vol.Schema(
@@ -594,6 +607,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_STATION_COUNTY): vol.In(county_options),
                 }
             ),
+            errors=errors,
         )
 
     # ---- Step 3c: station picker (county_search / location_search mode) ---------
@@ -695,23 +709,23 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             ):
                 self._abort_if_unique_id_configured()
                 return await self.async_step_name()
-            # For location_search / county_search providers the empty list
-            # means "no stations in the searched area". A previous attempt
-            # re-showed the picker form, but the only field on that form was
-            # a free-text station_id input — a user could type any string and
-            # submit, creating a broken entry whose synth station_id no
-            # provider could resolve (Sydney + 1 km on au_fuelwatch).
-            #
-            # Abort the flow instead. HA's abort UI shows a Cancel button so
-            # the user can dismiss and restart the flow from the country
-            # picker. Mode-aware reason key surfaces the right translated
-            # string. Restart is cheap; no state to recover.
+            # For location_search / county_search the empty list means "no
+            # stations in the searched area". Send the user back to the
+            # previous step with an error banner so they can adjust
+            # coords/radius or pick a different county without restarting
+            # the whole flow. Reset unique_id so the abort-on-duplicate
+            # check in async_step_location doesn't trip on a return visit.
+            self._unique_id = None  # type: ignore[assignment]
+            if mode == "location_search":
+                self._pending_error = "no_stations_found_location"
+                return await self.async_step_location()
+            if mode == "county_search":
+                self._pending_error = "no_stations_found"
+                return await self.async_step_county()
+            # global_list / other: nothing to re-prompt — abort with the
+            # mode-aware reason (UI shows a Cancel button).
             if mode == "global_list":
                 return self.async_abort(reason="no_stations_found_global")
-            if mode in ("location_search",) or (
-                self._latitude is not None and mode != "county_search"
-            ):
-                return self.async_abort(reason="no_stations_found_location")
             return self.async_abort(reason="no_stations_found")
         schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
             {uid: label for uid, label in station_list}
@@ -740,7 +754,16 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             provider_cls, "NEEDS_POSTAL_CODE", False
         )
 
-        def _location_schema(lat: float, lon: float, needs_pc: bool) -> vol.Schema:
+        # Pre-fill prior values when this step is re-entered after an empty
+        # station list (so the user only adjusts the radius), otherwise show
+        # HA's home coords.
+        prefill_lat = self._latitude if self._latitude is not None else default_lat
+        prefill_lon = self._longitude if self._longitude is not None else default_lon
+        prefill_radius = self._radius_km
+
+        def _location_schema(
+            lat: float, lon: float, radius: float, needs_pc: bool
+        ) -> vol.Schema:
             schema_dict: dict = {
                 vol.Required(CONF_LATITUDE, default=lat): vol.All(
                     vol.Coerce(float), vol.Range(min=-90, max=90)
@@ -748,7 +771,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_LONGITUDE, default=lon): vol.All(
                     vol.Coerce(float), vol.Range(min=-180, max=180)
                 ),
-                vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                vol.Optional(CONF_RADIUS_KM, default=radius): vol.All(
                     vol.Coerce(float), vol.Range(min=0.1, max=500)
                 ),
             }
@@ -769,7 +792,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_show_form(
                     step_id="location",
                     data_schema=_location_schema(
-                        default_lat, default_lon, needs_postal
+                        prefill_lat, prefill_lon, prefill_radius, needs_postal
                     ),
                     errors=errors,
                 )
@@ -803,10 +826,19 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
             return await self.async_step_station_picker()
 
+        # Surface a no-stations-from-picker error on re-entry, then clear it
+        # so it doesn't stick across unrelated future re-renders.
+        errors: dict[str, str] = {}
+        if self._pending_error:
+            errors["base"] = self._pending_error
+            self._pending_error = ""
+
         return self.async_show_form(
             step_id="location",
-            data_schema=_location_schema(default_lat, default_lon, needs_postal),
-            errors={},
+            data_schema=_location_schema(
+                prefill_lat, prefill_lon, prefill_radius, needs_postal
+            ),
+            errors=errors,
         )
 
     # ---- Step 4: confirm / edit name --------------------------------------------

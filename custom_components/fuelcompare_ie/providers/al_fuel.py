@@ -107,7 +107,7 @@ class AlFuelProvider(BaseProvider):
     DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "Albania National Average (cargopedia.net)"
     CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    STATION_LOOKUP_MODE = "global_list"
 
     POLL_INTERVAL_SECONDS = 86400
     STATION_PAGE_URL: ClassVar[str] = (

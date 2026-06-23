@@ -117,9 +117,9 @@ def test_provider_config_mode_is_location() -> None:
     assert PlBenzynaProvider.CONFIG_MODE == "location"
 
 
-def test_provider_station_lookup_mode_is_location_search() -> None:
-    """PlBenzynaProvider uses STATION_LOOKUP_MODE='location_search'."""
-    assert PlBenzynaProvider.STATION_LOOKUP_MODE == "location_search"
+def test_provider_station_lookup_mode_is_global_list() -> None:
+    """PlBenzynaProvider uses STATION_LOOKUP_MODE='global_list'."""
+    assert PlBenzynaProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_does_not_require_api_key() -> None:

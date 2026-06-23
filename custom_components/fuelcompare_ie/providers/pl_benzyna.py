@@ -36,7 +36,7 @@ CONFIG_MODE = "location"
     station_id is set to the country code "PL" and async_list_stations
     returns a single "PL (national wholesale)" entry.
 
-STATION_LOOKUP_MODE = "location_search"
+STATION_LOOKUP_MODE = "global_list"
     Required by the spec.  async_list_stations accepts lat/lng kwargs but
     always returns the single national wholesale record regardless of
     coordinates (no station-level data exists).
@@ -173,7 +173,7 @@ class PlBenzynaProvider(BaseProvider):
     DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "ORLEN Wholesale (Poland)"
     CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = "https://www.orlen.pl"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
     CURRENCY: ClassVar[str] = "zł"

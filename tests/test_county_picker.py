@@ -520,9 +520,8 @@ async def test_config_flow_station_picker_no_stations_shows_error(
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_STATION_COUNTY: "dublin"}
         )
-        assert result["type"] == "abort"
-        assert result["reason"] in {
-            "no_stations_found",
-            "no_stations_found_location",
-            "no_stations_found_global",
-        }
+        # Empty county_search result now loops back to county step with an
+        # error banner (no_stations_found) instead of aborting the flow.
+        assert result["type"] == "form"
+        assert result["step_id"] == "county"
+        assert result["errors"].get("base") == "no_stations_found"

@@ -126,8 +126,8 @@ def test_provider_config_mode() -> None:
 
 
 def test_provider_station_lookup_mode() -> None:
-    """MtFuelProvider.STATION_LOOKUP_MODE is 'location_search'."""
-    assert MtFuelProvider.STATION_LOOKUP_MODE == "location_search"
+    """MtFuelProvider.STATION_LOOKUP_MODE is 'global_list'."""
+    assert MtFuelProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_poll_interval_weekly() -> None:
@@ -166,12 +166,6 @@ def test_constructor_stores_station_id() -> None:
     """MtFuelProvider accepts a custom station_id (treated as 'MT' logically)."""
     p = MtFuelProvider("MT")
     assert p._station_id == "MT"
-
-
-def test_constructor_stores_optional_params() -> None:
-    """Constructor stores optional county."""
-    p = MtFuelProvider("MT", county="Valletta")
-    assert p._county == "Valletta"
 
 
 def test_constructor_no_cached_xlsx_url() -> None:

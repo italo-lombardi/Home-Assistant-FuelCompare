@@ -141,7 +141,7 @@ class MtFuelProvider(BaseProvider):
     DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "EU Oil Bulletin (Malta)"
     CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = (
         "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
     )
@@ -165,19 +165,13 @@ class MtFuelProvider(BaseProvider):
         "The station ID is always 'MT'."
     )
 
-    def __init__(
-        self,
-        station_id: str = "MT",
-        county: str | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = "MT") -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always "MT"; stored for coordinator compatibility.
-            county:      Not used by this provider.
         """
         self._station_id = station_id or "MT"
-        self._county = county
         # Cache the discovered XLSX URL so subsequent polls skip the landing page scrape
         self._cached_xlsx_url: str | None = None
 

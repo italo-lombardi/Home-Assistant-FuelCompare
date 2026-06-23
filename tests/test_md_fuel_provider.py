@@ -156,8 +156,8 @@ def test_provider_config_mode_is_location() -> None:
 
 
 def test_provider_station_lookup_mode() -> None:
-    """MdFuelProvider uses STATION_LOOKUP_MODE='location_search'."""
-    assert MdFuelProvider.STATION_LOOKUP_MODE == "location_search"
+    """MdFuelProvider uses STATION_LOOKUP_MODE='global_list'."""
+    assert MdFuelProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_capabilities_include_fuel_types() -> None:

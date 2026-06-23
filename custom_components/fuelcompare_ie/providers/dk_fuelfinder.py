@@ -330,11 +330,7 @@ class DkFuelFinderProvider(BaseProvider):
         "Use the station picker to browse available brands."
     )
 
-    def __init__(
-        self,
-        station_id: str,
-        county: str | None = None,
-    ) -> None:
+    def __init__(self, station_id: str) -> None:
         """Initialise the provider with the brand/company name as station_id."""
         self._station_id = station_id
 

@@ -29,13 +29,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   station_id from lat/lng (e.g. `au_fuelwatch_-33.86880_151.20930`) that no
   provider could resolve, leaving the entry stuck in
   `Failed setup, will retry: Station '…' not found in FuelWatch feed`.
-  An interim fix re-showed the picker form with a free-text station_id
-  fallback — but users could still type any string and submit, creating
-  the same broken entry. The flow now aborts cleanly with a mode-aware
-  reason (`no_stations_found_location` / `no_stations_found` /
-  `no_stations_found_global`) so the user can dismiss and restart from
-  the country picker. National-average / global_list providers (which
-  genuinely have one synthetic entry) keep the silent-create shortcut.
+  The config flow now loops back to the previous step (location or
+  county) with a `no_stations_found_location` / `no_stations_found`
+  error banner so the user can widen the radius or pick a different
+  county without restarting the flow from the country picker. The free-text
+  station_id fallback that allowed any string through is gone. National-
+  average / `global_list` providers (which genuinely have one synthetic
+  entry) keep the silent-create shortcut; the EU Oil Bulletin path is
+  unchanged.
+- **National-average providers asked for coordinates** — Albania, Malta,
+  Moldova, Montenegro and Poland (ORLEN) publish only a single national
+  reference row; the config flow nonetheless prompted for lat/lng/radius
+  on setup and then discarded them. These providers now use
+  `STATION_LOOKUP_MODE = "global_list"` (matching EU Oil Bulletin), so
+  the location step is skipped and the user goes straight from provider
+  → station picker → entry creation.
 
 ### Internal
 - New `providers/_geo.py` module with a shared `haversine_km` function plus
@@ -53,9 +61,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   No behaviour change.
 - Dropped unused `latitude`/`longitude`/`radius_km` constructor parameters
   from national-average / no-coords providers (`al_fuel`, `ba_fuel`,
-  `dk_fuelfinder`, `eu_oil_bulletin`, `md_fuel`, `me_fuel`, `mt_fuel`,
-  `pl_benzyna`) — these providers return a single country-level row and
-  never read coordinates.
+  `dk_fuelfinder`, `eu_oil_bulletin`, `lt_saurida`, `md_fuel`, `me_fuel`,
+  `mt_fuel`, `pl_benzyna`) — these providers return a single country-level
+  row (or have no per-station GPS at the source) and never read coordinates.
+  Also dropped the unused `county` constructor parameter from `ba_fuel`,
+  `dk_fuelfinder` and `mt_fuel`, and the `**kwargs` absorber from
+  `me_fuel.__init__` so kwarg typos now surface as `TypeError`.
+- Aligned the `radius_km=0` contract across all client-side filter
+  providers: `0` / `None` / missing kwarg = "no filter" (matches
+  `providers._geo.filter_within_radius`'s falsy-check semantics).
+  Previously `au_nsw` used `kwargs.get(...) or self._radius_km`, which
+  silently rewrote an explicit `0` back to the constructor default.
+- Added the `no_stations_found` / `no_stations_found_location` /
+  `no_stations_found_global` keys to `strings.json` and every locale's
+  `config.abort` block (matching the existing `config.error` entries) so
+  HA picks up the translated text on the re-rendered location / county
+  step and on the `global_list` abort path.
 
 ## [0.7.1] - 2026-06-23
 

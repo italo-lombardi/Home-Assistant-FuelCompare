@@ -29,11 +29,10 @@ import logging
 from typing import Any, ClassVar
 from xml.etree import ElementTree as ET
 
-from ._geo import filter_within_radius
-
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
+from ._geo import filter_within_radius
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)

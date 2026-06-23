@@ -161,7 +161,7 @@ class MeFuelProvider(BaseProvider):
     PROVIDER_KEY = "me_fuel"
     LABEL = "Min. of Energy (Montenegro)"
     CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = 43200
     STATION_PAGE_URL: ClassVar[str] = (
         "https://data.gov.me"  # 12 hours; source updates approx weekly/bi-weekly
@@ -179,17 +179,11 @@ class MeFuelProvider(BaseProvider):
         }
     )
 
-    def __init__(
-        self,
-        station_id: str = _STATION_ID_ME,
-        **kwargs: Any,
-    ) -> None:
+    def __init__(self, station_id: str = _STATION_ID_ME) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always ``'ME'`` for this national-average provider.
-            **kwargs:    Absorbs extra kwargs (e.g. county) from the
-                         coordinator factory without error.
         """
         self._station_id = station_id
 

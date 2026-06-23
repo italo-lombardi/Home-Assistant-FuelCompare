@@ -141,9 +141,9 @@ def test_provider_metadata_config_mode_is_location() -> None:
     assert AlFuelProvider.CONFIG_MODE == "location"
 
 
-def test_provider_metadata_station_lookup_mode_is_location_search() -> None:
-    """STATION_LOOKUP_MODE is 'location_search'."""
-    assert AlFuelProvider.STATION_LOOKUP_MODE == "location_search"
+def test_provider_metadata_station_lookup_mode_is_global_list() -> None:
+    """STATION_LOOKUP_MODE is 'global_list'."""
+    assert AlFuelProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_metadata_poll_interval_is_daily() -> None:

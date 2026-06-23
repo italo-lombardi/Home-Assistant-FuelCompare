@@ -146,19 +146,13 @@ class BaFuelProvider(BaseProvider):
         }
     )
 
-    def __init__(
-        self,
-        station_id: str,
-        county: str | None = None,
-    ) -> None:
+    def __init__(self, station_id: str) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  "{city_slug}:{row_index}" key, e.g. "sarajevo:3".
-            county:      Not used by this provider; stored for interface compat.
         """
         self._station_id = station_id
-        self._county = county
 
     # ── Public interface ──────────────────────────────────────────────────────
 

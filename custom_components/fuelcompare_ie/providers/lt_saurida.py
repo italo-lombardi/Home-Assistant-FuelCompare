@@ -388,18 +388,8 @@ class LtSauridaProvider(BaseProvider):
         "Use the station picker to browse all available stations."
     )
 
-    def __init__(
-        self,
-        station_id: str,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str) -> None:
         self._station_id = station_id
-        # lat/lng/radius accepted for API symmetry; saurida.lt has no GPS data.
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 

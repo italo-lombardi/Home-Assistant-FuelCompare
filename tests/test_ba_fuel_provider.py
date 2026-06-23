@@ -156,10 +156,7 @@ def _make_session(*responses: AsyncMock) -> MagicMock:
 
 def _default_provider(**kwargs) -> BaFuelProvider:
     """Create a BaFuelProvider with sensible test defaults."""
-    return BaFuelProvider(
-        station_id=kwargs.get("station_id", _STATION_ID),
-        county=None,
-    )
+    return BaFuelProvider(station_id=kwargs.get("station_id", _STATION_ID))
 
 
 # ---------------------------------------------------------------------------
@@ -245,12 +242,6 @@ def test_constructor_stores_station_id() -> None:
     """Constructor stores station_id."""
     p = BaFuelProvider(station_id="tuzla:2")
     assert p._station_id == "tuzla:2"
-
-
-def test_constructor_stores_county() -> None:
-    """Constructor stores county (interface compat)."""
-    p = BaFuelProvider(station_id="sarajevo:0", county="Sarajevo")
-    assert p._county == "Sarajevo"
 
 
 # ---------------------------------------------------------------------------
