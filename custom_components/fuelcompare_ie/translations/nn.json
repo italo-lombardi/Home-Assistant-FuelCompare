@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Denne stasjonen er allereie konfigurert.",
       "no_providers_for_country": "Ingen dataleverandørar er tilgjengelege for dette landet.",
-      "no_counties_for_country": "Ingen fylke er konfigurert for det valde landet."
+      "no_counties_for_country": "Ingen fylke er konfigurert for det valde landet.",
+      "no_stations_found": "Ingen stasjonar funne for dette fylket. Prøv eit anna fylke.",
+      "no_stations_found_location": "Ingen stasjonar funne i nærleiken av desse koordinatane. Prøv å justere plasseringa eller auke søkjeradiusen.",
+      "no_stations_found_global": "Kunne ikkje laste lista frå leverandøren. Kjelda kan vere nede, eller ein påkravd avhengnad manglar. Sjå Home Assistant-loggane for fleire detaljar."
     }
   },
   "issues": {

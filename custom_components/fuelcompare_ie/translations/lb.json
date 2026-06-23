@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Dës Statioun ass schon configuréiert.",
       "no_providers_for_country": "Keng Dateequellen sinn fir dëst Land verfügbar.",
-      "no_counties_for_country": "Et sinn keng Kantone fir dat gewielten Land konfiguriert."
+      "no_counties_for_country": "Et sinn keng Kantone fir dat gewielten Land konfiguriert.",
+      "no_stations_found": "Keng Statiounen fir dëse Kanton fonnt. Probéiert en anere Kanton.",
+      "no_stations_found_location": "Keng Statiounen an der Géigend vun dëse Koordinate fonnt. Probéiert de Standuert unzepassen oder de Sichradius ze vergréisseren.",
+      "no_stations_found_global": "D'Lëscht vum Ubidder konnt net gelueden ginn. D'Quell ass vläicht net erreechbar oder eng erfuerderlech Ofhängegkeet feelt. Kuckt d'Home-Assistant-Logbicher fir Detailer."
     }
   },
   "issues": {

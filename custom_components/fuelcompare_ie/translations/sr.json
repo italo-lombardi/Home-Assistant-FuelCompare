@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ова станица је већ конфигурисана.",
       "no_providers_for_country": "За ову земљу нису доступни добављачи података.",
-      "no_counties_for_country": "За одабрану земљу нису конфигурисани окрузи."
+      "no_counties_for_country": "За одабрану земљу нису конфигурисани окрузи.",
+      "no_stations_found": "Нису пронађене станице за овај округ. Покушајте са другим округом.",
+      "no_stations_found_location": "Нису пронађене станице у близини ових координата. Покушајте да прилагодите локацију или повећате радијус претраге.",
+      "no_stations_found_global": "Lista pružaoca nije mogla biti učitana. Izvor je možda nedostupan ili nedostaje potrebna zavisnost. Detalje potražite u Home Assistant zapisnicima."
     }
   },
   "issues": {

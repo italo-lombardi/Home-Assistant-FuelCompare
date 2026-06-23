@@ -603,6 +603,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Pick a station from a live list — loaded from the provider."""
         errors: dict[str, str] = {}
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
 
         if user_input is not None:
             station_id = user_input.get(CONF_STATION_ID, "")
@@ -631,37 +632,43 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._suggested_name = fetched or f"Station {station_id[:8]}"
                 return await self.async_step_name()
 
-        # Load station list from provider
-        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
-        station_list: list[tuple[str, str]] = []
-        if provider_cls:
-            try:
-                session = async_get_clientsession(self.hass)
-                init_kwargs: dict[str, Any] = {}
-                if self._api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
-                    init_kwargs["api_key"] = self._api_key
-                provider_instance = provider_cls("", **init_kwargs)
-                list_kwargs: dict[str, Any] = {"county": self._station_county}
-                if self._postal_code:
-                    list_kwargs["postal_code"] = self._postal_code
-                if self._latitude is not None:
-                    list_kwargs["lat"] = self._latitude
-                if self._longitude is not None:
-                    list_kwargs["lng"] = self._longitude
-                list_kwargs["radius_km"] = self._radius_km
-                station_list = await provider_instance.async_list_stations(
-                    session, **list_kwargs
-                )
-                self._station_url_map = {
-                    uid: url
-                    for uid, _ in station_list
-                    if (url := provider_instance.get_station_page_url(uid))
-                }
-            except Exception as err:  # noqa: BLE001
-                _LOGGER.warning("Failed to load station list: %s", err)
+        # Re-render path after a validation error reuses the previously-loaded
+        # station list rather than refetching, so users don't pay the upstream
+        # round-trip just to see an error message redisplayed.
+        if user_input is not None and self._station_list:
+            station_list: list[tuple[str, str]] = self._station_list
+        else:
+            station_list = []
+            if provider_cls:
+                try:
+                    session = async_get_clientsession(self.hass)
+                    init_kwargs: dict[str, Any] = {}
+                    if self._api_key and getattr(
+                        provider_cls, "REQUIRES_API_KEY", False
+                    ):
+                        init_kwargs["api_key"] = self._api_key
+                    provider_instance = provider_cls("", **init_kwargs)
+                    list_kwargs: dict[str, Any] = {"county": self._station_county}
+                    if self._postal_code:
+                        list_kwargs["postal_code"] = self._postal_code
+                    if self._latitude is not None:
+                        list_kwargs["lat"] = self._latitude
+                    if self._longitude is not None:
+                        list_kwargs["lng"] = self._longitude
+                    list_kwargs["radius_km"] = self._radius_km
+                    station_list = await provider_instance.async_list_stations(
+                        session, **list_kwargs
+                    )
+                    self._station_url_map = {
+                        uid: url
+                        for uid, _ in station_list
+                        if (url := provider_instance.get_station_page_url(uid))
+                    }
+                except Exception as err:  # noqa: BLE001
+                    _LOGGER.warning("Failed to load station list: %s", err)
 
-        station_list = sorted(station_list, key=lambda x: x[1].lower())
-        self._station_list = station_list
+            station_list = sorted(station_list, key=lambda x: x[1].lower())
+            self._station_list = station_list
 
         has_location_caps = (
             provider_cls is not None
@@ -673,31 +680,42 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         )
         schema_dict: dict = {}
         if not station_list:
-            if self.unique_id and not needs_station_id:
-                self._abort_if_unique_id_configured()
-                return await self.async_step_name()
             mode = (
                 getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
                 if provider_cls
                 else "manual_id"
             )
-            # Mode-aware error message. Order matters: global_list always wins
-            # over coordinates/county fallbacks because a global-list provider
-            # may also carry stale lat/lng on the flow (e.g. EU Oil Bulletin
-            # entries created before the global_list dispatch was added).
+            # Silent-create path: only safe for providers that genuinely have
+            # no station list (national-average / global_list one-entry
+            # providers).
+            if (
+                self.unique_id
+                and not needs_station_id
+                and mode not in ("location_search", "county_search")
+            ):
+                self._abort_if_unique_id_configured()
+                return await self.async_step_name()
+            # For location_search / county_search providers the empty list
+            # means "no stations in the searched area". A previous attempt
+            # re-showed the picker form, but the only field on that form was
+            # a free-text station_id input — a user could type any string and
+            # submit, creating a broken entry whose synth station_id no
+            # provider could resolve (Sydney + 1 km on au_fuelwatch).
+            #
+            # Abort the flow instead. HA's abort UI shows a Cancel button so
+            # the user can dismiss and restart the flow from the country
+            # picker. Mode-aware reason key surfaces the right translated
+            # string. Restart is cheap; no state to recover.
             if mode == "global_list":
-                errors["base"] = "no_stations_found_global"
-            elif mode in ("location_search",) or (
+                return self.async_abort(reason="no_stations_found_global")
+            if mode in ("location_search",) or (
                 self._latitude is not None and mode != "county_search"
             ):
-                errors["base"] = "no_stations_found_location"
-            else:
-                errors["base"] = "no_stations_found"
-            schema_dict[vol.Required(CONF_STATION_ID)] = str
-        else:
-            schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
-                {uid: label for uid, label in station_list}
-            )
+                return self.async_abort(reason="no_stations_found_location")
+            return self.async_abort(reason="no_stations_found")
+        schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
+            {uid: label for uid, label in station_list}
+        )
         if has_location_caps:
             schema_dict[vol.Optional(CONF_SHOW_ON_MAP, default=False)] = bool
 

@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Denna station är redan konfigurerad.",
       "no_providers_for_country": "Inga dataleverantörer finns tillgängliga för detta land.",
-      "no_counties_for_country": "Inga län är konfigurerade för det valda landet."
+      "no_counties_for_country": "Inga län är konfigurerade för det valda landet.",
+      "no_stations_found": "Inga stationer hittades för detta län. Prova ett annat län.",
+      "no_stations_found_location": "Inga stationer hittades i närheten av dessa koordinater. Prova att justera platsen eller öka sökradien.",
+      "no_stations_found_global": "Det gick inte att läsa in leverantörens lista. Källan kan vara nere eller så saknas ett obligatoriskt beroende. Se Home Assistant-loggen för detaljer."
     }
   },
   "issues": {

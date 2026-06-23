@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ta postaja je že nastavljena.",
       "no_providers_for_country": "Za to državo ni na voljo nobenih ponudnikov podatkov.",
-      "no_counties_for_country": "Za izbrano državo ni konfiguriranih občin."
+      "no_counties_for_country": "Za izbrano državo ni konfiguriranih občin.",
+      "no_stations_found": "Za to okrožje ni bilo najdenih postaj. Poskusite z drugim okrožjem.",
+      "no_stations_found_location": "V bližini teh koordinat ni bilo najdenih postaj. Poskusite prilagoditi lokacijo ali povečati polmer iskanja.",
+      "no_stations_found_global": "Seznama ponudnika ni bilo mogoče naložiti. Vir morda ni dosegljiv ali pa manjka zahtevana odvisnost. Podrobnosti poiščite v dnevnikih Home Assistant."
     }
   },
   "issues": {

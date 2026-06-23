@@ -492,7 +492,7 @@ async def test_config_flow_croatia_county_picker(hass: HomeAssistant) -> None:
 async def test_config_flow_station_picker_no_stations_shows_error(
     hass: HomeAssistant,
 ) -> None:
-    """Empty station list shows form with base error."""
+    """Empty station list aborts the flow (no recoverable form)."""
     with (
         patch(
             "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
@@ -520,5 +520,9 @@ async def test_config_flow_station_picker_no_stations_shows_error(
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={CONF_STATION_COUNTY: "dublin"}
         )
-        assert result["step_id"] == "station_picker"
-        assert "base" in result.get("errors", {})
+        assert result["type"] == "abort"
+        assert result["reason"] in {
+            "no_stations_found",
+            "no_stations_found_location",
+            "no_stations_found_global",
+        }

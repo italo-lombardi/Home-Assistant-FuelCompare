@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ši stotis jau sukonfigūruota.",
       "no_providers_for_country": "Šiai šaliai nėra pasiekiamų duomenų teikėjų.",
-      "no_counties_for_country": "Pasirinktai šaliai nėra sukonfigūruota jokių apskričių."
+      "no_counties_for_country": "Pasirinktai šaliai nėra sukonfigūruota jokių apskričių.",
+      "no_stations_found": "Šioje apskrityje stočių nerasta. Bandykite kitą apskritį.",
+      "no_stations_found_location": "Prie šių koordinačių stočių nerasta. Pabandykite pakeisti vietą arba padidinti paieškos spindulį.",
+      "no_stations_found_global": "Nepavyko įkelti tiekėjo sąrašo. Šaltinis gali būti neprieinamas arba trūksta reikalingos priklausomybės. Daugiau informacijos rasite Home Assistant žurnaluose."
     }
   },
   "issues": {

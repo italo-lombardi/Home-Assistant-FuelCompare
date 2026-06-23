@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ova stanica je već konfigurirana.",
       "no_providers_for_country": "Za ovu zemlju nisu dostupni davatelji podataka.",
-      "no_counties_for_country": "Za odabranu zemlju nisu konfigurirane županije."
+      "no_counties_for_country": "Za odabranu zemlju nisu konfigurirane županije.",
+      "no_stations_found": "Nisu pronađene postaje za ovu županiju. Pokušajte s drugom županijom.",
+      "no_stations_found_location": "Nisu pronađene postaje u blizini ovih koordinata. Pokušajte prilagoditi lokaciju ili povećati polumjer pretrage.",
+      "no_stations_found_global": "Nije moguće učitati popis pružatelja. Izvor je možda nedostupan ili nedostaje potrebna ovisnost. Pojedinosti potražite u zapisnicima Home Assistanta."
     }
   },
   "issues": {

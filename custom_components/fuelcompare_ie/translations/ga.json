@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Tá an stáisiún seo cumraithe cheana féin.",
       "no_providers_for_country": "Níl aon soláthraithe sonraí ar fáil don tír seo.",
-      "no_counties_for_country": "Níl aon chontae cumraithe don tír roghnaithe."
+      "no_counties_for_country": "Níl aon chontae cumraithe don tír roghnaithe.",
+      "no_stations_found": "Níor aimsíodh stáisiúin don chontae seo. Bain triail as contae eile.",
+      "no_stations_found_location": "Níor aimsíodh stáisiúin in aice leis na comhordanáidí seo. Bain triail as an suíomh a choigeartú nó an ga cuardaigh a mhéadú.",
+      "no_stations_found_global": "Níorbh fhéidir liosta an tsoláthraí a luchtú. Seans go bhfuil an fhoinse as líne nó go bhfuil spleáchas riachtanach in easnamh. Féach logaí Home Assistant le haghaidh tuilleadh sonraí."
     }
   },
   "issues": {

@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",
       "no_providers_for_country": "Für dieses Land sind keine Datenanbieter verfügbar.",
-      "no_counties_for_country": "Für das ausgewählte Land sind keine Bezirke konfiguriert."
+      "no_counties_for_country": "Für das ausgewählte Land sind keine Bezirke konfiguriert.",
+      "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk.",
+      "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Passen Sie den Standort an oder vergrößern Sie den Suchradius.",
+      "no_stations_found_global": "Die Liste des Anbieters konnte nicht geladen werden. Möglicherweise ist die Quelle nicht erreichbar oder eine erforderliche Abhängigkeit fehlt. Details findest du im Home-Assistant-Log."
     }
   },
   "issues": {

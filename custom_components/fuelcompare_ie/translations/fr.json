@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Cette station est déjà configurée.",
       "no_providers_for_country": "Aucun fournisseur de données n'est disponible pour ce pays.",
-      "no_counties_for_country": "Aucun comté n'est configuré pour le pays sélectionné."
+      "no_counties_for_country": "Aucun comté n'est configuré pour le pays sélectionné.",
+      "no_stations_found": "Aucune station trouvée pour ce comté. Essayez un autre comté.",
+      "no_stations_found_location": "Aucune station trouvée à proximité de ces coordonnées. Essayez d'ajuster l'emplacement ou d'augmenter le rayon de recherche.",
+      "no_stations_found_global": "Impossible de charger la liste du fournisseur. La source est peut-être indisponible ou une dépendance requise est manquante. Consultez les journaux Home Assistant pour plus de détails."
     }
   },
   "issues": {

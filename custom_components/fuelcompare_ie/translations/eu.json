@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Gasolindegia dagoeneko konfiguratuta dago.",
       "no_providers_for_country": "Ez dago datu-hornitzailerik herrialde honetarako.",
-      "no_counties_for_country": "Ez dago aukeratutako herrialderako eskualderik konfiguratuta."
+      "no_counties_for_country": "Ez dago aukeratutako herrialderako eskualderik konfiguratuta.",
+      "no_stations_found": "Ez da gasolindegirik aurkitu konderri honetan. Saiatu beste konderri batekin.",
+      "no_stations_found_location": "Ez da gasolindegirik aurkitu koordenatu hauen inguruan. Saiatu kokapena doitzen edo bilaketa-erradioa handitzen.",
+      "no_stations_found_global": "Ezin izan da hornitzailearen zerrenda kargatu. Iturria itzalita egon liteke edo beharrezko mendekotasun bat falta da. Begiratu Home Assistant erregistroak xehetasunetarako."
     }
   },
   "issues": {

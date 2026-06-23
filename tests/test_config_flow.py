@@ -743,10 +743,7 @@ async def test_async_step_location_location_search_skips_abort(
 async def test_station_picker_empty_global_list_shows_error(
     hass: HomeAssistant,
 ) -> None:
-    """Station picker shows 'no_stations_found_global' error for global_list providers with no stations.
-
-    Covers config_flow.py line 688.
-    """
+    """Station picker aborts with 'no_stations_found_global' for global_list providers with no stations."""
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
@@ -786,8 +783,8 @@ async def test_station_picker_empty_global_list_shows_error(
         ):
             result = await flow.async_step_station_picker(user_input=None)
 
-        assert result["type"] == "form"
-        assert result["errors"].get("base") == "no_stations_found_global"
+        assert result["type"] == "abort"
+        assert result["reason"] == "no_stations_found_global"
     finally:
         PROVIDER_REGISTRY.pop("eu_empty_global_list_test", None)
 
@@ -800,13 +797,22 @@ async def test_station_picker_empty_global_list_shows_error(
 async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
     hass: HomeAssistant,
 ) -> None:
-    """Empty station list aborts (not clobbers) when unique_id already configured.
+    """Empty station list on a location_search provider shows an error form
+    rather than silently creating an entry with a synthesised station_id.
 
-    Regression test for the clobber bug: when a location_search provider
-    returns no stations (API down / out of area), async_step_station_picker
-    previously fell through to async_step_name with the lat/lng unique_id
-    still set, causing HA to silently destroy and replace the existing entry.
-    The fix adds _abort_if_unique_id_configured() before the shortcut return.
+    Regression test for two related bugs:
+    1. Clobber bug (0.7.1): an empty list previously fell through to
+       async_step_name with the lat/lng unique_id set, silently destroying
+       and replacing the existing entry.
+    2. Synth station_id bug (0.7.2): an empty list on a location_search
+       provider with no prior entry fell through to async_step_name and
+       created a new entry with no station_id. __init__.py then synthesised
+       a station_id from lat/lng, which the provider couldn't resolve at
+       fetch time (e.g. Sydney coords on au_fuelwatch / WA).
+
+    Fix: for location_search / county_search providers, an empty list means
+    "no stations in the searched area" — surface an error and stay on the
+    picker so the user can widen the search. Never fall through.
     """
     from unittest.mock import MagicMock, patch
 
@@ -830,7 +836,7 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
             return {}
 
         async def async_list_stations(self, session, **kwargs):
-            return []  # API down
+            return []  # API down or radius too small
 
     PROVIDER_REGISTRY["au_empty_clobber_test"] = _EmptyProvider
     try:
@@ -844,9 +850,9 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
         flow._provider_key = "au_empty_clobber_test"
         flow._country = "AU"
         flow._station_county = ""
-        flow._latitude = -31.8027
-        flow._longitude = 115.8377
-        flow._radius_km = 5.0
+        flow._latitude = -33.8688
+        flow._longitude = 151.2093
+        flow._radius_km = 1.0
         flow._postal_code = ""
         flow._api_key = ""
         flow._suggested_name = ""
@@ -857,11 +863,11 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
         flow._show_on_map = False
         # Simulate unique_id set by async_step_location
         flow.context["unique_id"] = (
-            "fuelcompare_ie_au_empty_clobber_test_-31.8027_115.8377"
+            "fuelcompare_ie_au_empty_clobber_test_-33.8688_151.2093"
         )
 
         abort_called = False
-        name_called = []
+        name_called: list[int] = []
 
         def _record_abort():
             nonlocal abort_called
@@ -869,7 +875,7 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
 
         async def _mock_name():
             name_called.append(1)
-            return {"type": "form", "step_id": "name"}
+            return {"type": "create_entry", "title": "x", "data": {}}
 
         with (
             patch(
@@ -881,12 +887,26 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
             ),
             patch.object(flow, "async_step_name", side_effect=_mock_name),
         ):
-            await flow.async_step_station_picker(user_input=None)
+            result = await flow.async_step_station_picker(user_input=None)
 
-        assert abort_called, (
-            "_abort_if_unique_id_configured must be called when station list is empty "
-            "and unique_id is set (prevents clobbering existing entry)"
+        # Must NOT fall through to async_step_name (would synthesise a bogus
+        # station_id from lat/lng that the provider can't fetch).
+        assert not name_called, (
+            "async_step_name must NOT be called for an empty location_search list"
         )
+        # _abort_if_unique_id_configured (the *unique-id* abort that prevents
+        # clobbering an existing entry) must not fire — we abort the FLOW
+        # cleanly via async_abort() below instead, so there's no chance of
+        # a partial entry creation either way.
+        assert not abort_called, (
+            "_abort_if_unique_id_configured must NOT be called — the flow "
+            "should abort via async_abort(reason=...) instead"
+        )
+        # Should abort the flow with the mode-aware reason; HA renders this
+        # as a dismissable error, preventing the user from typing a bogus
+        # station_id into a free-text fallback form.
+        assert result["type"] == "abort"
+        assert result["reason"] == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("au_empty_clobber_test", None)
 
@@ -2377,9 +2397,8 @@ async def test_async_step_station_picker_exception_in_list_load(
         ):
             result = await flow.async_step_station_picker(user_input=None)
 
-        assert result["type"] == "form"
-        assert result["step_id"] == "station_picker"
-        assert result["errors"].get("base") == "no_stations_found_location"
+        assert result["type"] == "abort"
+        assert result["reason"] == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("ie_broken_list_601", None)
 
@@ -2392,7 +2411,16 @@ async def test_async_step_station_picker_exception_in_list_load(
 async def test_async_step_station_picker_no_stations_with_unique_id_routes_to_name(
     hass: HomeAssistant,
 ) -> None:
-    """station_picker routes to name step when station list empty and unique_id set (line 610)."""
+    """station_picker stays on the picker form (not fall through to name) when
+    the station list is empty for a location_search provider, even if a
+    lat/lng unique_id is already set on the flow.
+
+    Originally the code routed an empty list + unique_id straight to the name
+    step, which silently created an entry with no station_id (then the
+    runtime synthesised a station_id from lat/lng that no provider could
+    resolve). The fix narrows that shortcut to non-location_search providers
+    so location-search users see a recoverable error.
+    """
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
@@ -2435,8 +2463,8 @@ async def test_async_step_station_picker_no_stations_with_unique_id_routes_to_na
         ):
             result = await flow.async_step_station_picker(user_input=None)
 
-        assert result["type"] == "form"
-        assert result["step_id"] == "name"
+        assert result["type"] == "abort"
+        assert result["reason"] == "no_stations_found_location"
     finally:
         PROVIDER_REGISTRY.pop("ie_empty_list_610_new", None)
 

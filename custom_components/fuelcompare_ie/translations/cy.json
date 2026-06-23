@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Mae'r orsaf hon eisoes wedi'i ffurfweddu.",
       "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon.",
-      "no_counties_for_country": "Nid oes siroedd wedi'u ffurfweddu ar gyfer y wlad a ddewiswyd."
+      "no_counties_for_country": "Nid oes siroedd wedi'u ffurfweddu ar gyfer y wlad a ddewiswyd.",
+      "no_stations_found": "Ni chanfuwyd gorsafoedd ar gyfer y sir hon. Rhowch gynnig ar sir wahanol.",
+      "no_stations_found_location": "Ni chanfuwyd gorsafoedd yn agos at y cyfesurynnau hyn. Rhowch gynnig ar addasu'r lleoliad neu gynyddu'r radiws chwilio.",
+      "no_stations_found_global": "Methwyd llwytho rhestr y darparwr. Efallai bod y ffynhonnell i lawr neu fod dibyniaeth ofynnol ar goll. Edrychwch ar logiau Home Assistant am fanylion."
     }
   },
   "issues": {

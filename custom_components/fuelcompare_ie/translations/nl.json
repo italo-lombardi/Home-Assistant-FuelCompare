@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Dit station is al geconfigureerd.",
       "no_providers_for_country": "Er zijn geen gegevensproviders beschikbaar voor dit land.",
-      "no_counties_for_country": "Er zijn geen provincies geconfigureerd voor het geselecteerde land."
+      "no_counties_for_country": "Er zijn geen provincies geconfigureerd voor het geselecteerde land.",
+      "no_stations_found": "Geen stations gevonden voor deze provincie. Probeer een andere provincie.",
+      "no_stations_found_location": "Geen stations gevonden in de buurt van deze coördinaten. Pas de locatie aan of vergroot de zoekradius.",
+      "no_stations_found_global": "De lijst van de provider kon niet worden geladen. Mogelijk is de bron niet beschikbaar of ontbreekt een vereiste afhankelijkheid. Raadpleeg de Home Assistant-logboeken voor details."
     }
   },
   "issues": {
