@@ -26,9 +26,10 @@ STATION_LOOKUP_MODE = 'location_search' (browse stations by Region code).
 from __future__ import annotations
 
 import logging
-from math import asin, cos, radians, sin, sqrt
 from typing import Any, ClassVar
 from xml.etree import ElementTree as ET
+
+from ._geo import filter_within_radius, haversine_km as _haversine_km  # noqa: F401
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -202,7 +203,8 @@ class AuFuelwatchProvider(BaseProvider):
             lat, lng (float): User's reference coordinates. When supplied with
                               radius_km, the returned list is filtered to
                               stations within that great-circle distance.
-            radius_km (float): Search radius in km. Ignored when lat/lng absent.
+            radius_km (float): Search radius in km. Filter is skipped when
+                               lat, lng or radius_km is missing/falsy.
 
         Returns:
             Alphabetically sorted list of (station_id, label) tuples where the
@@ -228,16 +230,9 @@ class AuFuelwatchProvider(BaseProvider):
 
         # FuelWatch RSS API has no radius parameter; filter client-side using
         # haversine distance when the caller supplies coords + radius.
-        filter_active = lat is not None and lng is not None and radius_km
+        kept = filter_within_radius(merged.items(), lat, lng, radius_km)
         result: list[tuple[str, str]] = []
-        for sid, data in merged.items():
-            if filter_active:
-                slat = data.get("latitude")
-                slng = data.get("longitude")
-                if slat is None or slng is None:
-                    continue
-                if _haversine_km(float(lat), float(lng), slat, slng) > float(radius_km):
-                    continue
+        for sid, data in kept:
             label = _build_station_list_label(data, sid)
             result.append((sid, label))
 
@@ -417,16 +412,6 @@ def _parse_lat_lng(raw: str | None) -> float | None:
         return float(raw)
     except (ValueError, TypeError):
         return None
-
-
-def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    """Great-circle distance in km between two WGS84 coords (mean-radius earth)."""
-    r1 = radians(lat1)
-    r2 = radians(lat2)
-    dlat = r2 - r1
-    dlng = radians(lng2 - lng1)
-    a = sin(dlat / 2) ** 2 + cos(r1) * cos(r2) * sin(dlng / 2) ** 2
-    return 2 * 6371.0 * asin(sqrt(a))
 
 
 def _parse_is_open(site_features: str | None) -> bool:
