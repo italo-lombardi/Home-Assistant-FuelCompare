@@ -13,14 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Multi-station add blocked for location-search providers** — a second (or
   third) station from the same search area could not be added because the
   config flow set the entry unique-ID at the location step (lat/lng-based)
-  instead of the station-picker step (station-ID-based).  On the second run,
+  instead of the station-picker step (station-ID-based). On the second run,
   the lat/lng unique-ID was already taken and `_abort_if_unique_id_configured`
-  blocked the flow before the user could pick a different station.  Affected
+  blocked the flow before the user could pick a different station. Affected
   all providers with `CONFIG_MODE="location"` + `STATION_LOOKUP_MODE=
   "location_search"` (≈ 30 providers including au_fuelwatch, fr_carburants,
-  de_tankerkoenig, gb_fuelfinder, es_minetur, it_mase and others).  The unique
+  de_tankerkoenig, gb_fuelfinder, es_minetur, it_mase and others). The unique
   ID is now always set from the selected station ID, matching the behaviour of
   `county_search` providers. Fixes #44.
+- **Silent entry clobber on empty station list** — when a location-search
+  provider returned no stations (API outage, coordinates outside coverage),
+  the config flow fell through to `async_create_entry` with the lat/lng
+  unique-ID still set, causing HA to silently unload and replace an existing
+  entry. The flow now correctly aborts with `already_configured` in this case.
 
 ## [0.7.0] - 2026-06-19
 
