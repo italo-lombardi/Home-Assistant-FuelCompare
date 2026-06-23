@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-06-23
+
+### Fixed
+- **FuelWatch (au_fuelwatch) ignored the search radius** — the WA FuelWatch RSS
+  endpoint has no native radius parameter, so the provider returned every
+  station in the WA Region regardless of the user's `radius_km` setting.
+  `async_list_stations` now applies a great-circle (haversine) filter
+  client-side when `lat`, `lng` and `radius_km` are supplied, so the station
+  picker shows only stations within the configured radius. Reported in #44.
+
 ## [0.7.1] - 2026-06-23
 
 ### Fixed
