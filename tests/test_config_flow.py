@@ -3165,3 +3165,208 @@ async def test_station_picker_picker_label_fallback_reaches_name_step(
         assert flow._suggested_name == "Shell Sandymount, Strand Rd"
     finally:
         PROVIDER_REGISTRY.pop("ie_picker_fallback_test", None)
+
+
+# ---------------------------------------------------------------------------
+# test_location_search_allows_second_station_same_area  (fix for #44)
+# ---------------------------------------------------------------------------
+
+
+async def test_location_search_allows_second_station_same_area(
+    hass: HomeAssistant,
+) -> None:
+    """Two different stations from the same search area can both be added.
+
+    Before the fix, async_step_location set the unique_id from lat/lng so the
+    second station was aborted with 'already_configured'.  After the fix the
+    unique_id is always set from the selected station_id inside
+    async_step_station_picker.
+    """
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _MultiStationProvider(BaseProvider):
+        COUNTRY = "AU"
+        PROVIDER_KEY = "au_multi_station_test"
+        LABEL = "Multi Station Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "A$"
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return f"Station {station_id}"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [
+                ("au_sta_001", "BP Canningvale, 1 Main St (#au_sta_)"),
+                ("au_sta_002", "Caltex Gosnells, 2 High St (#au_sta_)"),
+            ]
+
+    PROVIDER_REGISTRY["au_multi_station_test"] = _MultiStationProvider
+    try:
+        _lat, _lng = -31.8027, 115.8377
+
+        async def _add_station(station_id: str) -> dict:
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            if result.get("step_id") == "user":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_COUNTRY: "AU"}
+                )
+            if result.get("step_id") == "provider":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_PROVIDER: "au_multi_station_test"},
+                )
+            assert result["step_id"] == "location"
+            with patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession"
+            ):
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={
+                        CONF_LATITUDE: _lat,
+                        CONF_LONGITUDE: _lng,
+                        CONF_RADIUS_KM: 5.0,
+                    },
+                )
+            assert result["step_id"] == "station_picker"
+            with (
+                patch(
+                    "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
+                    new=AsyncMock(return_value=f"Station {station_id}"),
+                ),
+                _PATCH_FIRST_REFRESH,
+            ):
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_STATION_ID: station_id}
+                )
+            assert result["step_id"] == "name"
+            with _PATCH_FIRST_REFRESH:
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={"name": f"Station {station_id}"}
+                )
+            return result
+
+        result1 = await _add_station("au_sta_001")
+        assert result1["type"] == "create_entry", "first station should be created"
+
+        result2 = await _add_station("au_sta_002")
+        assert result2["type"] == "create_entry", (
+            "second station in same area should also be created (was blocked before fix)"
+        )
+
+        entries = hass.config_entries.async_entries(DOMAIN)
+        station_ids = [e.data.get("station_id") for e in entries]
+        assert "au_sta_001" in station_ids
+        assert "au_sta_002" in station_ids
+    finally:
+        PROVIDER_REGISTRY.pop("au_multi_station_test", None)
+
+
+# ---------------------------------------------------------------------------
+# test_location_search_duplicate_station_still_aborts  (fix for #44)
+# ---------------------------------------------------------------------------
+
+
+async def test_location_search_duplicate_station_still_aborts(
+    hass: HomeAssistant,
+) -> None:
+    """Re-adding an already-configured station is still rejected after the fix."""
+    from custom_components.fuelcompare_ie.const import (
+        CONF_LATITUDE,
+        CONF_LONGITUDE,
+        CONF_RADIUS_KM,
+    )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _DupStationProvider(BaseProvider):
+        COUNTRY = "AU"
+        PROVIDER_KEY = "au_dup_station_test"
+        LABEL = "Dup Station Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "A$"
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return "BP Canningvale"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("au_dup_001", "BP Canningvale, 1 Main St (#au_dup_)")]
+
+    PROVIDER_REGISTRY["au_dup_station_test"] = _DupStationProvider
+    try:
+        _lat, _lng = -31.8027, 115.8377
+
+        async def _add_station() -> dict:
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            if result.get("step_id") == "user":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_COUNTRY: "AU"}
+                )
+            if result.get("step_id") == "provider":
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={CONF_PROVIDER: "au_dup_station_test"},
+                )
+            assert result["step_id"] == "location"
+            with patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession"
+            ):
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"],
+                    user_input={
+                        CONF_LATITUDE: _lat,
+                        CONF_LONGITUDE: _lng,
+                        CONF_RADIUS_KM: 5.0,
+                    },
+                )
+            assert result["step_id"] == "station_picker"
+            with (
+                patch(
+                    "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
+                    new=AsyncMock(return_value="BP Canningvale"),
+                ),
+                _PATCH_FIRST_REFRESH,
+            ):
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={CONF_STATION_ID: "au_dup_001"}
+                )
+            if result.get("type") == "abort":
+                return result
+            assert result["step_id"] == "name"
+            with _PATCH_FIRST_REFRESH:
+                result = await hass.config_entries.flow.async_configure(
+                    result["flow_id"], user_input={"name": "BP Canningvale"}
+                )
+            return result
+
+        result1 = await _add_station()
+        assert result1["type"] == "create_entry"
+
+        result2 = await _add_station()
+        assert result2["type"] == "abort"
+        assert result2["reason"] == "already_configured"
+    finally:
+        PROVIDER_REGISTRY.pop("au_dup_station_test", None)
