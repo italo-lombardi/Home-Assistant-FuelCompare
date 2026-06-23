@@ -18,9 +18,11 @@ gasoline 95, diesel, and LPG in EUR/litre, updated approximately weekly.
 The station_id for this provider is the country code "AL"; only one virtual
 "station" (the national average) exists.
 
-CONFIG_MODE = 'location'
-  The user does not need to enter a station UUID.  The coordinator calls
-  async_fetch(session, "AL") and the provider returns national averages.
+CONFIG_MODE = 'station_id', STATION_LOOKUP_MODE = 'global_list'
+  Single national-average row; the config flow skips both location and
+  county steps and goes directly to the station picker. The coordinator
+  calls async_fetch(session, "AL") and the provider returns national
+  averages.
 
 Data quality
 ------------

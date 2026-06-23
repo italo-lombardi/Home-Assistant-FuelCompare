@@ -27,7 +27,7 @@ All four prices are in EUR/litre.  The government publishes updates
 approximately weekly to bi-weekly; there is no fixed update day.
 
 No station-level data is available from any free/open source for
-Montenegro.  This provider therefore operates in CONFIG_MODE='location'
+Montenegro.  This provider therefore operates in STATION_LOOKUP_MODE='global_list'
 with a single virtual station whose station_id is the country code ``'ME'``.
 
 CKAN API endpoint
@@ -142,9 +142,9 @@ class MeFuelProvider(BaseProvider):
     retail prices for EUROSUPER 95, EUROSUPER 98, EURODIESEL, and LOŽ ULJE
     (heating oil) as XLSX workbooks.
 
-    There is no station-level data available.  CONFIG_MODE is ``'location'``
-    with the virtual station ``'ME'`` so the coordinator tracks a single
-    national-average entry per integration instance.
+    There is no station-level data available.  STATION_LOOKUP_MODE is
+    ``'global_list'`` with the virtual station ``'ME'`` so the coordinator
+    tracks a single national-average entry per integration instance.
 
     The fetch process has two steps:
       1. Query the CKAN package_search endpoint to get the latest XLSX URL.

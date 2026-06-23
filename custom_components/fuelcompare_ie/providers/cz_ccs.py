@@ -54,9 +54,9 @@ last_updated                → lastupdated         ISO 8601 string
 "Czech Republic"            → name                Fixed label (national average)
 "CZ"                        → source_station_id   Country code used as station id
 
-Because CONFIG_MODE is 'location', the station_id passed to async_fetch is the
-country code 'CZ' (set during config entry creation).  async_list_stations
-returns a single entry for the national average.
+Because STATION_LOOKUP_MODE is 'global_list', the station_id passed to
+async_fetch is the country code 'CZ' (set during config entry creation).
+async_list_stations returns a single entry for the national average.
 
 Third-party dependency risk
 ---------------------------
@@ -101,9 +101,9 @@ class CzCcsProvider(BaseProvider):
     from a community-maintained JSON file that scrapes and re-publishes these
     caps each weekday.
 
-    Because no station-level data source exists for CZ, CONFIG_MODE is
-    'location' and the provider tracks national-average caps only.  The
-    station_id for the single virtual "station" is the country code 'CZ'.
+    Because no station-level data source exists for CZ, STATION_LOOKUP_MODE
+    is 'global_list' and the provider tracks national-average caps only.
+    The station_id for the single virtual "station" is the country code 'CZ'.
 
     Usage
     -----

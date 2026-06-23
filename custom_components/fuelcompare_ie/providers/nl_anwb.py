@@ -41,7 +41,7 @@ POLL_INTERVAL_SECONDS = 86400
 week.  Daily polling avoids re-downloading on non-publication days while
 ensuring the new data is picked up within one day of Thursday publication.
 
-CONFIG_MODE = 'location'
+CONFIG_MODE = 'station_id'
 STATION_LOOKUP_MODE = 'global_list'
 
 station_id is always "NL" (the country code) for this national-average

@@ -32,9 +32,9 @@ Approach
 Station level: False.  No station-level data source exists for Malta.
 The single "station" returned has station_id = "MT" (country code).
 
-CONFIG_MODE='location': the coordinator/config flow treats this as a
-location-based provider.  async_list_stations returns a single entry for
-the national average.
+STATION_LOOKUP_MODE='global_list': the coordinator/config flow skips the
+location and county steps and goes directly to the station picker.
+async_list_stations returns a single entry for the national average.
 
 Update cadence: weekly (Thursdays).  POLL_INTERVAL_SECONDS = 604800
     STATION_PAGE_URL: ClassVar[str] = "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"

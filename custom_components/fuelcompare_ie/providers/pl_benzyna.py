@@ -31,7 +31,7 @@ GET https://tool.orlen.pl/api/autogasprices
       voivodeship   — str, e.g. "Mazowieckie"
     This provider uses the national minimum LPG price across all voivodeships.
 
-CONFIG_MODE = "location"
+CONFIG_MODE = "station_id"
     There are no individual stations — only national wholesale prices.
     station_id is set to the country code "PL" and async_list_stations
     returns a single "PL (national wholesale)" entry.
@@ -162,7 +162,7 @@ class PlBenzynaProvider(BaseProvider):
 
     Usage
     -----
-    CONFIG_MODE = 'location': station_id is fixed to 'PL'.
+    CONFIG_MODE = 'station_id': station_id is fixed to 'PL'.
     The coordinator creates entities for each CAPABILITIES key.
     async_list_stations returns the single national record regardless of
     lat/lng coordinates supplied (no location-specific retail data exists).
@@ -243,8 +243,8 @@ class PlBenzynaProvider(BaseProvider):
     ) -> str | None:
         """Return the display name for the config flow.
 
-        For CONFIG_MODE='location' providers that have only a single national
-        record, this returns the static name without making an API call.
+        For global_list providers that have only a single national record,
+        this returns the static name without making an API call.
 
         Args:
             session:    aiohttp ClientSession (not used).

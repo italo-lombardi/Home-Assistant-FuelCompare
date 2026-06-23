@@ -23,8 +23,9 @@ Coverage
 - Prices as of 2026-06-13/14: Benzina 95 = 28.71 MDL/L, Motorina = 27.16 MDL/L
 
 Because this provider returns a single national reference price (not per-
-station data), CONFIG_MODE is 'location' and station_id is the country code
-'MD'.  There are no coordinates, no station name, and no address.
+station data), STATION_LOOKUP_MODE is 'global_list' and station_id is the
+country code 'MD'.  There are no coordinates, no station name, and no
+address.
 
 Scraping approach
 -----------------
@@ -184,8 +185,8 @@ class MdFuelProvider(BaseProvider):
     ) -> str | None:
         """Return a display name for the config flow.
 
-        For CONFIG_MODE='location' providers the config flow generates a
-        location-based title; returning None is correct here.
+        For global_list providers the config flow generates the entry
+        title from the picker label; returning None is correct here.
 
         Args:
             session:    aiohttp ClientSession.
