@@ -30,8 +30,8 @@ from .base import (
     BaseProvider,
     ProviderError,
     StationData,
-    haversine_km as _haversine_km,
 )
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -279,15 +279,7 @@ class PtDgegProvider(BaseProvider):
 
         # Filter by proximity when coordinates available
         if lat is not None and lng is not None:
-            filtered: dict[str, dict[str, Any]] = {}
-            for sid, info in stations.items():
-                s_lat = info.get("latitude")
-                s_lng = info.get("longitude")
-                if s_lat is not None and s_lng is not None:
-                    if _haversine_km(lat, lng, s_lat, s_lng) <= radius_km:
-                        filtered[sid] = info
-                # Stations without coordinates are excluded when filtering by location
-            stations = filtered
+            stations = dict(filter_within_radius(stations.items(), lat, lng, radius_km))
 
         # Sort alphabetically by label
         result: list[tuple[str, str]] = []

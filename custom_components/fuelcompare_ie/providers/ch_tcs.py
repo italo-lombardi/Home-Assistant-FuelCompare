@@ -85,7 +85,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import BaseProvider, ProviderError, StationData
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -335,21 +336,18 @@ class ChTcsProvider(BaseProvider):
 
         result: list[tuple[str, str]] = []
 
-        for sid, raw in merged.items():
+        filtered = filter_within_radius(
+            merged.items(),
+            lat,
+            lng,
+            radius_km,
+            get_coords=lambda r: (
+                (r.get("_meta") or {}).get("latitude"),
+                (r.get("_meta") or {}).get("longitude"),
+            ),
+        )
+        for sid, raw in filtered:
             meta = raw.get("_meta", {})
-            slat = meta.get("latitude")
-            slng = meta.get("longitude")
-            if slat is None or slng is None:
-                continue
-
-            try:
-                dist = haversine_km(lat, lng, float(slat), float(slng))
-            except (ValueError, TypeError):
-                continue
-
-            if dist > radius_km:
-                continue
-
             name = meta.get("displayName") or meta.get("brand") or f"Station {sid}"
             address = meta.get("formattedAddress") or ""
             if address:

@@ -97,7 +97,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import BaseProvider, ProviderError, StationData
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -310,19 +311,18 @@ class AuVicProvider(BaseProvider):
         station_map = _build_station_map(raw)
 
         result: list[tuple[str, str]] = []
-        for sid, entry in station_map.items():
+        filtered = filter_within_radius(
+            station_map.items(),
+            lat,
+            lng,
+            radius_km,
+            get_coords=lambda e: (
+                ((e.get("fuelStation") or {}).get("location") or {}).get("latitude"),
+                ((e.get("fuelStation") or {}).get("location") or {}).get("longitude"),
+            ),
+        )
+        for sid, entry in filtered:
             fs = entry.get("fuelStation") or {}
-            loc = fs.get("location") or {}
-            try:
-                s_lat = float(loc["latitude"])
-                s_lng = float(loc["longitude"])
-            except (KeyError, TypeError, ValueError):
-                continue
-
-            dist = haversine_km(lat, lng, s_lat, s_lng)
-            if dist > radius_km:
-                continue
-
             label = _build_display_label(fs, sid)
             result.append((sid, label))
 

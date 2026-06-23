@@ -30,6 +30,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   call-sites behind one helper API is tracked as a follow-up cleanup.
   The 14 other providers carrying private haversine copies will be
   migrated in the same follow-up.
+- Unified haversine + radius filter behind `providers/_geo`: extended
+  `filter_within_radius` with an optional `get_coords` callable for nested
+  coord shapes, migrated `at_econtrol` to the helper, and switched the 16
+  remaining providers (au_nsw/au_qld/au_vic/be_carbu/ca_qc/ch_tcs/es_minetur/
+  fr_carburants/gb_fuelfinder/ie_pumps/is_fuel/it_mase/pt_dgeg/se_bensinpriser/
+  si_goriva/no_drivstoff) off the duplicate `base.haversine_km` import. Flat-
+  coord client-side filter loops are now collapsed into a single
+  `filter_within_radius(...)` call; distance-display-only call sites simply
+  use `_geo.haversine_km`. au_fuelwatch's `noqa` re-export and the two tests
+  that imported `_haversine_km` from provider modules were updated to import
+  from `providers._geo` directly. No behaviour change.
+- Dropped unused `latitude`/`longitude`/`radius_km` constructor parameters
+  from national-average / no-coords providers (`al_fuel`, `ba_fuel`,
+  `dk_fuelfinder`, `eu_oil_bulletin`, `md_fuel`, `me_fuel`, `mt_fuel`,
+  `pl_benzyna`) — these providers return a single country-level row and
+  never read coordinates.
 
 ## [0.7.1] - 2026-06-23
 

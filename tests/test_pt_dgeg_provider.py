@@ -8,12 +8,14 @@ import pytest
 from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
+from custom_components.fuelcompare_ie.providers._geo import (
+    haversine_km as _haversine_km,
+)
 from custom_components.fuelcompare_ie.providers.pt_dgeg import (
     PtDgegProvider,
     _FUEL_NAME_MAP,
     _GET_POSTO_URL,
     _SEARCH_URL,
-    _haversine_km,
     _parse_price,
     _parse_station,
 )

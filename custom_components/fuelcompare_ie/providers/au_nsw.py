@@ -92,8 +92,8 @@ from .base import (
     BaseProvider,
     ProviderError,
     StationData,
-    haversine_km as _haversine_km,
 )
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -297,18 +297,17 @@ class AuNswProvider(BaseProvider):
         station_map, _ = _build_index(raw)
 
         result: list[tuple[str, str]] = []
-        for code, station in station_map.items():
-            loc = station.get("location") or {}
-            try:
-                s_lat = float(loc["latitude"])
-                s_lng = float(loc["longitude"])
-            except (KeyError, TypeError, ValueError):
-                continue
-
-            dist = _haversine_km(lat, lng, s_lat, s_lng)
-            if dist > radius_km:
-                continue
-
+        filtered = filter_within_radius(
+            station_map.items(),
+            lat,
+            lng,
+            radius_km,
+            get_coords=lambda s: (
+                (s.get("location") or {}).get("latitude"),
+                (s.get("location") or {}).get("longitude"),
+            ),
+        )
+        for code, station in filtered:
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
             address = station.get("address") or ""

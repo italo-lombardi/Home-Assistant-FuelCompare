@@ -3,16 +3,13 @@
 Used by providers whose upstream API has no native radius parameter and must
 filter station lists client-side after fetching (e.g. au_fuelwatch RSS,
 at_econtrol "10 nearest" hard cap).
-
-ponytail: 14 other providers carry private copies of haversine. Migrating
-those is a refactor, not part of the radius-honour bug fix; left for a
-follow-up cleanup.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Iterable
+from typing import Any
 
 _EARTH_RADIUS_KM = 6371.0
 
@@ -35,14 +32,20 @@ def filter_within_radius(
     *,
     lat_key: str = "latitude",
     lng_key: str = "longitude",
+    get_coords: Callable[[Any], tuple[float | None, float | None]] | None = None,
 ) -> list[tuple[str, dict[str, Any]]]:
-    """Yield only items whose (lat_key, lng_key) lie within `radius_km`.
+    """Yield only items whose coordinates lie within `radius_km`.
 
     If lat/lng/radius_km is missing or falsy, returns the full list unchanged
     (back-compat path for callers that don't supply coordinates).
 
     Items whose dict has no coords (or non-numeric coords) are DROPPED when
     the filter is active — same conservative behaviour as au_fuelwatch.
+
+    By default coords are read flat from the dict via `lat_key`/`lng_key`.
+    Providers with nested coord shapes (e.g. a `location` sub-dict) can pass
+    `get_coords` to extract `(lat, lng)` from the row instead; returning
+    `(None, None)` drops the item.
     """
     materialised = list(items)
     if lat is None or lng is None or not radius_km:
@@ -53,8 +56,11 @@ def filter_within_radius(
     frad = float(radius_km)
     out: list[tuple[str, dict[str, Any]]] = []
     for sid, data in materialised:
-        slat = data.get(lat_key)
-        slng = data.get(lng_key)
+        if get_coords is not None:
+            slat, slng = get_coords(data)
+        else:
+            slat = data.get(lat_key)
+            slng = data.get(lng_key)
         if slat is None or slng is None:
             continue
         try:
@@ -89,4 +95,22 @@ if __name__ == "__main__":
     kept = filter_within_radius(rows, -31.9523, 115.8613, 5.0)
     ids = [sid for sid, _ in kept]
     assert ids == ["near"], ids
+
+    # filter_within_radius with get_coords: nested coord extractor
+    nested = [
+        ("near", {"location": {"lat": -31.95, "lng": 115.86}}),
+        ("far", {"location": {"lat": -32.06, "lng": 115.74}}),
+        ("empty", {"location": {}}),
+        ("missing", {}),
+    ]
+
+    def _extract(row: dict[str, Any]) -> tuple[float | None, float | None]:
+        loc = row.get("location") or {}
+        return loc.get("lat"), loc.get("lng")
+
+    kept_nested = filter_within_radius(
+        nested, -31.9523, 115.8613, 5.0, get_coords=_extract
+    )
+    ids_nested = [sid for sid, _ in kept_nested]
+    assert ids_nested == ["near"], ids_nested
     print("ok")

@@ -1422,14 +1422,12 @@ async def test_async_list_stations_no_radius_kwarg_returns_all() -> None:
 
 
 async def test_haversine_km_known_distance() -> None:
-    """_haversine_km matches a known distance within 1 % tolerance."""
-    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
-        _haversine_km,
-    )
+    """haversine_km matches a known distance within 1 % tolerance."""
+    from custom_components.fuelcompare_ie.providers._geo import haversine_km
 
     # Perth CBD (-31.9523, 115.8613) ↔ Fremantle (-32.0569, 115.7439)
     # Real-world great-circle distance ≈ 16.0 km.
-    d = _haversine_km(-31.9523, 115.8613, -32.0569, 115.7439)
+    d = haversine_km(-31.9523, 115.8613, -32.0569, 115.7439)
     assert 15.5 < d < 16.5
 
 

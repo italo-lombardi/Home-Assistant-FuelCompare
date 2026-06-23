@@ -73,7 +73,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import BaseProvider, ProviderError, StationData
+from ._geo import haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
