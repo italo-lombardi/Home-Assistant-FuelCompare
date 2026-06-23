@@ -219,27 +219,14 @@ class EuOilBulletinProvider(BaseProvider):
         "'EURO' for the Euro Area aggregate."
     )
 
-    def __init__(
-        self,
-        station_id: str = "EU27",
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = "EU27") -> None:
         """Initialise the provider.
 
         Args:
             station_id:  ISO country code or aggregate key ('EU27', 'EURO').
                          Stored for use in async_fetch.
-            latitude:    Unused. Kept for back-compat with pre-global_list
-                         entries (and entry.data) that still carry coordinates.
-            longitude:   Unused. See latitude.
-            radius_km:   Unused. See latitude.
         """
         self._station_id = station_id.upper() if station_id else "EU27"
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km
 
     # ── Public interface ──────────────────────────────────────────────────────
 

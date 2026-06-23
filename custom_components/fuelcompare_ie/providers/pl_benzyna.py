@@ -201,25 +201,13 @@ class PlBenzynaProvider(BaseProvider):
         "the national wholesale price schedule.  Enter 'PL' or leave blank."
     )
 
-    def __init__(
-        self,
-        station_id: str = _NATIONAL_STATION_ID,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = _NATIONAL_STATION_ID) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Ignored for this provider; always 'PL'.
-            latitude:    Stored for BaseProvider compat; not used for fetching.
-            longitude:   Stored for BaseProvider compat; not used for fetching.
-            radius_km:   Stored for BaseProvider compat; not used for fetching.
         """
         self._station_id = _NATIONAL_STATION_ID
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 

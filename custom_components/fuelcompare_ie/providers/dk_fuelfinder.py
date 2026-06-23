@@ -334,17 +334,9 @@ class DkFuelFinderProvider(BaseProvider):
         self,
         station_id: str,
         county: str | None = None,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
     ) -> None:
         """Initialise the provider with the brand/company name as station_id."""
         self._station_id = station_id
-        # lat/lng/radius are accepted for API symmetry but not used for filtering
-        # (fuelfinder.dk provides no per-station location data).
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 

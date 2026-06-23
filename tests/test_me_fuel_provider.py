@@ -254,14 +254,6 @@ def test_constructor_default_station_id() -> None:
     assert p._station_id == "ME"
 
 
-def test_constructor_accepts_coordinates() -> None:
-    """Constructor stores optional lat/lng/radius for interface compat."""
-    p = MeFuelProvider(station_id="ME", latitude=42.5, longitude=19.3, radius_km=50.0)
-    assert p._latitude == pytest.approx(42.5)
-    assert p._longitude == pytest.approx(19.3)
-    assert p._radius_km == pytest.approx(50.0)
-
-
 def test_constructor_extra_kwargs_do_not_raise() -> None:
     """Constructor absorbs unknown kwargs without raising."""
     MeFuelProvider(station_id="ME", county="Podgorica", unknown_param="x")

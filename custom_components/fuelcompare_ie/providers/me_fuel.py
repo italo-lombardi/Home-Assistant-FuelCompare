@@ -182,25 +182,16 @@ class MeFuelProvider(BaseProvider):
     def __init__(
         self,
         station_id: str = _STATION_ID_ME,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always ``'ME'`` for this national-average provider.
-            latitude:    Not used; stored for interface compatibility.
-            longitude:   Not used; stored for interface compatibility.
-            radius_km:   Not used; stored for interface compatibility.
             **kwargs:    Absorbs extra kwargs (e.g. county) from the
                          coordinator factory without error.
         """
         self._station_id = station_id
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km
 
     # ── Public interface ──────────────────────────────────────────────────────
 

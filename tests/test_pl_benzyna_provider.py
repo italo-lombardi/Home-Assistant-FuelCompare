@@ -83,16 +83,8 @@ def _make_session(*responses: AsyncMock) -> MagicMock:
     return session
 
 
-def _make_provider(
-    latitude: float | None = _LAT,
-    longitude: float | None = _LNG,
-    radius_km: float = 10.0,
-) -> PlBenzynaProvider:
-    return PlBenzynaProvider(
-        latitude=latitude,
-        longitude=longitude,
-        radius_km=radius_km,
-    )
+def _make_provider(**_unused: object) -> PlBenzynaProvider:
+    return PlBenzynaProvider()
 
 
 # ---------------------------------------------------------------------------
@@ -196,32 +188,6 @@ def test_constructor_station_id_is_always_pl() -> None:
     """Constructor always sets station_id to 'PL' regardless of argument."""
     provider = PlBenzynaProvider(station_id="whatever")
     assert provider._station_id == "PL"
-
-
-def test_constructor_stores_coordinates() -> None:
-    """Constructor stores latitude and longitude."""
-    provider = _make_provider(latitude=_LAT, longitude=_LNG)
-    assert provider._latitude == pytest.approx(_LAT)
-    assert provider._longitude == pytest.approx(_LNG)
-
-
-def test_constructor_stores_radius_km() -> None:
-    """Constructor stores radius_km."""
-    provider = _make_provider(radius_km=25.0)
-    assert provider._radius_km == pytest.approx(25.0)
-
-
-def test_constructor_radius_defaults_to_ten() -> None:
-    """Constructor defaults radius_km to 10.0 when not supplied."""
-    provider = PlBenzynaProvider()
-    assert provider._radius_km == pytest.approx(10.0)
-
-
-def test_constructor_coordinates_default_to_none() -> None:
-    """Constructor defaults lat/lng to None when not supplied."""
-    provider = PlBenzynaProvider()
-    assert provider._latitude is None
-    assert provider._longitude is None
 
 
 # ---------------------------------------------------------------------------

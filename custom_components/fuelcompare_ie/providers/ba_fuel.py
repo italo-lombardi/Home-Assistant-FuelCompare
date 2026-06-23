@@ -150,24 +150,15 @@ class BaFuelProvider(BaseProvider):
         self,
         station_id: str,
         county: str | None = None,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
     ) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  "{city_slug}:{row_index}" key, e.g. "sarajevo:3".
             county:      Not used by this provider; stored for interface compat.
-            latitude:    WGS84 latitude of the tracked location.
-            longitude:   WGS84 longitude of the tracked location.
-            radius_km:   Search radius in km (used for async_list_stations).
         """
         self._station_id = station_id
         self._county = county
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 50.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 

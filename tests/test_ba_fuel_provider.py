@@ -159,9 +159,6 @@ def _default_provider(**kwargs) -> BaFuelProvider:
     return BaFuelProvider(
         station_id=kwargs.get("station_id", _STATION_ID),
         county=None,
-        latitude=kwargs.get("latitude", 43.8476),
-        longitude=kwargs.get("longitude", 18.3564),
-        radius_km=kwargs.get("radius_km", 50.0),
     )
 
 
@@ -248,22 +245,6 @@ def test_constructor_stores_station_id() -> None:
     """Constructor stores station_id."""
     p = BaFuelProvider(station_id="tuzla:2")
     assert p._station_id == "tuzla:2"
-
-
-def test_constructor_stores_coordinates() -> None:
-    """Constructor stores latitude, longitude, radius_km."""
-    p = BaFuelProvider(
-        station_id="mostar:0", latitude=43.34, longitude=17.81, radius_km=20.0
-    )
-    assert p._latitude == pytest.approx(43.34)
-    assert p._longitude == pytest.approx(17.81)
-    assert p._radius_km == pytest.approx(20.0)
-
-
-def test_constructor_default_radius() -> None:
-    """Constructor defaults radius_km to 50.0 when None is passed."""
-    p = BaFuelProvider(station_id="sarajevo:0", radius_km=None)
-    assert p._radius_km == pytest.approx(50.0)
 
 
 def test_constructor_stores_county() -> None:

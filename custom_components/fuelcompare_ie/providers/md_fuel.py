@@ -119,27 +119,14 @@ class MdFuelProvider(BaseProvider):
         "No station-level data is available.  The station ID is fixed to 'MD'."
     )
 
-    def __init__(
-        self,
-        station_id: str = _NATIONAL_STATION_ID,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = _NATIONAL_STATION_ID) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always 'MD' for this provider.  Accepted as a
                          parameter for BaseProvider compatibility.
-            latitude:    Not used — no station-level data.  Accepted for
-                         CONFIG_MODE='location' interface compatibility.
-            longitude:   Not used — see latitude.
-            radius_km:   Not used — see latitude.
         """
         self._station_id = station_id or _NATIONAL_STATION_ID
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 

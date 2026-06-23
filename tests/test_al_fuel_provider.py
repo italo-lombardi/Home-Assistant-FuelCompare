@@ -199,13 +199,6 @@ def test_constructor_stores_station_id() -> None:
     assert p._station_id == "AL"
 
 
-def test_constructor_accepts_lat_lng_for_interface_compat() -> None:
-    """Constructor accepts latitude/longitude even though they are not used."""
-    p = AlFuelProvider(station_id="AL", latitude=41.33, longitude=19.83)
-    assert p._latitude == pytest.approx(41.33)
-    assert p._longitude == pytest.approx(19.83)
-
-
 def test_constructor_default_station_id_is_al() -> None:
     """Default station_id is 'AL'."""
     p = AlFuelProvider()

@@ -134,28 +134,15 @@ class AlFuelProvider(BaseProvider):
         "(the ISO country code).  No station-level data is available."
     )
 
-    def __init__(
-        self,
-        station_id: str = _STATION_ID,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float = 10.0,
-    ) -> None:
+    def __init__(self, station_id: str = _STATION_ID) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always "AL" for this provider.  Other values are
                          accepted for interface compatibility but will behave
                          identically (only national averages are returned).
-            latitude:    Ignored (no station-level data exists); stored for
-                         interface compatibility with location-mode providers.
-            longitude:   Ignored.
-            radius_km:   Ignored.
         """
         self._station_id = station_id
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km
 
     # ── Public interface ──────────────────────────────────────────────────────
 

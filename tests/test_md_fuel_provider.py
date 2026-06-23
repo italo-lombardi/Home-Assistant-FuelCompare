@@ -295,26 +295,6 @@ def test_provider_init_custom_station_id_overridden() -> None:
     assert provider._station_id == "MD"
 
 
-def test_provider_init_stores_lat_lon() -> None:
-    """MdFuelProvider stores latitude and longitude."""
-    provider = MdFuelProvider(latitude=47.0, longitude=28.9)
-    assert provider._latitude == pytest.approx(47.0)
-    assert provider._longitude == pytest.approx(28.9)
-
-
-def test_provider_init_default_lat_lon_is_none() -> None:
-    """MdFuelProvider defaults latitude and longitude to None."""
-    provider = MdFuelProvider()
-    assert provider._latitude is None
-    assert provider._longitude is None
-
-
-def test_provider_init_default_radius_km() -> None:
-    """MdFuelProvider defaults radius_km to 10.0."""
-    provider = MdFuelProvider()
-    assert provider._radius_km == pytest.approx(10.0)
-
-
 # ---------------------------------------------------------------------------
 # async_fetch — success paths
 # ---------------------------------------------------------------------------
@@ -525,7 +505,7 @@ async def test_async_list_stations_label_includes_prices_when_available() -> Non
 async def test_async_list_stations_with_coordinates() -> None:
     """async_list_stations accepts lat/lng kwargs without error."""
     session = _make_session()
-    provider = MdFuelProvider(latitude=47.0, longitude=28.9)
+    provider = MdFuelProvider()
     results = await provider.async_list_stations(
         session, lat=47.0, lng=28.9, radius_km=100.0
     )

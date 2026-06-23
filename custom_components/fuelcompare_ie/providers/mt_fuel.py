@@ -169,24 +169,15 @@ class MtFuelProvider(BaseProvider):
         self,
         station_id: str = "MT",
         county: str | None = None,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
     ) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always "MT"; stored for coordinator compatibility.
             county:      Not used by this provider.
-            latitude:    WGS84 latitude (stored but not used for filtering).
-            longitude:   WGS84 longitude (stored but not used for filtering).
-            radius_km:   Search radius (stored but not used).
         """
         self._station_id = station_id or "MT"
         self._county = county
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
         # Cache the discovered XLSX URL so subsequent polls skip the landing page scrape
         self._cached_xlsx_url: str | None = None
 

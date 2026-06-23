@@ -169,24 +169,9 @@ def test_constructor_stores_station_id() -> None:
 
 
 def test_constructor_stores_optional_params() -> None:
-    """Constructor stores optional county, lat, lng, radius_km."""
-    p = MtFuelProvider(
-        "MT",
-        county="Valletta",
-        latitude=35.8989,
-        longitude=14.5146,
-        radius_km=5.0,
-    )
+    """Constructor stores optional county."""
+    p = MtFuelProvider("MT", county="Valletta")
     assert p._county == "Valletta"
-    assert p._latitude == pytest.approx(35.8989)
-    assert p._longitude == pytest.approx(14.5146)
-    assert p._radius_km == pytest.approx(5.0)
-
-
-def test_constructor_defaults_radius_to_10() -> None:
-    """Constructor defaults radius_km to 10.0."""
-    p = MtFuelProvider()
-    assert p._radius_km == pytest.approx(10.0)
 
 
 def test_constructor_no_cached_xlsx_url() -> None:
@@ -620,8 +605,8 @@ async def test_async_list_stations_accepts_coord_kwargs() -> None:
 
 
 async def test_async_list_stations_is_not_none_coord_check() -> None:
-    """async_list_stations uses is-not-None checks (0.0 lat/lng are valid)."""
-    provider = MtFuelProvider(latitude=0.0, longitude=0.0)
+    """async_list_stations runs without lat/lng kwargs in constructor."""
+    provider = MtFuelProvider()
     session = MagicMock()
     # Should not raise and should still return the single entry
     result = await provider.async_list_stations(session)
