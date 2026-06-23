@@ -792,6 +792,105 @@ async def test_station_picker_empty_global_list_shows_error(
         PROVIDER_REGISTRY.pop("eu_empty_global_list_test", None)
 
 
+# ---------------------------------------------------------------------------
+# test_station_picker_empty_list_with_uid_aborts_not_clobbers
+# ---------------------------------------------------------------------------
+
+
+async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
+    hass: HomeAssistant,
+) -> None:
+    """Empty station list aborts (not clobbers) when unique_id already configured.
+
+    Regression test for the clobber bug: when a location_search provider
+    returns no stations (API down / out of area), async_step_station_picker
+    previously fell through to async_step_name with the lat/lng unique_id
+    still set, causing HA to silently destroy and replace the existing entry.
+    The fix adds _abort_if_unique_id_configured() before the shortcut return.
+    """
+    from unittest.mock import MagicMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _EmptyProvider(BaseProvider):
+        COUNTRY = "AU"
+        PROVIDER_KEY = "au_empty_clobber_test"
+        LABEL = "Empty Clobber Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "A$"
+        CAPABILITIES: frozenset = frozenset({"name"})
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_list_stations(self, session, **kwargs):
+            return []  # API down
+
+    PROVIDER_REGISTRY["au_empty_clobber_test"] = _EmptyProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        # Use MagicMock for hass so we control config_entries behaviour
+        mock_hass = MagicMock()
+        mock_hass.config_entries.async_entry_for_domain_unique_id.return_value = None
+        flow.hass = mock_hass
+        # Initialise required flow attrs
+        flow.context = {"source": "user"}
+        flow._provider_key = "au_empty_clobber_test"
+        flow._country = "AU"
+        flow._station_county = ""
+        flow._latitude = -31.8027
+        flow._longitude = 115.8377
+        flow._radius_km = 5.0
+        flow._postal_code = ""
+        flow._api_key = ""
+        flow._suggested_name = ""
+        flow._station_list = []
+        flow._station_url_map = {}
+        flow._station_id = ""
+        flow._station_page_url = ""
+        flow._show_on_map = False
+        # Simulate unique_id set by async_step_location
+        flow.context["unique_id"] = (
+            "fuelcompare_ie_au_empty_clobber_test_-31.8027_115.8377"
+        )
+
+        abort_called = False
+        name_called = []
+
+        def _record_abort():
+            nonlocal abort_called
+            abort_called = True
+
+        async def _mock_name():
+            name_called.append(1)
+            return {"type": "form", "step_id": "name"}
+
+        with (
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+                return_value=MagicMock(),
+            ),
+            patch.object(
+                flow, "_abort_if_unique_id_configured", side_effect=_record_abort
+            ),
+            patch.object(flow, "async_step_name", side_effect=_mock_name),
+        ):
+            await flow.async_step_station_picker(user_input=None)
+
+        assert abort_called, (
+            "_abort_if_unique_id_configured must be called when station list is empty "
+            "and unique_id is set (prevents clobbering existing entry)"
+        )
+    finally:
+        PROVIDER_REGISTRY.pop("au_empty_clobber_test", None)
+
+
 async def test_async_step_api_key_empty_key_shows_error(
     hass: HomeAssistant,
 ) -> None:

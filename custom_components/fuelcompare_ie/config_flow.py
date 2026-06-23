@@ -674,6 +674,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         schema_dict: dict = {}
         if not station_list:
             if self.unique_id and not needs_station_id:
+                self._abort_if_unique_id_configured()
                 return await self.async_step_name()
             mode = (
                 getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
@@ -765,7 +766,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             # user from picking a second station in the same area.  Only abort for
             # providers where lat/lng IS the final identity (global_list, pure
             # location-only providers with a single synthetic station).
-            provider_cls_loc = PROVIDER_REGISTRY.get(self._provider_key)
+            provider_cls_loc = provider_cls
             _lookup_mode = getattr(provider_cls_loc, "STATION_LOOKUP_MODE", "manual_id")
             if _lookup_mode != "location_search":
                 self._abort_if_unique_id_configured()
