@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ky stacion është konfiguruar tashmë.",
       "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend.",
-      "no_counties_for_country": "Nuk ka bashki të konfiguruara për vendin e zgjedhur."
+      "no_counties_for_country": "Nuk ka bashki të konfiguruara për vendin e zgjedhur.",
+      "no_stations_found": "Nuk u gjetën stacione për këtë rreth. Provoni një rreth tjetër.",
+      "no_stations_found_location": "Nuk u gjetën stacione pranë këtyre koordinatave. Provoni të rregulloni vendndodhjen ose të rrisni rrezën e kërkimit.",
+      "no_stations_found_global": "Lista e ofruesit nuk mund të ngarkohej. Burimi mund të jetë jashtë funksioni ose mungon një varësi e kërkuar. Shihni regjistrat e Home Assistant për detaje."
     }
   },
   "issues": {

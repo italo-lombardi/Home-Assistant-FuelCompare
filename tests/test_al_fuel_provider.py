@@ -137,13 +137,13 @@ def test_provider_metadata_label_contains_albania() -> None:
 
 
 def test_provider_metadata_config_mode_is_location() -> None:
-    """CONFIG_MODE is 'location'."""
-    assert AlFuelProvider.CONFIG_MODE == "location"
+    """CONFIG_MODE is "station_id"."""
+    assert AlFuelProvider.CONFIG_MODE == "station_id"
 
 
-def test_provider_metadata_station_lookup_mode_is_location_search() -> None:
-    """STATION_LOOKUP_MODE is 'location_search'."""
-    assert AlFuelProvider.STATION_LOOKUP_MODE == "location_search"
+def test_provider_metadata_station_lookup_mode_is_global_list() -> None:
+    """STATION_LOOKUP_MODE is 'global_list'."""
+    assert AlFuelProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_metadata_poll_interval_is_daily() -> None:
@@ -197,13 +197,6 @@ def test_constructor_stores_station_id() -> None:
     """Constructor stores station_id as _station_id."""
     p = AlFuelProvider(station_id="AL")
     assert p._station_id == "AL"
-
-
-def test_constructor_accepts_lat_lng_for_interface_compat() -> None:
-    """Constructor accepts latitude/longitude even though they are not used."""
-    p = AlFuelProvider(station_id="AL", latitude=41.33, longitude=19.83)
-    assert p._latitude == pytest.approx(41.33)
-    assert p._longitude == pytest.approx(19.83)
 
 
 def test_constructor_default_station_id_is_al() -> None:

@@ -71,7 +71,10 @@
     "abort": {
       "already_configured": "This station is already configured.",
       "no_providers_for_country": "No data providers are available for this country.",
-      "no_counties_for_country": "No counties are configured for the selected country."
+      "no_counties_for_country": "No counties are configured for the selected country.",
+      "no_stations_found": "No stations found for this county. Cancel and try a different county.",
+      "no_stations_found_location": "No stations found near these coordinates. Cancel and try a wider search radius or different location.",
+      "no_stations_found_global": "Could not load the provider's list. The upstream may be down, or a required dependency is missing. Check Home Assistant logs for details."
     }
   },
   "options": {

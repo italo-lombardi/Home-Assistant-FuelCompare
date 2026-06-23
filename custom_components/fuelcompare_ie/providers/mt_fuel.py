@@ -32,9 +32,9 @@ Approach
 Station level: False.  No station-level data source exists for Malta.
 The single "station" returned has station_id = "MT" (country code).
 
-CONFIG_MODE='location': the coordinator/config flow treats this as a
-location-based provider.  async_list_stations returns a single entry for
-the national average.
+STATION_LOOKUP_MODE='global_list': the coordinator/config flow skips the
+location and county steps and goes directly to the station picker.
+async_list_stations returns a single entry for the national average.
 
 Update cadence: weekly (Thursdays).  POLL_INTERVAL_SECONDS = 604800
     STATION_PAGE_URL: ClassVar[str] = "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
@@ -138,10 +138,9 @@ class MtFuelProvider(BaseProvider):
 
     COUNTRY = "MT"
     PROVIDER_KEY = "mt_fuel"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "EU Oil Bulletin (Malta)"
-    CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    CONFIG_MODE = "station_id"
+    STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = (
         "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en"
     )
@@ -165,28 +164,13 @@ class MtFuelProvider(BaseProvider):
         "The station ID is always 'MT'."
     )
 
-    def __init__(
-        self,
-        station_id: str = "MT",
-        county: str | None = None,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = "MT") -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always "MT"; stored for coordinator compatibility.
-            county:      Not used by this provider.
-            latitude:    WGS84 latitude (stored but not used for filtering).
-            longitude:   WGS84 longitude (stored but not used for filtering).
-            radius_km:   Search radius (stored but not used).
         """
         self._station_id = station_id or "MT"
-        self._county = county
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
         # Cache the discovered XLSX URL so subsequent polls skip the landing page scrape
         self._cached_xlsx_url: str | None = None
 
@@ -284,8 +268,9 @@ class MtFuelProvider(BaseProvider):
         single ("MT", "Malta — national average (EU Oil Bulletin)") entry.
         No HTTP request is made.
 
-        Keyword args (from config flow location_search) are accepted but
-        ignored — coordinates are irrelevant for a national-average source.
+        Keyword args are accepted (the provider runs in global_list mode so
+        the config flow does not pass coordinates) but ignored — only one
+        national-average row exists.
 
         Args:
             session: aiohttp ClientSession (not used).

@@ -29,11 +29,10 @@ import logging
 from typing import Any, ClassVar
 from xml.etree import ElementTree as ET
 
-from ._geo import filter_within_radius, haversine_km as _haversine_km  # noqa: F401
-
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
+from ._geo import filter_within_radius
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -220,7 +219,11 @@ class AuFuelwatchProvider(BaseProvider):
 
         lat = kwargs.get("lat", self._latitude)
         lng = kwargs.get("lng", self._longitude)
-        radius_km = kwargs.get("radius_km", self._radius_km)
+        radius_km = (
+            kwargs["radius_km"]
+            if kwargs.get("radius_km") is not None
+            else self._radius_km
+        )
 
         try:
             merged = await self._fetch_all_products(session, region_code)

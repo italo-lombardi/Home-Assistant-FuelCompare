@@ -232,32 +232,6 @@ def test_constructor_stores_station_id() -> None:
     assert p._station_id == "Circle K"
 
 
-def test_constructor_default_radius() -> None:
-    """Default radius_km is 10.0 when not supplied."""
-    p = DkFuelFinderProvider("Circle K")
-    assert p._radius_km == 10.0
-
-
-def test_constructor_custom_radius() -> None:
-    """radius_km is stored when explicitly provided."""
-    p = DkFuelFinderProvider("Q8", radius_km=25.0)
-    assert p._radius_km == 25.0
-
-
-def test_constructor_accepts_lat_lng() -> None:
-    """Constructor accepts latitude and longitude."""
-    p = DkFuelFinderProvider("Shell", latitude=55.67, longitude=12.57)
-    assert p._latitude == 55.67
-    assert p._longitude == 12.57
-
-
-def test_constructor_lat_lng_none_by_default() -> None:
-    """Latitude and longitude default to None when not provided."""
-    p = DkFuelFinderProvider("Circle K")
-    assert p._latitude is None
-    assert p._longitude is None
-
-
 # ---------------------------------------------------------------------------
 # _parse_price_dkk — unit tests
 # ---------------------------------------------------------------------------
@@ -827,7 +801,7 @@ async def test_async_list_stations_works_without_lat_lng_kwargs() -> None:
     """async_list_stations works when no lat/lng/radius kwargs are provided."""
     resp = _make_mock_response(200, _TABLE_HTML)
     session = _make_session(resp)
-    provider = DkFuelFinderProvider("Circle K", latitude=55.67, longitude=12.57)
+    provider = DkFuelFinderProvider("Circle K")
     results = await provider.async_list_stations(session)
     assert len(results) > 0
 

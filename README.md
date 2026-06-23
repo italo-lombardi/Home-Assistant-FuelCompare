@@ -9,7 +9,7 @@
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
 [![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
 
-> ⚠️ **Early multi-country release — testers welcome.** 5 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×3 + EU Oil Bulletin + FuelWatch WA), 15 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 16 are currently disabled because their upstream is broken (12) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
+> ⚠️ **Early multi-country release — testers welcome.** 5 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×3 + EU Oil Bulletin + FuelWatch WA), 21 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 10 are currently disabled because their upstream is broken (6) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
 
 > **Disclaimer:** This is an independent, unofficial custom integration. It is not affiliated with, endorsed by, or connected to any of the data providers it accesses. All provider names, websites, and trademarks are the property of their respective owners. This project reads publicly available data for personal, non-commercial use only.
 
@@ -29,7 +29,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 
 | Provider | Country | Key Fuel Types | Lookup | Requires API Key | Status |
 |----------|---------|----------------|--------|------------------|--------|
-| Albania National Average (cargopedia.net) | 🇦🇱 Albania | Unleaded, Diesel, LPG | Location + picker | — | ⚠️ Disabled |
+| Albania National Average (cargopedia.net) | 🇦🇱 Albania | Unleaded, Diesel, LPG | Country picker | — | 🤖 Smoke-tested |
 | e-control (Austria) | 🇦🇹 Austria | Unleaded, Diesel, CNG | Location + picker | — | 🤖 Smoke-tested |
 | Fuel Prices QLD (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
 | FuelCheck NSW (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | — | 🤖 Smoke-tested |
@@ -39,7 +39,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | Carbu.com (Belgium) | 🇧🇪 Belgium | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |
 | Régie de l'énergie (Canada — QC) | 🇨🇦 Canada | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
 | TCS Benzinpreis-Radar (Switzerland) | 🇨🇭 Switzerland | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
-| MF ČR Price Caps (Czech Republic) | 🇨🇿 Czech Republic | Unleaded, Diesel | Location + picker | — | ⚠️ Disabled |
+| MF ČR Price Caps (Czech Republic) | 🇨🇿 Czech Republic | Unleaded, Diesel | Country picker | — | 🤖 Smoke-tested |
 | Tankerkoenig (Germany) | 🇩🇪 Germany | Unleaded, Diesel, E10 | Location + picker (API key required) | 🔑 | ⚠️ Disabled (untested, API key required) |
 | FuelFinder (Denmark) | 🇩🇰 Denmark | Unleaded, Diesel, Premium | Location + picker | — | ⚠️ Disabled |
 | EC Weekly Oil Bulletin (EU) | 🇪🇺 European Union | Unleaded, Diesel, LPG, Kerosene | Country picker | — | ✅ Tested |
@@ -56,12 +56,12 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | MIMIT/MASE (Italy) | 🇮🇹 Italy | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |
 | Saurida (Lithuania) | 🇱🇹 Lithuania | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
 | carbu.com Luxembourg | 🇱🇺 Luxembourg | Unleaded, Diesel, LPG, CNG | Location + picker | — | ⚠️ Disabled |
-| ANRE (Moldova) | 🇲🇩 Moldova | Unleaded, Diesel | Location + picker | — | ⚠️ Disabled |
-| Min. of Energy (Montenegro) | 🇲🇪 Montenegro | Unleaded, Diesel, Kerosene | Location + picker | — | 🤖 Smoke-tested |
-| Malta | 🇲🇹 Malta | Unleaded, Diesel, LPG, Kerosene | Location + picker | — | ⚠️ Disabled |
-| Netherlands (ANWB) | 🇳🇱 Netherlands | Diesel, E10, LPG, Kerosene | Location + picker | — | ⚠️ Disabled |
+| ANRE (Moldova) | 🇲🇩 Moldova | Unleaded, Diesel | Country picker | — | 🤖 Smoke-tested |
+| Min. of Energy (Montenegro) | 🇲🇪 Montenegro | Unleaded, Diesel, Kerosene | Country picker | — | 🤖 Smoke-tested |
+| Malta | 🇲🇹 Malta | Unleaded, Diesel, LPG, Kerosene | Country picker | — | 🤖 Smoke-tested |
+| Netherlands (ANWB) | 🇳🇱 Netherlands | Diesel, E10, LPG, Kerosene | Country picker | — | 🤖 Smoke-tested |
 | Drivstoffpriser (Norway) | 🇳🇴 Norway | Unleaded, Diesel, Premium | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
-| ORLEN Wholesale (Poland) | 🇵🇱 Poland | Unleaded, Diesel, E85, LPG, Kerosene | Location + picker | — | ⚠️ Disabled |
+| ORLEN Wholesale (Poland) | 🇵🇱 Poland | Unleaded, Diesel, E85, LPG, Kerosene | Country picker | — | 🤖 Smoke-tested |
 | DGEG (Portugal) | 🇵🇹 Portugal | Unleaded, Diesel, LPG | Location + picker | — | ⚠️ Disabled |
 | Bensinpriser.nu (Sweden) | 🇸🇪 Sweden | Unleaded, Diesel, E85 | Location + picker | — | 🤖 Smoke-tested |
 | goriva.si (Slovenia) | 🇸🇮 Slovenia | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |

@@ -30,8 +30,8 @@ from .base import (
     BaseProvider,
     ProviderError,
     StationData,
-    haversine_km as _haversine_km,
 )
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ class PtDgegProvider(BaseProvider):
         self._county = county
         self._latitude = latitude
         self._longitude = longitude
-        self._radius_km = radius_km or 10.0
+        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -217,7 +217,11 @@ class PtDgegProvider(BaseProvider):
         lng: float | None = (
             kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
         )
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         params: dict[str, Any] = {
             "qtd": 5000,
@@ -277,17 +281,13 @@ class PtDgegProvider(BaseProvider):
                     # Keep first (cheapest, list is sorted asc by price)
                     stations[sid]["prices"].setdefault(key, price)
 
-        # Filter by proximity when coordinates available
-        if lat is not None and lng is not None:
-            filtered: dict[str, dict[str, Any]] = {}
-            for sid, info in stations.items():
-                s_lat = info.get("latitude")
-                s_lng = info.get("longitude")
-                if s_lat is not None and s_lng is not None:
-                    if _haversine_km(lat, lng, s_lat, s_lng) <= radius_km:
-                        filtered[sid] = info
-                # Stations without coordinates are excluded when filtering by location
-            stations = filtered
+        # Filter by proximity when coordinates AND a positive radius are
+        # supplied. radius_km=0 explicitly disables the filter — return the
+        # full list including stations with missing coords (they would
+        # otherwise be silently dropped by filter_within_radius, which is
+        # surprising for a "no filter" request).
+        if lat is not None and lng is not None and radius_km:
+            stations = dict(filter_within_radius(stations.items(), lat, lng, radius_km))
 
         # Sort alphabetically by label
         result: list[tuple[str, str]] = []

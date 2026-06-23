@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ova stanica je već konfigurirana.",
       "no_providers_for_country": "Za ovu državu nisu dostupni pružatelji podataka.",
-      "no_counties_for_country": "Nije konfiguriran nijedan kanton za odabranu zemlju."
+      "no_counties_for_country": "Nije konfiguriran nijedan kanton za odabranu zemlju.",
+      "no_stations_found": "Nisu pronađene stanice za ovu županiju. Pokušajte s drugom županijom.",
+      "no_stations_found_location": "Nisu pronađene stanice u blizini ovih koordinata. Pokušajte prilagoditi lokaciju ili povećati polumjer pretrage.",
+      "no_stations_found_global": "Nije moguće učitati listu pružatelja. Izvor možda ne radi ili nedostaje potrebna zavisnost. Provjerite Home Assistant zapisnike za detalje."
     }
   },
   "issues": {

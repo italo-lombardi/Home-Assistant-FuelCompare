@@ -125,13 +125,13 @@ def test_provider_label_contains_netherlands() -> None:
 
 
 def test_provider_config_mode_is_location() -> None:
-    """NlAnwbProvider uses CONFIG_MODE='location' (national average)."""
-    assert NlAnwbProvider.CONFIG_MODE == "location"
+    """NlAnwbProvider uses CONFIG_MODE='station_id' (national average)."""
+    assert NlAnwbProvider.CONFIG_MODE == "station_id"
 
 
-def test_provider_station_lookup_mode_is_location_search() -> None:
-    """NlAnwbProvider uses STATION_LOOKUP_MODE='location_search'."""
-    assert NlAnwbProvider.STATION_LOOKUP_MODE == "location_search"
+def test_provider_station_lookup_mode_is_global_list() -> None:
+    """NlAnwbProvider uses STATION_LOOKUP_MODE='global_list'."""
+    assert NlAnwbProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_does_not_require_api_key() -> None:

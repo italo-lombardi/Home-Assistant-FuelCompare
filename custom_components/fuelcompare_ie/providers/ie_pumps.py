@@ -88,7 +88,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import BaseProvider, ProviderError, StationData
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -310,7 +311,9 @@ class IePumpsProvider(BaseProvider):
         """
         lat: float | None = kwargs.get("lat")  # type: ignore[assignment]
         lng: float | None = kwargs.get("lng")  # type: ignore[assignment]
-        radius_km: float = float(kwargs.get("radius_km", 10.0))
+        radius_km: float = (
+            float(kwargs["radius_km"]) if kwargs.get("radius_km") is not None else 10.0
+        )
 
         # is-not-None coord checks (not falsy — 0.0 is a valid coordinate)
         if lat is None or lng is None:
@@ -347,17 +350,15 @@ class IePumpsProvider(BaseProvider):
             return []
 
         nearby: list[tuple[str, str]] = []
-        for sid, station in merged.items():
-            s_lat = station.get("lat")
-            s_lng = station.get("lng")
-            # is-not-None coordinate checks
-            if s_lat is None or s_lng is None:
-                continue
-
-            dist = haversine_km(lat, lng, s_lat, s_lng)
-            if dist > radius_km:
-                continue
-
+        filtered = filter_within_radius(
+            merged.items(),
+            lat,
+            lng,
+            radius_km,
+            lat_key="lat",
+            lng_key="lng",
+        )
+        for sid, station in filtered:
             name = station.get("name") or "Unknown"
             brand = station.get("brand") or ""
             addr1 = (station.get("addr1") or "").strip()

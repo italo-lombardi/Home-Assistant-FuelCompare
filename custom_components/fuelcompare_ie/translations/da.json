@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Denne station er allerede konfigureret.",
       "no_providers_for_country": "Der er ingen tilgængelige dataudbydere for dette land.",
-      "no_counties_for_country": "Der er ingen konfigurerede kommuner for det valgte land."
+      "no_counties_for_country": "Der er ingen konfigurerede kommuner for det valgte land.",
+      "no_stations_found": "Ingen stationer fundet i dette amt. Prøv et andet amt.",
+      "no_stations_found_location": "Ingen stationer fundet i nærheden af disse koordinater. Prøv at justere placeringen eller øge søgeradius.",
+      "no_stations_found_global": "Kunne ikke indlæse udbyderens liste. Kilden kan være nede, eller en påkrævet afhængighed mangler. Se Home Assistant-loggen for detaljer."
     }
   },
   "issues": {

@@ -47,8 +47,8 @@ from .base import (
     BaseProvider,
     ProviderError,
     StationData,
-    haversine_km as _haversine_km,
 )
+from ._geo import haversine_km as _haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -51,8 +51,8 @@ from .base import (
     BaseProvider,
     ProviderError,
     StationData,
-    haversine_km as _haversine_km,
 )
+from ._geo import haversine_km as _haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -244,7 +244,11 @@ class SiGorivaProvider(BaseProvider):
         lng: float | None = (
             kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
         )
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         try:
             franchise_map = await self._ensure_franchise_cache(session)

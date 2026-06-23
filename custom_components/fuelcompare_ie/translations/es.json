@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Esta estación ya está configurada.",
       "no_providers_for_country": "No hay proveedores de datos disponibles para este país.",
-      "no_counties_for_country": "No hay condados configurados para el país seleccionado."
+      "no_counties_for_country": "No hay condados configurados para el país seleccionado.",
+      "no_stations_found": "No se encontraron estaciones para este condado. Pruebe con un condado diferente.",
+      "no_stations_found_location": "No se encontraron estaciones cerca de estas coordenadas. Intente ajustar la ubicación o aumentar el radio de búsqueda.",
+      "no_stations_found_global": "No se pudo cargar la lista del proveedor. Es posible que el servicio no esté disponible o que falte una dependencia obligatoria. Consulta los registros de Home Assistant para más detalles."
     }
   },
   "issues": {

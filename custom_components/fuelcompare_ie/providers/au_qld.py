@@ -107,7 +107,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import BaseProvider, ProviderError, StationData
+from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -316,7 +317,11 @@ class AuQldProvider(BaseProvider):
         lng: float | None = (
             kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
         )  # type: ignore[assignment]
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         if lat is None or lng is None:
             _LOGGER.debug(
@@ -333,17 +338,14 @@ class AuQldProvider(BaseProvider):
         site_map, _prices_map, _ts = _build_index(sites_raw, prices_raw)
 
         result: list[tuple[str, str]] = []
-        for site_id_str, site in site_map.items():
-            try:
-                s_lat = float(site["Lat"])
-                s_lng = float(site["Lng"])
-            except (KeyError, TypeError, ValueError):
-                continue
-
-            dist = haversine_km(lat, lng, s_lat, s_lng)
-            if dist > radius_km:
-                continue
-
+        filtered = filter_within_radius(
+            site_map.items(),
+            lat,
+            lng,
+            radius_km,
+            get_coords=lambda s: (s.get("Lat"), s.get("Lng")),
+        )
+        for site_id_str, site in filtered:
             name: str = site.get("N") or "Unknown"
             brand: str = site.get("B") or ""
             address: str = site.get("A") or ""

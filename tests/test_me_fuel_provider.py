@@ -198,13 +198,13 @@ def test_provider_label_contains_montenegro() -> None:
 
 
 def test_provider_config_mode_is_location() -> None:
-    """CONFIG_MODE is 'location' (national average, no station selection)."""
-    assert MeFuelProvider.CONFIG_MODE == "location"
+    """CONFIG_MODE is "station_id" (national average, no station selection)."""
+    assert MeFuelProvider.CONFIG_MODE == "station_id"
 
 
-def test_provider_station_lookup_mode_is_location_search() -> None:
-    """STATION_LOOKUP_MODE is 'location_search'."""
-    assert MeFuelProvider.STATION_LOOKUP_MODE == "location_search"
+def test_provider_station_lookup_mode_is_global_list() -> None:
+    """STATION_LOOKUP_MODE is 'global_list'."""
+    assert MeFuelProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_poll_interval_is_at_least_3600() -> None:
@@ -254,17 +254,15 @@ def test_constructor_default_station_id() -> None:
     assert p._station_id == "ME"
 
 
-def test_constructor_accepts_coordinates() -> None:
-    """Constructor stores optional lat/lng/radius for interface compat."""
-    p = MeFuelProvider(station_id="ME", latitude=42.5, longitude=19.3, radius_km=50.0)
-    assert p._latitude == pytest.approx(42.5)
-    assert p._longitude == pytest.approx(19.3)
-    assert p._radius_km == pytest.approx(50.0)
+def test_constructor_rejects_unknown_kwargs() -> None:
+    """Constructor's strict signature surfaces typos as TypeError.
 
-
-def test_constructor_extra_kwargs_do_not_raise() -> None:
-    """Constructor absorbs unknown kwargs without raising."""
-    MeFuelProvider(station_id="ME", county="Podgorica", unknown_param="x")
+    The factory in __init__.py uses inspect.signature() to only forward
+    kwargs that exist in the provider's __init__, so an unknown kwarg here
+    means a real test-side typo, not a runtime path.
+    """
+    with pytest.raises(TypeError):
+        MeFuelProvider(station_id="ME", unknown_param="x")
 
 
 # ---------------------------------------------------------------------------

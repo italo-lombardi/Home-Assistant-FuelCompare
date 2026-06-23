@@ -107,16 +107,9 @@ def _make_session(response: AsyncMock) -> MagicMock:
 
 def _make_provider(
     station_id: str = _STATION_NAME_1,
-    latitude: float | None = None,
-    longitude: float | None = None,
-    radius_km: float | None = None,
+    **_unused: object,
 ) -> LtSauridaProvider:
-    return LtSauridaProvider(
-        station_id=station_id,
-        latitude=latitude,
-        longitude=longitude,
-        radius_km=radius_km,
-    )
+    return LtSauridaProvider(station_id=station_id)
 
 
 # ---------------------------------------------------------------------------
@@ -207,25 +200,6 @@ def test_constructor_stores_station_id() -> None:
     """Constructor stores station_id."""
     provider = _make_provider(station_id="TestStation")
     assert provider._station_id == "TestStation"
-
-
-def test_constructor_radius_defaults_to_ten() -> None:
-    """Constructor defaults radius_km to 10.0 when not supplied."""
-    provider = LtSauridaProvider(station_id="x")
-    assert provider._radius_km == pytest.approx(10.0)
-
-
-def test_constructor_stores_radius_km() -> None:
-    """Constructor stores radius_km."""
-    provider = _make_provider(radius_km=5.0)
-    assert provider._radius_km == pytest.approx(5.0)
-
-
-def test_constructor_accepts_none_lat_lng() -> None:
-    """Constructor accepts None for latitude and longitude."""
-    provider = LtSauridaProvider(station_id="x", latitude=None, longitude=None)
-    assert provider._latitude is None
-    assert provider._longitude is None
 
 
 # ---------------------------------------------------------------------------

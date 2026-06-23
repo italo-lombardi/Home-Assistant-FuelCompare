@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ta stacja jest już skonfigurowana.",
       "no_providers_for_country": "Brak dostępnych dostawców danych dla tego kraju.",
-      "no_counties_for_country": "Dla wybranego kraju nie skonfigurowano żadnych hrabstw."
+      "no_counties_for_country": "Dla wybranego kraju nie skonfigurowano żadnych hrabstw.",
+      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa.",
+      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Spróbuj zmienić lokalizację lub zwiększyć promień wyszukiwania.",
+      "no_stations_found_global": "Nie udało się wczytać listy dostawcy. Źródło może być niedostępne lub brakuje wymaganej zależności. Sprawdź dzienniki Home Assistanta, aby uzyskać szczegóły."
     }
   },
   "issues": {

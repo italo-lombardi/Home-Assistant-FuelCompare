@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Ez az állomás már konfigurálva van.",
       "no_providers_for_country": "Ehhez az országhoz nem érhetők el adatszolgáltatók.",
-      "no_counties_for_country": "A kiválasztott országhoz nem konfiguráltak megyéket."
+      "no_counties_for_country": "A kiválasztott országhoz nem konfiguráltak megyéket.",
+      "no_stations_found": "Nem találhatók állomások ebben a megyében. Próbáljon másik megyét.",
+      "no_stations_found_location": "Nem találhatók állomások ezen koordináták közelében. Módosítsa a helyszínt, vagy növelje a keresési sugarat.",
+      "no_stations_found_global": "A szolgáltató listáját nem sikerült betölteni. A forrás elérhetetlen lehet, vagy egy szükséges függőség hiányzik. A részletekért nézd meg a Home Assistant naplóit."
     }
   },
   "issues": {

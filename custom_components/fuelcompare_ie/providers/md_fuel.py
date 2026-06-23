@@ -23,8 +23,9 @@ Coverage
 - Prices as of 2026-06-13/14: Benzina 95 = 28.71 MDL/L, Motorina = 27.16 MDL/L
 
 Because this provider returns a single national reference price (not per-
-station data), CONFIG_MODE is 'location' and station_id is the country code
-'MD'.  There are no coordinates, no station name, and no address.
+station data), STATION_LOOKUP_MODE is 'global_list' and station_id is the
+country code 'MD'.  There are no coordinates, no station name, and no
+address.
 
 Scraping approach
 -----------------
@@ -95,10 +96,9 @@ class MdFuelProvider(BaseProvider):
 
     COUNTRY = "MD"
     PROVIDER_KEY = "md_fuel"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "ANRE (Moldova)"
-    CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    CONFIG_MODE = "station_id"
+    STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = 43200
     STATION_PAGE_URL: ClassVar[str] = (
         "https://anre.md"  # 12 hours — ANRE updates at most once daily
@@ -119,27 +119,14 @@ class MdFuelProvider(BaseProvider):
         "No station-level data is available.  The station ID is fixed to 'MD'."
     )
 
-    def __init__(
-        self,
-        station_id: str = _NATIONAL_STATION_ID,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = _NATIONAL_STATION_ID) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always 'MD' for this provider.  Accepted as a
                          parameter for BaseProvider compatibility.
-            latitude:    Not used — no station-level data.  Accepted for
-                         CONFIG_MODE='location' interface compatibility.
-            longitude:   Not used — see latitude.
-            radius_km:   Not used — see latitude.
         """
         self._station_id = station_id or _NATIONAL_STATION_ID
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -198,8 +185,8 @@ class MdFuelProvider(BaseProvider):
     ) -> str | None:
         """Return a display name for the config flow.
 
-        For CONFIG_MODE='location' providers the config flow generates a
-        location-based title; returning None is correct here.
+        For global_list providers the config flow generates the entry
+        title from the picker label; returning None is correct here.
 
         Args:
             session:    aiohttp ClientSession.

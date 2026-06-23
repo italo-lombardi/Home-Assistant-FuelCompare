@@ -21,15 +21,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so `radius_km` was silently a no-op. `async_list_stations` now applies a
   client-side haversine filter, sharing `haversine_km` from the new
   `providers/_geo` module with au_fuelwatch.
+- **Empty station list silently created a broken entry** — for location-search
+  providers (e.g. `au_fuelwatch`), choosing coordinates outside the
+  provider's coverage area (Sydney + 1 km on a WA-only feed, or a radius
+  too small to capture any station) caused the config flow to fall through
+  to entry creation with no `station_id`. The runtime then synthesised a
+  station_id from lat/lng (e.g. `au_fuelwatch_-33.86880_151.20930`) that no
+  provider could resolve, leaving the entry stuck in
+  `Failed setup, will retry: Station '…' not found in FuelWatch feed`.
+  The config flow now loops back to the previous step (location or
+  county) with a `no_stations_found_location` / `no_stations_found`
+  error banner so the user can widen the radius or pick a different
+  county without restarting the flow from the country picker. The free-text
+  station_id fallback that allowed any string through is gone. National-
+  average / `global_list` providers (which genuinely have one synthetic
+  entry) keep the silent-create shortcut; the EU Oil Bulletin path is
+  unchanged.
+- **National-average providers asked for coordinates** — Albania, Czech
+  Republic, Malta, Moldova, Montenegro, Netherlands and Poland (ORLEN)
+  publish only a single national reference row; the config flow
+  nonetheless prompted for lat/lng/radius on setup and then discarded
+  them. These providers now use `STATION_LOOKUP_MODE = "global_list"`
+  (matching EU Oil Bulletin), so the location step is skipped and the
+  user goes straight from provider → station picker → entry creation.
+
+### Changed
+- Re-enabled six providers verified live against their real upstreams
+  during this audit: `al_fuel` (Albania), `cz_ccs` (Czech Republic),
+  `md_fuel` (Moldova), `mt_fuel` (Malta), `nl_anwb` (Netherlands) and
+  `pl_benzyna` (Poland / ORLEN). README status flipped from ⚠️ Disabled
+  to 🤖 Smoke-tested for each. The remaining six providers in the
+  "upstream broken" bucket (`ba_fuel`, `dk_fuelfinder`, `es_minetur`,
+  `fi_tankille`, `lu_carbu`, `pt_dgeg`) still fail their live probe —
+  these stay disabled.
 
 ### Internal
 - New `providers/_geo.py` module with a shared `haversine_km` function plus
-  a `filter_within_radius` helper (currently used by au_fuelwatch for its
-  flat-coord shape). A nested-coord variant covers at_econtrol's
-  `data["location"]["latitude"]` shape inline for now; unifying both
-  call-sites behind one helper API is tracked as a follow-up cleanup.
-  The 14 other providers carrying private haversine copies will be
-  migrated in the same follow-up.
+  a `filter_within_radius` helper. Extended with an optional `get_coords`
+  callable so providers with nested coord shapes (`at_econtrol`,
+  `au_nsw`, `au_qld`, `au_vic`, `ch_tcs`) use the same helper as
+  flat-coord providers. All 16 providers that previously carried a
+  private `_haversine_km` copy (au_nsw/au_qld/au_vic/be_carbu/ca_qc/
+  ch_tcs/es_minetur/fr_carburants/gb_fuelfinder/ie_pumps/is_fuel/it_mase/
+  pt_dgeg/se_bensinpriser/si_goriva/no_drivstoff) now import from
+  `providers._geo`. Providers whose filter loop matched the helper's
+  drop-on-missing-coords contract collapsed their loop into a single
+  `filter_within_radius(...)` call (at_econtrol, au_fuelwatch, au_nsw,
+  au_qld, au_vic, ch_tcs, ie_pumps, pt_dgeg). The rest (be_carbu, ca_qc,
+  es_minetur, fr_carburants, gb_fuelfinder, is_fuel, it_mase,
+  no_drivstoff, se_bensinpriser, si_goriva) kept their inline loop —
+  each has provider-specific gating (e.g. keep-on-missing-coords,
+  late-extracted station IDs) that differs from the helper's strict
+  contract — and only swapped the haversine math to `_geo.haversine_km`.
+  The duplicate `base.haversine_km` (atan2 formula, numerically
+  identical to within ~1e-12 km) is deleted. No behaviour change.
+- Dropped unused `latitude`/`longitude`/`radius_km` constructor parameters
+  from national-average / no-coords providers (`al_fuel`, `ba_fuel`,
+  `dk_fuelfinder`, `eu_oil_bulletin`, `lt_saurida`, `md_fuel`, `me_fuel`,
+  `mt_fuel`, `pl_benzyna`) — these providers return a single country-level
+  row (or have no per-station GPS at the source) and never read coordinates.
+  Also dropped the unused `county` constructor parameter from `ba_fuel`,
+  `dk_fuelfinder` and `mt_fuel`, and the `**kwargs` absorber from
+  `me_fuel.__init__` so kwarg typos now surface as `TypeError`.
+- Aligned the `radius_km=0` contract across **every** client-side filter
+  provider: `0` / `None` / missing kwarg = "no filter" (matches
+  `providers._geo.filter_within_radius`'s falsy-check semantics).
+  Twelve providers used `kwargs.get("radius_km") or self._radius_km`,
+  which silently rewrote an explicit `0` back to the constructor default
+  (au_nsw, au_qld, au_vic, be_carbu, ca_qc, ch_tcs, de_tankerkoenig,
+  es_minetur, fr_carburants, pt_dgeg, se_bensinpriser, si_goriva); three
+  more (`at_econtrol`, `au_fuelwatch`, `ie_pumps`) used
+  `kwargs.get("radius_km", default)` which preserves `0` but differs
+  cosmetically. All fifteen now use the same
+  `kwargs["radius_km"] if kwargs.get("radius_km") is not None else <default>`
+  ternary that preserves a user-supplied `0`. `ca_qc.__init__` and
+  `pt_dgeg.__init__` also dropped their `radius_km or 10.0` init
+  rewrites in favour of the strict `is not None` check.
+- Added the `no_stations_found` / `no_stations_found_location` /
+  `no_stations_found_global` keys to `strings.json` and every locale's
+  `config.abort` block (matching the existing `config.error` entries) so
+  HA picks up the translated text on the re-rendered location / county
+  step and on the `global_list` abort path.
 
 ## [0.7.1] - 2026-06-23
 

@@ -31,12 +31,12 @@ GET https://tool.orlen.pl/api/autogasprices
       voivodeship   — str, e.g. "Mazowieckie"
     This provider uses the national minimum LPG price across all voivodeships.
 
-CONFIG_MODE = "location"
+CONFIG_MODE = "station_id"
     There are no individual stations — only national wholesale prices.
     station_id is set to the country code "PL" and async_list_stations
     returns a single "PL (national wholesale)" entry.
 
-STATION_LOOKUP_MODE = "location_search"
+STATION_LOOKUP_MODE = "global_list"
     Required by the spec.  async_list_stations accepts lat/lng kwargs but
     always returns the single national wholesale record regardless of
     coordinates (no station-level data exists).
@@ -162,7 +162,7 @@ class PlBenzynaProvider(BaseProvider):
 
     Usage
     -----
-    CONFIG_MODE = 'location': station_id is fixed to 'PL'.
+    CONFIG_MODE = 'station_id': station_id is fixed to 'PL'.
     The coordinator creates entities for each CAPABILITIES key.
     async_list_stations returns the single national record regardless of
     lat/lng coordinates supplied (no location-specific retail data exists).
@@ -170,10 +170,9 @@ class PlBenzynaProvider(BaseProvider):
 
     COUNTRY = "PL"
     PROVIDER_KEY = "pl_benzyna"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "ORLEN Wholesale (Poland)"
-    CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    CONFIG_MODE = "station_id"
+    STATION_LOOKUP_MODE = "global_list"
     STATION_PAGE_URL: ClassVar[str] = "https://www.orlen.pl"
     POLL_INTERVAL_SECONDS = 86400  # daily — prices update at most once per day
     CURRENCY: ClassVar[str] = "zł"
@@ -201,25 +200,13 @@ class PlBenzynaProvider(BaseProvider):
         "the national wholesale price schedule.  Enter 'PL' or leave blank."
     )
 
-    def __init__(
-        self,
-        station_id: str = _NATIONAL_STATION_ID,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float | None = None,
-    ) -> None:
+    def __init__(self, station_id: str = _NATIONAL_STATION_ID) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Ignored for this provider; always 'PL'.
-            latitude:    Stored for BaseProvider compat; not used for fetching.
-            longitude:   Stored for BaseProvider compat; not used for fetching.
-            radius_km:   Stored for BaseProvider compat; not used for fetching.
         """
         self._station_id = _NATIONAL_STATION_ID
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -256,8 +243,8 @@ class PlBenzynaProvider(BaseProvider):
     ) -> str | None:
         """Return the display name for the config flow.
 
-        For CONFIG_MODE='location' providers that have only a single national
-        record, this returns the static name without making an API call.
+        For global_list providers that have only a single national record,
+        this returns the static name without making an API call.
 
         Args:
             session:    aiohttp ClientSession (not used).
@@ -276,8 +263,8 @@ class PlBenzynaProvider(BaseProvider):
         This method always returns the single national ORLEN wholesale record
         regardless of lat/lng arguments.
 
-        Required: STATION_LOOKUP_MODE = 'location_search' (spec).
-        The config flow passes lat/lng kwargs which are accepted but ignored.
+        STATION_LOOKUP_MODE = 'global_list' (single-row provider — the
+        config flow skips the location step entirely).
 
         Args:
             session:   aiohttp ClientSession.

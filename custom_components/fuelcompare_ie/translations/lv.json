@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Šī stacija jau ir konfigurēta.",
       "no_providers_for_country": "Šai valstij nav pieejami datu sniedzēji.",
-      "no_counties_for_country": "Izvēlētajai valstij nav konfigurēti novadi."
+      "no_counties_for_country": "Izvēlētajai valstij nav konfigurēti novadi.",
+      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu.",
+      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Mēģiniet pielāgot atrašanās vietu vai palielināt meklēšanas rādiusu.",
+      "no_stations_found_global": "Nevarēja ielādēt sniedzēja sarakstu. Avots var nebūt pieejams vai trūkst nepieciešamās atkarības. Sīkāku informāciju skatiet Home Assistant žurnālos."
     }
   },
   "issues": {

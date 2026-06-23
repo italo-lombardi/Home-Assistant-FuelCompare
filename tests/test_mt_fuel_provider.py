@@ -121,13 +121,13 @@ def test_provider_label() -> None:
 
 
 def test_provider_config_mode() -> None:
-    """MtFuelProvider.CONFIG_MODE is 'location'."""
-    assert MtFuelProvider.CONFIG_MODE == "location"
+    """MtFuelProvider.CONFIG_MODE is "station_id"."""
+    assert MtFuelProvider.CONFIG_MODE == "station_id"
 
 
 def test_provider_station_lookup_mode() -> None:
-    """MtFuelProvider.STATION_LOOKUP_MODE is 'location_search'."""
-    assert MtFuelProvider.STATION_LOOKUP_MODE == "location_search"
+    """MtFuelProvider.STATION_LOOKUP_MODE is 'global_list'."""
+    assert MtFuelProvider.STATION_LOOKUP_MODE == "global_list"
 
 
 def test_provider_poll_interval_weekly() -> None:
@@ -166,27 +166,6 @@ def test_constructor_stores_station_id() -> None:
     """MtFuelProvider accepts a custom station_id (treated as 'MT' logically)."""
     p = MtFuelProvider("MT")
     assert p._station_id == "MT"
-
-
-def test_constructor_stores_optional_params() -> None:
-    """Constructor stores optional county, lat, lng, radius_km."""
-    p = MtFuelProvider(
-        "MT",
-        county="Valletta",
-        latitude=35.8989,
-        longitude=14.5146,
-        radius_km=5.0,
-    )
-    assert p._county == "Valletta"
-    assert p._latitude == pytest.approx(35.8989)
-    assert p._longitude == pytest.approx(14.5146)
-    assert p._radius_km == pytest.approx(5.0)
-
-
-def test_constructor_defaults_radius_to_10() -> None:
-    """Constructor defaults radius_km to 10.0."""
-    p = MtFuelProvider()
-    assert p._radius_km == pytest.approx(10.0)
 
 
 def test_constructor_no_cached_xlsx_url() -> None:
@@ -620,8 +599,8 @@ async def test_async_list_stations_accepts_coord_kwargs() -> None:
 
 
 async def test_async_list_stations_is_not_none_coord_check() -> None:
-    """async_list_stations uses is-not-None checks (0.0 lat/lng are valid)."""
-    provider = MtFuelProvider(latitude=0.0, longitude=0.0)
+    """async_list_stations runs without lat/lng kwargs in constructor."""
+    provider = MtFuelProvider()
     session = MagicMock()
     # Should not raise and should still return the single entry
     result = await provider.async_list_stations(session)

@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Această stație este deja configurată.",
       "no_providers_for_country": "Nu există furnizori de date disponibili pentru această țară.",
-      "no_counties_for_country": "Nu sunt configurate județe pentru țara selectată."
+      "no_counties_for_country": "Nu sunt configurate județe pentru țara selectată.",
+      "no_stations_found": "Nu s-au găsit stații pentru acest județ. Încercați un alt județ.",
+      "no_stations_found_location": "Nu s-au găsit stații în apropierea acestor coordonate. Încercați să ajustați locația sau să măriți raza de căutare.",
+      "no_stations_found_global": "Lista furnizorului nu a putut fi încărcată. Sursa poate fi indisponibilă sau lipsește o dependență necesară. Consultați jurnalele Home Assistant pentru detalii."
     }
   },
   "issues": {

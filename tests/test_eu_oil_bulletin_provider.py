@@ -192,16 +192,6 @@ def test_constructor_uppercases_station_id() -> None:
     assert provider._station_id == "DE"
 
 
-def test_constructor_accepts_coordinates() -> None:
-    """Constructor stores optional lat/lng/radius without error."""
-    provider = EuOilBulletinProvider(
-        station_id="FR", latitude=48.85, longitude=2.35, radius_km=50.0
-    )
-    assert provider._latitude == pytest.approx(48.85)
-    assert provider._longitude == pytest.approx(2.35)
-    assert provider._radius_km == pytest.approx(50.0)
-
-
 # ---------------------------------------------------------------------------
 # _parse_price_per_litre
 # ---------------------------------------------------------------------------

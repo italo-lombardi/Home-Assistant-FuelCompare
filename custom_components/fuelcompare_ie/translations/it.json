@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Questa stazione è già configurata.",
       "no_providers_for_country": "Nessun fornitore di dati disponibile per questo paese.",
-      "no_counties_for_country": "Non ci sono contee configurate per il paese selezionato."
+      "no_counties_for_country": "Non ci sono contee configurate per il paese selezionato.",
+      "no_stations_found": "Nessuna stazione trovata per questa contea. Prova una contea diversa.",
+      "no_stations_found_location": "Nessuna stazione trovata nelle vicinanze di queste coordinate. Prova a modificare la posizione o ad aumentare il raggio di ricerca.",
+      "no_stations_found_global": "Impossibile caricare l'elenco del fornitore. La fonte potrebbe non essere disponibile o manca una dipendenza richiesta. Controlla i log di Home Assistant per i dettagli."
     }
   },
   "issues": {

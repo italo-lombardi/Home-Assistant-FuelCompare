@@ -91,7 +91,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, haversine_km
+from .base import BaseProvider, ProviderError, StationData
+from ._geo import haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -622,7 +623,11 @@ class BeCarbuProvider(BaseProvider):
             return []
 
         # Filter by radius if lat/lng supplied
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
         if lat is not None and lng is not None:
             filtered: dict[str, dict[str, Any]] = {}
             for sid, station in merged.items():

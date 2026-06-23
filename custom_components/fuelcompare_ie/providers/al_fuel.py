@@ -18,9 +18,11 @@ gasoline 95, diesel, and LPG in EUR/litre, updated approximately weekly.
 The station_id for this provider is the country code "AL"; only one virtual
 "station" (the national average) exists.
 
-CONFIG_MODE = 'location'
-  The user does not need to enter a station UUID.  The coordinator calls
-  async_fetch(session, "AL") and the provider returns national averages.
+CONFIG_MODE = 'station_id', STATION_LOOKUP_MODE = 'global_list'
+  Single national-average row; the config flow skips both location and
+  county steps and goes directly to the station picker. The coordinator
+  calls async_fetch(session, "AL") and the provider returns national
+  averages.
 
 Data quality
 ------------
@@ -104,10 +106,9 @@ class AlFuelProvider(BaseProvider):
 
     COUNTRY = "AL"
     PROVIDER_KEY = "al_fuel"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "Albania National Average (cargopedia.net)"
-    CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    CONFIG_MODE = "station_id"
+    STATION_LOOKUP_MODE = "global_list"
 
     POLL_INTERVAL_SECONDS = 86400
     STATION_PAGE_URL: ClassVar[str] = (
@@ -134,28 +135,15 @@ class AlFuelProvider(BaseProvider):
         "(the ISO country code).  No station-level data is available."
     )
 
-    def __init__(
-        self,
-        station_id: str = _STATION_ID,
-        latitude: float | None = None,
-        longitude: float | None = None,
-        radius_km: float = 10.0,
-    ) -> None:
+    def __init__(self, station_id: str = _STATION_ID) -> None:
         """Initialise the provider.
 
         Args:
             station_id:  Always "AL" for this provider.  Other values are
                          accepted for interface compatibility but will behave
                          identically (only national averages are returned).
-            latitude:    Ignored (no station-level data exists); stored for
-                         interface compatibility with location-mode providers.
-            longitude:   Ignored.
-            radius_km:   Ignored.
         """
         self._station_id = station_id
-        self._latitude = latitude
-        self._longitude = longitude
-        self._radius_km = radius_km
 
     # ── Public interface ──────────────────────────────────────────────────────
 

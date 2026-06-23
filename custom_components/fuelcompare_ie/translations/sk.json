@@ -72,7 +72,10 @@
     "abort": {
       "already_configured": "Táto stanica je už nakonfigurovaná.",
       "no_providers_for_country": "Pre túto krajinu nie sú dostupní žiadni poskytovatelia dát.",
-      "no_counties_for_country": "Pre vybranú krajinu nie sú nakonfigurované žiadne okresy."
+      "no_counties_for_country": "Pre vybranú krajinu nie sú nakonfigurované žiadne okresy.",
+      "no_stations_found": "Pre tento okres sa nenašli žiadne stanice. Skúste iný okres.",
+      "no_stations_found_location": "V blízkosti týchto súradníc sa nenašli žiadne stanice. Skúste upraviť polohu alebo zväčšiť polomer vyhľadávania.",
+      "no_stations_found_global": "Nepodarilo sa načítať zoznam poskytovateľa. Zdroj môže byť nedostupný alebo chýba požadovaná závislosť. Podrobnosti nájdete v záznamoch Home Assistant."
     }
   },
   "issues": {

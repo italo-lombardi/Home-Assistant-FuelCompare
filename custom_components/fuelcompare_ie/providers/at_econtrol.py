@@ -25,7 +25,7 @@ from typing import Any, ClassVar
 from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from ..const import UA_HEADER, API_TIMEOUT
-from ._geo import haversine_km
+from ._geo import filter_within_radius
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -174,7 +174,11 @@ class AtEcontrolProvider(BaseProvider):
             return []
         lat = float(raw_lat)
         lng = float(raw_lng)
-        radius_km = kwargs.get("radius_km", self._radius_km)
+        radius_km = (
+            kwargs["radius_km"]
+            if kwargs.get("radius_km") is not None
+            else self._radius_km
+        )
 
         try:
             merged = await self._fetch_all_fuel_types(session, lat, lng)
@@ -183,20 +187,17 @@ class AtEcontrolProvider(BaseProvider):
             return []
 
         result: list[tuple[str, str]] = []
-        for sid, raw in merged.items():
-            if radius_km:
-                location = raw.get("location") or {}
-                slat = location.get("latitude")
-                slng = location.get("longitude")
-                if slat is None or slng is None:
-                    continue
-                try:
-                    if haversine_km(lat, lng, float(slat), float(slng)) > float(
-                        radius_km
-                    ):
-                        continue
-                except (TypeError, ValueError):
-                    continue
+        filtered = filter_within_radius(
+            merged.items(),
+            lat,
+            lng,
+            radius_km,
+            get_coords=lambda raw: (
+                (raw.get("location") or {}).get("latitude"),
+                (raw.get("location") or {}).get("longitude"),
+            ),
+        )
+        for sid, raw in filtered:
             name = raw.get("name") or f"Station {sid}"
             location = raw.get("location") or {}
             address = _format_address(location)

@@ -21,36 +21,11 @@ from __future__ import annotations
 
 import inspect
 from abc import ABC, abstractmethod
-from math import atan2, cos, radians, sin, sqrt
 from typing import Any, ClassVar, Final, Literal, TypedDict
 
 from aiohttp import ClientSession
 
-_EARTH_RADIUS_KM = 6371.0
-
 MAX_STATION_URL_LEN = 255
-
-
-def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Return the great-circle distance in km between two WGS84 points.
-
-    Uses the haversine formula with atan2 for numerical stability.
-    Accuracy is better than 0.5% for distances under 1000 km.
-
-    Args:
-        lat1, lon1: Coordinates of the first point (degrees).
-        lat2, lon2: Coordinates of the second point (degrees).
-
-    Returns:
-        Distance in kilometres.
-    """
-    d_lat = radians(lat2 - lat1)
-    d_lon = radians(lon2 - lon1)
-    a = (
-        sin(d_lat / 2) ** 2
-        + cos(radians(lat1)) * cos(radians(lat2)) * sin(d_lon / 2) ** 2
-    )
-    return _EARTH_RADIUS_KM * 2 * atan2(sqrt(a), sqrt(1 - a))
 
 
 class ProviderError(Exception):

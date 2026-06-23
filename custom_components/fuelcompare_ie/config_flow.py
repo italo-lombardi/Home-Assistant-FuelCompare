@@ -411,6 +411,12 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         self._radius_km: float = DEFAULT_RADIUS_KM
         self._suggested_name: str = ""
         self._api_key: str = ""  # optional API key for providers that require it
+        # Set by async_step_station_picker when the station list comes back
+        # empty for a location_search / county_search provider; consumed by
+        # the next async_step_location / async_step_county call which
+        # re-renders its form with this error key in `errors["base"]` so the
+        # user can adjust coords/county without restarting the whole flow.
+        self._pending_error: str = ""
 
     # ---- Step 1: country --------------------------------------------------------
 
@@ -587,6 +593,13 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         county_options = _counties_for_country(self._country)
         if not county_options:
             return self.async_abort(reason="no_counties_for_country")
+
+        # Surface a no-stations-from-picker error on re-entry, then clear it.
+        errors: dict[str, str] = {}
+        if self._pending_error:
+            errors["base"] = self._pending_error
+            self._pending_error = ""
+
         return self.async_show_form(
             step_id="county",
             data_schema=vol.Schema(
@@ -594,6 +607,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_STATION_COUNTY): vol.In(county_options),
                 }
             ),
+            errors=errors,
         )
 
     # ---- Step 3c: station picker (county_search / location_search mode) ---------
@@ -603,6 +617,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Pick a station from a live list — loaded from the provider."""
         errors: dict[str, str] = {}
+        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
 
         if user_input is not None:
             station_id = user_input.get(CONF_STATION_ID, "")
@@ -631,37 +646,48 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._suggested_name = fetched or f"Station {station_id[:8]}"
                 return await self.async_step_name()
 
-        # Load station list from provider
-        provider_cls = PROVIDER_REGISTRY.get(self._provider_key)
-        station_list: list[tuple[str, str]] = []
-        if provider_cls:
-            try:
-                session = async_get_clientsession(self.hass)
-                init_kwargs: dict[str, Any] = {}
-                if self._api_key and getattr(provider_cls, "REQUIRES_API_KEY", False):
-                    init_kwargs["api_key"] = self._api_key
-                provider_instance = provider_cls("", **init_kwargs)
-                list_kwargs: dict[str, Any] = {"county": self._station_county}
-                if self._postal_code:
-                    list_kwargs["postal_code"] = self._postal_code
-                if self._latitude is not None:
-                    list_kwargs["lat"] = self._latitude
-                if self._longitude is not None:
-                    list_kwargs["lng"] = self._longitude
-                list_kwargs["radius_km"] = self._radius_km
-                station_list = await provider_instance.async_list_stations(
-                    session, **list_kwargs
-                )
-                self._station_url_map = {
-                    uid: url
-                    for uid, _ in station_list
-                    if (url := provider_instance.get_station_page_url(uid))
-                }
-            except Exception as err:  # noqa: BLE001
-                _LOGGER.warning("Failed to load station list: %s", err)
+        # Re-render path after a validation error (empty station_id submitted)
+        # reuses the previously-loaded station list rather than refetching, so
+        # users don't pay the upstream round-trip just to see the error
+        # message redisplayed. Tightened to require both: (a) we got here from
+        # a user submission, (b) the validation produced an error, AND
+        # (c) we have a cached list from the first render. Without the
+        # `errors` check the cache would also kick in on legitimate retries
+        # where the user navigated back to this step expecting a fresh fetch.
+        if user_input is not None and errors and self._station_list:
+            station_list: list[tuple[str, str]] = self._station_list
+        else:
+            station_list = []
+            if provider_cls:
+                try:
+                    session = async_get_clientsession(self.hass)
+                    init_kwargs: dict[str, Any] = {}
+                    if self._api_key and getattr(
+                        provider_cls, "REQUIRES_API_KEY", False
+                    ):
+                        init_kwargs["api_key"] = self._api_key
+                    provider_instance = provider_cls("", **init_kwargs)
+                    list_kwargs: dict[str, Any] = {"county": self._station_county}
+                    if self._postal_code:
+                        list_kwargs["postal_code"] = self._postal_code
+                    if self._latitude is not None:
+                        list_kwargs["lat"] = self._latitude
+                    if self._longitude is not None:
+                        list_kwargs["lng"] = self._longitude
+                    list_kwargs["radius_km"] = self._radius_km
+                    station_list = await provider_instance.async_list_stations(
+                        session, **list_kwargs
+                    )
+                    self._station_url_map = {
+                        uid: url
+                        for uid, _ in station_list
+                        if (url := provider_instance.get_station_page_url(uid))
+                    }
+                except Exception as err:  # noqa: BLE001
+                    _LOGGER.warning("Failed to load station list: %s", err)
 
-        station_list = sorted(station_list, key=lambda x: x[1].lower())
-        self._station_list = station_list
+            station_list = sorted(station_list, key=lambda x: x[1].lower())
+            self._station_list = station_list
 
         has_location_caps = (
             provider_cls is not None
@@ -673,31 +699,48 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         )
         schema_dict: dict = {}
         if not station_list:
-            if self.unique_id and not needs_station_id:
-                self._abort_if_unique_id_configured()
-                return await self.async_step_name()
             mode = (
                 getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
                 if provider_cls
                 else "manual_id"
             )
-            # Mode-aware error message. Order matters: global_list always wins
-            # over coordinates/county fallbacks because a global-list provider
-            # may also carry stale lat/lng on the flow (e.g. EU Oil Bulletin
-            # entries created before the global_list dispatch was added).
+            # Order matters here. Each branch returns; the comments below
+            # spell out why this exact ordering is necessary.
+            #
+            # 1. global_list — provider is expected to ALWAYS return its
+            #    fixed list (EU member states, ORLEN wholesale, …). An
+            #    empty list means the upstream is genuinely broken. Aborting
+            #    is the only safe action because the user has no parameter
+            #    to adjust. Must run BEFORE the silent-create branch below,
+            #    which would otherwise jump to async_step_name with no
+            #    station_id and create an unresolvable entry.
             if mode == "global_list":
-                errors["base"] = "no_stations_found_global"
-            elif mode in ("location_search",) or (
-                self._latitude is not None and mode != "county_search"
-            ):
-                errors["base"] = "no_stations_found_location"
-            else:
-                errors["base"] = "no_stations_found"
-            schema_dict[vol.Required(CONF_STATION_ID)] = str
-        else:
-            schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
-                {uid: label for uid, label in station_list}
-            )
+                return self.async_abort(reason="no_stations_found_global")
+            # 2. location_search / county_search — empty list means "no
+            #    stations in the searched area". Loop back to the previous
+            #    step with an error banner so the user can adjust
+            #    coords/radius or pick a different county without
+            #    restarting the flow.
+            if mode == "location_search":
+                self._pending_error = "no_stations_found_location"
+                return await self.async_step_location()
+            if mode == "county_search":
+                self._pending_error = "no_stations_found"
+                return await self.async_step_county()
+            # 3. Silent-create — only reachable for non-list lookup modes
+            #    (manual_id, country, etc.) that build their identity from
+            #    earlier flow state instead of a station picker. Guarded by
+            #    `unique_id` (must already have one) and `not
+            #    needs_station_id` (CONFIG_MODE != "station_id"). Aborts on
+            #    duplicate then creates the entry.
+            if self.unique_id and not needs_station_id:
+                self._abort_if_unique_id_configured()
+                return await self.async_step_name()
+            # 4. Fallback abort for any combination we don't recognise.
+            return self.async_abort(reason="no_stations_found")
+        schema_dict[vol.Required(CONF_STATION_ID)] = vol.In(
+            {uid: label for uid, label in station_list}
+        )
         if has_location_caps:
             schema_dict[vol.Optional(CONF_SHOW_ON_MAP, default=False)] = bool
 
@@ -722,7 +765,16 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             provider_cls, "NEEDS_POSTAL_CODE", False
         )
 
-        def _location_schema(lat: float, lon: float, needs_pc: bool) -> vol.Schema:
+        # Pre-fill prior values when this step is re-entered after an empty
+        # station list (so the user only adjusts the radius), otherwise show
+        # HA's home coords.
+        prefill_lat = self._latitude if self._latitude is not None else default_lat
+        prefill_lon = self._longitude if self._longitude is not None else default_lon
+        prefill_radius = self._radius_km
+
+        def _location_schema(
+            lat: float, lon: float, radius: float, needs_pc: bool
+        ) -> vol.Schema:
             schema_dict: dict = {
                 vol.Required(CONF_LATITUDE, default=lat): vol.All(
                     vol.Coerce(float), vol.Range(min=-90, max=90)
@@ -730,7 +782,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_LONGITUDE, default=lon): vol.All(
                     vol.Coerce(float), vol.Range(min=-180, max=180)
                 ),
-                vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                vol.Optional(CONF_RADIUS_KM, default=radius): vol.All(
                     vol.Coerce(float), vol.Range(min=0.1, max=500)
                 ),
             }
@@ -751,7 +803,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_show_form(
                     step_id="location",
                     data_schema=_location_schema(
-                        default_lat, default_lon, needs_postal
+                        prefill_lat, prefill_lon, prefill_radius, needs_postal
                     ),
                     errors=errors,
                 )
@@ -785,10 +837,19 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
             return await self.async_step_station_picker()
 
+        # Surface a no-stations-from-picker error on re-entry, then clear it
+        # so it doesn't stick across unrelated future re-renders.
+        errors: dict[str, str] = {}
+        if self._pending_error:
+            errors["base"] = self._pending_error
+            self._pending_error = ""
+
         return self.async_show_form(
             step_id="location",
-            data_schema=_location_schema(default_lat, default_lon, needs_postal),
-            errors={},
+            data_schema=_location_schema(
+                prefill_lat, prefill_lon, prefill_radius, needs_postal
+            ),
+            errors=errors,
         )
 
     # ---- Step 4: confirm / edit name --------------------------------------------

@@ -54,9 +54,9 @@ last_updated                → lastupdated         ISO 8601 string
 "Czech Republic"            → name                Fixed label (national average)
 "CZ"                        → source_station_id   Country code used as station id
 
-Because CONFIG_MODE is 'location', the station_id passed to async_fetch is the
-country code 'CZ' (set during config entry creation).  async_list_stations
-returns a single entry for the national average.
+Because STATION_LOOKUP_MODE is 'global_list', the station_id passed to
+async_fetch is the country code 'CZ' (set during config entry creation).
+async_list_stations returns a single entry for the national average.
 
 Third-party dependency risk
 ---------------------------
@@ -101,9 +101,9 @@ class CzCcsProvider(BaseProvider):
     from a community-maintained JSON file that scrapes and re-publishes these
     caps each weekday.
 
-    Because no station-level data source exists for CZ, CONFIG_MODE is
-    'location' and the provider tracks national-average caps only.  The
-    station_id for the single virtual "station" is the country code 'CZ'.
+    Because no station-level data source exists for CZ, STATION_LOOKUP_MODE
+    is 'global_list' and the provider tracks national-average caps only.
+    The station_id for the single virtual "station" is the country code 'CZ'.
 
     Usage
     -----
@@ -115,10 +115,9 @@ class CzCcsProvider(BaseProvider):
 
     COUNTRY = "CZ"
     PROVIDER_KEY = "cz_ccs"
-    DISABLED = True  # 0.7.0: upstream broken — disable until fixed
     LABEL = "MF ČR Price Caps (Czech Republic)"
-    CONFIG_MODE = "location"
-    STATION_LOOKUP_MODE = "location_search"
+    CONFIG_MODE = "station_id"
+    STATION_LOOKUP_MODE = "global_list"
     POLL_INTERVAL_SECONDS = 3600 * 6  # updated once per weekday; 6-hour poll is ample
     STATION_PAGE_URL: ClassVar[str] = "https://www.mfcr.cz"
     CURRENCY: ClassVar[str] = "Kč"
@@ -199,7 +198,7 @@ class CzCcsProvider(BaseProvider):
     ) -> list[tuple[str, str]]:
         """Return a single entry for the national average.
 
-        Called by the config flow location_search step.  For national-average
+        Called by the config flow global_list step.  For national-average
         providers there is exactly one "station" — the country-wide cap price.
 
         Args:
