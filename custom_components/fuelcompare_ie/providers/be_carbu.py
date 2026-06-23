@@ -623,7 +623,11 @@ class BeCarbuProvider(BaseProvider):
             return []
 
         # Filter by radius if lat/lng supplied
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
         if lat is not None and lng is not None:
             filtered: dict[str, dict[str, Any]] = {}
             for sid, station in merged.items():

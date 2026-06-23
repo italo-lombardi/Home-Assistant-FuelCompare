@@ -142,7 +142,7 @@ class PtDgegProvider(BaseProvider):
         self._county = county
         self._latitude = latitude
         self._longitude = longitude
-        self._radius_km = radius_km or 10.0
+        self._radius_km = radius_km if radius_km is not None else 10.0
 
     # ── Public interface ──────────────────────────────────────────────────────
 
@@ -217,7 +217,11 @@ class PtDgegProvider(BaseProvider):
         lng: float | None = (
             kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
         )
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         params: dict[str, Any] = {
             "qtd": 5000,

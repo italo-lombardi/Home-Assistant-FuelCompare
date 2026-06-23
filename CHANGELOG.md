@@ -67,11 +67,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Also dropped the unused `county` constructor parameter from `ba_fuel`,
   `dk_fuelfinder` and `mt_fuel`, and the `**kwargs` absorber from
   `me_fuel.__init__` so kwarg typos now surface as `TypeError`.
-- Aligned the `radius_km=0` contract across all client-side filter
-  providers: `0` / `None` / missing kwarg = "no filter" (matches
+- Aligned the `radius_km=0` contract across **every** client-side filter
+  provider: `0` / `None` / missing kwarg = "no filter" (matches
   `providers._geo.filter_within_radius`'s falsy-check semantics).
-  Previously `au_nsw` used `kwargs.get(...) or self._radius_km`, which
-  silently rewrote an explicit `0` back to the constructor default.
+  Twelve providers used `kwargs.get("radius_km") or self._radius_km`,
+  which silently rewrote an explicit `0` back to the constructor default
+  (au_nsw, au_qld, au_vic, be_carbu, ca_qc, ch_tcs, de_tankerkoenig,
+  es_minetur, fr_carburants, pt_dgeg, se_bensinpriser, si_goriva); they
+  now use an explicit `kwargs.get(...) is not None` ternary that
+  preserves a user-supplied `0`. `ca_qc.__init__` and `pt_dgeg.__init__`
+  also dropped their similar `radius_km or 10.0` rewrites in favour of
+  the strict `is not None` check.
 - Added the `no_stations_found` / `no_stations_found_location` /
   `no_stations_found_global` keys to `strings.json` and every locale's
   `config.abort` block (matching the existing `config.error` entries) so

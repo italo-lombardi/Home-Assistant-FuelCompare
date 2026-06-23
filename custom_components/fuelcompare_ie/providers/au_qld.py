@@ -317,7 +317,11 @@ class AuQldProvider(BaseProvider):
         lng: float | None = (
             kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
         )  # type: ignore[assignment]
-        radius_km: float = float(kwargs.get("radius_km") or self._radius_km)
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         if lat is None or lng is None:
             _LOGGER.debug(

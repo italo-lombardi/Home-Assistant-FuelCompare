@@ -282,11 +282,11 @@ class AuNswProvider(BaseProvider):
         lng: float | None = (
             kwargs["lng"] if kwargs.get("lng") is not None else self._longitude
         )  # type: ignore[assignment]
-        # radius_km contract: 0/None/missing = no client-side filter (matches
-        # providers._geo.filter_within_radius). Use .get(..., default) — not
-        # `or` — so an explicit 0 from the user passes through.
-        raw_radius = kwargs.get("radius_km", self._radius_km)
-        radius_km: float = float(raw_radius) if raw_radius is not None else 0.0
+        radius_km: float = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         if lat is None or lng is None:
             _LOGGER.debug("async_list_stations called without lat/lng — returning []")

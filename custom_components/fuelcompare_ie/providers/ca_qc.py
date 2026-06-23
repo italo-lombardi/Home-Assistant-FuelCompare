@@ -287,7 +287,7 @@ class CaQcProvider(BaseProvider):
         self._station_id = station_id
         self._latitude = latitude
         self._longitude = longitude
-        self._radius_km = radius_km
+        self._radius_km = radius_km if radius_km is not None else 10.0
         # Instance-level GeoJSON cache — avoids shared mutable state across
         # config entries.  Two entries with different radii/locations will not
         # race to populate or invalidate each other's cache.
@@ -384,7 +384,11 @@ class CaQcProvider(BaseProvider):
         """
         lat = kwargs.get("lat") if kwargs.get("lat") is not None else self._latitude
         lng = kwargs.get("lng") if kwargs.get("lng") is not None else self._longitude
-        radius_km = float(kwargs.get("radius_km") or self._radius_km or 10.0)
+        radius_km = (
+            float(kwargs["radius_km"])
+            if kwargs.get("radius_km") is not None
+            else float(self._radius_km)
+        )
 
         if lat is None or lng is None:
             _LOGGER.debug("async_list_stations: no coordinates provided")

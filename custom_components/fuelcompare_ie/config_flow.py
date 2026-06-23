@@ -713,9 +713,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             # stations in the searched area". Send the user back to the
             # previous step with an error banner so they can adjust
             # coords/radius or pick a different county without restarting
-            # the whole flow. Reset unique_id so the abort-on-duplicate
-            # check in async_step_location doesn't trip on a return visit.
-            self._unique_id = None  # type: ignore[assignment]
+            # the whole flow.
             if mode == "location_search":
                 self._pending_error = "no_stations_found_location"
                 return await self.async_step_location()
