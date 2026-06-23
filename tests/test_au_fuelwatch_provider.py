@@ -1358,6 +1358,82 @@ async def test_async_list_stations_stations_without_price_go_last() -> None:
 
 
 # ---------------------------------------------------------------------------
+# async_list_stations — radius_km filter (issue #44)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_radius_km_filters_distant_stations() -> None:
+    """async_list_stations drops stations outside radius_km of (lat, lng)."""
+    # Two stations: Landsdale (~-31.80, 115.84) and Fremantle (~-32.06, 115.74).
+    # Distance ≈ 29 km. Center on Landsdale with 5 km radius → Fremantle dropped.
+    body = _rss_two_stations_bytes()
+
+    def _fresh_resp():
+        return _make_mock_response(200, body=body)
+
+    session = _make_session_all_same(_fresh_resp)
+    provider = AuFuelwatchProvider("region")
+    result = await provider.async_list_stations(
+        session,
+        lat=-31.80275800,
+        lng=115.83773700,
+        radius_km=5.0,
+    )
+
+    sids = [sid for sid, _ in result]
+    assert _STATION_ID in sids
+    assert _STATION_ID2 not in sids
+
+
+async def test_async_list_stations_radius_km_keeps_within_range() -> None:
+    """async_list_stations keeps stations inside the radius."""
+    body = _rss_two_stations_bytes()
+
+    def _fresh_resp():
+        return _make_mock_response(200, body=body)
+
+    session = _make_session_all_same(_fresh_resp)
+    provider = AuFuelwatchProvider("region")
+    # 50 km radius keeps both stations.
+    result = await provider.async_list_stations(
+        session,
+        lat=-31.80275800,
+        lng=115.83773700,
+        radius_km=50.0,
+    )
+
+    sids = [sid for sid, _ in result]
+    assert _STATION_ID in sids
+    assert _STATION_ID2 in sids
+
+
+async def test_async_list_stations_no_radius_kwarg_returns_all() -> None:
+    """Without radius_km/lat/lng, list is unfiltered (back-compat)."""
+    body = _rss_two_stations_bytes()
+
+    def _fresh_resp():
+        return _make_mock_response(200, body=body)
+
+    session = _make_session_all_same(_fresh_resp)
+    provider = AuFuelwatchProvider("region")
+    result = await provider.async_list_stations(session)
+
+    assert len(result) == 2
+
+
+async def test_haversine_km_known_distance() -> None:
+    """_haversine_km matches a known distance within 1 % tolerance."""
+    from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
+        _haversine_km,
+    )
+
+    # Perth CBD (-31.9523, 115.8613) ↔ Fremantle (-32.0569, 115.7439)
+    # Real-world great-circle distance ≈ 16.0 km.
+    d = _haversine_km(-31.9523, 115.8613, -32.0569, 115.7439)
+    assert 15.5 < d < 16.5
+
+
+# ---------------------------------------------------------------------------
 # au_fuelwatch.py line 266 — _make_station_id returns None → skip item
 # ---------------------------------------------------------------------------
 

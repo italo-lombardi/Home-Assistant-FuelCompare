@@ -26,6 +26,7 @@ STATION_LOOKUP_MODE = 'location_search' (browse stations by Region code).
 from __future__ import annotations
 
 import logging
+from math import asin, cos, radians, sin, sqrt
 from typing import Any, ClassVar
 from xml.etree import ElementTree as ET
 
@@ -122,10 +123,13 @@ class AuFuelwatchProvider(BaseProvider):
                         OR a WA Region code string used as a placeholder during
                         setup before a specific station is selected.
             county:     WA Region code (optional, used for list filtering).
-            latitude:   User's reference latitude (unused in feed requests; kept
-                        for interface compatibility with location-mode providers).
+            latitude:   User's reference latitude (used by async_list_stations
+                        to filter results within radius_km; FuelWatch RSS has
+                        no native radius parameter, so the filter is client-side).
             longitude:  User's reference longitude (same as above).
-            radius_km:  Search radius in km (unused; FuelWatch uses Region codes).
+            radius_km:  Search radius in km. Applied client-side after the
+                        Region feed is fetched (FuelWatch RSS does not support
+                        coordinate-based filtering server-side).
         """
         self._station_id = station_id
         self._county = county  # treated as Region code when present
@@ -195,9 +199,10 @@ class AuFuelwatchProvider(BaseProvider):
         Keyword args accepted:
             county (str): WA Region code (e.g. '25'). If absent, fetches
                           without a region filter (statewide — may be slow).
-            lat, lng, radius_km: accepted for interface compatibility but unused
-                                 (FuelWatch does not support coordinate-based
-                                 filtering; use Region codes instead).
+            lat, lng (float): User's reference coordinates. When supplied with
+                              radius_km, the returned list is filtered to
+                              stations within that great-circle distance.
+            radius_km (float): Search radius in km. Ignored when lat/lng absent.
 
         Returns:
             Alphabetically sorted list of (station_id, label) tuples where the
@@ -211,14 +216,28 @@ class AuFuelwatchProvider(BaseProvider):
             or (str(self._county) if self._county else None)
         ) or None
 
+        lat = kwargs.get("lat", self._latitude)
+        lng = kwargs.get("lng", self._longitude)
+        radius_km = kwargs.get("radius_km", self._radius_km)
+
         try:
             merged = await self._fetch_all_products(session, region_code)
         except Exception as err:  # noqa: BLE001
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
+        # FuelWatch RSS API has no radius parameter; filter client-side using
+        # haversine distance when the caller supplies coords + radius.
+        filter_active = lat is not None and lng is not None and radius_km
         result: list[tuple[str, str]] = []
         for sid, data in merged.items():
+            if filter_active:
+                slat = data.get("latitude")
+                slng = data.get("longitude")
+                if slat is None or slng is None:
+                    continue
+                if _haversine_km(float(lat), float(lng), slat, slng) > float(radius_km):
+                    continue
             label = _build_station_list_label(data, sid)
             result.append((sid, label))
 
@@ -398,6 +417,16 @@ def _parse_lat_lng(raw: str | None) -> float | None:
         return float(raw)
     except (ValueError, TypeError):
         return None
+
+
+def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """Great-circle distance in km between two WGS84 coords (mean-radius earth)."""
+    r1 = radians(lat1)
+    r2 = radians(lat2)
+    dlat = r2 - r1
+    dlng = radians(lng2 - lng1)
+    a = sin(dlat / 2) ** 2 + cos(r1) * cos(r2) * sin(dlng / 2) ** 2
+    return 2 * 6371.0 * asin(sqrt(a))
 
 
 def _parse_is_open(site_features: str | None) -> bool:

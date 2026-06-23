@@ -208,6 +208,28 @@ async def test_au_fuelwatch_perth_two_stations_distinct(session) -> None:
     assert len(ids) >= 2, "AU FuelWatch Perth: station IDs not unique"
 
 
+async def test_au_fuelwatch_perth_radius_filter(session) -> None:
+    """radius_km narrows the Perth Metro list (issue #44 follow-up).
+
+    Fetch unfiltered list, then again with a small radius around Perth CBD
+    (-31.9523, 115.8613) — the filtered list must be strictly smaller.
+    """
+    prov = AuFuelwatchProvider("", county="25")
+    all_stations = await prov.async_list_stations(session, county="25")
+    near_cbd = await prov.async_list_stations(
+        session,
+        county="25",
+        lat=-31.9523,
+        lng=115.8613,
+        radius_km=5.0,
+    )
+    assert near_cbd, "AU FuelWatch: no stations within 5 km of Perth CBD"
+    assert len(near_cbd) < len(all_stations), (
+        f"AU FuelWatch: radius_km did not filter "
+        f"({len(near_cbd)} vs {len(all_stations)} total)"
+    )
+
+
 # ── AU NSW: FuelCheck — Sydney ──────────────────────────────────────────────
 async def test_au_nsw_sydney(session) -> None:
     prov = AuNswProvider("", latitude=-33.8688, longitude=151.2093, radius_km=5.0)
