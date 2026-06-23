@@ -9,7 +9,7 @@
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
 [![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
 
-> ⚠️ **Early multi-country release — testers welcome.** 4 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×3 + EU Oil Bulletin), 16 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 16 are currently disabled because their upstream is broken (12) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
+> ⚠️ **Early multi-country release — testers welcome.** 5 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×3 + EU Oil Bulletin + FuelWatch WA), 15 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 16 are currently disabled because their upstream is broken (12) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
 
 > **Disclaimer:** This is an independent, unofficial custom integration. It is not affiliated with, endorsed by, or connected to any of the data providers it accesses. All provider names, websites, and trademarks are the property of their respective owners. This project reads publicly available data for personal, non-commercial use only.
 
@@ -33,7 +33,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | e-control (Austria) | 🇦🇹 Austria | Unleaded, Diesel, CNG | Location + picker | — | 🤖 Smoke-tested |
 | Fuel Prices QLD (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
 | FuelCheck NSW (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | — | 🤖 Smoke-tested |
-| FuelWatch (Australia WA) | 🇦🇺 Australia | Unleaded, Diesel, E10, LPG | Location + picker | — | 🤖 Smoke-tested |
+| FuelWatch (Australia WA) | 🇦🇺 Australia | Unleaded, Diesel, E10, LPG | Location + picker | — | ✅ Tested |
 | Servo Saver VIC (Australia) | 🇦🇺 Australia | Unleaded, Diesel, E10, E85, LPG | Location + picker | 🔑 | ⚠️ Disabled (untested, API key required) |
 | cijenegoriva.ba (Bosnia and Herzegovina) | 🇧🇦 Bosnia & Herzegovina | Diesel, LPG | Location + picker | — | ⚠️ Disabled |
 | Carbu.com (Belgium) | 🇧🇪 Belgium | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |

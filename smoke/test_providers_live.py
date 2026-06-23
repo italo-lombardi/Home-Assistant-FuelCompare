@@ -22,19 +22,39 @@ from __future__ import annotations
 
 import pytest
 
+from custom_components.fuelcompare_ie.providers.at_econtrol import AtEcontrolProvider
+from custom_components.fuelcompare_ie.providers.au_fuelwatch import AuFuelwatchProvider
+from custom_components.fuelcompare_ie.providers.au_nsw import AuNswProvider
 from custom_components.fuelcompare_ie.providers.au_qld import AuQldProvider
 from custom_components.fuelcompare_ie.providers.au_vic import AuVicProvider
 from custom_components.fuelcompare_ie.providers.ba_fuel import BaFuelProvider
+from custom_components.fuelcompare_ie.providers.be_carbu import BeCarbuProvider
+from custom_components.fuelcompare_ie.providers.ca_qc import CaQcProvider
+from custom_components.fuelcompare_ie.providers.ch_tcs import ChTcsProvider
 from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
     DeTankerkoenigProvider,
 )
 from custom_components.fuelcompare_ie.providers.es_minetur import EsMineturProvider
 from custom_components.fuelcompare_ie.providers.fi_tankille import FiTankilleProvider
+from custom_components.fuelcompare_ie.providers.fr_carburants import (
+    FrCarburantsProvider,
+)
+from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
+    GbFuelfinderProvider,
+)
+from custom_components.fuelcompare_ie.providers.gr_fuelgov import GrFuelgovProvider
+from custom_components.fuelcompare_ie.providers.is_fuel import IsFuelProvider
+from custom_components.fuelcompare_ie.providers.it_mase import ItMaseProvider
+from custom_components.fuelcompare_ie.providers.lt_saurida import LtSauridaProvider
 from custom_components.fuelcompare_ie.providers.lu_carbu import LuCarbuProvider
 from custom_components.fuelcompare_ie.providers.me_fuel import MeFuelProvider
 from custom_components.fuelcompare_ie.providers.no_drivstoff import (
     NoDrivstoffProvider,
 )
+from custom_components.fuelcompare_ie.providers.se_bensinpriser import (
+    SEBensinpriserProvider,
+)
+from custom_components.fuelcompare_ie.providers.si_goriva import SiGorivaProvider
 
 
 pytestmark = [pytest.mark.smoke, pytest.mark.asyncio]
@@ -153,3 +173,144 @@ async def test_au_vic_melbourne(session) -> None:
         session, lat=-37.8136, lng=144.9631, radius_km=10.0
     )
     assert stations, "AU VIC: no Melbourne stations"
+
+
+# ── location_search multi-station providers (affected by #44 unique_id fix) ─
+
+
+# ── AT: econtrol.at — Vienna ────────────────────────────────────────────────
+async def test_at_econtrol_vienna(session) -> None:
+    prov = AtEcontrolProvider("", latitude=48.2082, longitude=16.3738, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=48.2082, lng=16.3738, radius_km=5.0
+    )
+    assert stations, "AT econtrol: no Vienna stations"
+
+
+# ── AU WA: FuelWatch — Perth Metro (Region 25) ──────────────────────────────
+async def test_au_fuelwatch_perth(session) -> None:
+    prov = AuFuelwatchProvider("", county="25")
+    stations = await prov.async_list_stations(session, county="25")
+    assert stations, "AU FuelWatch: no Perth Metro stations"
+
+
+async def test_au_fuelwatch_perth_two_stations_distinct(session) -> None:
+    """Verify at least two distinct station IDs exist in Perth Metro.
+
+    This directly validates the multi-station config scenario from issue #44.
+    """
+    prov = AuFuelwatchProvider("", county="25")
+    stations = await prov.async_list_stations(session, county="25")
+    assert len(stations) >= 2, (
+        f"AU FuelWatch Perth: expected ≥2 stations, got {len(stations)}"
+    )
+    ids = {sid for sid, _ in stations}
+    assert len(ids) >= 2, "AU FuelWatch Perth: station IDs not unique"
+
+
+# ── AU NSW: FuelCheck — Sydney ──────────────────────────────────────────────
+async def test_au_nsw_sydney(session) -> None:
+    prov = AuNswProvider("", latitude=-33.8688, longitude=151.2093, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=-33.8688, lng=151.2093, radius_km=5.0
+    )
+    assert stations, "AU NSW FuelCheck: no Sydney stations"
+
+
+# ── BE: carbu.com Belgium — Brussels (postal code 1000) ─────────────────────
+async def test_be_carbu_brussels(session) -> None:
+    prov = BeCarbuProvider("", latitude=50.8503, longitude=4.3517, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=50.8503, lng=4.3517, radius_km=5.0, postal_code="1000"
+    )
+    assert stations, "BE carbu: no Brussels stations"
+
+
+# ── CA QC: CAA-Québec — Montréal ────────────────────────────────────────────
+async def test_ca_qc_montreal(session) -> None:
+    prov = CaQcProvider("", latitude=45.5017, longitude=-73.5673, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=45.5017, lng=-73.5673, radius_km=5.0
+    )
+    assert stations, "CA QC: no Montréal stations"
+
+
+# ── CH: TCS — Bern ──────────────────────────────────────────────────────────
+async def test_ch_tcs_bern(session) -> None:
+    prov = ChTcsProvider("", latitude=46.9481, longitude=7.4474, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=46.9481, lng=7.4474, radius_km=5.0
+    )
+    assert stations, "CH TCS: no Bern stations"
+
+
+# ── FR: prix-carburants.gouv.fr — Paris ─────────────────────────────────────
+async def test_fr_carburants_paris(session) -> None:
+    prov = FrCarburantsProvider("", latitude=48.8566, longitude=2.3522, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=48.8566, lng=2.3522, radius_km=5.0
+    )
+    assert stations, "FR carburants: no Paris stations"
+
+
+# ── GB: fuelfinder.uk — London ──────────────────────────────────────────────
+async def test_gb_fuelfinder_london(session) -> None:
+    prov = GbFuelfinderProvider("", latitude=51.5074, longitude=-0.1278, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=51.5074, lng=-0.1278, radius_km=5.0
+    )
+    assert stations, "GB fuelfinder: no London stations"
+
+
+# ── GR: fuelgov.gr — Attica prefecture ──────────────────────────────────────
+async def test_gr_fuelgov_athens(session) -> None:
+    prov = GrFuelgovProvider("GR", prefecture_id=1)  # Attica
+    stations = await prov.async_list_stations(session)
+    assert stations, "GR fuelgov: no Attica stations"
+
+
+# ── IS: gasvaktin.is — Reykjavík ────────────────────────────────────────────
+async def test_is_fuel_reykjavik(session) -> None:
+    prov = IsFuelProvider("", latitude=64.1265, longitude=-21.8174, radius_km=20.0)
+    stations = await prov.async_list_stations(
+        session, lat=64.1265, lng=-21.8174, radius_km=20.0
+    )
+    assert stations, "IS gasvaktin: no Reykjavík stations"
+
+
+# ── IT: MASE — Rome ─────────────────────────────────────────────────────────
+async def test_it_mase_rome(session) -> None:
+    prov = ItMaseProvider("", latitude=41.9028, longitude=12.4964, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=41.9028, lng=12.4964, radius_km=5.0
+    )
+    assert stations, "IT MASE: no Rome stations"
+
+
+# ── LT: saurida.lt — Vilnius ────────────────────────────────────────────────
+async def test_lt_saurida_vilnius(session) -> None:
+    prov = LtSauridaProvider("", latitude=54.6872, longitude=25.2797, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=54.6872, lng=25.2797, radius_km=5.0
+    )
+    assert stations, "LT saurida: no Vilnius stations"
+
+
+# ── SE: bensinpriser.se — Stockholm ─────────────────────────────────────────
+async def test_se_bensinpriser_stockholm(session) -> None:
+    prov = SEBensinpriserProvider(
+        "", latitude=59.3293, longitude=18.0686, radius_km=10.0
+    )
+    stations = await prov.async_list_stations(
+        session, lat=59.3293, lng=18.0686, radius_km=10.0
+    )
+    assert stations, "SE bensinpriser: no Stockholm stations"
+
+
+# ── SI: goriva.si — Ljubljana ────────────────────────────────────────────────
+async def test_si_goriva_ljubljana(session) -> None:
+    prov = SiGorivaProvider("", latitude=46.0569, longitude=14.5058, radius_km=5.0)
+    stations = await prov.async_list_stations(
+        session, lat=46.0569, lng=14.5058, radius_km=5.0
+    )
+    assert stations, "SI goriva: no Ljubljana stations"

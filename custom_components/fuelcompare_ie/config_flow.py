@@ -609,11 +609,10 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             if not station_id:
                 errors[CONF_STATION_ID] = "invalid_station_id"
             else:
-                if not self.unique_id:
-                    await self.async_set_unique_id(
-                        f"{DOMAIN}_{self._provider_key}_{station_id}"
-                    )
-                    self._abort_if_unique_id_configured()
+                await self.async_set_unique_id(
+                    f"{DOMAIN}_{self._provider_key}_{station_id}"
+                )
+                self._abort_if_unique_id_configured()
                 self._station_id = station_id
                 self._station_page_url = self._station_url_map.get(station_id, "")
                 if user_input.get(CONF_SHOW_ON_MAP):
@@ -675,6 +674,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
         schema_dict: dict = {}
         if not station_list:
             if self.unique_id and not needs_station_id:
+                self._abort_if_unique_id_configured()
                 return await self.async_step_name()
             mode = (
                 getattr(provider_cls, "STATION_LOOKUP_MODE", "manual_id")
@@ -761,11 +761,18 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
             # 4 decimal places ≈ 11 m precision; stations closer than ~11 m share an entry_id
             unique = f"{DOMAIN}_{self._provider_key}_{self._latitude:.4f}_{self._longitude:.4f}"
             await self.async_set_unique_id(unique)
-            self._abort_if_unique_id_configured()
+            # For location_search providers the station picker will overwrite the
+            # unique_id with a station-based one, so aborting here would block the
+            # user from picking a second station in the same area.  Only abort for
+            # providers where lat/lng IS the final identity (global_list, pure
+            # location-only providers with a single synthetic station).
+            provider_cls_loc = provider_cls
+            _lookup_mode = getattr(provider_cls_loc, "STATION_LOOKUP_MODE", "manual_id")
+            if _lookup_mode != "location_search":
+                self._abort_if_unique_id_configured()
             # Suggested name: set a location-based fallback here only for
             # providers that don't require a station ID (location-only).
             # Station-picker providers overwrite this after the user picks a station.
-            provider_cls_loc = PROVIDER_REGISTRY.get(self._provider_key)
             _is_station_id_mode = (
                 provider_cls_loc is not None
                 and getattr(provider_cls_loc, "CONFIG_MODE", "station_id")
