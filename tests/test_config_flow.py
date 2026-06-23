@@ -583,9 +583,204 @@ async def test_async_step_location_invalid_coords_returns_form_error(
     assert "base" in result["errors"]
 
 
+async def test_async_step_location_non_location_search_aborts_on_duplicate(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_location aborts when lat/lng uid already configured for non-location_search providers.
+
+    Covers config_flow.py line 771: _abort_if_unique_id_configured() for
+    providers whose unique_id is lat/lng-based (global_list, manual_id).
+    """
+    from unittest.mock import AsyncMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_LATITUDE, CONF_LONGITUDE
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _GlobalListProvider(BaseProvider):
+        COUNTRY = "EU"
+        PROVIDER_KEY = "eu_global_list_abort_test"
+        LABEL = "Global List Abort Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "global_list"
+        CURRENCY = "EUR"
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("eu_001", "EU Station")]
+
+    PROVIDER_REGISTRY["eu_global_list_abort_test"] = _GlobalListProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "eu_global_list_abort_test"
+        flow._country = "EU"
+        flow._api_key = ""
+        flow._postal_code = ""
+
+        with (
+            patch.object(
+                flow,
+                "async_set_unique_id",
+                new=AsyncMock(return_value=None),
+            ),
+            patch.object(
+                flow,
+                "_abort_if_unique_id_configured",
+                side_effect=Exception("abort_called"),
+            ),
+        ):
+            try:
+                await flow.async_step_location(
+                    user_input={CONF_LATITUDE: 48.0, CONF_LONGITUDE: 16.0}
+                )
+                aborted = False
+            except Exception as exc:
+                aborted = str(exc) == "abort_called"
+
+        assert aborted, (
+            "Expected _abort_if_unique_id_configured to be called for non-location_search providers"
+        )
+    finally:
+        PROVIDER_REGISTRY.pop("eu_global_list_abort_test", None)
+
+
+async def test_async_step_location_location_search_skips_abort(
+    hass: HomeAssistant,
+) -> None:
+    """async_step_location does NOT abort for location_search providers.
+
+    Covers the fix for multi-station add: _abort_if_unique_id_configured must
+    NOT be called when STATION_LOOKUP_MODE='location_search' so the user can
+    pick different stations from the same search area.
+    """
+    from unittest.mock import AsyncMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_LATITUDE, CONF_LONGITUDE
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _LocationSearchProvider(BaseProvider):
+        COUNTRY = "AU"
+        PROVIDER_KEY = "au_location_search_no_abort_test"
+        LABEL = "Location Search No Abort Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "A$"
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_list_stations(self, session, **kwargs):
+            return [("au_001", "Station 1"), ("au_002", "Station 2")]
+
+    PROVIDER_REGISTRY["au_location_search_no_abort_test"] = _LocationSearchProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "au_location_search_no_abort_test"
+        flow._country = "AU"
+        flow._api_key = ""
+        flow._postal_code = ""
+
+        abort_called = False
+
+        def _record_abort():
+            nonlocal abort_called
+            abort_called = True
+
+        with (
+            patch.object(flow, "async_set_unique_id", new=AsyncMock(return_value=None)),
+            patch.object(
+                flow, "_abort_if_unique_id_configured", side_effect=_record_abort
+            ),
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.async_get_clientsession"
+            ),
+            patch(
+                "custom_components.fuelcompare_ie.config_flow.FuelCompareIEConfigFlow.async_step_station_picker",
+                new=AsyncMock(
+                    return_value={"type": "form", "step_id": "station_picker"}
+                ),
+            ),
+        ):
+            result = await flow.async_step_location(
+                user_input={CONF_LATITUDE: -31.8027, CONF_LONGITUDE: 115.8377}
+            )
+
+        assert not abort_called, (
+            "_abort_if_unique_id_configured must NOT be called for location_search providers"
+        )
+        assert result["step_id"] == "station_picker"
+    finally:
+        PROVIDER_REGISTRY.pop("au_location_search_no_abort_test", None)
+
+
 # ---------------------------------------------------------------------------
-# async_step_api_key tests
+# test_station_picker_empty_global_list_shows_error  (config_flow.py line 688)
 # ---------------------------------------------------------------------------
+
+
+async def test_station_picker_empty_global_list_shows_error(
+    hass: HomeAssistant,
+) -> None:
+    """Station picker shows 'no_stations_found_global' error for global_list providers with no stations.
+
+    Covers config_flow.py line 688.
+    """
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _EmptyGlobalListProvider(BaseProvider):
+        COUNTRY = "EU"
+        PROVIDER_KEY = "eu_empty_global_list_test"
+        LABEL = "Empty Global List Test"
+        CONFIG_MODE = "location"
+        STATION_LOOKUP_MODE = "global_list"
+        CURRENCY = "EUR"
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_list_stations(self, session, **kwargs):
+            return []  # deliberately empty
+
+    PROVIDER_REGISTRY["eu_empty_global_list_test"] = _EmptyGlobalListProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow._provider_key = "eu_empty_global_list_test"
+        flow._country = "EU"
+        flow._station_county = ""
+        flow._latitude = None
+        flow._longitude = None
+        flow._radius_km = 10.0
+        flow._postal_code = ""
+        flow._api_key = ""
+
+        with patch(
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession"
+        ):
+            result = await flow.async_step_station_picker(user_input=None)
+
+        assert result["type"] == "form"
+        assert result["errors"].get("base") == "no_stations_found_global"
+    finally:
+        PROVIDER_REGISTRY.pop("eu_empty_global_list_test", None)
 
 
 async def test_async_step_api_key_empty_key_shows_error(
@@ -3370,3 +3565,105 @@ async def test_location_search_duplicate_station_still_aborts(
         assert result2["reason"] == "already_configured"
     finally:
         PROVIDER_REGISTRY.pop("au_dup_station_test", None)
+
+
+# ---------------------------------------------------------------------------
+# test_county_search_multi_station_unaffected_by_location_fix
+# ---------------------------------------------------------------------------
+
+
+async def test_county_search_multi_station_unaffected_by_location_fix(
+    hass: HomeAssistant,
+) -> None:
+    """county_search providers are unaffected by the location_search unique_id fix.
+
+    county_search never goes through async_step_location, so the conditional
+    abort introduced in that step has no effect on this path.  Verify that:
+    - The flow routes directly to county → station_picker (skips location).
+    - The unique_id is station-based (not lat/lng-based).
+    - A duplicate station is still rejected.
+    """
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+    from custom_components.fuelcompare_ie.const import CONF_STATION_COUNTY
+
+    class _CountySearchProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "ie_county_search_regression_test"
+        LABEL = "County Search Regression Test"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "county_search"
+        CURRENCY = "EUR"
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_fetch_station_name(self, session, station_id):
+            return f"Station {station_id}"
+
+        async def async_list_stations(self, session, **kwargs):
+            return [
+                ("cs_001", "Texaco Cork, Main St (#cs_001)"),
+                ("cs_002", "Shell Cork, High St (#cs_002)"),
+            ]
+
+    PROVIDER_REGISTRY["ie_county_search_regression_test"] = _CountySearchProvider
+    try:
+        # Drive flow to station_picker and capture the unique_id set for two stations.
+        async def _flow_to_uid(station_id: str) -> str | None:
+            flow = FuelCompareIEConfigFlow()
+            flow.hass = hass
+            flow._provider_key = "ie_county_search_regression_test"
+            flow._country = DEFAULT_COUNTRY
+            flow._api_key = ""
+            flow._latitude = None
+            flow._longitude = None
+            flow._radius_km = 10.0
+
+            captured_uid: list[str] = []
+
+            async def _capture_uid(uid: str) -> None:
+                captured_uid.append(uid)
+
+            with (
+                patch.object(flow, "async_set_unique_id", side_effect=_capture_uid),
+                patch.object(flow, "_abort_if_unique_id_configured", return_value=None),
+                patch(
+                    "custom_components.fuelcompare_ie.config_flow.async_get_clientsession"
+                ),
+                patch(
+                    "custom_components.fuelcompare_ie.config_flow._fetch_station_name",
+                    new=AsyncMock(return_value=f"Station {station_id}"),
+                ),
+            ):
+                # county step
+                result = await flow.async_step_county(
+                    user_input={CONF_STATION_COUNTY: "cork"}
+                )
+                assert result["step_id"] == "station_picker", (
+                    "county_search should route county → station_picker, not through location"
+                )
+                # station picker step
+                result = await flow.async_step_station_picker(
+                    user_input={CONF_STATION_ID: station_id}
+                )
+            assert result["step_id"] == "name"
+            return captured_uid[-1] if captured_uid else None
+
+        uid1 = await _flow_to_uid("cs_001")
+        uid2 = await _flow_to_uid("cs_002")
+
+        # unique_ids must be station-based, not lat/lng-based
+        assert uid1 is not None and "cs_001" in uid1, (
+            f"Expected station-based uid, got {uid1!r}"
+        )
+        assert uid2 is not None and "cs_002" in uid2, (
+            f"Expected station-based uid, got {uid2!r}"
+        )
+        assert uid1 != uid2, "Different stations must produce different unique_ids"
+    finally:
+        PROVIDER_REGISTRY.pop("ie_county_search_regression_test", None)
