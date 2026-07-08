@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-07-08
+
+### Changed
+- **`ie_fuelcompare` deprecated — fuelcompare.ie shut down 30 June 2026.** The
+  upstream site is no longer reachable, so this provider cannot return data.
+  It is now hidden from the config-flow picker (`DISABLED = True`), so new
+  entries cannot be created. Existing entries continue to load and now raise
+  an ERROR-severity repairs issue instructing the user to delete the entry
+  and switch to `ie_fuelfinder` or `ie_pumps`. The provider class remains in
+  the registry so orphaned entries stay identifiable rather than crashing on
+  startup with "Unknown provider". Scheduled for full removal in a future
+  major version.
+
 ## [0.7.2] - 2026-06-23
 
 ### Fixed

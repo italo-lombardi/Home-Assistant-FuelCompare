@@ -33,6 +33,28 @@ _PATCH_FIRST_REFRESH = patch(
 )
 
 
+@pytest.fixture(autouse=True)
+def _reenable_ie_fuelcompare_for_flow_tests():
+    """Re-enable the DISABLED ie_fuelcompare provider for config-flow tests.
+
+    fuelcompare.ie shut down on 2026-06-30 and the provider is now hidden
+    from the picker via DISABLED=True. The config-flow tests were authored
+    against this provider as DEFAULT_PROVIDER and use it as a stand-in for
+    the manual_id / station-id lookup mode. Toggling DISABLED off here keeps
+    the existing tests exercising that mode without a mass rewrite; the
+    prod behaviour (hidden from picker) is covered by test_ie_fuelcompare_provider.
+    """
+    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
+        IEFuelCompareProvider,
+    )
+
+    IEFuelCompareProvider.DISABLED = False
+    try:
+        yield
+    finally:
+        IEFuelCompareProvider.DISABLED = True
+
+
 # ---------------------------------------------------------------------------
 # test_config_flow_valid_station_id
 # ---------------------------------------------------------------------------

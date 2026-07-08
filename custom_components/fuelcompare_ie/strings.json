@@ -90,8 +90,8 @@
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie is shutting down",
-      "description": "The fuelcompare.ie website is scheduled to shut down on **30 June 2026**. Your station **{entry_title}** will stop receiving price updates after that date. Consider switching to a different Irish fuel price source, such as FuelFinder IE or IE Pumps."
+      "title": "fuelcompare.ie has shut down",
+      "description": "The fuelcompare.ie website was shut down on **30 June 2026** and is no longer reachable. Your station **{entry_title}** will not receive further price updates. Please delete this entry and add a new one using another Irish fuel price source, such as **FuelFinder IE** or **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS certificate verification disabled",

@@ -50,7 +50,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | Greek Ministry of Energy | 🇬🇷 Greece | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
 | MINGOR (Croatia) | 🇭🇷 Croatia | Unleaded, Diesel, LPG | County picker → station | — | 🤖 Smoke-tested |
 | FuelFinder.ie | 🇮🇪 Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station | — | ✅ Tested |
-| fuelcompare.ie | 🇮🇪 Ireland | Unleaded, Diesel | Numeric station ID | — | ✅ Tested |
+| fuelcompare.ie | 🇮🇪 Ireland | Unleaded, Diesel | Numeric station ID | — | ⚠️ Disabled (site shut down 2026-06-30) |
 | pumps.ie | 🇮🇪 Ireland | Unleaded, Diesel, Petrol | Location + picker | — | ✅ Tested |
 | Gasvaktin (Iceland) | 🇮🇸 Iceland | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
 | MIMIT/MASE (Italy) | 🇮🇹 Italy | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |

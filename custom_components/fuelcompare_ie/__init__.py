@@ -168,16 +168,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    # Warn users of ie_fuelcompare (fuelcompare.ie) that the service is ending.
-    # These calls are placed AFTER the coordinator is stored so that if issue
-    # creation triggers any synchronous listeners they can safely access the entry.
+    # Notify users of ie_fuelcompare (fuelcompare.ie) that the upstream site
+    # has been shut down (site went offline 2026-06-30). The provider is
+    # DISABLED so no new entries can be created; existing entries load, hit
+    # this issue, and stop updating.
     if provider_key == "ie_fuelcompare":
         async_create_issue(
             hass,
             DOMAIN,
             f"fuelcompare_ie_deprecation_{entry.entry_id}",
             is_fixable=False,
-            severity=IssueSeverity.WARNING,
+            severity=IssueSeverity.ERROR,
             translation_key="fuelcompare_ie_deprecation",
             translation_placeholders={"entry_title": entry.title},
         )
