@@ -9,9 +9,11 @@
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=italo-lombardi&repository=Home-Assistant-FuelCompare&category=integration)
 [![Add to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fuelcompare_ie)
 
-> ⚠️ **Early multi-country release — testers welcome.** 5 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×3 + EU Oil Bulletin + FuelWatch WA), 21 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 10 are currently disabled because their upstream is broken (6) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
+> ⚠️ **Early multi-country release — testers welcome.** 4 providers are verified end-to-end on production Home Assistant installs (✅ Tested — Ireland ×2 + EU Oil Bulletin + FuelWatch WA), 21 are smoke-tested against live upstreams from a dev install (🤖 Smoke-tested), and 11 are currently disabled because their upstream is broken (7 — includes fuelcompare.ie, whose site shut down on 30 June 2026) or requires an API key the project lacks (4) (⚠️ Disabled). See the [status legend](#supported-data-sources) below. Please install, try it out, and [open a GitHub issue](https://github.com/italo-lombardi/Home-Assistant-FuelCompare/issues) for any bug, missing data point, or improvement idea.
 
 > **Disclaimer:** This is an independent, unofficial custom integration. It is not affiliated with, endorsed by, or connected to any of the data providers it accesses. All provider names, websites, and trademarks are the property of their respective owners. This project reads publicly available data for personal, non-commercial use only.
+
+> 🇮🇪 **fuelcompare.ie users — the upstream site was shut down on 30 June 2026 and is no longer reachable.** The `ie_fuelcompare` provider is now disabled and existing entries will surface an error-severity repairs issue in Home Assistant. Please delete affected entries and re-add them using **FuelFinder.ie** or **pumps.ie** instead.
 
 ---
 
@@ -50,7 +52,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | Greek Ministry of Energy | 🇬🇷 Greece | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
 | MINGOR (Croatia) | 🇭🇷 Croatia | Unleaded, Diesel, LPG | County picker → station | — | 🤖 Smoke-tested |
 | FuelFinder.ie | 🇮🇪 Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station | — | ✅ Tested |
-| fuelcompare.ie | 🇮🇪 Ireland | Unleaded, Diesel | Numeric station ID | — | ⚠️ Disabled (site shut down 2026-06-30) |
+| fuelcompare.ie | 🇮🇪 Ireland | Unleaded, Diesel | Numeric station ID | — | ⚠️ Disabled (site shut down on 30 June 2026 — use FuelFinder.ie or pumps.ie) |
 | pumps.ie | 🇮🇪 Ireland | Unleaded, Diesel, Petrol | Location + picker | — | ✅ Tested |
 | Gasvaktin (Iceland) | 🇮🇸 Iceland | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
 | MIMIT/MASE (Italy) | 🇮🇹 Italy | Unleaded, Diesel, LPG, CNG | Location + picker | — | 🤖 Smoke-tested |
