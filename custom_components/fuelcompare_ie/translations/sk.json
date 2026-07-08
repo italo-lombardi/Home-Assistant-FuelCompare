@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Vyberte zdroj dát",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Zdroj dát"
         }

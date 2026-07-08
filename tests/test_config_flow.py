@@ -33,16 +33,19 @@ _PATCH_FIRST_REFRESH = patch(
 )
 
 
-@pytest.fixture(autouse=True)
-def _reenable_ie_fuelcompare_for_flow_tests():
-    """Re-enable the DISABLED ie_fuelcompare provider for config-flow tests.
+@pytest.fixture
+def enable_ie_fuelcompare():
+    """Temporarily flip DISABLED off on ie_fuelcompare for tests that need it.
 
     fuelcompare.ie shut down on 2026-06-30 and the provider is now hidden
-    from the picker via DISABLED=True. The config-flow tests were authored
-    against this provider as DEFAULT_PROVIDER and use it as a stand-in for
-    the manual_id / station-id lookup mode. Toggling DISABLED off here keeps
-    the existing tests exercising that mode without a mass rewrite; the
-    prod behaviour (hidden from picker) is covered by test_ie_fuelcompare_provider.
+    from the picker via DISABLED=True. The ~9 tests below use it as
+    DEFAULT_PROVIDER — a convenient stand-in for the manual_id / station-id
+    lookup mode — and submit CONF_PROVIDER=ie_fuelcompare through the
+    provider-selection step, which would fail voluptuous schema validation
+    with DISABLED=True. This opt-in fixture (NOT autouse) flips it back
+    only for those tests, so tests asserting the DISABLED filter itself
+    (test_disabled_provider_hidden_from_provider_list &c.) see the real
+    prod state.
     """
     from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
         IEFuelCompareProvider,
@@ -60,6 +63,7 @@ def _reenable_ie_fuelcompare_for_flow_tests():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
     """Submitting a valid station ID then confirming name creates a config entry."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -108,6 +112,7 @@ async def test_config_flow_valid_station_id(hass: HomeAssistant) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_custom_name(hass: HomeAssistant) -> None:
     """User can override the pre-populated name in the name step."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -149,6 +154,7 @@ async def test_config_flow_custom_name(hass: HomeAssistant) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_name_fetch_fails_uses_fallback(
     hass: HomeAssistant,
 ) -> None:
@@ -193,6 +199,7 @@ async def test_config_flow_name_fetch_fails_uses_fallback(
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
     """Non-integer station ID (e.g. a UUID or slug) is now accepted as valid."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -227,6 +234,7 @@ async def test_config_flow_invalid_not_integer(hass: HomeAssistant) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
     """Negative string station ID (e.g. '-1') is now accepted as a valid non-empty string."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -260,6 +268,7 @@ async def test_config_flow_invalid_negative(hass: HomeAssistant) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
     """String '0' is now accepted as a valid non-empty station ID."""
     with _PATCH_FETCH_NAME as mock_fetch, _PATCH_FIRST_REFRESH:
@@ -293,6 +302,7 @@ async def test_config_flow_invalid_zero(hass: HomeAssistant) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("enable_ie_fuelcompare")
 async def test_config_flow_duplicate(hass: HomeAssistant) -> None:
     """Submitting a station ID that already has a config entry aborts."""
     existing = MockConfigEntry(
@@ -2264,22 +2274,26 @@ def test_disabled_provider_hidden_from_provider_list(
 ) -> None:
     """_providers_for_country filters out DISABLED providers but keeps others."""
     from custom_components.fuelcompare_ie.config_flow import _providers_for_country
-    from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
-        IEFuelCompareProvider,
-    )
     from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
         IEFuelFinderProvider,
     )
+    from custom_components.fuelcompare_ie.providers.ie_pumps import (
+        IePumpsProvider,
+    )
 
-    # Ireland has multiple providers. Disable one, confirm it's gone, others stay.
+    # Ireland has multiple non-disabled providers (fuelfinder, pumps). Disable
+    # one, confirm it's gone from the picker list, others stay.
+    # NB: ie_fuelcompare is permanently DISABLED (site shut down 2026-06-30)
+    # so it's the wrong subject for this assertion — pick a currently-live
+    # provider and flip it instead.
     keys_before = {k for k, _ in _providers_for_country("IE")}
-    assert IEFuelCompareProvider.PROVIDER_KEY in keys_before
     assert IEFuelFinderProvider.PROVIDER_KEY in keys_before
+    assert IePumpsProvider.PROVIDER_KEY in keys_before
 
-    monkeypatch.setattr(IEFuelCompareProvider, "DISABLED", True)
+    monkeypatch.setattr(IEFuelFinderProvider, "DISABLED", True)
     keys_after = {k for k, _ in _providers_for_country("IE")}
-    assert IEFuelCompareProvider.PROVIDER_KEY not in keys_after
-    assert IEFuelFinderProvider.PROVIDER_KEY in keys_after
+    assert IEFuelFinderProvider.PROVIDER_KEY not in keys_after
+    assert IePumpsProvider.PROVIDER_KEY in keys_after
 
 
 def test_disabled_provider_default_is_false_on_base() -> None:

@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Hautatu datu-iturria",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Datu-iturria"
         }

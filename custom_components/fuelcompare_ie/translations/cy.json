@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Dewiswch Ffynhonnell Data",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Ffynhonnell data"
         }

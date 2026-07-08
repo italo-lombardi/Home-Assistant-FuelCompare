@@ -34,7 +34,7 @@ def test_provider_metadata() -> None:
     """IEFuelCompareProvider has required class attributes."""
     assert IEFuelCompareProvider.COUNTRY == "IE"
     assert IEFuelCompareProvider.PROVIDER_KEY == "ie_fuelcompare"
-    assert IEFuelCompareProvider.LABEL == "fuelcompare.ie (shut down)"
+    assert IEFuelCompareProvider.LABEL == "fuelcompare.ie"
     assert "unleaded" in IEFuelCompareProvider.CAPABILITIES
     assert "diesel" in IEFuelCompareProvider.CAPABILITIES
     # Upstream fuelcompare.ie shut down 2026-06-30 — provider is hidden from

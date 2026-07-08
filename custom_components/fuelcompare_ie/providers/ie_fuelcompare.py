@@ -31,7 +31,7 @@ class IEFuelCompareProvider(BaseProvider):
 
     COUNTRY = "IE"
     PROVIDER_KEY = "ie_fuelcompare"
-    LABEL = "fuelcompare.ie (shut down)"
+    LABEL = "fuelcompare.ie"
     POLL_INTERVAL_SECONDS = 1800
     # Upstream site fuelcompare.ie shut down on 2026-06-30 (site unreachable).
     # Kept in registry so existing config entries load and surface the

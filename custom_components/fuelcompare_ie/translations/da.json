@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Vælg datakilde",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Datakilde"
         }

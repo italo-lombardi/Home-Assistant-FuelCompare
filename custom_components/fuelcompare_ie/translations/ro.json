@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Selectați sursa de date",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Sursă de date"
         }

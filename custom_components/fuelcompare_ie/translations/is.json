@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Veldu gagnagjafa",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Gagnagjafi"
         }

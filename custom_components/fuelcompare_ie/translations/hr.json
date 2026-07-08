@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Odaberite izvor podataka",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Izvor podataka"
         }

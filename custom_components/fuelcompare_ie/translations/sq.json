@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Zgjidhni Burimin e të Dhënave",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Burimi i të dhënave"
         }

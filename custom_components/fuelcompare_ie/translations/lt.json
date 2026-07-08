@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Pasirinkite duomenų šaltinį",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Duomenų šaltinis"
         }

@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Atlasiet datu avotu",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Datu avots"
         }
