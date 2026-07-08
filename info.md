@@ -20,4 +20,4 @@ Live fuel prices from 36 providers across 30 countries (plus EU) — Ireland, UK
 3. Search for **Fuel Compare**
 4. Select your country and data source
 5. For location-based providers: enter coordinates and radius, then pick a station from the sorted list
-6. For Ireland fuelcompare.ie: enter the numeric station ID from the station URL
+6. For Ireland fuelcompare.ie: **disabled — the site shut down on 30 June 2026.** Use FuelFinder.ie or pumps.ie instead.

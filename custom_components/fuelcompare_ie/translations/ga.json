@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Roghnaigh Foinse Sonraí",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Foinse Sonraí"
         }

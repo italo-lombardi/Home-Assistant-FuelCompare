@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Välj datakälla",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Datakälla"
         }

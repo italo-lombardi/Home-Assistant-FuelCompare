@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Dateequell auswielen",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Dateequell"
         }

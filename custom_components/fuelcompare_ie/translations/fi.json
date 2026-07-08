@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Valitse tietolähde",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Tietolähde"
         }

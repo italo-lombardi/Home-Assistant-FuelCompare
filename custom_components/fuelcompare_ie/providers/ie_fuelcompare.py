@@ -33,6 +33,11 @@ class IEFuelCompareProvider(BaseProvider):
     PROVIDER_KEY = "ie_fuelcompare"
     LABEL = "fuelcompare.ie"
     POLL_INTERVAL_SECONDS = 1800
+    # Upstream site fuelcompare.ie shut down on 2026-06-30 (site unreachable).
+    # Kept in registry so existing config entries load and surface the
+    # repairs issue in __init__.async_setup_entry, but hidden from the
+    # config-flow picker so no new entries can be created.
+    DISABLED: ClassVar[bool] = True
     STATION_PAGE_URL: ClassVar[str] = "https://www.fuelcompare.ie"
     STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
         "https://www.fuelcompare.ie/station/{station_id}"

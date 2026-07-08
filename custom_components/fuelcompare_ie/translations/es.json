@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Seleccionar fuente de datos",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Fuente de datos"
         }

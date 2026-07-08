@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Sélectionner la source de données",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Source de données"
         }

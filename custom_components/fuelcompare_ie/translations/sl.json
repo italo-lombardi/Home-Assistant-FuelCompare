@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Izberite vir podatkov",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Vir podatkov"
         }

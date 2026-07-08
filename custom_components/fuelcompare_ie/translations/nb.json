@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Velg datakilde",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Datakilde"
         }

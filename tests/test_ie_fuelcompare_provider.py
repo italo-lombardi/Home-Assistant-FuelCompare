@@ -37,6 +37,9 @@ def test_provider_metadata() -> None:
     assert IEFuelCompareProvider.LABEL == "fuelcompare.ie"
     assert "unleaded" in IEFuelCompareProvider.CAPABILITIES
     assert "diesel" in IEFuelCompareProvider.CAPABILITIES
+    # Upstream fuelcompare.ie shut down 2026-06-30 — provider is hidden from
+    # the config-flow picker so no new entries can be created.
+    assert IEFuelCompareProvider.DISABLED is True
 
 
 # ---------------------------------------------------------------------------

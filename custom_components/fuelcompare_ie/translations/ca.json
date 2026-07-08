@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Seleccioneu la font de dades",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Font de dades"
         }

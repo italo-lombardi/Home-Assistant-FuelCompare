@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Επιλογή πηγής δεδομένων",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Πηγή δεδομένων"
         }

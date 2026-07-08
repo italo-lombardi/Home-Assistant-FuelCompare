@@ -9,7 +9,6 @@
       },
       "provider": {
         "title": "Vali andmeallikas",
-        "description": "{deprecation_notice}",
         "data": {
           "provider": "Andmeallikas"
         }
