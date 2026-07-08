@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.7.3] - 2026-07-08
+## [0.7.3b1] - 2026-07-08
+
+Beta release. Final 0.7.3 will follow after additional feature work.
 
 ### Changed
 - **`ie_fuelcompare` deprecated — fuelcompare.ie shut down 30 June 2026.** The
