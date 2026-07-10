@@ -1,5 +1,5 @@
 pytest>=7.0
-pytest-homeassistant-custom-component>=0.13.344,<0.13.345
+pytest-homeassistant-custom-component>=0.13.345,<0.13.346
 pytest-cov>=4.0
 openpyxl>=3.1.5
 beautifulsoup4>=4.15.0
