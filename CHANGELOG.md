@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`gb_fuelfinder` — Opening Hours sensor for UK stations.** The Fuel Finder
+  CSV now includes per-day opening time columns
+  (`forecourts.opening_times.usual_days.*`). The provider parses these into an
+  OSM `opening_hours` string (e.g. `Mo-Fr 07:00-22:00; Sa-Su 08:00-20:00`),
+  enabling the Is Open binary sensor and the Opening Hours (OSM) sensor for
+  all UK stations. Stations with the `twenty_four_hour_fuel` amenity flag set
+  report `24/7`. `opening_hours` added to `CAPABILITIES`.
+
+### Fixed
+- **`binary_sensor.py` — midnight race in `is_on`.** `dt_util.now()` was
+  called twice per evaluation: once inside `_get_today_hours_str()` to select
+  the weekday key, and again inside `_is_open()` to compare the clock time.
+  Calls straddling midnight could use the wrong day's hours. Fixed by
+  capturing a single `now = dt_util.now()` snapshot in `is_on` and threading
+  it through both calls.
+- **`crypto.py` — missing AES block-alignment guard.** `cryptojs_decrypt` did
+  not verify that the ciphertext length is a nonzero multiple of 16 before
+  passing it to the AES-CBC decryptor. A truncated or corrupt payload now
+  raises `ValueError` immediately instead of producing undefined output.
+- **`base.py` — `STATION_PAGE_URL` fallback not length-capped.** The 255-char
+  HA state-value limit was applied only to template-expanded URLs; the plain
+  `STATION_PAGE_URL` homepage fallback was returned unchecked. Both paths now
+  enforce the cap.
+
 ## [0.7.3b1] - 2026-07-08
 
 Beta release. Final 0.7.3 will follow after additional feature work.
