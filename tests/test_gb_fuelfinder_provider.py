@@ -16,6 +16,7 @@ from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
     _find_row_by_id,
     _haversine_km,
     _parse_js_timestamp,
+    _parse_opening_hours,
     _parse_price_pence,
     _parse_row,
     _pence_to_gbp,
@@ -1453,3 +1454,107 @@ async def test_async_list_stations_label_omits_address_when_absent() -> None:
     # Verify no address part (no comma in the label before the short ID)
     assert f"(#{_NODE_ID[:8]})" in label
     assert label.endswith(f"(#{_NODE_ID[:8]})")
+
+
+# ---------------------------------------------------------------------------
+# _parse_opening_hours
+# ---------------------------------------------------------------------------
+
+
+def _day_row(open_t: str, close_t: str, is_24: str = "false") -> dict[str, str]:
+    """Build a minimal row with all 7 days set to the same times."""
+    row: dict[str, str] = {"forecourts.amenities.twenty_four_hour_fuel": "false"}
+    for day in (
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    ):
+        prefix = f"forecourts.opening_times.usual_days.{day}"
+        row[f"{prefix}.open_time"] = open_t
+        row[f"{prefix}.close_time"] = close_t
+        row[f"{prefix}.is_24_hours"] = is_24
+    return row
+
+
+def test_parse_opening_hours_24hr_amenity_flag() -> None:
+    """Row with twenty_four_hour_fuel=true returns '24/7'."""
+    row = _day_row("00:00:00", "00:00:00")
+    row["forecourts.amenities.twenty_four_hour_fuel"] = "true"
+    assert _parse_opening_hours(row) == "24/7"
+
+
+def test_parse_opening_hours_all_same_times_compresses_to_single_rule() -> None:
+    """All 7 days with identical times compress to 'Mo-Su HH:MM-HH:MM'."""
+    row = _day_row("07:00:00", "22:00:00")
+    result = _parse_opening_hours(row)
+    assert result == "Mo-Su 07:00-22:00"
+
+
+def test_parse_opening_hours_weekday_only() -> None:
+    """Mon–Fri times with Sat–Sun zero compress to 'Mo-Fr HH:MM-HH:MM'."""
+    row: dict[str, str] = {"forecourts.amenities.twenty_four_hour_fuel": "false"}
+    for day in ("monday", "tuesday", "wednesday", "thursday", "friday"):
+        prefix = f"forecourts.opening_times.usual_days.{day}"
+        row[f"{prefix}.open_time"] = "08:00:00"
+        row[f"{prefix}.close_time"] = "20:00:00"
+        row[f"{prefix}.is_24_hours"] = "false"
+    for day in ("saturday", "sunday"):
+        prefix = f"forecourts.opening_times.usual_days.{day}"
+        row[f"{prefix}.open_time"] = "00:00:00"
+        row[f"{prefix}.close_time"] = "00:00:00"
+        row[f"{prefix}.is_24_hours"] = "false"
+    result = _parse_opening_hours(row)
+    assert result == "Mo-Fr 08:00-20:00"
+
+
+def test_parse_opening_hours_all_zeros_returns_none() -> None:
+    """All days with 00:00:00 times and no 24hr flag returns None."""
+    row = _day_row("00:00:00", "00:00:00")
+    assert _parse_opening_hours(row) is None
+
+
+def test_parse_opening_hours_is_24_hours_per_day() -> None:
+    """Per-day is_24_hours=true maps to 00:00-24:00 window."""
+    row = _day_row("00:00:00", "00:00:00", is_24="true")
+    result = _parse_opening_hours(row)
+    assert result == "Mo-Su 00:00-24:00"
+
+
+def test_parse_opening_hours_seconds_stripped() -> None:
+    """Seconds component ':00' is stripped from output times."""
+    row = _day_row("06:30:00", "23:45:00")
+    result = _parse_opening_hours(row)
+    assert result is not None
+    assert ":00" not in result  # no seconds in output
+    assert "06:30" in result
+    assert "23:45" in result
+
+
+def test_parse_row_includes_opening_hours() -> None:
+    """_parse_row populates opening_hours key in returned dict."""
+    row = dict(_BASE_ROW)
+    for day in (
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    ):
+        prefix = f"forecourts.opening_times.usual_days.{day}"
+        row[f"{prefix}.open_time"] = "07:00:00"
+        row[f"{prefix}.close_time"] = "22:00:00"
+        row[f"{prefix}.is_24_hours"] = "false"
+    row["forecourts.amenities.twenty_four_hour_fuel"] = "false"
+    data = _parse_row(row)
+    assert data["opening_hours"] == "Mo-Su 07:00-22:00"
+
+
+def test_capabilities_include_opening_hours() -> None:
+    """CAPABILITIES includes opening_hours."""
+    assert "opening_hours" in GbFuelfinderProvider.CAPABILITIES

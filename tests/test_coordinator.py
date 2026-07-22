@@ -1164,6 +1164,18 @@ def test_cryptojs_decrypt_empty_decrypted_output() -> None:
             _cryptojs_decrypt(payload, evp_key)
 
 
+def test_cryptojs_decrypt_non_block_aligned_ciphertext() -> None:
+    """Ciphertext whose length is not a nonzero multiple of 16 raises ValueError."""
+    import os
+
+    salt = os.urandom(8)
+    # 17 bytes — passes the ≥32 check (8+8+17=33) but not a multiple of 16
+    bad_ciphertext = os.urandom(17)
+    payload = base64.b64encode(b"Salted__" + salt + bad_ciphertext).decode()
+    with pytest.raises(ValueError, match="not a nonzero multiple of 16"):
+        _cryptojs_decrypt(payload, _TEST_DECRYPT_KEY)
+
+
 # ---------------------------------------------------------------------------
 # last_successful_fetch stamping
 # ---------------------------------------------------------------------------

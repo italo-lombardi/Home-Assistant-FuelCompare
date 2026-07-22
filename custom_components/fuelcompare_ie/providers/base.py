@@ -481,6 +481,12 @@ class BaseProvider(ABC):
         if self.STATION_PAGE_URL_TEMPLATE:
             url = self.STATION_PAGE_URL_TEMPLATE.format(station_id=station_id)
             if len(url) > MAX_STATION_URL_LEN:
-                return self.STATION_PAGE_URL or None
+                url = self.STATION_PAGE_URL
+                if url and len(url) > MAX_STATION_URL_LEN:
+                    return None
+                return url or None
             return url
-        return self.STATION_PAGE_URL or None
+        url = self.STATION_PAGE_URL
+        if url and len(url) > MAX_STATION_URL_LEN:
+            return None
+        return url or None

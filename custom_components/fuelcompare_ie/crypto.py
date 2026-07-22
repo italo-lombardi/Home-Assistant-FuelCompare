@@ -30,6 +30,10 @@ def cryptojs_decrypt(encrypted_b64: str, evp_key: str) -> Any:
     ciphertext = raw[16:]
     if len(raw) < 32:
         raise ValueError(f"Payload too short ({len(raw)} bytes)")
+    if not ciphertext or len(ciphertext) % 16:
+        raise ValueError(
+            f"Ciphertext length {len(ciphertext)} is not a nonzero multiple of 16"
+        )
 
     # EvpKDF: chain MD5(prev + evp_key + salt) until we have 48 bytes (32 key + 16 IV)
     d, d_i = b"", b""

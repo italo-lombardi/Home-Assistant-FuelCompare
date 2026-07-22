@@ -48,7 +48,7 @@ Data is refreshed every **30 minutes** via Home Assistant's `DataUpdateCoordinat
 | MINETUR (Spain) | 🇪🇸 Spain | Unleaded, Diesel, Premium, LPG | Location + picker | — | ⚠️ Disabled |
 | Statistics Finland — National Average | 🇫🇮 Finland | Unleaded, Diesel, E10, Kerosene | Location + picker | — | ⚠️ Disabled |
 | Prix Carburants (France) | 🇫🇷 France | Unleaded, Diesel, E10, E85, LPG | Location + picker | — | 🤖 Smoke-tested |
-| Fuel Finder (UK) | 🇬🇧 United Kingdom | Unleaded, Diesel, Premium | Location + picker | — | 🤖 Smoke-tested |
+| Fuel Finder (UK) | 🇬🇧 United Kingdom | Unleaded, Diesel, Premium, Opening Hours | Location + picker | — | ✅ Tested |
 | Greek Ministry of Energy | 🇬🇷 Greece | Unleaded, Diesel, Premium, LPG | Location + picker | — | 🤖 Smoke-tested |
 | MINGOR (Croatia) | 🇭🇷 Croatia | Unleaded, Diesel, LPG | County picker → station | — | 🤖 Smoke-tested |
 | FuelFinder.ie | 🇮🇪 Ireland | Diesel, Petrol, Kerosene, CNG | County picker → station | — | ✅ Tested |

@@ -667,8 +667,12 @@ def test_day_matches_trailing_comma_skips_empty_segment() -> None:
 
 def test_get_today_hours_str_returns_osm_string_directly() -> None:
     """_get_today_hours_str returns raw OSM string when opening_hours present (line 252)."""
+    from datetime import datetime, timezone
+
     sensor = _make_binary_sensor({"opening_hours": "Mo-Su 07:00-23:00"})
-    result = sensor._get_today_hours_str()
+    result = sensor._get_today_hours_str(
+        datetime(2024, 1, 15, 10, 0, tzinfo=timezone.utc)
+    )
     assert result == "Mo-Su 07:00-23:00"
 
 
@@ -783,3 +787,23 @@ async def test_setup_entry_no_is_open_without_hours_cap() -> None:
     types = [type(e).__name__ for e in added]
     assert "StationIsOpenBinarySensor" not in types
     assert "DataFetchProblemBinarySensor" in types
+
+
+# ---------------------------------------------------------------------------
+# is_on single dt_util.now() snapshot (midnight race fix)
+# ---------------------------------------------------------------------------
+
+
+def test_is_on_uses_single_now_snapshot_for_day_and_time() -> None:
+    """is_on passes the same now to _get_today_hours_str and _is_open (no midnight race)."""
+    from datetime import datetime, timezone
+    from unittest.mock import patch
+
+    import homeassistant.util.dt as _dt
+
+    # Monday 2024-01-15 12:00 UTC — station open Monday 8a.m.-10p.m.
+    monday_noon = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+    sensor = _make_binary_sensor({"working_hours": '{"Monday": "8a.m.-10p.m."}'})
+    with patch.object(_dt, "now", return_value=monday_noon):
+        result = sensor.is_on
+    assert result is True
