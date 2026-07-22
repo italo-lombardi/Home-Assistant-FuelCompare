@@ -175,6 +175,7 @@ class GbFuelfinderProvider(BaseProvider):
             "latitude",
             "longitude",
             "is_open",
+            "opening_hours",
         }
     )
 
@@ -433,6 +434,70 @@ def _safe_float(value: str | None) -> float | None:
         return None
 
 
+# OSM day abbreviations ordered Mon–Sun to match CSV column names.
+_OSM_DAYS = ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
+_CSV_DAYS = (
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+)
+
+
+def _parse_opening_hours(row: dict[str, str]) -> str | None:
+    """Build an OSM opening_hours string from the CSV per-day columns.
+
+    Returns '24/7' when the 24-hour amenity flag is true, an OSM rule string
+    when per-day data is present, or None when no usable data exists.
+
+    Zero open/close times ('00:00:00') are treated as missing data.
+    """
+    if (
+        row.get("forecourts.amenities.twenty_four_hour_fuel", "").strip().lower()
+        == "true"
+    ):
+        return "24/7"
+
+    windows: list[tuple[str, str]] = []
+    for csv_day in _CSV_DAYS:
+        prefix = f"forecourts.opening_times.usual_days.{csv_day}"
+        is_24 = row.get(f"{prefix}.is_24_hours", "").strip().lower() == "true"
+        if is_24:
+            windows.append(("00:00", "24:00"))
+            continue
+        open_t = (row.get(f"{prefix}.open_time") or "").strip()
+        close_t = (row.get(f"{prefix}.close_time") or "").strip()
+        # treat missing or all-zero as no data
+        if not open_t or not close_t or open_t == "00:00:00" or close_t == "00:00:00":
+            windows.append(None)  # type: ignore[arg-type]
+            continue
+        # strip seconds: "07:00:00" → "07:00"
+        windows.append((open_t[:5], close_t[:5]))
+
+    if all(w is None for w in windows):
+        return None
+
+    # Compress consecutive days with identical windows into ranges.
+    rules: list[str] = []
+    i = 0
+    while i < 7:
+        if windows[i] is None:
+            i += 1
+            continue
+        j = i + 1
+        while j < 7 and windows[j] == windows[i]:
+            j += 1
+        day_range = _OSM_DAYS[i] if j == i + 1 else f"{_OSM_DAYS[i]}-{_OSM_DAYS[j - 1]}"
+        open_t, close_t = windows[i]
+        rules.append(f"{day_range} {open_t}-{close_t}")
+        i = j
+
+    return "; ".join(rules) if rules else None
+
+
 def _parse_row(row: dict[str, str]) -> StationData:
     """Build a StationData dict from a single CSV row.
 
@@ -496,5 +561,6 @@ def _parse_row(row: dict[str, str]) -> StationData:
         "latitude": lat,
         "longitude": lng,
         "is_open": True,  # default open; async_fetch overrides for closures
+        "opening_hours": _parse_opening_hours(row),
         "source_station_id": node_id,
     }
