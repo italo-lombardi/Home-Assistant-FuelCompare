@@ -5,7 +5,7 @@ from __future__ import annotations
 import json as json_lib
 import logging
 import re
-from datetime import time as dt_time
+from datetime import datetime, time as dt_time
 
 import homeassistant.util.dt as dt_util
 from homeassistant.components.binary_sensor import (
@@ -82,7 +82,7 @@ def _parse_time(s: str) -> dt_time | None:
     return dt_time(hours, minutes)
 
 
-def _is_open(hours_str: str) -> bool | None:
+def _is_open(hours_str: str, now: datetime | None = None) -> bool | None:
     """Return True if currently open, False if closed, None if unparseable.
 
     Handles two formats:
@@ -97,8 +97,11 @@ def _is_open(hours_str: str) -> bool | None:
     if s == "closed":
         return False
 
+    if now is None:
+        now = dt_util.now()
+
     # Try OSM format first: 'Mo-Su 07:00-23:00', 'Mo-Fr 08:00-20:00; Sa 09:00-18:00'
-    osm_result = _is_open_osm(s)
+    osm_result = _is_open_osm(s, now)
     if osm_result is not None:
         return osm_result
 
@@ -110,19 +113,20 @@ def _is_open(hours_str: str) -> bool | None:
     close_time = _parse_time(f"{times[1][0]}:{times[1][1] or '0'}{times[1][2]}")
     if open_time is None or close_time is None:
         return None
-    now = dt_util.now().time()
+    now_time = now.time()
     if close_time < open_time:  # crosses midnight
-        return now >= open_time or now < close_time
-    return open_time <= now < close_time
+        return now_time >= open_time or now_time < close_time
+    return open_time <= now_time < close_time
 
 
-def _is_open_osm(hours_str: str) -> bool | None:
+def _is_open_osm(hours_str: str, now: datetime | None = None) -> bool | None:
     """Parse OSM opening_hours string and return open/closed status, or None."""
     # OSM format: 'mo-su 07:00-23:00' or 'mo-fr 08:00-20:00; sa 09:00-18:00'
     if not _OSM_TIME_RE.search(hours_str):
         return None
 
-    now = dt_util.now()
+    if now is None:
+        now = dt_util.now()
     today_idx = now.weekday()  # 0=Monday ... 6=Sunday
 
     any_valid_window_for_today = False
@@ -287,7 +291,7 @@ class StationIsOpenBinarySensor(
             or self.coordinator.data.get("is_open") is not None
         )
 
-    def _get_today_hours_str(self) -> str | None:
+    def _get_today_hours_str(self, now: datetime) -> str | None:
         """Return today's hours string from whichever format the provider uses."""
         if not self.coordinator.data:
             return None
@@ -301,7 +305,7 @@ class StationIsOpenBinarySensor(
             return None
         try:
             hours = json_lib.loads(raw) if isinstance(raw, str) else raw
-            return hours.get(DAYS[dt_util.now().weekday()])
+            return hours.get(DAYS[now.weekday()])
         except (ValueError, TypeError) as err:
             _LOGGER.debug("Failed to parse working_hours: %s", err)
             return None
@@ -312,16 +316,17 @@ class StationIsOpenBinarySensor(
         direct = self.coordinator.data.get("is_open") if self.coordinator.data else None
         if direct is not None:
             return bool(direct)
-        today_hours = self._get_today_hours_str()
+        now = dt_util.now()
+        today_hours = self._get_today_hours_str(now)
         if today_hours is None:
             return None
-        return _is_open(today_hours)
+        return _is_open(today_hours, now)
 
     @property
     def extra_state_attributes(self) -> dict:
         """Return today's hours and station_id as attributes."""
         base = {"station_id": self._station_id}
-        today_hours = self._get_today_hours_str()
+        today_hours = self._get_today_hours_str(dt_util.now())
         if today_hours is not None:
             base["today_hours"] = today_hours
         return base

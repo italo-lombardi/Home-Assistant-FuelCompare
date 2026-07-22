@@ -1269,3 +1269,63 @@ def test_base_get_station_page_url_template_exceeds_255_falls_back() -> None:
     p = _LongURLProvider("abc")
     result = p.get_station_page_url("abc")
     assert result == "https://example.com"
+
+
+def test_base_get_station_page_url_homepage_exceeds_255_returns_none() -> None:
+    """get_station_page_url returns None when STATION_PAGE_URL itself exceeds 255 chars."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _LongHomepageProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "test_long_homepage"
+        LABEL = "Test"
+        CURRENCY = "EUR"
+        CAPABILITIES: ClassVar[frozenset] = frozenset()
+        STATION_PAGE_URL: ClassVar[str] = "https://example.com/" + "x" * 240
+        STATION_PAGE_URL_TEMPLATE: ClassVar[str] = ""
+
+        def __init__(self, station_id: str) -> None:
+            pass
+
+        async def async_fetch(self, session: ClientSession, station_id: str):
+            return {}
+
+        async def async_fetch_station_name(
+            self, session: ClientSession, station_id: str
+        ):
+            return None
+
+    p = _LongHomepageProvider("abc")
+    assert p.get_station_page_url("abc") is None
+
+
+def test_base_get_station_page_url_template_and_homepage_both_too_long_returns_none() -> (
+    None
+):
+    """get_station_page_url returns None when both template URL and homepage exceed 255 chars."""
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _BothLongProvider(BaseProvider):
+        COUNTRY = "IE"
+        PROVIDER_KEY = "test_both_long"
+        LABEL = "Test"
+        CURRENCY = "EUR"
+        CAPABILITIES: ClassVar[frozenset] = frozenset()
+        STATION_PAGE_URL: ClassVar[str] = "https://example.com/" + "y" * 240
+        STATION_PAGE_URL_TEMPLATE: ClassVar[str] = (
+            "https://example.com/" + "z" * 240 + "/{station_id}"
+        )
+
+        def __init__(self, station_id: str) -> None:
+            pass
+
+        async def async_fetch(self, session: ClientSession, station_id: str):
+            return {}
+
+        async def async_fetch_station_name(
+            self, session: ClientSession, station_id: str
+        ):
+            return None
+
+    p = _BothLongProvider("abc")
+    assert p.get_station_page_url("abc") is None
