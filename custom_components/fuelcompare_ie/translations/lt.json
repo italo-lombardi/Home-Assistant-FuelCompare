@@ -39,7 +39,7 @@
         "description": "Pasirinkite stotį, regioną arba šalį iš toliau pateikto sąrašo.",
         "data": {
           "station_id": "Stotis",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Rodyti stotį žemėlapyje"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Ši stotis jau sukonfigūruota.",
       "no_providers_for_country": "Šiai šaliai nėra pasiekiamų duomenų teikėjų.",
       "no_counties_for_country": "Pasirinktai šaliai nėra sukonfigūruota jokių apskričių.",
-      "no_stations_found": "Šioje apskrityje stočių nerasta. Bandykite kitą apskritį.",
-      "no_stations_found_location": "Prie šių koordinačių stočių nerasta. Pabandykite pakeisti vietą arba padidinti paieškos spindulį.",
+      "no_stations_found": "Šioje apskrityje stočių nerasta. Atšaukite ir bandykite kitą apskritį.",
+      "no_stations_found_location": "Prie šių koordinačių stočių nerasta. Atšaukite ir padidinkite paieškos spindulį arba pakeiskite vietą.",
       "no_stations_found_global": "Nepavyko įkelti tiekėjo sąrašo. Šaltinis gali būti neprieinamas arba trūksta reikalingos priklausomybės. Daugiau informacijos rasite Home Assistant žurnaluose."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie baigia darbą",
-      "description": "Svetainė fuelcompare.ie planuoja baigti darbą **2026 m. birželio 30 d.** Jūsų stotis **{entry_title}** nustops gauti kainų atnaujinimus po tos datos. Apsvarstykite galimybę pereiti prie kito Airijos degalų kainų šaltinio, pvz., FuelFinder IE arba IE Pumps."
+      "title": "fuelcompare.ie nebveikia",
+      "description": "Svetainė fuelcompare.ie buvo uždaryta **2026 m. birželio 30 d.** ir nebėra pasiekiama. Jūsų stotis **{entry_title}** nebegaus kainų atnaujinimų. Prašome ištrinti šį įrašą ir pridėti naują naudojant kitą Airijos degalų kainų šaltinį, pvz., **FuelFinder IE** arba **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikato patikrinimas išjungtas",
@@ -177,16 +177,16 @@
         "name": "Darbo laikas"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Duomenų tiekėjas"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Šalis"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Stoties puslapio URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stoties ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Vieta"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API raktas",
           "radius_km": "Paieškos spindulys (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Rodyti stotį žemėlapyje"
         }
       }
     }

@@ -46,7 +46,7 @@
         "description": "Vælg en station, region eller et land fra listen nedenfor.",
         "data": {
           "station_id": "Station",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Vis station på kortet"
         }
       },
       "location": {
@@ -71,16 +71,16 @@
     "abort": {
       "already_configured": "Denne station er allerede konfigureret.",
       "no_providers_for_country": "Der er ingen tilgængelige dataudbydere for dette land.",
-      "no_counties_for_country": "Der er ingen konfigurerede kommuner for det valgte land.",
-      "no_stations_found": "Ingen stationer fundet i dette amt. Prøv et andet amt.",
-      "no_stations_found_location": "Ingen stationer fundet i nærheden af disse koordinater. Prøv at justere placeringen eller øge søgeradius.",
+      "no_counties_for_country": "Der er ingen konfigurerede amter for det valgte land.",
+      "no_stations_found": "Ingen stationer fundet i dette amt. Annuller og prøv et andet amt.",
+      "no_stations_found_location": "Ingen stationer fundet i nærheden af disse koordinater. Annuller og prøv en større søgeradius eller en anden placering.",
       "no_stations_found_global": "Kunne ikke indlæse udbyderens liste. Kilden kan være nede, eller en påkrævet afhængighed mangler. Se Home Assistant-loggen for detaljer."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie lukker ned",
-      "description": "Hjemmesiden fuelcompare.ie er planlagt til at lukke ned den **30. juni 2026**. Din station **{entry_title}** vil stoppe med at modtage prisopdateringer efter denne dato. Overvej at skifte til en anden irsk brændstofpriskoilde, f.eks. FuelFinder IE eller IE Pumps."
+      "title": "fuelcompare.ie er lukket ned",
+      "description": "Hjemmesiden fuelcompare.ie blev lukket ned den **30. juni 2026** og kan ikke længere nås. Din station **{entry_title}** vil ikke modtage yderligere prisopdateringer. Slet venligst denne post og tilføj en ny ved hjælp af en anden irsk brændstofpriskilde, f.eks. **FuelFinder IE** eller **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-certifikatbekræftelse deaktiveret",
@@ -177,16 +177,16 @@
         "name": "Arbejdstider"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Dataudbyder"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL til stationsside"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stations-ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Placering"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-nøgle",
           "radius_km": "Søgeradius (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Vis station på kortet"
         }
       }
     }

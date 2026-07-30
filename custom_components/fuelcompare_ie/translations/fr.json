@@ -39,7 +39,7 @@
         "description": "Choisissez une station, une région ou un pays dans la liste ci-dessous.",
         "data": {
           "station_id": "Station",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Afficher la station sur la carte"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Cette station est déjà configurée.",
       "no_providers_for_country": "Aucun fournisseur de données n'est disponible pour ce pays.",
       "no_counties_for_country": "Aucun comté n'est configuré pour le pays sélectionné.",
-      "no_stations_found": "Aucune station trouvée pour ce comté. Essayez un autre comté.",
-      "no_stations_found_location": "Aucune station trouvée à proximité de ces coordonnées. Essayez d'ajuster l'emplacement ou d'augmenter le rayon de recherche.",
+      "no_stations_found": "Aucune station trouvée pour ce comté. Annulez et essayez un autre comté.",
+      "no_stations_found_location": "Aucune station trouvée à proximité de ces coordonnées. Annulez et essayez un rayon de recherche plus large ou un emplacement différent.",
       "no_stations_found_global": "Impossible de charger la liste du fournisseur. La source est peut-être indisponible ou une dépendance requise est manquante. Consultez les journaux Home Assistant pour plus de détails."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie va fermer",
-      "description": "Le site fuelcompare.ie est prévu de fermer le **30 juin 2026**. Votre station **{entry_title}** ne recevra plus de mises à jour de prix après cette date. Envisagez de passer à une autre source irlandaise de prix des carburants, comme FuelFinder IE ou IE Pumps."
+      "description": "Le site fuelcompare.ie a été fermé le **30 juin 2026** et n'est plus accessible. Votre station **{entry_title}** ne recevra plus de mises à jour de prix. Veuillez supprimer cette entrée et en ajouter une nouvelle en utilisant une autre source irlandaise de prix des carburants, telle que **FuelFinder IE** ou **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Vérification du certificat TLS de pumps.ie désactivée",
@@ -174,19 +174,19 @@
         "name": "Site web"
       },
       "working_hours": {
-        "name": "Horaires de travail"
+        "name": "Horaires d'ouverture"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Fournisseur de données"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Pays"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL de la page de la station"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Identifiant de la station"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Emplacement"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Clé API",
           "radius_km": "Rayon de recherche (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Afficher la station sur la carte"
         }
       }
     }

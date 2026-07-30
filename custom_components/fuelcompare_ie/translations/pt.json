@@ -14,7 +14,7 @@
         }
       },
       "station": {
-        "title": "Adicionar Estação Fuel Compare",
+        "title": "Adicionar Estação",
         "description": "{hint}",
         "data": {
           "station_id": "ID da Estação"
@@ -43,10 +43,10 @@
       },
       "station_picker": {
         "title": "Selecionar Estação",
-        "description": "Seleciona uma estação, região ou país da lista abaixo.",
+        "description": "Selecione uma estação, região ou país da lista abaixo.",
         "data": {
           "station_id": "Estação",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Mostrar estação no mapa"
         }
       },
       "location": {
@@ -66,21 +66,21 @@
       "invalid_location": "Coordenadas inválidas. Introduza valores válidos de latitude e longitude.",
       "no_stations_found": "Nenhuma estação encontrada para este condado. Tente um condado diferente.",
       "no_stations_found_location": "Nenhuma estação encontrada perto destas coordenadas. Tente ajustar a localização ou aumentar o raio de pesquisa.",
-      "no_stations_found_global": "Não foi possível carregar a lista do fornecedor. A fonte pode estar indisponível ou falta uma dependência necessária. Consulta os registos do Home Assistant para mais detalhes."
+      "no_stations_found_global": "Não foi possível carregar a lista do fornecedor. A fonte pode estar indisponível ou falta uma dependência necessária. Consulte os registos do Home Assistant para mais detalhes."
     },
     "abort": {
       "already_configured": "Esta estação já está configurada.",
       "no_providers_for_country": "Não existem fornecedores de dados disponíveis para este país.",
       "no_counties_for_country": "Não há condados configurados para o país selecionado.",
-      "no_stations_found": "Nenhuma estação encontrada para este condado. Tente um condado diferente.",
-      "no_stations_found_location": "Nenhuma estação encontrada perto destas coordenadas. Tente ajustar a localização ou aumentar o raio de pesquisa.",
-      "no_stations_found_global": "Não foi possível carregar a lista do fornecedor. A fonte pode estar indisponível ou falta uma dependência necessária. Consulta os registos do Home Assistant para mais detalhes."
+      "no_stations_found": "Nenhuma estação encontrada para este condado. Cancele e tente um condado diferente.",
+      "no_stations_found_location": "Nenhuma estação encontrada perto destas coordenadas. Cancele e tente um raio de pesquisa maior ou uma localização diferente.",
+      "no_stations_found_global": "Não foi possível carregar a lista do fornecedor. A fonte pode estar indisponível ou falta uma dependência necessária. Consulte os registos do Home Assistant para mais detalhes."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie está a encerrar",
-      "description": "O site fuelcompare.ie está programado para encerrar no dia **30 de junho de 2026**. A sua estação **{entry_title}** deixará de receber atualizações de preços após essa data. Considere mudar para outra fonte irlandesa de preços de combustível, como o FuelFinder IE ou o IE Pumps."
+      "description": "O site fuelcompare.ie foi encerrado a **30 de junho de 2026** e já não está acessível. A sua estação **{entry_title}** não receberá mais atualizações de preços. Por favor, elimine esta entrada e adicione uma nova utilizando outra fonte irlandesa de preços de combustível, como o **FuelFinder IE** ou o **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Verificação do certificado TLS do pumps.ie desativada",
@@ -177,16 +177,16 @@
         "name": "Horário de trabalho"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Fornecedor de dados"
       },
       "country_code": {
-        "name": "Country"
+        "name": "País"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL da página da estação"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID da estação"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Localização"
       }
     }
   },
@@ -238,9 +238,9 @@
       "init": {
         "title": "Opções",
         "data": {
-          "api_key": "Chave API",
+          "api_key": "Chave de API",
           "radius_km": "Raio de pesquisa (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Mostrar estação no mapa"
         }
       }
     }

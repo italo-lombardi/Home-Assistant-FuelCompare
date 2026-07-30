@@ -46,7 +46,7 @@
         "description": "Wybierz stację, region lub kraj z poniższej listy.",
         "data": {
           "station_id": "Stacja",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Pokaż stację na mapie"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Ta stacja jest już skonfigurowana.",
       "no_providers_for_country": "Brak dostępnych dostawców danych dla tego kraju.",
       "no_counties_for_country": "Dla wybranego kraju nie skonfigurowano żadnych hrabstw.",
-      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Spróbuj innego hrabstwa.",
-      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Spróbuj zmienić lokalizację lub zwiększyć promień wyszukiwania.",
+      "no_stations_found": "Nie znaleziono stacji dla tego hrabstwa. Anuluj i spróbuj innego hrabstwa.",
+      "no_stations_found_location": "Nie znaleziono stacji w pobliżu tych współrzędnych. Anuluj i spróbuj z większym promieniem lub inną lokalizacją.",
       "no_stations_found_global": "Nie udało się wczytać listy dostawcy. Źródło może być niedostępne lub brakuje wymaganej zależności. Sprawdź dzienniki Home Assistanta, aby uzyskać szczegóły."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie kończy działalność",
-      "description": "Witryna fuelcompare.ie ma zakończyć działalność **30 czerwca 2026 r.** Twoja stacja **{entry_title}** przestanie otrzymywać aktualizacje cen po tej dacie. Rozważ przejście do innego irlandzkiego źródła cen paliw, takiego jak FuelFinder IE lub IE Pumps."
+      "description": "Witryna fuelcompare.ie została zamknięta **30 czerwca 2026 r.** i nie jest już dostępna. Twoja stacja **{entry_title}** nie będzie otrzymywać dalszych aktualizacji cen. Usuń ten wpis i dodaj nowy, korzystając z innego irlandzkiego źródła cen paliw, takiego jak **FuelFinder IE** lub **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Weryfikacja certyfikatu TLS pumps.ie wyłączona",
@@ -177,16 +177,16 @@
         "name": "Godziny otwarcia"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Dostawca danych"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Kraj"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL strony stacji"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID stacji"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Lokalizacja"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Klucz API",
           "radius_km": "Promień wyszukiwania (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Pokaż stację na mapie"
         }
       }
     }

@@ -39,7 +39,7 @@
         "description": "Wielt eng Statioun, eng Regioun oder e Land aus der Lëscht hei drënner.",
         "data": {
           "station_id": "Statioun",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Statioun op der Kaart weisen"
         }
       },
       "location": {
@@ -53,7 +53,7 @@
         }
       },
       "name": {
-        "title": "Statiounsnum",
+        "title": "Statiounsnumm",
         "description": "Confirméiert oder ännert den Numm vun dëser Statioun.",
         "data": {
           "name": "Numm"
@@ -72,15 +72,15 @@
       "already_configured": "Dës Statioun ass schon configuréiert.",
       "no_providers_for_country": "Keng Dateequellen sinn fir dëst Land verfügbar.",
       "no_counties_for_country": "Et sinn keng Kantone fir dat gewielten Land konfiguriert.",
-      "no_stations_found": "Keng Statiounen fir dëse Kanton fonnt. Probéiert en anere Kanton.",
-      "no_stations_found_location": "Keng Statiounen an der Géigend vun dëse Koordinate fonnt. Probéiert de Standuert unzepassen oder de Sichradius ze vergréisseren.",
+      "no_stations_found": "Keng Statiounen fir dëse Kanton fonnt. Ofbriechen an en anere Kanton probéieren.",
+      "no_stations_found_location": "Keng Statiounen an der Géigend vun dëse Koordinate fonnt. Ofbriechen an e méi grousse Sichradius oder en anere Standuert probéieren.",
       "no_stations_found_global": "D'Lëscht vum Ubidder konnt net gelueden ginn. D'Quell ass vläicht net erreechbar oder eng erfuerderlech Ofhängegkeet feelt. Kuckt d'Home-Assistant-Logbicher fir Detailer."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stellt säi Betrib an",
-      "description": "D'Websäit fuelcompare.ie ass geplangt fir den **30. Juni 2026** zouzemaachen. Är Statioun **{entry_title}** wäert no deem Datum keng Präisupdates méi kréien. Iwwerdenkt op eng aner iresch Benzinpräisquell ëmzestellen, wéi FuelFinder IE oder IE Pumps."
+      "title": "fuelcompare.ie huet zougemaach",
+      "description": "D'Websäit fuelcompare.ie huet den **30. Juni 2026** zougemaach a ass net méi erreechbar. Är Statioun **{entry_title}** wäert keng weidere Präisupdates méi kréien. Läscht dësen Andrag a setzt en neien un mat enger anerer ireescher Benzinpräisquell, wéi **FuelFinder IE** oder **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-Zertifikaatsprüfung deaktivéiert",
@@ -141,7 +141,7 @@
         "name": "Längegrad"
       },
       "station_name": {
-        "name": "Statiounsnum"
+        "name": "Statiounsnumm"
       },
       "accessibility": {
         "name": "Zougänglechkeet"
@@ -153,7 +153,7 @@
         "name": "Leschten erfollegräiche Fetch"
       },
       "offerings": {
-        "name": "Ubidder"
+        "name": "Ubidden"
       },
       "opening_hours": {
         "name": "Ouvertureszäiten (OSM)"
@@ -177,16 +177,16 @@
         "name": "Aarbechtszäiten"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Datenanbieter"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL vun der Statiounssäit"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Statiounskennung"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Standuert"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-Schlëssel",
           "radius_km": "Sichradius (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Statioun op der Kaart weisen"
         }
       }
     }

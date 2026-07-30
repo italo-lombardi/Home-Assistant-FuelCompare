@@ -46,7 +46,7 @@
         "description": "Kies een station, regio of land uit de onderstaande lijst.",
         "data": {
           "station_id": "Station",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Toon station op kaart"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Dit station is al geconfigureerd.",
       "no_providers_for_country": "Er zijn geen gegevensproviders beschikbaar voor dit land.",
       "no_counties_for_country": "Er zijn geen provincies geconfigureerd voor het geselecteerde land.",
-      "no_stations_found": "Geen stations gevonden voor deze provincie. Probeer een andere provincie.",
-      "no_stations_found_location": "Geen stations gevonden in de buurt van deze coördinaten. Pas de locatie aan of vergroot de zoekradius.",
+      "no_stations_found": "Geen stations gevonden voor deze provincie. Annuleer en probeer een andere provincie.",
+      "no_stations_found_location": "Geen stations gevonden in de buurt van deze coördinaten. Annuleer en probeer een grotere zoekradius of een andere locatie.",
       "no_stations_found_global": "De lijst van de provider kon niet worden geladen. Mogelijk is de bron niet beschikbaar of ontbreekt een vereiste afhankelijkheid. Raadpleeg de Home Assistant-logboeken voor details."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie sluit",
-      "description": "De website fuelcompare.ie staat gepland om te sluiten op **30 juni 2026**. Uw station **{entry_title}** stopt na die datum met het ontvangen van prijsupdates. Overweeg over te stappen naar een andere Ierse brandstofprijsbron, zoals FuelFinder IE of IE Pumps."
+      "title": "fuelcompare.ie is gesloten",
+      "description": "De website fuelcompare.ie is op **30 juni 2026** gesloten en is niet meer bereikbaar. Uw station **{entry_title}** ontvangt geen prijsupdates meer. Verwijder dit item en voeg een nieuw toe met een andere Ierse brandstofprijsbron, zoals **FuelFinder IE** of **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-certificaatverificatie uitgeschakeld",
@@ -174,19 +174,19 @@
         "name": "Website"
       },
       "working_hours": {
-        "name": "Openingstijden"
+        "name": "Werktijden"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Gegevensprovider"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Station-pagina-URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Station-ID"
       }
     },
     "binary_sensor": {
@@ -209,7 +209,7 @@
         "name": "Rolstoeltoegankelijk"
       },
       "has_electric_charging": {
-        "name": "Laadpaal elektrisch"
+        "name": "EV-laden"
       },
       "has_shop": {
         "name": "Winkel"
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Locatie"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-sleutel",
           "radius_km": "Zoekradius (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Toon station op kaart"
         }
       }
     }

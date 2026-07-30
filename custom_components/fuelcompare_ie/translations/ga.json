@@ -46,7 +46,7 @@
         "description": "Roghnaigh stáisiún, réigiún nó tír ón liosta thíos.",
         "data": {
           "station_id": "Stáisiún",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Taispeáin an stáisiún ar an léarscáil"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Tá an stáisiún seo cumraithe cheana féin.",
       "no_providers_for_country": "Níl aon soláthraithe sonraí ar fáil don tír seo.",
       "no_counties_for_country": "Níl aon chontae cumraithe don tír roghnaithe.",
-      "no_stations_found": "Níor aimsíodh stáisiúin don chontae seo. Bain triail as contae eile.",
-      "no_stations_found_location": "Níor aimsíodh stáisiúin in aice leis na comhordanáidí seo. Bain triail as an suíomh a choigeartú nó an ga cuardaigh a mhéadú.",
+      "no_stations_found": "Níor aimsíodh stáisiúin don chontae seo. Cealaigh agus bain triail as contae eile.",
+      "no_stations_found_location": "Níor aimsíodh stáisiúin in aice leis na comhordanáidí seo. Cealaigh agus bain triail as ga cuardaigh níos leithne nó suíomh difriúil.",
       "no_stations_found_global": "Níorbh fhéidir liosta an tsoláthraí a luchtú. Seans go bhfuil an fhoinse as líne nó go bhfuil spleáchas riachtanach in easnamh. Féach logaí Home Assistant le haghaidh tuilleadh sonraí."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "Tá fuelcompare.ie ag dúnadh",
-      "description": "Tá sé beartaithe go ndúnfar suíomh fuelcompare.ie ar **30 Meitheamh 2026**. Stopfaidh do stáisiún **{entry_title}** ag fáil nuashonruithe praghsanna tar éis an dáta sin. Smaoinigh ar aistriú go foinse eile praghas breosla Éireannach, amhail FuelFinder IE nó IE Pumps."
+      "description": "Dúnadh suíomh fuelcompare.ie ar **30 Meitheamh 2026** agus níl sé inrochtana a thuilleadh. Ní bhfaighidh do stáisiún **{entry_title}** nuashonruithe praghsanna feasta. Scriosadh an iontráil seo agus cuir ceann nua leis ag baint úsáide as foinse eile praghas breosla Éireannach, amhail **FuelFinder IE** nó **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Fíordheimhniú deimhnithe TLS pumps.ie díchumasaithe",
@@ -168,25 +168,25 @@
         "name": "Iontaofacht praghas"
       },
       "price_last_updated": {
-        "name": "Praghas Nuashonraithe go Deireanach"
+        "name": "Praghas nuashonraithe go deireanach"
       },
       "website": {
         "name": "Suíomh gréasáin"
       },
       "working_hours": {
-        "name": "Uaireanta Oibre"
+        "name": "Uaireanta oibre"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Soláthraí sonraí"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Tír"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL leathanach an stáisiúin"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Aitheantas stáisiúin"
       }
     },
     "binary_sensor": {
@@ -197,7 +197,7 @@
         "name": "Tá praghas ann"
       },
       "is_open": {
-        "name": "Ar Oscailt"
+        "name": "Ar oscailt"
       },
       "has_atm": {
         "name": "Meaisín airgid"
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Suíomh"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Eochair API",
           "radius_km": "Raidias cuardaigh (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Taispeáin an stáisiún ar an léarscáil"
         }
       }
     }

@@ -43,10 +43,10 @@
       },
       "station_picker": {
         "title": "Tankstelle auswählen",
-        "description": "Wähle eine Station, Region oder ein Land aus der folgenden Liste aus.",
+        "description": "Wählen Sie eine Station, Region oder ein Land aus der folgenden Liste aus.",
         "data": {
           "station_id": "Tankstelle",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Station auf der Karte anzeigen"
         }
       },
       "location": {
@@ -66,21 +66,21 @@
       "invalid_location": "Ungültige Koordinaten. Bitte geben Sie gültige Breiten- und Längengradwerte ein.",
       "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk.",
       "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Passen Sie den Standort an oder vergrößern Sie den Suchradius.",
-      "no_stations_found_global": "Die Liste des Anbieters konnte nicht geladen werden. Möglicherweise ist die Quelle nicht erreichbar oder eine erforderliche Abhängigkeit fehlt. Details findest du im Home-Assistant-Log."
+      "no_stations_found_global": "Die Liste des Anbieters konnte nicht geladen werden. Möglicherweise ist die Quelle nicht erreichbar oder eine erforderliche Abhängigkeit fehlt. Details finden Sie im Home-Assistant-Log."
     },
     "abort": {
       "already_configured": "Diese Tankstelle ist bereits konfiguriert.",
       "no_providers_for_country": "Für dieses Land sind keine Datenanbieter verfügbar.",
       "no_counties_for_country": "Für das ausgewählte Land sind keine Bezirke konfiguriert.",
-      "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Bitte wählen Sie einen anderen Bezirk.",
-      "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Passen Sie den Standort an oder vergrößern Sie den Suchradius.",
-      "no_stations_found_global": "Die Liste des Anbieters konnte nicht geladen werden. Möglicherweise ist die Quelle nicht erreichbar oder eine erforderliche Abhängigkeit fehlt. Details findest du im Home-Assistant-Log."
+      "no_stations_found": "Für diesen Bezirk wurden keine Tankstellen gefunden. Brechen Sie ab und wählen Sie einen anderen Bezirk.",
+      "no_stations_found_location": "In der Nähe dieser Koordinaten wurden keine Tankstellen gefunden. Brechen Sie ab und versuchen Sie einen größeren Suchradius oder einen anderen Standort.",
+      "no_stations_found_global": "Die Liste des Anbieters konnte nicht geladen werden. Möglicherweise ist die Quelle nicht erreichbar oder eine erforderliche Abhängigkeit fehlt. Details finden Sie im Home-Assistant-Log."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie wird eingestellt",
-      "description": "Die Website fuelcompare.ie soll am **30. Juni 2026** eingestellt werden. Ihre Tankstelle **{entry_title}** erhält nach diesem Datum keine Preisaktualisierungen mehr. Erwägen Sie einen Wechsel zu einer anderen irischen Kraftstoffpreisquelle, wie z. B. FuelFinder IE oder IE Pumps."
+      "title": "fuelcompare.ie wurde eingestellt",
+      "description": "Die Website fuelcompare.ie wurde am **30. Juni 2026** abgeschaltet und ist nicht mehr erreichbar. Ihre Tankstelle **{entry_title}** erhält keine weiteren Preisaktualisierungen. Bitte löschen Sie diesen Eintrag und fügen Sie einen neuen mit einer anderen irischen Kraftstoffpreisquelle hinzu, z. B. **FuelFinder IE** oder **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-Zertifikatsüberprüfung deaktiviert",
@@ -177,16 +177,16 @@
         "name": "Betriebszeiten"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Datenanbieter"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Stations-URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stations-ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Standort"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-Schlüssel",
           "radius_km": "Suchradius (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Station auf der Karte anzeigen"
         }
       }
     }

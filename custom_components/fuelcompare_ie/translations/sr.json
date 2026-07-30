@@ -36,10 +36,10 @@
       },
       "station_picker": {
         "title": "Изаберите станицу",
-        "description": "Izaberite stanicu, region ili državu sa donjeg spiska.",
+        "description": "Изаберите станицу, регион или државу са доњег списка.",
         "data": {
           "station_id": "Станица",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Прикажи станицу на мапи"
         }
       },
       "location": {
@@ -72,19 +72,19 @@
       "already_configured": "Ова станица је већ конфигурисана.",
       "no_providers_for_country": "За ову земљу нису доступни добављачи података.",
       "no_counties_for_country": "За одабрану земљу нису конфигурисани окрузи.",
-      "no_stations_found": "Нису пронађене станице за овај округ. Покушајте са другим округом.",
-      "no_stations_found_location": "Нису пронађене станице у близини ових координата. Покушајте да прилагодите локацију или повећате радијус претраге.",
+      "no_stations_found": "Нису пронађене станице за овај округ. Откажите и покушајте са другим округом.",
+      "no_stations_found_location": "Нису пронађене станице у близини ових координата. Откажите и покушајте са већим радијусом претраге или другом локацијом.",
       "no_stations_found_global": "Листа добављача није могла бити учитана. Извор је можда недоступан или недостаје потребна зависност. Детаље потражите у Home Assistant записницима."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie се гаси",
-      "description": "Веб-сајт fuelcompare.ie планира да се угаси **30. јуна 2026.** Ваша станица **{entry_title}** ће престати да прима ажурирања цена након тог датума. Размислите о преласку на другачији ирски извор цена горива, као што су FuelFinder IE или IE Pumps."
+      "title": "fuelcompare.ie је угашен",
+      "description": "Веб-сајт fuelcompare.ie је угашен **30. јуна 2026.** и више није доступан. Ваша станица **{entry_title}** неће примати даља ажурирања цена. Избришите овај унос и додајте нови користећи неки други ирски извор цена горива, попут **FuelFinder IE** или **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Верификација TLS сертификата за pumps.ie је онемогућена",
-      "description": "pumps.ie провајдер за **{entry_title}** има онемогућену верификацију TLS сертификата јер сертификат сајта је истекао. Подаци су и даље шифровани у преносу, али идентитет сервера није верификован."
+      "description": "pumps.ie провајдер за **{entry_title}** има онемогућену верификацију TLS сертификата јер је сертификат сајта истекао. Подаци су и даље шифровани у преносу, али идентитет сервера није верификован."
     }
   },
   "entity": {
@@ -177,16 +177,16 @@
         "name": "Радно време"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Добављач података"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Земља"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL странице станице"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID станице"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Локација"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API кључ",
           "radius_km": "Полупречник претраживања (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Прикажи станицу на мапи"
         }
       }
     }

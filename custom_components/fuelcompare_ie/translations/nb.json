@@ -46,7 +46,7 @@
         "description": "Velg en stasjon, region eller et land fra listen nedenfor.",
         "data": {
           "station_id": "Stasjon",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Vis stasjon på kart"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Denne stasjonen er allerede konfigurert.",
       "no_providers_for_country": "Ingen dataleverandører er tilgjengelige for dette landet.",
       "no_counties_for_country": "Ingen fylker er konfigurert for det valgte landet.",
-      "no_stations_found": "Ingen stasjoner funnet for dette fylket. Prøv et annet fylke.",
-      "no_stations_found_location": "Ingen stasjoner funnet i nærheten av disse koordinatene. Prøv å justere plasseringen eller øke søkeradius.",
+      "no_stations_found": "Ingen stasjoner funnet for dette fylket. Avbryt og prøv et annet fylke.",
+      "no_stations_found_location": "Ingen stasjoner funnet i nærheten av disse koordinatene. Avbryt og prøv en større søkeradius eller en annen plassering.",
       "no_stations_found_global": "Kunne ikke laste leverandørens liste. Kilden kan være nede, eller en påkrevd avhengighet mangler. Se Home Assistant-loggene for detaljer."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stenger",
-      "description": "Nettstedet fuelcompare.ie er planlagt å stenge **30. juni 2026**. Stasjonen din **{entry_title}** vil slutte å motta prisoppdateringer etter denne datoen. Vurder å bytte til en annen irsk drivstoffpriskilde, for eksempel FuelFinder IE eller IE Pumps."
+      "title": "fuelcompare.ie er stengt",
+      "description": "Nettstedet fuelcompare.ie ble stengt **30. juni 2026** og er ikke lenger tilgjengelig. Stasjonen din **{entry_title}** vil ikke motta flere prisoppdateringer. Vennligst slett denne oppføringen og legg til en ny med en annen irsk drivstoffpriskilde, for eksempel **FuelFinder IE** eller **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-sertifikatverifisering deaktivert",
@@ -177,16 +177,16 @@
         "name": "Arbeidstider"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Dataleverandør"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Stasjonssideadresse"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stasjons-ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Plassering"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-nøkkel",
           "radius_km": "Søkeradius (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Vis stasjon på kart"
         }
       }
     }

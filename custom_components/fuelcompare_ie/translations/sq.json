@@ -39,7 +39,7 @@
         "description": "Zgjidhni një stacion, rajon ose vend nga lista më poshtë.",
         "data": {
           "station_id": "Stacioni",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Shfaq stacionin në hartë"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Ky stacion është konfiguruar tashmë.",
       "no_providers_for_country": "Nuk ka ofrues të dhënash të disponueshëm për këtë vend.",
       "no_counties_for_country": "Nuk ka bashki të konfiguruara për vendin e zgjedhur.",
-      "no_stations_found": "Nuk u gjetën stacione për këtë rreth. Provoni një rreth tjetër.",
-      "no_stations_found_location": "Nuk u gjetën stacione pranë këtyre koordinatave. Provoni të rregulloni vendndodhjen ose të rrisni rrezën e kërkimit.",
+      "no_stations_found": "Nuk u gjetën stacione për këtë rreth. Anuloni dhe provoni një rreth tjetër.",
+      "no_stations_found_location": "Nuk u gjetën stacione pranë këtyre koordinatave. Anuloni dhe provoni një rreze kërkimi më të gjerë ose vendndodhje tjetër.",
       "no_stations_found_global": "Lista e ofruesit nuk mund të ngarkohej. Burimi mund të jetë jashtë funksioni ose mungon një varësi e kërkuar. Shihni regjistrat e Home Assistant për detaje."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie po mbyllet",
-      "description": "Faqja e internetit fuelcompare.ie është planifikuar të mbyllet më **30 qershor 2026**. Stacioni juaj **{entry_title}** do të ndalojë marrjen e përditësimeve të çmimeve pas kësaj date. Konsideroni kalimin në një burim tjetër të çmimeve të karburantit në Irlandë, si FuelFinder IE ose IE Pumps."
+      "title": "fuelcompare.ie është mbyllur",
+      "description": "Faqja e internetit fuelcompare.ie u mbyll më **30 qershor 2026** dhe nuk është më e arritshme. Stacioni juaj **{entry_title}** nuk do të marrë më përditësime çmimesh. Ju lutemi fshini këtë hyrje dhe shtoni një të re duke përdorur një burim tjetër të çmimeve të karburantit në Irlandë, si **FuelFinder IE** ose **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Verifikimi i certifikatës TLS të pumps.ie është çaktivizuar",
@@ -177,16 +177,16 @@
         "name": "Orari i Punës"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Ofruesi i të Dhënave"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Vendi"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL i Faqes së Stacionit"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID e Stacionit"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Vendndodhja"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Çelës API",
           "radius_km": "Rrezja e kërkimit (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Shfaq stacionin në hartë"
         }
       }
     }

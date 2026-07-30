@@ -46,7 +46,7 @@
         "description": "Válassz egy állomást, régiót vagy országot az alábbi listából.",
         "data": {
           "station_id": "Állomás",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Állomás megjelenítése a térképen"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Ez az állomás már konfigurálva van.",
       "no_providers_for_country": "Ehhez az országhoz nem érhetők el adatszolgáltatók.",
       "no_counties_for_country": "A kiválasztott országhoz nem konfiguráltak megyéket.",
-      "no_stations_found": "Nem találhatók állomások ebben a megyében. Próbáljon másik megyét.",
-      "no_stations_found_location": "Nem találhatók állomások ezen koordináták közelében. Módosítsa a helyszínt, vagy növelje a keresési sugarat.",
+      "no_stations_found": "Nem találhatók állomások ebben a megyében. Mondja le, és próbáljon másik megyét.",
+      "no_stations_found_location": "Nem találhatók állomások ezen koordináták közelében. Mondja le, és próbáljon nagyobb keresési sugárral vagy más helyszínnel.",
       "no_stations_found_global": "A szolgáltató listáját nem sikerült betölteni. A forrás elérhetetlen lehet, vagy egy szükséges függőség hiányzik. A részletekért nézd meg a Home Assistant naplóit."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "A fuelcompare.ie leáll",
-      "description": "A fuelcompare.ie weboldal **2026. június 30-án** tervezi a leállást. Az Ön állomása **{entry_title}** az adott dátum után nem kap több árfrissítést. Fontolja meg az átváltást egy másik ír üzemanyagár-forrásra, például a FuelFinder IE-re vagy az IE Pumps-ra."
+      "title": "A fuelcompare.ie leállt",
+      "description": "A fuelcompare.ie weboldal **2026. június 30-án** leállt és többé nem érhető el. Az Ön állomása **{entry_title}** nem kap több árfrissítést. Törölje ezt a bejegyzést, és adjon hozzá egy újat egy másik ír üzemanyagár-forrás, például a **FuelFinder IE** vagy az **IE Pumps** használatával."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS tanúsítvány-ellenőrzés letiltva",
@@ -177,16 +177,16 @@
         "name": "Nyitvatartás"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Adatszolgáltató"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Ország"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Állomás oldal URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Állomás azonosító"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Helyszín"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-kulcs",
           "radius_km": "Keresési sugár (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Állomás megjelenítése a térképen"
         }
       }
     }

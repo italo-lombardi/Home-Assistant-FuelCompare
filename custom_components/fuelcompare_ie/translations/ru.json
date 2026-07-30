@@ -120,16 +120,16 @@
         "name": "Керосин"
       },
       "lpg": {
-        "name": "СУГ"
+        "name": "LPG"
       },
       "petrol": {
         "name": "Бензин"
       },
       "premium_diesel": {
-        "name": "Премиум дизель"
+        "name": "Premium Diesel"
       },
       "premium_unleaded": {
-        "name": "Премиум неэтилированный"
+        "name": "Premium Unleaded"
       },
       "unleaded": {
         "name": "Неэтилированный"

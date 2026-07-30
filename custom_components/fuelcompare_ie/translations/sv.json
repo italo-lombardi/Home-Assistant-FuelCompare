@@ -46,7 +46,7 @@
         "description": "Välj en station, region eller ett land från listan nedan.",
         "data": {
           "station_id": "Station",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Visa station på karta"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Denna station är redan konfigurerad.",
       "no_providers_for_country": "Inga dataleverantörer finns tillgängliga för detta land.",
       "no_counties_for_country": "Inga län är konfigurerade för det valda landet.",
-      "no_stations_found": "Inga stationer hittades för detta län. Prova ett annat län.",
-      "no_stations_found_location": "Inga stationer hittades i närheten av dessa koordinater. Prova att justera platsen eller öka sökradien.",
+      "no_stations_found": "Inga stationer hittades för detta län. Avbryt och prova ett annat län.",
+      "no_stations_found_location": "Inga stationer hittades i närheten av dessa koordinater. Avbryt och prova en större sökradius eller annan plats.",
       "no_stations_found_global": "Det gick inte att läsa in leverantörens lista. Källan kan vara nere eller så saknas ett obligatoriskt beroende. Se Home Assistant-loggen för detaljer."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie stänger",
-      "description": "Webbplatsen fuelcompare.ie planeras att stänga **30 juni 2026**. Din station **{entry_title}** slutar ta emot prisuppdateringar efter det datumet. Överväg att byta till en annan irländsk bränslekälla, till exempel FuelFinder IE eller IE Pumps."
+      "title": "fuelcompare.ie har stängt",
+      "description": "Webbplatsen fuelcompare.ie stängde **30 juni 2026** och är inte längre nåbar. Din station **{entry_title}** kommer inte att ta emot fler prisuppdateringar. Ta bort den här posten och lägg till en ny med en annan irländsk bränslekälla, till exempel **FuelFinder IE** eller **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-certifikatverifiering inaktiverad",
@@ -177,16 +177,16 @@
         "name": "Arbetstider"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Dataleverantör"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL till stationssida"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stations-ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Plats"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-nyckel",
           "radius_km": "Sökradie (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Visa station på karta"
         }
       }
     }

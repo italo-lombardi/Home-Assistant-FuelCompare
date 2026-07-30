@@ -39,7 +39,7 @@
         "description": "Valitse asema, alue tai maa alla olevasta luettelosta.",
         "data": {
           "station_id": "Asema",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Näytä asema kartalla"
         }
       },
       "location": {
@@ -53,7 +53,7 @@
         }
       },
       "name": {
-        "title": "Aseman Nimi",
+        "title": "Aseman nimi",
         "description": "Vahvista tai muuta tämän aseman nimeä.",
         "data": {
           "name": "Nimi"
@@ -72,15 +72,15 @@
       "already_configured": "Tämä asema on jo määritetty.",
       "no_providers_for_country": "Tälle maalle ei ole saatavilla tietolähteen tarjoajia.",
       "no_counties_for_country": "Valitulle maalle ei ole konfiguroitu läänejä.",
-      "no_stations_found": "Tältä lääniltä ei löydy asemia. Kokeile eri lääniä.",
-      "no_stations_found_location": "Näiden koordinaattien läheltä ei löydy asemia. Kokeile muuttaa sijaintia tai kasvata hakusädettä.",
+      "no_stations_found": "Tältä lääniltä ei löydy asemia. Peruuta ja kokeile eri lääniä.",
+      "no_stations_found_location": "Näiden koordinaattien läheltä ei löydy asemia. Peruuta ja kokeile suurempaa hakusädettä tai eri sijaintia.",
       "no_stations_found_global": "Toimittajan luetteloa ei voitu ladata. Lähde voi olla poissa käytöstä tai vaadittu riippuvuus puuttuu. Katso lisätietoja Home Assistantin lokeista."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie suljetaan",
-      "description": "Verkkosivusto fuelcompare.ie on suunniteltu suljettavaksi **30. kesäkuuta 2026**. Asemasi **{entry_title}** lopettaa hinnapäivitysten vastaanottamisen sen jälkeen. Harkitse siirtymistä toiseen irlantilaiseen polttoainehintapalveluun, kuten FuelFinder IE tai IE Pumps."
+      "description": "fuelcompare.ie-verkkosivusto suljettiin **30. kesäkuuta 2026** eikä ole enää tavoitettavissa. Asemasi **{entry_title}** ei enää saa hintapäivityksiä. Poista tämä merkintä ja lisää uusi käyttäen toista irlantilaista polttoainehintapalvelua, kuten **FuelFinder IE** tai **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-varmenteen tarkistus poistettu käytöstä",
@@ -177,16 +177,16 @@
         "name": "Aukioloajat"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Tietolähteen tarjoaja"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Maa"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Aseman sivun URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Aseman tunnus"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Sijainti"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-avain",
           "radius_km": "Hakusäde (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Näytä asema kartalla"
         }
       }
     }
