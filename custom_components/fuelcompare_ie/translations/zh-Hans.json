@@ -1,0 +1,248 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "选择国家/地区",
+        "data": {
+          "country": "国家/地区"
+        }
+      },
+      "provider": {
+        "title": "选择数据来源",
+        "data": {
+          "provider": "数据来源"
+        }
+      },
+      "county": {
+        "title": "选择县",
+        "description": "选择您所在的县以查找附近的加油站。",
+        "data": {
+          "station_county": "县"
+        }
+      },
+      "api_key": {
+        "title": "API 密钥",
+        "description": "输入您的免费 API 密钥。如有提示，请[在此获取]({registration_url})。",
+        "data": {
+          "api_key": "API 密钥"
+        }
+      },
+      "station": {
+        "title": "添加加油站",
+        "description": "{hint}",
+        "data": {
+          "station_id": "站点 ID"
+        }
+      },
+      "station_picker": {
+        "title": "选择加油站",
+        "description": "从下列选项中选择加油站、地区或国家/地区。",
+        "data": {
+          "station_id": "加油站",
+          "show_on_map": "在地图上显示加油站"
+        }
+      },
+      "location": {
+        "title": "设置位置",
+        "description": "输入您的位置和搜索半径。半径范围内的加油站将被跟踪。",
+        "data": {
+          "latitude": "纬度",
+          "longitude": "经度",
+          "radius_km": "半径（公里）",
+          "postal_code": "邮政编码"
+        }
+      },
+      "name": {
+        "title": "加油站名称",
+        "description": "确认或编辑该加油站的名称。",
+        "data": {
+          "name": "名称"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "站点 ID 不能为空。",
+      "invalid_location": "坐标无效。请输入有效的经纬度值。",
+      "no_stations_found": "该县未找到加油站。请尝试其他县。",
+      "no_stations_found_location": "附近坐标处未找到加油站。请尝试调整位置或扩大搜索半径。",
+      "invalid_api_key": "API 密钥不能为空。",
+      "no_stations_found_global": "无法加载提供商列表。上游服务可能已停止，或缺少必要的依赖项。请查看 Home Assistant 日志获取详情。"
+    },
+    "abort": {
+      "already_configured": "该加油站已配置。",
+      "no_providers_for_country": "该国家/地区没有可用的数据提供商。",
+      "no_counties_for_country": "所选国家/地区未配置任何县。",
+      "no_stations_found": "该县未找到加油站。请取消并尝试其他县。",
+      "no_stations_found_location": "附近坐标处未找到加油站。请取消并尝试更大的搜索半径或不同的位置。",
+      "no_stations_found_global": "无法加载提供商列表。上游服务可能已停止，或缺少必要的依赖项。请查看 Home Assistant 日志获取详情。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "选项",
+        "data": {
+          "api_key": "API 密钥",
+          "radius_km": "搜索半径（公里）",
+          "show_on_map": "在地图上显示加油站"
+        }
+      }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie 已关闭",
+      "description": "fuelcompare.ie 网站已于 **2026 年 6 月 30 日** 关闭，无法再访问。您的加油站 **{entry_title}** 将不再收到价格更新。请删除此条目，并使用其他爱尔兰油价数据来源（如 **FuelFinder IE** 或 **IE Pumps**）添加新条目。"
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS 证书验证已禁用",
+      "description": "**{entry_title}** 的 pumps.ie 提供商已禁用 TLS 证书验证，原因是该网站的证书已过期。传输中的数据仍经过加密，但服务器身份未经验证。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "柴油"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "煤油"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "汽油"
+      },
+      "premium_diesel": {
+        "name": "高级柴油"
+      },
+      "premium_unleaded": {
+        "name": "高级无铅"
+      },
+      "unleaded": {
+        "name": "无铅"
+      },
+      "address": {
+        "name": "地址"
+      },
+      "brand": {
+        "name": "品牌"
+      },
+      "county": {
+        "name": "县"
+      },
+      "latitude": {
+        "name": "纬度"
+      },
+      "location": {
+        "name": "位置"
+      },
+      "longitude": {
+        "name": "经度"
+      },
+      "station_name": {
+        "name": "站名"
+      },
+      "accessibility": {
+        "name": "无障碍设施"
+      },
+      "amenities": {
+        "name": "便民设施"
+      },
+      "last_successful_fetch": {
+        "name": "最后成功获取"
+      },
+      "provider_label": {
+        "name": "数据提供商"
+      },
+      "country_code": {
+        "name": "国家"
+      },
+      "station_page_url": {
+        "name": "加油站页面URL"
+      },
+      "offerings": {
+        "name": "服务项目"
+      },
+      "opening_hours": {
+        "name": "营业时间 (OSM)"
+      },
+      "payments": {
+        "name": "支付方式"
+      },
+      "phone": {
+        "name": "电话"
+      },
+      "price_confidence": {
+        "name": "价格可信度"
+      },
+      "price_last_updated": {
+        "name": "价格最后更新"
+      },
+      "website": {
+        "name": "网站"
+      },
+      "working_hours": {
+        "name": "工作时间"
+      },
+      "station_id": {
+        "name": "站点ID"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "数据获取问题"
+      },
+      "has_price": {
+        "name": "有价格"
+      },
+      "is_open": {
+        "name": "已开放"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "洗车"
+      },
+      "has_disabled_access": {
+        "name": "无障碍通道"
+      },
+      "has_electric_charging": {
+        "name": "电动车充电"
+      },
+      "has_shop": {
+        "name": "商店"
+      },
+      "has_toilet": {
+        "name": "卫生间"
+      },
+      "accepts_cards": {
+        "name": "接受刷卡"
+      },
+      "accepts_cash": {
+        "name": "接受现金"
+      },
+      "accepts_contactless": {
+        "name": "接受非接触支付"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "位置"
+      }
+    }
+  }
+}

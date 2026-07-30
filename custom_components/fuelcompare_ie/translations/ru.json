@@ -1,0 +1,248 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Выбрать страну",
+        "data": {
+          "country": "Страна"
+        }
+      },
+      "provider": {
+        "title": "Выбрать источник данных",
+        "data": {
+          "provider": "Источник данных"
+        }
+      },
+      "county": {
+        "title": "Выбрать район",
+        "description": "Выберите район для поиска ближайших станций.",
+        "data": {
+          "station_county": "Район"
+        }
+      },
+      "api_key": {
+        "title": "Ключ API",
+        "description": "Введите бесплатный ключ API. [Получить здесь]({registration_url}), если требуется.",
+        "data": {
+          "api_key": "Ключ API"
+        }
+      },
+      "station": {
+        "title": "Добавить станцию",
+        "description": "{hint}",
+        "data": {
+          "station_id": "ID станции"
+        }
+      },
+      "station_picker": {
+        "title": "Выбрать станцию",
+        "description": "Выберите станцию, регион или страну из списка ниже.",
+        "data": {
+          "station_id": "Станция",
+          "show_on_map": "Показать на карте"
+        }
+      },
+      "location": {
+        "title": "Задать местоположение",
+        "description": "Укажите координаты и радиус поиска. Станции в радиусе будут отслеживаться.",
+        "data": {
+          "latitude": "Широта",
+          "longitude": "Долгота",
+          "radius_km": "Радиус (км)",
+          "postal_code": "Почтовый индекс"
+        }
+      },
+      "name": {
+        "title": "Название станции",
+        "description": "Подтвердите или отредактируйте название станции.",
+        "data": {
+          "name": "Название"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "ID станции не может быть пустым.",
+      "invalid_location": "Неверные координаты. Введите корректные значения широты и долготы.",
+      "no_stations_found": "Станции в этом районе не найдены. Попробуйте другой район.",
+      "no_stations_found_location": "Станции рядом с этими координатами не найдены. Скорректируйте местоположение или увеличьте радиус поиска.",
+      "invalid_api_key": "Ключ API не может быть пустым.",
+      "no_stations_found_global": "Не удалось загрузить список поставщика. Источник может быть недоступен или отсутствует необходимая зависимость. Проверьте журналы Home Assistant."
+    },
+    "abort": {
+      "already_configured": "Эта станция уже настроена.",
+      "no_providers_for_country": "Для этой страны нет доступных поставщиков данных.",
+      "no_counties_for_country": "Для выбранной страны не настроены районы.",
+      "no_stations_found": "Станции в этом районе не найдены. Отмените и попробуйте другой район.",
+      "no_stations_found_location": "Станции рядом с этими координатами не найдены. Отмените и расширьте радиус или выберите другое местоположение.",
+      "no_stations_found_global": "Не удалось загрузить список поставщика. Источник может быть недоступен или отсутствует необходимая зависимость. Проверьте журналы Home Assistant."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Параметры",
+        "data": {
+          "api_key": "Ключ API",
+          "radius_km": "Радиус поиска (км)",
+          "show_on_map": "Показать на карте"
+        }
+      }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie прекратил работу",
+      "description": "Сайт fuelcompare.ie был закрыт **30 июня 2026 года** и больше не доступен. Станция **{entry_title}** не будет получать обновления цен. Удалите эту запись и добавьте новую, используя другой ирландский источник цен на топливо, например **FuelFinder IE** или **IE Pumps**."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "Проверка TLS-сертификата pumps.ie отключена",
+      "description": "У поставщика pumps.ie для **{entry_title}** отключена проверка TLS-сертификата, поскольку срок действия сертификата сайта истёк. Данные по-прежнему шифруются при передаче, но подлинность сервера не проверяется."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Дизель"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Керосин"
+      },
+      "lpg": {
+        "name": "СУГ"
+      },
+      "petrol": {
+        "name": "Бензин"
+      },
+      "premium_diesel": {
+        "name": "Премиум дизель"
+      },
+      "premium_unleaded": {
+        "name": "Премиум неэтилированный"
+      },
+      "unleaded": {
+        "name": "Неэтилированный"
+      },
+      "address": {
+        "name": "Адрес"
+      },
+      "brand": {
+        "name": "Бренд"
+      },
+      "county": {
+        "name": "Район"
+      },
+      "latitude": {
+        "name": "Широта"
+      },
+      "location": {
+        "name": "Местоположение"
+      },
+      "longitude": {
+        "name": "Долгота"
+      },
+      "station_name": {
+        "name": "Название станции"
+      },
+      "accessibility": {
+        "name": "Доступность"
+      },
+      "amenities": {
+        "name": "Удобства"
+      },
+      "last_successful_fetch": {
+        "name": "Последнее успешное получение"
+      },
+      "provider_label": {
+        "name": "Поставщик данных"
+      },
+      "country_code": {
+        "name": "Страна"
+      },
+      "station_page_url": {
+        "name": "URL страницы станции"
+      },
+      "offerings": {
+        "name": "Услуги"
+      },
+      "opening_hours": {
+        "name": "Часы работы (OSM)"
+      },
+      "payments": {
+        "name": "Способы оплаты"
+      },
+      "phone": {
+        "name": "Телефон"
+      },
+      "price_confidence": {
+        "name": "Достоверность цены"
+      },
+      "price_last_updated": {
+        "name": "Цена обновлена"
+      },
+      "website": {
+        "name": "Сайт"
+      },
+      "working_hours": {
+        "name": "Рабочие часы"
+      },
+      "station_id": {
+        "name": "ID станции"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Проблема получения данных"
+      },
+      "has_price": {
+        "name": "Есть цена"
+      },
+      "is_open": {
+        "name": "Открыто"
+      },
+      "has_atm": {
+        "name": "Банкомат"
+      },
+      "has_car_wash": {
+        "name": "Автомойка"
+      },
+      "has_disabled_access": {
+        "name": "Доступ для инвалидов"
+      },
+      "has_electric_charging": {
+        "name": "Зарядка электромобилей"
+      },
+      "has_shop": {
+        "name": "Магазин"
+      },
+      "has_toilet": {
+        "name": "Туалет"
+      },
+      "accepts_cards": {
+        "name": "Принимает карты"
+      },
+      "accepts_cash": {
+        "name": "Принимает наличные"
+      },
+      "accepts_contactless": {
+        "name": "Принимает бесконтактную оплату"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Местоположение"
+      }
+    }
+  }
+}

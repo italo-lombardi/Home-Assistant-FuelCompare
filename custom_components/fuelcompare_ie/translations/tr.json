@@ -1,0 +1,248 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ülke Seç",
+        "data": {
+          "country": "Ülke"
+        }
+      },
+      "provider": {
+        "title": "Veri Kaynağı Seç",
+        "data": {
+          "provider": "Veri kaynağı"
+        }
+      },
+      "county": {
+        "title": "İlçe Seç",
+        "description": "Yakındaki istasyonları bulmak için ilçenizi seçin.",
+        "data": {
+          "station_county": "İlçe"
+        }
+      },
+      "api_key": {
+        "title": "API Anahtarı",
+        "description": "Ücretsiz API anahtarınızı girin. Gerekirse [buradan alın]({registration_url}).",
+        "data": {
+          "api_key": "API Anahtarı"
+        }
+      },
+      "station": {
+        "title": "İstasyon Ekle",
+        "description": "{hint}",
+        "data": {
+          "station_id": "İstasyon ID"
+        }
+      },
+      "station_picker": {
+        "title": "İstasyon Seç",
+        "description": "Aşağıdaki listeden bir istasyon, bölge veya ülke seçin.",
+        "data": {
+          "station_id": "İstasyon",
+          "show_on_map": "Haritada göster"
+        }
+      },
+      "location": {
+        "title": "Konum Ayarla",
+        "description": "Konumunuzu ve arama yarıçapını girin. Yarıçap içindeki istasyonlar takip edilecektir.",
+        "data": {
+          "latitude": "Enlem",
+          "longitude": "Boylam",
+          "radius_km": "Yarıçap (km)",
+          "postal_code": "Posta kodu"
+        }
+      },
+      "name": {
+        "title": "İstasyon Adı",
+        "description": "Bu istasyonun adını onaylayın veya düzenleyin.",
+        "data": {
+          "name": "Ad"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "İstasyon ID boş olamaz.",
+      "invalid_location": "Geçersiz koordinatlar. Geçerli enlem ve boylam değerleri girin.",
+      "no_stations_found": "Bu ilçede istasyon bulunamadı. Farklı bir ilçe deneyin.",
+      "no_stations_found_location": "Bu koordinatlar yakınında istasyon bulunamadı. Konumu ayarlayın veya arama yarıçapını genişletin.",
+      "invalid_api_key": "API anahtarı boş olamaz.",
+      "no_stations_found_global": "Sağlayıcı listesi yüklenemedi. Kaynak kapalı olabilir veya gerekli bağımlılık eksik olabilir. Ayrıntılar için Home Assistant günlüklerini kontrol edin."
+    },
+    "abort": {
+      "already_configured": "Bu istasyon zaten yapılandırılmış.",
+      "no_providers_for_country": "Bu ülke için kullanılabilir veri sağlayıcısı yok.",
+      "no_counties_for_country": "Seçilen ülke için ilçe yapılandırılmamış.",
+      "no_stations_found": "Bu ilçede istasyon bulunamadı. İptal edip farklı bir ilçe deneyin.",
+      "no_stations_found_location": "Bu koordinatlar yakınında istasyon bulunamadı. İptal edip daha geniş bir yarıçap veya farklı konum deneyin.",
+      "no_stations_found_global": "Sağlayıcı listesi yüklenemedi. Kaynak kapalı olabilir veya gerekli bağımlılık eksik olabilir. Ayrıntılar için Home Assistant günlüklerini kontrol edin."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Seçenekler",
+        "data": {
+          "api_key": "API Anahtarı",
+          "radius_km": "Arama yarıçapı (km)",
+          "show_on_map": "Haritada göster"
+        }
+      }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie kapandı",
+      "description": "fuelcompare.ie web sitesi **30 Haziran 2026** tarihinde kapandı ve artık erişilemiyor. **{entry_title}** istasyonunuz bundan sonra fiyat güncellemesi almayacak. Bu girişi silin ve **FuelFinder IE** veya **IE Pumps** gibi başka bir İrlanda yakıt fiyatı kaynağı kullanarak yeni bir giriş ekleyin."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS sertifika doğrulaması devre dışı",
+      "description": "**{entry_title}** için pumps.ie sağlayıcısında, sitenin sertifikasının süresi dolduğundan TLS sertifika doğrulaması devre dışı bırakıldı. Veriler aktarım sırasında şifreleniyor ancak sunucu kimliği doğrulanmıyor."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "Dizel"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "Gazyağı"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "Benzin"
+      },
+      "premium_diesel": {
+        "name": "Premium Dizel"
+      },
+      "premium_unleaded": {
+        "name": "Premium Kurşunsuz"
+      },
+      "unleaded": {
+        "name": "Kurşunsuz"
+      },
+      "address": {
+        "name": "Adres"
+      },
+      "brand": {
+        "name": "Marka"
+      },
+      "county": {
+        "name": "İlçe"
+      },
+      "latitude": {
+        "name": "Enlem"
+      },
+      "location": {
+        "name": "Konum"
+      },
+      "longitude": {
+        "name": "Boylam"
+      },
+      "station_name": {
+        "name": "İstasyon Adı"
+      },
+      "accessibility": {
+        "name": "Erişilebilirlik"
+      },
+      "amenities": {
+        "name": "Olanaklar"
+      },
+      "last_successful_fetch": {
+        "name": "Son Başarılı Çekme"
+      },
+      "provider_label": {
+        "name": "Veri Sağlayıcı"
+      },
+      "country_code": {
+        "name": "Ülke"
+      },
+      "station_page_url": {
+        "name": "İstasyon Sayfası URL"
+      },
+      "offerings": {
+        "name": "Hizmetler"
+      },
+      "opening_hours": {
+        "name": "Çalışma Saatleri (OSM)"
+      },
+      "payments": {
+        "name": "Ödeme Yöntemleri"
+      },
+      "phone": {
+        "name": "Telefon"
+      },
+      "price_confidence": {
+        "name": "Fiyat Güvenilirliği"
+      },
+      "price_last_updated": {
+        "name": "Fiyat Son Güncelleme"
+      },
+      "website": {
+        "name": "Web Sitesi"
+      },
+      "working_hours": {
+        "name": "Çalışma Saatleri"
+      },
+      "station_id": {
+        "name": "İstasyon ID"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "Veri Çekme Sorunu"
+      },
+      "has_price": {
+        "name": "Fiyat Var"
+      },
+      "is_open": {
+        "name": "Açık"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "Araç Yıkama"
+      },
+      "has_disabled_access": {
+        "name": "Engelli Erişimi"
+      },
+      "has_electric_charging": {
+        "name": "Elektrikli Araç Şarjı"
+      },
+      "has_shop": {
+        "name": "Market"
+      },
+      "has_toilet": {
+        "name": "Tuvalet"
+      },
+      "accepts_cards": {
+        "name": "Kart Kabul Ediyor"
+      },
+      "accepts_cash": {
+        "name": "Nakit Kabul Ediyor"
+      },
+      "accepts_contactless": {
+        "name": "Temassız Ödeme Kabul Ediyor"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "Konum"
+      }
+    }
+  }
+}

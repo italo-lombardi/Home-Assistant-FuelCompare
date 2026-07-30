@@ -1,0 +1,248 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "国を選択",
+        "data": {
+          "country": "国"
+        }
+      },
+      "provider": {
+        "title": "データソースを選択",
+        "data": {
+          "provider": "データソース"
+        }
+      },
+      "county": {
+        "title": "郡を選択",
+        "description": "近くのスタンドを探すために郡を選択してください。",
+        "data": {
+          "station_county": "郡"
+        }
+      },
+      "api_key": {
+        "title": "APIキー",
+        "description": "無料のAPIキーを入力してください。必要な場合は[こちらで取得]({registration_url})してください。",
+        "data": {
+          "api_key": "APIキー"
+        }
+      },
+      "station": {
+        "title": "スタンドを追加",
+        "description": "{hint}",
+        "data": {
+          "station_id": "スタンドID"
+        }
+      },
+      "station_picker": {
+        "title": "スタンドを選択",
+        "description": "以下のリストからスタンド、地域、または国を選択してください。",
+        "data": {
+          "station_id": "スタンド",
+          "show_on_map": "地図に表示"
+        }
+      },
+      "location": {
+        "title": "場所を設定",
+        "description": "場所と検索半径を入力してください。半径内のスタンドが追跡されます。",
+        "data": {
+          "latitude": "緯度",
+          "longitude": "経度",
+          "radius_km": "半径（km）",
+          "postal_code": "郵便番号"
+        }
+      },
+      "name": {
+        "title": "スタンド名",
+        "description": "このスタンドの名前を確認または編集してください。",
+        "data": {
+          "name": "名前"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "スタンドIDを空にすることはできません。",
+      "invalid_location": "座標が無効です。有効な緯度と経度の値を入力してください。",
+      "no_stations_found": "この郡にスタンドが見つかりません。別の郡を試してください。",
+      "no_stations_found_location": "これらの座標付近にスタンドが見つかりません。場所を調整するか、検索半径を広げてください。",
+      "invalid_api_key": "APIキーを空にすることはできません。",
+      "no_stations_found_global": "プロバイダーのリストを読み込めませんでした。上流がダウンしているか、必要な依存関係が不足している可能性があります。Home Assistantのログを確認してください。"
+    },
+    "abort": {
+      "already_configured": "このスタンドはすでに設定されています。",
+      "no_providers_for_country": "この国に利用可能なデータプロバイダーがありません。",
+      "no_counties_for_country": "選択した国に郡が設定されていません。",
+      "no_stations_found": "この郡にスタンドが見つかりません。キャンセルして別の郡を試してください。",
+      "no_stations_found_location": "これらの座標付近にスタンドが見つかりません。キャンセルして検索半径を広げるか別の場所を試してください。",
+      "no_stations_found_global": "プロバイダーのリストを読み込めませんでした。上流がダウンしているか、必要な依存関係が不足している可能性があります。Home Assistantのログを確認してください。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "オプション",
+        "data": {
+          "api_key": "APIキー",
+          "radius_km": "検索半径（km）",
+          "show_on_map": "地図に表示"
+        }
+      }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie がサービスを終了しました",
+      "description": "fuelcompare.ie のウェブサイトは **2026年6月30日** にサービスを終了し、現在アクセスできません。スタンド **{entry_title}** は今後価格の更新を受け取れません。このエントリを削除し、**FuelFinder IE** や **IE Pumps** などの別のアイルランドの燃料価格ソースを使用して新しいエントリを追加してください。"
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie のTLS証明書検証が無効",
+      "description": "**{entry_title}** の pumps.ie プロバイダーは、サイトの証明書が期限切れのためTLS証明書検証が無効になっています。データは送信中も暗号化されていますが、サーバーの身元は確認されません。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "軽油"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "灯油"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "ガソリン"
+      },
+      "premium_diesel": {
+        "name": "プレミアム軽油"
+      },
+      "premium_unleaded": {
+        "name": "プレミアム無鉛"
+      },
+      "unleaded": {
+        "name": "無鉛"
+      },
+      "address": {
+        "name": "住所"
+      },
+      "brand": {
+        "name": "ブランド"
+      },
+      "county": {
+        "name": "郡"
+      },
+      "latitude": {
+        "name": "緯度"
+      },
+      "location": {
+        "name": "場所"
+      },
+      "longitude": {
+        "name": "経度"
+      },
+      "station_name": {
+        "name": "スタンド名"
+      },
+      "accessibility": {
+        "name": "アクセシビリティ"
+      },
+      "amenities": {
+        "name": "設備"
+      },
+      "last_successful_fetch": {
+        "name": "最終取得成功"
+      },
+      "provider_label": {
+        "name": "データプロバイダー"
+      },
+      "country_code": {
+        "name": "国"
+      },
+      "station_page_url": {
+        "name": "スタンドページURL"
+      },
+      "offerings": {
+        "name": "サービス"
+      },
+      "opening_hours": {
+        "name": "営業時間（OSM）"
+      },
+      "payments": {
+        "name": "支払い方法"
+      },
+      "phone": {
+        "name": "電話"
+      },
+      "price_confidence": {
+        "name": "価格信頼度"
+      },
+      "price_last_updated": {
+        "name": "価格最終更新"
+      },
+      "website": {
+        "name": "ウェブサイト"
+      },
+      "working_hours": {
+        "name": "営業時間"
+      },
+      "station_id": {
+        "name": "スタンドID"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "データ取得問題"
+      },
+      "has_price": {
+        "name": "価格あり"
+      },
+      "is_open": {
+        "name": "営業中"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "洗車"
+      },
+      "has_disabled_access": {
+        "name": "バリアフリー"
+      },
+      "has_electric_charging": {
+        "name": "EV充電"
+      },
+      "has_shop": {
+        "name": "ショップ"
+      },
+      "has_toilet": {
+        "name": "トイレ"
+      },
+      "accepts_cards": {
+        "name": "カード払い可"
+      },
+      "accepts_cash": {
+        "name": "現金払い可"
+      },
+      "accepts_contactless": {
+        "name": "非接触払い可"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "場所"
+      }
+    }
+  }
+}

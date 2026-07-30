@@ -1,0 +1,248 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "국가 선택",
+        "data": {
+          "country": "국가"
+        }
+      },
+      "provider": {
+        "title": "데이터 소스 선택",
+        "data": {
+          "provider": "데이터 소스"
+        }
+      },
+      "county": {
+        "title": "지역 선택",
+        "description": "주유소를 찾으려면 지역을 선택하세요.",
+        "data": {
+          "station_county": "지역"
+        }
+      },
+      "api_key": {
+        "title": "API 키",
+        "description": "무료 API 키를 입력하세요. 필요시 [여기서 발급]({registration_url})하세요.",
+        "data": {
+          "api_key": "API 키"
+        }
+      },
+      "station": {
+        "title": "주유소 추가",
+        "description": "{hint}",
+        "data": {
+          "station_id": "주유소 ID"
+        }
+      },
+      "station_picker": {
+        "title": "주유소 선택",
+        "description": "아래 목록에서 주유소, 지역 또는 국가를 선택하세요.",
+        "data": {
+          "station_id": "주유소",
+          "show_on_map": "지도에 표시"
+        }
+      },
+      "location": {
+        "title": "위치 설정",
+        "description": "위치와 검색 반경을 입력하세요. 반경 내 주유소가 추적됩니다.",
+        "data": {
+          "latitude": "위도",
+          "longitude": "경도",
+          "radius_km": "반경 (km)",
+          "postal_code": "우편번호"
+        }
+      },
+      "name": {
+        "title": "주유소 이름",
+        "description": "주유소 이름을 확인하거나 수정하세요.",
+        "data": {
+          "name": "이름"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "주유소 ID는 비워둘 수 없습니다.",
+      "invalid_location": "유효하지 않은 좌표입니다. 올바른 위도 및 경도 값을 입력하세요.",
+      "no_stations_found": "이 지역에서 주유소를 찾을 수 없습니다. 다른 지역을 시도하세요.",
+      "no_stations_found_location": "이 좌표 근처에 주유소가 없습니다. 위치를 조정하거나 검색 반경을 늘려보세요.",
+      "invalid_api_key": "API 키는 비워둘 수 없습니다.",
+      "no_stations_found_global": "공급자 목록을 불러올 수 없습니다. 상위 서버가 다운되었거나 필수 종속성이 없을 수 있습니다. Home Assistant 로그를 확인하세요."
+    },
+    "abort": {
+      "already_configured": "이 주유소는 이미 설정되어 있습니다.",
+      "no_providers_for_country": "이 국가에 사용 가능한 데이터 공급자가 없습니다.",
+      "no_counties_for_country": "선택한 국가에 설정된 지역이 없습니다.",
+      "no_stations_found": "이 지역에서 주유소를 찾을 수 없습니다. 취소하고 다른 지역을 시도하세요.",
+      "no_stations_found_location": "이 좌표 근처에 주유소가 없습니다. 취소하고 더 넓은 반경 또는 다른 위치를 시도하세요.",
+      "no_stations_found_global": "공급자 목록을 불러올 수 없습니다. 상위 서버가 다운되었거나 필수 종속성이 없을 수 있습니다. Home Assistant 로그를 확인하세요."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "옵션",
+        "data": {
+          "api_key": "API 키",
+          "radius_km": "검색 반경 (km)",
+          "show_on_map": "지도에 표시"
+        }
+      }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie 서비스 종료",
+      "description": "fuelcompare.ie 웹사이트가 **2026년 6월 30일**에 서비스를 종료했으며 더 이상 접속할 수 없습니다. 주유소 **{entry_title}**은 더 이상 가격 업데이트를 받지 않습니다. 이 항목을 삭제하고 **FuelFinder IE** 또는 **IE Pumps** 등 다른 아일랜드 연료 가격 소스를 사용하여 새 항목을 추가하세요."
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS 인증서 검증 비활성화",
+      "description": "**{entry_title}**의 pumps.ie 공급자는 사이트 인증서가 만료되어 TLS 인증서 검증이 비활성화되어 있습니다. 데이터는 전송 중 암호화되지만 서버 신원은 확인되지 않습니다."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "경유"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "등유"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "휘발유"
+      },
+      "premium_diesel": {
+        "name": "프리미엄 경유"
+      },
+      "premium_unleaded": {
+        "name": "프리미엄 무연"
+      },
+      "unleaded": {
+        "name": "무연"
+      },
+      "address": {
+        "name": "주소"
+      },
+      "brand": {
+        "name": "브랜드"
+      },
+      "county": {
+        "name": "지역"
+      },
+      "latitude": {
+        "name": "위도"
+      },
+      "location": {
+        "name": "위치"
+      },
+      "longitude": {
+        "name": "경도"
+      },
+      "station_name": {
+        "name": "주유소 이름"
+      },
+      "accessibility": {
+        "name": "접근성"
+      },
+      "amenities": {
+        "name": "편의시설"
+      },
+      "last_successful_fetch": {
+        "name": "마지막 성공적 수신"
+      },
+      "provider_label": {
+        "name": "데이터 공급자"
+      },
+      "country_code": {
+        "name": "국가"
+      },
+      "station_page_url": {
+        "name": "주유소 페이지 URL"
+      },
+      "offerings": {
+        "name": "서비스"
+      },
+      "opening_hours": {
+        "name": "영업시간 (OSM)"
+      },
+      "payments": {
+        "name": "결제 방법"
+      },
+      "phone": {
+        "name": "전화"
+      },
+      "price_confidence": {
+        "name": "가격 신뢰도"
+      },
+      "price_last_updated": {
+        "name": "가격 최종 업데이트"
+      },
+      "website": {
+        "name": "웹사이트"
+      },
+      "working_hours": {
+        "name": "운영시간"
+      },
+      "station_id": {
+        "name": "주유소 ID"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "데이터 수신 문제"
+      },
+      "has_price": {
+        "name": "가격 있음"
+      },
+      "is_open": {
+        "name": "영업 중"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "세차"
+      },
+      "has_disabled_access": {
+        "name": "장애인 접근"
+      },
+      "has_electric_charging": {
+        "name": "전기차 충전"
+      },
+      "has_shop": {
+        "name": "편의점"
+      },
+      "has_toilet": {
+        "name": "화장실"
+      },
+      "accepts_cards": {
+        "name": "카드 결제 가능"
+      },
+      "accepts_cash": {
+        "name": "현금 결제 가능"
+      },
+      "accepts_contactless": {
+        "name": "비접촉 결제 가능"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "위치"
+      }
+    }
+  }
+}
