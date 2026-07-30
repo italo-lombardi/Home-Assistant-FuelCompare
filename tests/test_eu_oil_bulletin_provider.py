@@ -22,8 +22,8 @@ import pytest
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.eu_oil_bulletin import (
-    EuOilBulletinProvider,
     _DOWNLOAD_URL,
+    EuOilBulletinProvider,
     _build_station_data,
     _parse_price_per_litre,
     _parse_sheet,

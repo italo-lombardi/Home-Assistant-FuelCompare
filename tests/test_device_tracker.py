@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+from custom_components.fuelcompare_ie.const import DOMAIN
 from custom_components.fuelcompare_ie.device_tracker import (
     StationDeviceTracker,
     async_setup_entry,
 )
-from custom_components.fuelcompare_ie.const import DOMAIN
-
 
 # ---------------------------------------------------------------------------
 # Helpers

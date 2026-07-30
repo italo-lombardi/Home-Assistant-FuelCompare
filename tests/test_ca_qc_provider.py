@@ -17,17 +17,16 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from aiohttp import ClientError
 
+from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ca_qc import (
-    CaQcProvider,
+    _GAS_TYPE_MAP,
     _GEOJSON_URL,
     _HEADERS,
-    _GAS_TYPE_MAP,
+    CaQcProvider,
     _build_station_data,
     _make_station_id,
     _parse_price,
 )
-from custom_components.fuelcompare_ie.providers.base import ProviderError
-
 
 # ---------------------------------------------------------------------------
 # Fixtures and sample data

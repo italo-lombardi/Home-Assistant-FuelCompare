@@ -11,13 +11,12 @@ from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.mt_fuel import (
-    MtFuelProvider,
     _FALLBACK_XLSX_URL,
+    MtFuelProvider,
     _make_absolute,
     _parse_malta_row,
     _parse_price_cell,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers — minimal XLSX builder

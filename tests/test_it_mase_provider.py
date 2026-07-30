@@ -9,11 +9,11 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.it_mase import (
-    ItMaseProvider,
     _DESC_TO_KEY,
     _HEADERS,
     _META_URL,
     _PRICE_URL,
+    ItMaseProvider,
     _build_station_data,
     _cheapest_price,
     _haversine_km,
@@ -22,7 +22,6 @@ from custom_components.fuelcompare_ie.providers.it_mase import (
     _parse_price_csv,
     _skip_banner,
 )
-
 
 # ---------------------------------------------------------------------------
 # Sample CSV fixtures

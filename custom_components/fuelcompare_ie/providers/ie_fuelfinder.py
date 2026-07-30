@@ -93,8 +93,8 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, MAX_STATION_URL_LEN
+from ..const import API_TIMEOUT, UA_HEADER
+from .base import MAX_STATION_URL_LEN, BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 

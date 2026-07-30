@@ -6,11 +6,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
     IEFuelCompareProvider,
 )
-from custom_components.fuelcompare_ie.providers.base import ProviderError
-
 
 # ---------------------------------------------------------------------------
 # Helpers

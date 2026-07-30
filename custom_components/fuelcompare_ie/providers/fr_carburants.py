@@ -49,7 +49,6 @@ import functools
 import io
 import logging
 import time
-import zipfile
 
 # xml.etree.ElementTree is protected against billion-laughs since Python 3.8
 # (https://docs.python.org/3/library/xml.etree.elementtree.html#xml-vulnerabilities).
@@ -57,17 +56,18 @@ import zipfile
 # A 50 MB size check is added as defence-in-depth to prevent any amplification
 # from an unexpectedly large or malicious response reaching the parser.
 import xml.etree.ElementTree as ET
+import zipfile
 from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
+from ._geo import haversine_km as _haversine_km
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import haversine_km as _haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 

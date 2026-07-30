@@ -30,7 +30,6 @@ from custom_components.fuelcompare_ie.providers.ie_pumps import (
     _parse_xml,
 )
 
-
 # ---------------------------------------------------------------------------
 # Test fixtures / XML helpers
 # ---------------------------------------------------------------------------

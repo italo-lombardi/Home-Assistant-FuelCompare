@@ -10,17 +10,16 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.be_carbu import (
-    BeCarbuProvider,
     _FUEL_KEY_TO_SLUG,
     _HEADERS,
     _JSON_HEADERS,
     _LOCATION_URL,
     _STATION_LISTING_URL,
+    BeCarbuProvider,
     _extract_price_from_text,
     _normalise_town,
     _parse_station_html,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures and builder helpers
@@ -1204,6 +1203,7 @@ async def test_async_list_stations_lat_lng_only_no_postal_code_returns_empty() -
 async def test_async_list_stations_gather_exception_returns_empty() -> None:
     """async_list_stations returns [] when asyncio.gather raises unexpectedly."""
     import asyncio as _real_asyncio
+
     import custom_components.fuelcompare_ie.providers.be_carbu as _be_carbu_mod
 
     provider = _make_provider(postal_code=_POSTAL_CODE)

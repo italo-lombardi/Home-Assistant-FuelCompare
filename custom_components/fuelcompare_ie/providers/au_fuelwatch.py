@@ -31,7 +31,7 @@ from xml.etree import ElementTree as ET
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from ._geo import filter_within_radius
 from .base import BaseProvider, ProviderError, StationData
 

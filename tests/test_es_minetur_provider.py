@@ -10,8 +10,8 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.es_minetur import (
-    EsMineturProvider,
     _HEADERS,
+    EsMineturProvider,
     _find_station,
     _haversine_km,
     _normalise_fecha,
@@ -19,7 +19,6 @@ from custom_components.fuelcompare_ie.providers.es_minetur import (
     _parse_price,
     _parse_station,
 )
-
 
 # ---------------------------------------------------------------------------
 # Constants

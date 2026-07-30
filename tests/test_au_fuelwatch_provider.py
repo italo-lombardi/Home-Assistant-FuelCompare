@@ -7,11 +7,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from aiohttp import ClientError
 
-from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
-    AuFuelwatchProvider,
     _HEADERS,
     _RSS_URL,
+    AuFuelwatchProvider,
     _build_display_label,
     _make_station_id,
     _parse_is_open,
@@ -20,7 +19,7 @@ from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
     _parse_rss_items,
     _parse_station_base,
 )
-
+from custom_components.fuelcompare_ie.providers.base import ProviderError
 
 # ---------------------------------------------------------------------------
 # RSS fixture data
@@ -1438,10 +1437,11 @@ async def test_haversine_km_known_distance() -> None:
 
 async def test_fetch_all_products_skips_item_with_no_coords() -> None:
     """Items without lat/lng coords are skipped (_make_station_id returns None)."""
+    from unittest.mock import AsyncMock, MagicMock
+
     from custom_components.fuelcompare_ie.providers.au_fuelwatch import (
         AuFuelwatchProvider,
     )
-    from unittest.mock import AsyncMock, MagicMock
 
     # RSS with one valid item (has coords) and one missing coords
     rss_mixed = b"""<?xml version="1.0" encoding="utf-8"?>

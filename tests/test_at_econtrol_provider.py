@@ -8,16 +8,15 @@ import pytest
 from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.at_econtrol import (
-    AtEcontrolProvider,
     _BASE_URL,
     _FUEL_CODES,
     _HEADERS,
+    AtEcontrolProvider,
     _build_station_data,
     _extract_prices,
     _format_address,
 )
 from custom_components.fuelcompare_ie.providers.base import ProviderError
-
 
 # ---------------------------------------------------------------------------
 # Test fixtures / constants

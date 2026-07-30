@@ -9,8 +9,7 @@ from .au_nsw import AuNswProvider
 from .au_qld import AuQldProvider
 from .au_vic import AuVicProvider
 from .ba_fuel import BaFuelProvider
-from .base import BaseProvider, ProviderError, StationData
-from .base import ALL_SENSOR_KEYS
+from .base import ALL_SENSOR_KEYS, BaseProvider, ProviderError, StationData
 from .be_carbu import BeCarbuProvider
 from .ca_qc import CaQcProvider
 from .ch_tcs import ChTcsProvider

@@ -26,12 +26,12 @@ from typing import Any, ClassVar
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
+from ._geo import filter_within_radius
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 

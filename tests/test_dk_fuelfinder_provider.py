@@ -9,15 +9,14 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.dk_fuelfinder import (
-    DkFuelFinderProvider,
     _HEADERS,
     _LISTPRICES_URL,
     _MAX_DKK_PER_LITRE,
-    _TableParser,
+    DkFuelFinderProvider,
     _parse_price_dkk,
     _parse_table,
+    _TableParser,
 )
-
 
 # ---------------------------------------------------------------------------
 # Sample HTML fixtures

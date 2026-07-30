@@ -2050,8 +2050,8 @@ def _make_simple_float_sensor(data_key: str, data: dict):
 def test_make_location_factory_returns_simple_str_sensor() -> None:
     """_INFO_SENSOR_REGISTRY['location'] creates a StationSimpleStrSensor for the location key."""
     from custom_components.fuelcompare_ie.sensor import (
-        StationSimpleStrSensor,
         _INFO_SENSOR_REGISTRY,
+        StationSimpleStrSensor,
     )
 
     coord = _make_coordinator({"location": "53.3498,-6.2603"})
@@ -2696,9 +2696,9 @@ async def test_async_step_name_show_on_map_stored_in_options(
 ) -> None:
     """show_on_map=True set on flow (_show_on_map) is stored in options after name step."""
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
-    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
 
     class _LatLonProvider(BaseProvider):
         COUNTRY = "AT"
@@ -2743,9 +2743,9 @@ async def test_async_step_name_show_on_map_absent_when_no_lat_lon_caps(
 ) -> None:
     """async_step_name schema excludes show_on_map when provider has no lat/lon caps."""
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
-    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
 
     class _NoLatLonProvider(BaseProvider):
         COUNTRY = "IE"
@@ -3118,14 +3118,14 @@ async def test_options_flow_location_entry_with_location_caps_shows_show_on_map(
     hass: HomeAssistant,
 ) -> None:
     """Location entry with latitude/longitude CAPABILITIES shows show_on_map toggle."""
-    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
-    from custom_components.fuelcompare_ie.providers.base import BaseProvider
     from custom_components.fuelcompare_ie.const import (
         CONF_LATITUDE,
         CONF_LONGITUDE,
         CONF_RADIUS_KM,
         CONF_SHOW_ON_MAP,
     )
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
 
     class _FakeLocLatLon(BaseProvider):
         COUNTRY = "NO"
@@ -3385,9 +3385,9 @@ async def test_options_flow_station_entry_with_lat_lon_shows_show_on_map(
     hass: HomeAssistant,
 ) -> None:
     """Options flow for a station_id provider with lat/lon caps shows show_on_map toggle."""
+    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
-    from custom_components.fuelcompare_ie.const import CONF_SHOW_ON_MAP
 
     class _FakeLatLonStation(BaseProvider):
         COUNTRY = "HR"
@@ -3762,9 +3762,9 @@ async def test_county_search_multi_station_unaffected_by_location_fix(
     - A duplicate station is still rejected.
     """
     from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.const import CONF_STATION_COUNTY
     from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
     from custom_components.fuelcompare_ie.providers.base import BaseProvider
-    from custom_components.fuelcompare_ie.const import CONF_STATION_COUNTY
 
     class _CountySearchProvider(BaseProvider):
         COUNTRY = "IE"

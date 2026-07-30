@@ -83,7 +83,6 @@ lat/lng is supplied.  When a postal_code kwarg is present it is used directly.
 from __future__ import annotations
 
 import asyncio
-
 import logging
 import re
 from typing import Any, ClassVar
@@ -91,8 +90,8 @@ from typing import Any, ClassVar
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
 from ._geo import haversine_km
+from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 

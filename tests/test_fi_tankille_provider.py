@@ -10,10 +10,10 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.fi_tankille import (
-    FiTankilleProvider,
     _API_URL,
     _HEADERS,
     _NATIONAL_STATION_ID,
+    FiTankilleProvider,
     _extract_prices_from_jsonstat2,
     _parse_price,
 )

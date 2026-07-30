@@ -9,15 +9,14 @@ from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.lu_carbu import (
-    LuCarbuProvider,
     _BASE_URL,
     _FUEL_IDS,
     _HEADERS,
+    LuCarbuProvider,
     _find_station,
     _parse_coord,
     _parse_price,
 )
-
 
 # ---------------------------------------------------------------------------
 # Test data helpers

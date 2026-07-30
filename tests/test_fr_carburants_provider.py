@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import io
 import time
-import zipfile
 import xml.etree.ElementTree as ET
+import zipfile
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -13,10 +13,10 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.fr_carburants import (
-    FrCarburantsProvider,
     _DATA_URL,
     _HEADERS,
     _NOM_TO_KEY,
+    FrCarburantsProvider,
     _build_station_data,
     _find_station_in_root,
     _haversine_km,
@@ -1783,10 +1783,9 @@ async def test_fetch_and_parse_xml_returns_cached_element_on_cache_hit() -> None
 
 async def test_fetch_xml_raises_provider_error_when_xml_exceeds_size_limit() -> None:
     """_fetch_xml raises ProviderError when the extracted XML content exceeds 50 MB."""
-    from unittest.mock import patch
-
     # Make _extract_xml return data that is actually > 50 MB by patching zf.read
     import zipfile as _zipfile
+    from unittest.mock import patch
 
     valid_zip = _make_zip(_PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24=""))
     resp = _make_mock_response(200, body=valid_zip)

@@ -56,7 +56,6 @@ from custom_components.fuelcompare_ie.providers.se_bensinpriser import (
 )
 from custom_components.fuelcompare_ie.providers.si_goriva import SiGorivaProvider
 
-
 pytestmark = [pytest.mark.smoke, pytest.mark.asyncio]
 
 

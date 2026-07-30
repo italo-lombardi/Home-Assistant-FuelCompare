@@ -8,15 +8,14 @@ import pytest
 from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.au_qld import (
-    AuQldProvider,
     _FUELID_MAP,
-    _SITES_URL,
     _PRICES_URL,
+    _SITES_URL,
+    AuQldProvider,
     _build_index,
     _build_station_data,
 )
 from custom_components.fuelcompare_ie.providers.base import ProviderError
-
 
 # ---------------------------------------------------------------------------
 # Shared sample data

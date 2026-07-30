@@ -10,9 +10,9 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
-    GbFuelfinderProvider,
     _CSV_URL,
     _HEADERS,
+    GbFuelfinderProvider,
     _find_row_by_id,
     _haversine_km,
     _parse_js_timestamp,
@@ -22,7 +22,6 @@ from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
     _pence_to_gbp,
     _safe_float,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures / constants

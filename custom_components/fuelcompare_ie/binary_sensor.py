@@ -5,7 +5,8 @@ from __future__ import annotations
 import json as json_lib
 import logging
 import re
-from datetime import datetime, time as dt_time
+from datetime import datetime
+from datetime import time as dt_time
 
 import homeassistant.util.dt as dt_util
 from homeassistant.components.binary_sensor import (

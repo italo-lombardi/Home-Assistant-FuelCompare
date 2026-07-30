@@ -9,15 +9,14 @@ from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.md_fuel import (
-    MdFuelProvider,
     _HEADERS,
     _NATIONAL_STATION_ID,
     _URL_BENZINA_95,
     _URL_MOTORINA,
+    MdFuelProvider,
     _extract_price_from_html,
     _parse_price,
 )
-
 
 # ---------------------------------------------------------------------------
 # Sample HTML fixtures

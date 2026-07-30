@@ -9,13 +9,13 @@ from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ch_tcs import (
-    ChTcsProvider,
     _API_URL,
     _CH_BBOX,
     _FUEL_MAP,
     _FUEL_TYPES,
     _GRID_SPLITS,
     _HEADERS,
+    ChTcsProvider,
     _build_station_data,
     _build_sub_bboxes,
     _parse_price,

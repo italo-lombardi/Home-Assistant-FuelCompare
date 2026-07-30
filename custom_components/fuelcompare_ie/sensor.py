@@ -19,7 +19,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DAYS, DOMAIN, CONF_STATION_PAGE_URL
+from .const import CONF_STATION_PAGE_URL, DAYS, DOMAIN
 from .coordinator import FuelCompareIECoordinator
 from .helpers import _device_info
 
