@@ -1,5 +1,6 @@
 [lint]
 ignore = [
+  "BLE001",   # broad Exception catches are intentional in provider fetch methods
   "E402",     # module-level import not at top — needed after pytest.importorskip()
   "DTZ001",   # tz-aware datetime not required; provider data has no tz info
   "DTZ007",   # strptime without %z — provider timestamps are naive by design
