@@ -182,7 +182,7 @@ Example automation:
 
 ## Supported languages
 
-35 translations: Albanian, Basque, Bosnian, Bulgarian, Catalan, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, Galician, German, Greek, Hungarian, Icelandic, Irish, Italian, Latvian, Lithuanian, Luxembourgish, Norwegian Bokmål, Norwegian Nynorsk, Polish, Portuguese, Romanian, Serbian, Slovak, Slovenian, Spanish, Swedish, Ukrainian, Welsh.
+41 translations: Albanian, Basque, Bosnian, Bulgarian, Catalan, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, Galician, German, Greek, Hungarian, Icelandic, Irish, Italian, Japanese, Korean, Latvian, Lithuanian, Luxembourgish, Norwegian Bokmål, Norwegian Nynorsk, Polish, Portuguese, Romanian, Russian, Serbian, Slovak, Slovenian, Spanish, Swedish, Turkish, Ukrainian, Welsh.
 
 ## Sibling integrations
 

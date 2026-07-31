@@ -11,7 +11,7 @@ Live fuel prices from 36 providers across 30 countries (plus EU) — Ireland, UK
 - Stale-retention: entities keep their last known value through transient outages
 - Station picker in config flow for location-based providers — sorted cheapest-first
 - Currency-aware: EUR, GBP, AUD per provider
-- Translated into 35 languages
+- Translated into 41 languages
 
 ## Setup
 

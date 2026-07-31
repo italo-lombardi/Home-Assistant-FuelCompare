@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **41-language translation coverage.** Six new locales added: Chinese
+  Simplified (`zh-Hans`), Chinese Traditional (`zh-Hant`), Russian (`ru`),
+  Japanese (`ja`), Korean (`ko`), and Turkish (`tr`). Coverage now matches
+  the ~30-language target set by HA core for high-quality integrations.
+
+### Fixed
+- **All 35 existing translations backfilled** with seven fields that were added
+  to `en.json` after the original translations were written and never
+  propagated: `show_on_map` (×2), `provider_label`, `country_code`,
+  `station_page_url`, `station_id`, and `device_tracker.station_tracker`.
+- **`fuelcompare_ie_deprecation` description updated to past tense** in all 35
+  legacy locales — the text previously said the site "plans to close" (future)
+  rather than "was shut down on 30 June 2026" (fact).
+- **`abort.no_stations_found` / `abort.no_stations_found_location`** now carry
+  the "Cancel and try…" instruction that distinguishes them from the error
+  variants, across all 35 legacy locales.
+- **Language-specific fixes:** de formal/informal register inconsistency (`du`
+  → `Sie`); fr `device_tracker` false-friend "Location" → "Emplacement";
+  fr `working_hours` → "Horaires d'ouverture"; da typo
+  "brændstofpriskoilde"; da/bs/ca/gl wrong county term in abort message;
+  el sensor latitude/longitude abbreviations expanded; es/et/pt spurious
+  "Fuel Compare" removed from station step title; et typo "maakondakondasid";
+  eu Basque `has_disabled_access` grammar; fi step capitalisation; ga
+  sentence-case fixes; is Icelandic verb-as-noun labels; lb "Ubidder" →
+  "Ubidden", truncated "Statiounsnum" fixed; lv capitalisation; nl
+  `has_electric_charging` natural phrasing, `working_hours` disambiguated
+  from `opening_hours`; nn "vellukkast" → "vellykka"; pt register
+  inconsistency; ro `opening_hours` disambiguated; ru LPG/premium fuel codes
+  restored to English; sr Latin-script sentence in Cyrillic file and word-order
+  error fixed; tr `opening_hours` → "Açılış Saatleri" (distinct from
+  `working_hours`); uk deprecation description was missing the
+  "delete and re-add" instruction.
+
 ## [0.7.3] - 2026-07-22
 
 ### Added
