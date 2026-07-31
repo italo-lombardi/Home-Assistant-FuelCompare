@@ -17,3 +17,6 @@ ignore = [
   "TRY203",   # remove re-raise handler — kept for clarity
   "TRY401",   # redundant exc in logging.exception — explicit is fine
 ]
+
+[format]
+exclude = ["*.md"]
