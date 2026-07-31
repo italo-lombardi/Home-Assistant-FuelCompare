@@ -46,7 +46,7 @@
         "description": "Alegeți o stație, regiune sau țară din lista de mai jos.",
         "data": {
           "station_id": "Stație",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Afișați stația pe hartă"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Această stație este deja configurată.",
       "no_providers_for_country": "Nu există furnizori de date disponibili pentru această țară.",
       "no_counties_for_country": "Nu sunt configurate județe pentru țara selectată.",
-      "no_stations_found": "Nu s-au găsit stații pentru acest județ. Încercați un alt județ.",
-      "no_stations_found_location": "Nu s-au găsit stații în apropierea acestor coordonate. Încercați să ajustați locația sau să măriți raza de căutare.",
+      "no_stations_found": "Nu s-au găsit stații pentru acest județ. Anulați și încercați un alt județ.",
+      "no_stations_found_location": "Nu s-au găsit stații în apropierea acestor coordonate. Anulați și încercați o rază de căutare mai mare sau o altă locație.",
       "no_stations_found_global": "Lista furnizorului nu a putut fi încărcată. Sursa poate fi indisponibilă sau lipsește o dependență necesară. Consultați jurnalele Home Assistant pentru detalii."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
       "title": "fuelcompare.ie se închide",
-      "description": "Site-ul fuelcompare.ie este programat să se închidă la **30 iunie 2026**. Stația dvs. **{entry_title}** va înceta să primească actualizări de prețuri după această dată. Luați în considerare trecerea la o altă sursă de prețuri pentru combustibili din Irlanda, cum ar fi FuelFinder IE sau IE Pumps."
+      "description": "Site-ul fuelcompare.ie a fost închis la **30 iunie 2026** și nu mai este accesibil. Stația dvs. **{entry_title}** nu va mai primi actualizări de prețuri. Vă rugăm să ștergeți această intrare și să adăugați una nouă folosind o altă sursă irlandeză de prețuri la combustibili, cum ar fi **FuelFinder IE** sau **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Verificarea certificatului TLS pumps.ie dezactivată",
@@ -156,7 +156,7 @@
         "name": "Servicii"
       },
       "opening_hours": {
-        "name": "Program de lucru (OSM)"
+        "name": "Program de deschidere (OSM)"
       },
       "payments": {
         "name": "Plăți"
@@ -177,16 +177,16 @@
         "name": "Program de lucru"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Furnizor de date"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Țară"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL pagina stației"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID stație"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Locație"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Cheie API",
           "radius_km": "Raza de căutare (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Afișați stația pe hartă"
         }
       }
     }

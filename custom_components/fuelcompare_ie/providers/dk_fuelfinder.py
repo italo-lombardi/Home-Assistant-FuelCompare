@@ -168,7 +168,7 @@ class _TableParser(HTMLParser):
         elif tag in ("th", "td") and self._in_cell:
             self._in_cell = False
             # Strip zero-width spaces and surrounding whitespace from cell text.
-            cell_text = "".join(self._current_text).replace("​", "").strip()
+            cell_text = "".join(self._current_text).replace("\u200b", "").strip()
             self._current_row.append(cell_text)
         elif tag == "tr" and self._in_table:
             if self._current_row:
@@ -223,7 +223,7 @@ def _parse_table(html: str) -> dict[str, dict[str, float | None]]:
         if col_idx == 0:
             continue  # brand column
         # Normalise: strip surrounding whitespace and zero-width spaces.
-        normalised = col_name.replace("​", "").strip()
+        normalised = col_name.replace("\u200b", "").strip()
         data_key = _COLUMN_MAP.get(normalised)
         if data_key:
             col_index_to_key[col_idx] = data_key
@@ -265,7 +265,7 @@ def _parse_price_dkk(raw: str | None) -> float | None:
     if not raw or not raw.strip():
         return None
     # Normalise: remove zero-width spaces and replace comma separator.
-    cleaned = raw.replace("​", "").strip().replace(",", ".")
+    cleaned = raw.replace("\u200b", "").strip().replace(",", ".")
     try:
         val = float(cleaned)
     except (ValueError, TypeError):
@@ -404,7 +404,7 @@ class DkFuelFinderProvider(BaseProvider):
             for brand_key in brand_table:
                 if brand_key.lower() == station_id_lower:
                     return brand_key
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for '%s': %s", station_id, err)
         return None
 
@@ -438,7 +438,7 @@ class DkFuelFinderProvider(BaseProvider):
         """
         try:
             brand_table = await self._fetch_table(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

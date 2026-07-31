@@ -9,9 +9,9 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.no_drivstoff import (
-    NoDrivstoffProvider,
     _DEFAULT_BASE_URL,
     _HEADERS,
+    NoDrivstoffProvider,
     _display_name,
     _extract_prices,
     _find_station,

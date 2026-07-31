@@ -90,7 +90,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -514,7 +514,7 @@ async def _parse_xlsx(xlsx_bytes: bytes) -> dict[str, float | None]:
         ProviderError: The bytes cannot be parsed as a valid XLSX workbook.
     """
     try:
-        import openpyxl  # local import — openpyxl is not always installed  # noqa: PLC0415
+        import openpyxl  # local import — openpyxl is not always installed
 
         wb = await asyncio.get_running_loop().run_in_executor(
             None,
@@ -564,7 +564,7 @@ async def _parse_xlsx(xlsx_bytes: bytes) -> dict[str, float | None]:
     finally:
         try:
             wb.close()  # type: ignore[union-attr]
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
 
     _LOGGER.debug(

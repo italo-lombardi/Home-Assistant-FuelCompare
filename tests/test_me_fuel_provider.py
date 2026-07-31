@@ -9,11 +9,10 @@ import pytest
 
 openpyxl = pytest.importorskip("openpyxl")
 
-from aiohttp import ClientError  # noqa: E402
+from aiohttp import ClientError
 
-from custom_components.fuelcompare_ie.providers.base import ProviderError  # noqa: E402
-from custom_components.fuelcompare_ie.providers.me_fuel import (  # noqa: E402
-    MeFuelProvider,
+from custom_components.fuelcompare_ie.providers.base import ProviderError
+from custom_components.fuelcompare_ie.providers.me_fuel import (
     _CKAN_SEARCH_URL,
     _COL_EURODIESEL,
     _COL_EUROSUPER_95,
@@ -23,11 +22,11 @@ from custom_components.fuelcompare_ie.providers.me_fuel import (  # noqa: E402
     _HEADERS,
     _PRICE_ROW,
     _STATION_ID_ME,
+    MeFuelProvider,
     _parse_price,
     _parse_prices_from_description,
     _parse_xlsx,
 )
-
 
 # ---------------------------------------------------------------------------
 # CKAN API response fixtures
@@ -295,7 +294,7 @@ def test_station_id_me_constant() -> None:
 
 
 def test_headers_include_user_agent() -> None:
-    assert "User-Agent" in _HEADERS and _HEADERS["User-Agent"]
+    assert _HEADERS.get("User-Agent")
 
 
 # ---------------------------------------------------------------------------

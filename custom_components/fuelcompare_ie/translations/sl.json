@@ -46,7 +46,7 @@
         "description": "Izberite postajo, regijo ali državo s spodnjega seznama.",
         "data": {
           "station_id": "Postaja",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Prikaži postajo na zemljevidu"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Ta postaja je že nastavljena.",
       "no_providers_for_country": "Za to državo ni na voljo nobenih ponudnikov podatkov.",
       "no_counties_for_country": "Za izbrano državo ni konfiguriranih občin.",
-      "no_stations_found": "Za to okrožje ni bilo najdenih postaj. Poskusite z drugim okrožjem.",
-      "no_stations_found_location": "V bližini teh koordinat ni bilo najdenih postaj. Poskusite prilagoditi lokacijo ali povečati polmer iskanja.",
+      "no_stations_found": "Za to okrožje ni bilo najdenih postaj. Prekličite in poskusite z drugim okrožjem.",
+      "no_stations_found_location": "V bližini teh koordinat ni bilo najdenih postaj. Prekličite in poskusite z večjim polmerom iskanja ali drugo lokacijo.",
       "no_stations_found_global": "Seznama ponudnika ni bilo mogoče naložiti. Vir morda ni dosegljiv ali pa manjka zahtevana odvisnost. Podrobnosti poiščite v dnevnikih Home Assistant."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie se zapira",
-      "description": "Spletna stran fuelcompare.ie je načrtovana za zaprtje **30. junija 2026**. Vaša postaja **{entry_title}** bo po tem datumu prenehala prejemati posodobitve cen. Razmislite o prehodu na drug irski vir cen goriva, kot sta FuelFinder IE ali IE Pumps."
+      "title": "fuelcompare.ie je prenehalo delovati",
+      "description": "Spletna stran fuelcompare.ie je bila zaprta **30. junija 2026** in ni več dostopna. Vaša postaja **{entry_title}** ne bo prejemala nadaljnjih posodobitev cen. Izbrišite ta vnos in dodajte novega z drugim irskim virom cen goriva, kot sta **FuelFinder IE** ali **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Preverjanje TLS certifikata pumps.ie onemogočeno",
@@ -177,16 +177,16 @@
         "name": "Delovni čas"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Ponudnik podatkov"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Država"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL strani postaje"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID postaje"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Lokacija"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API ključ",
           "radius_km": "Iskalni polmer (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Prikaži postajo na zemljevidu"
         }
       }
     }

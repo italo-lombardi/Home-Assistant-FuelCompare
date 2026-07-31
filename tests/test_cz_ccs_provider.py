@@ -9,10 +9,10 @@ from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.cz_ccs import (
-    CzCcsProvider,
     _HEADERS,
     _NATIONAL_STATION_ID,
     _PRICES_URL,
+    CzCcsProvider,
     _parse_prices,
     _safe_price,
 )

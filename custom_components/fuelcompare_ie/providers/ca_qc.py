@@ -59,9 +59,9 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from ..const import API_TIMEOUT, UA_HEADER
 from ._geo import haversine_km
+from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,8 +106,8 @@ def _make_station_id(name: str, address: str) -> str:
     Returns:
         16-character lowercase hex string.
     """
-    key = f"{name}|{address}".encode("utf-8")
-    return hashlib.md5(key, usedforsecurity=False).hexdigest()[:16]  # noqa: S324
+    key = f"{name}|{address}".encode()
+    return hashlib.md5(key, usedforsecurity=False).hexdigest()[:16]
 
 
 def _parse_price(price_raw: Any) -> float | None:
@@ -354,7 +354,7 @@ class CaQcProvider(BaseProvider):
                 fid = _make_station_id(name, address)
                 if fid == station_id:
                     return name or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_fetch_station_name failed for station %s: %s", station_id, err
             )
@@ -396,7 +396,7 @@ class CaQcProvider(BaseProvider):
 
         try:
             features = await self._fetch_geojson(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

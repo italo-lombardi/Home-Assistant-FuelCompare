@@ -9,9 +9,9 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.se_bensinpriser import (
-    SEBensinpriserProvider,
     _DATA_URL,
     _HEADERS,
+    SEBensinpriserProvider,
     _find_station,
     _parse_price,
     _parse_station,

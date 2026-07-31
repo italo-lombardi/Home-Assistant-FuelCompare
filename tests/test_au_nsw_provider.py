@@ -7,10 +7,13 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from aiohttp import ClientError
 
+from custom_components.fuelcompare_ie.providers._geo import (
+    haversine_km as _haversine_km,
+)
 from custom_components.fuelcompare_ie.providers.au_nsw import (
-    AuNswProvider,
-    _FUELTYPE_MAP,
     _API_URL,
+    _FUELTYPE_MAP,
+    AuNswProvider,
     _build_index,
     _build_station_data,
     _build_station_data_with_ts,
@@ -18,10 +21,6 @@ from custom_components.fuelcompare_ie.providers.au_nsw import (
     _parse_lastupdated,
 )
 from custom_components.fuelcompare_ie.providers.base import ProviderError
-from custom_components.fuelcompare_ie.providers._geo import (
-    haversine_km as _haversine_km,
-)
-
 
 # ---------------------------------------------------------------------------
 # Fixtures / shared sample data

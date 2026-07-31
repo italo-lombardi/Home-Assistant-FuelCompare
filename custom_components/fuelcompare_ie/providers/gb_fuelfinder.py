@@ -77,13 +77,13 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
+from ._geo import haversine_km as _haversine_km
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import haversine_km as _haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ class GbFuelfinderProvider(BaseProvider):
             row = _find_row_by_id(rows, station_id)
             if row:
                 return row.get("forecourts.trading_name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -266,7 +266,7 @@ class GbFuelfinderProvider(BaseProvider):
 
         try:
             rows = await self._fetch_csv(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

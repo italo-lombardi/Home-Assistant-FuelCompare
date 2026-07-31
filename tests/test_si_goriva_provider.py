@@ -9,16 +9,15 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.si_goriva import (
-    SiGorivaProvider,
     _FRANCHISE_URL,
     _HEADERS,
     _PRICE_KEY_MAP,
     _SEARCH_URL,
+    SiGorivaProvider,
     _haversine_km,
     _parse_price,
     _parse_station,
 )
-
 
 # ---------------------------------------------------------------------------
 # Constants / shared fixtures

@@ -39,7 +39,7 @@
         "description": "Vyberte stanici, region nebo zemi ze seznamu níže.",
         "data": {
           "station_id": "Stanice",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Zobrazit stanici na mapě"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Tato stanice je již nakonfigurována.",
       "no_providers_for_country": "Pro tuto zemi nejsou k dispozici žádní poskytovatelé dat.",
       "no_counties_for_country": "Pro vybranou zemi nejsou nastaveny žádné okresy.",
-      "no_stations_found": "Pro tento okres nebyly nalezeny žádné stanice. Zkuste jiný okres.",
-      "no_stations_found_location": "V blízkosti těchto souřadnic nebyly nalezeny žádné stanice. Zkuste upravit polohu nebo zvětšit poloměr hledání.",
+      "no_stations_found": "Pro tento okres nebyly nalezeny žádné stanice. Zrušte a zkuste jiný okres.",
+      "no_stations_found_location": "V blízkosti těchto souřadnic nebyly nalezeny žádné stanice. Zrušte a zkuste větší poloměr hledání nebo jinou polohu.",
       "no_stations_found_global": "Nepodařilo se načíst seznam poskytovatele. Zdroj může být nedostupný nebo chybí požadovaná závislost. Podrobnosti najdete v protokolech Home Assistant."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie se vypíná",
-      "description": "Webová stránka fuelcompare.ie je naplánována k vypnutí **30. června 2026**. Vaše stanice **{entry_title}** přestane přijímat aktualizace cen po tomto datu. Zvažte přechod na jiný irský zdroj cen paliv, jako je FuelFinder IE nebo IE Pumps."
+      "title": "fuelcompare.ie byl vypnut",
+      "description": "Webová stránka fuelcompare.ie byla vypnuta **30. června 2026** a již není dostupná. Vaše stanice **{entry_title}** nebude dostávat další aktualizace cen. Odstraňte prosím tento záznam a přidejte nový s použitím jiného irského zdroje cen paliv, například **FuelFinder IE** nebo **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Ověření TLS certifikátu pumps.ie je zakázáno",
@@ -177,16 +177,16 @@
         "name": "Pracovní doba"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Poskytovatel dat"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Země"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL stránky stanice"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID Stanice"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Poloha"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API klíč",
           "radius_km": "Poloměr hledání (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Zobrazit stanici na mapě"
         }
       }
     }

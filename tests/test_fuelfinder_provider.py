@@ -10,11 +10,10 @@ from aiohttp import ClientError, ClientSession
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ie_fuelfinder import (
-    IEFuelFinderProvider,
     _HEADERS,
+    IEFuelFinderProvider,
     _find_station,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

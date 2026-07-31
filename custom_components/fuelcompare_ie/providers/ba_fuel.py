@@ -65,7 +65,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -247,7 +247,7 @@ class BaFuelProvider(BaseProvider):
 
         try:
             html = await self._fetch_city_html(session, city_slug)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_list_stations failed for city '%s': %s", city_slug, err
             )
@@ -310,7 +310,7 @@ class BaFuelProvider(BaseProvider):
                 err,
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unexpected error fetching cijenegoriva.ba city '%s': %s",
                 city_slug,
@@ -580,7 +580,7 @@ def _parse_station_table(html: str) -> list[dict[str, Any]]:
     parser = _TableParser()
     try:
         parser.feed(html)
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         _LOGGER.debug("HTML parse error in _parse_station_table: %s", err)
         return []
 

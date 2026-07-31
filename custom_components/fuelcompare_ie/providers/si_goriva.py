@@ -46,13 +46,13 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
+from ._geo import haversine_km as _haversine_km
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import haversine_km as _haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -253,7 +253,7 @@ class SiGorivaProvider(BaseProvider):
         try:
             franchise_map = await self._ensure_franchise_cache(session)
             all_stations = await self._get_all_stations_cached(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
@@ -424,7 +424,7 @@ class SiGorivaProvider(BaseProvider):
             ) as resp:
                 resp.raise_for_status()
                 franchises: list[dict[str, Any]] = await resp.json()
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.warning(
                 "goriva.si: failed to fetch franchise list (brand names will be absent): %s",
                 err,

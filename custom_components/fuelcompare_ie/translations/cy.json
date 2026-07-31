@@ -39,7 +39,7 @@
         "description": "Dewiswch orsaf, rhanbarth neu wlad o'r rhestr isod.",
         "data": {
           "station_id": "Gorsaf",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Dangos yr orsaf ar y map"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Mae'r orsaf hon eisoes wedi'i ffurfweddu.",
       "no_providers_for_country": "Nid oes darparwyr data ar gael ar gyfer y wlad hon.",
       "no_counties_for_country": "Nid oes siroedd wedi'u ffurfweddu ar gyfer y wlad a ddewiswyd.",
-      "no_stations_found": "Ni chanfuwyd gorsafoedd ar gyfer y sir hon. Rhowch gynnig ar sir wahanol.",
-      "no_stations_found_location": "Ni chanfuwyd gorsafoedd yn agos at y cyfesurynnau hyn. Rhowch gynnig ar addasu'r lleoliad neu gynyddu'r radiws chwilio.",
+      "no_stations_found": "Ni chanfuwyd gorsafoedd ar gyfer y sir hon. Diddymwch a rhowch gynnig ar sir wahanol.",
+      "no_stations_found_location": "Ni chanfuwyd gorsafoedd yn agos at y cyfesurynnau hyn. Diddymwch a rhowch gynnig ar radiws chwilio ehangach neu leoliad gwahanol.",
       "no_stations_found_global": "Methwyd llwytho rhestr y darparwr. Efallai bod y ffynhonnell i lawr neu fod dibyniaeth ofynnol ar goll. Edrychwch ar logiau Home Assistant am fanylion."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "Mae fuelcompare.ie yn cau",
-      "description": "Mae gwefan fuelcompare.ie wedi'i threfnu i gau ar **30 Mehefin 2026**. Bydd eich gorsaf **{entry_title}** yn rhoi'r gorau i dderbyn diweddariadau prisiau ar ôl y dyddiad hwnnw. Ystyriwch newid i ffynhonnell prisiau tanwydd Gwyddelig wahanol, fel FuelFinder IE neu IE Pumps."
+      "title": "Mae fuelcompare.ie wedi cau",
+      "description": "Caeodd gwefan fuelcompare.ie ar **30 Mehefin 2026** ac nid yw bellach yn hygyrch. Ni fydd eich gorsaf **{entry_title}** yn derbyn rhagor o ddiweddariadau prisiau. Dylech ddileu'r cofnod hwn a ychwanegu un newydd gan ddefnyddio ffynhonnell prisiau tanwydd Gwyddelig arall, megis **FuelFinder IE** neu **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Dilysu tystysgrif TLS pumps.ie wedi'i analluogi",
@@ -177,16 +177,16 @@
         "name": "Oriau Gweithio"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Darparwr Data"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Gwlad"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL Tudalen yr Orsaf"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID Gorsaf"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Lleoliad"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Allwedd API",
           "radius_km": "Radiws chwilio (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Dangos yr orsaf ar y map"
         }
       }
     }

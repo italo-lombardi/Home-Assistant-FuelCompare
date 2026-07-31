@@ -37,7 +37,7 @@ def _make_xlsx_bytes(
       Row 3: Netherlands (when include_nl=True)
     """
     try:
-        import openpyxl  # noqa: PLC0415
+        import openpyxl
     except ImportError:
         pytest.skip("openpyxl not installed — skipping XLSX builder")
 
@@ -568,8 +568,9 @@ async def test_parse_bulletin_raises_on_openpyxl_missing() -> None:
 @pytest.mark.asyncio
 async def test_parse_bulletin_raises_when_no_active_sheet() -> None:
     """_parse_bulletin raises ProviderError when workbook has no active sheet (line 340)."""
-    import openpyxl
     from unittest.mock import patch
+
+    import openpyxl
 
     mock_wb = MagicMock()
     mock_wb.active = None
@@ -604,8 +605,8 @@ async def test_parse_bulletin_skips_row_with_none_country_cell() -> None:
 @pytest.mark.asyncio
 async def test_async_fetch_raises_provider_error_on_client_response_error() -> None:
     """async_fetch wraps aiohttp ClientResponseError in ProviderError (line 285)."""
-    from aiohttp import ClientResponseError, RequestInfo
     import yarl
+    from aiohttp import ClientResponseError, RequestInfo
 
     request_info = RequestInfo(
         url=yarl.URL("https://example.com"),
@@ -635,8 +636,9 @@ async def test_async_fetch_raises_provider_error_on_client_response_error() -> N
 async def test_parse_bulletin_extracts_date_from_datetime_instance() -> None:
     """Line 350: when row 0, col 0 contains a datetime instance, bulletin_date uses date().isoformat()."""
     try:
-        import openpyxl  # noqa: PLC0415
-        from datetime import datetime as _dt  # noqa: PLC0415
+        from datetime import datetime as _dt
+
+        import openpyxl
     except ImportError:
         pytest.skip("openpyxl not installed")
 

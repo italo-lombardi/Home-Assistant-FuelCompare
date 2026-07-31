@@ -47,7 +47,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -236,7 +236,7 @@ class MdFuelProvider(BaseProvider):
                 session, _URL_BENZINA_95, "benzina_95"
             )
             motorina_price = await self._fetch_price(session, _URL_MOTORINA, "motorina")
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed to fetch ANRE prices: %s", err)
             benzina_price = None
             motorina_price = None
@@ -289,7 +289,7 @@ class MdFuelProvider(BaseProvider):
                 err,
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unexpected error fetching ANRE Moldova %s (%s): %s",
                 url,
@@ -350,7 +350,7 @@ def _extract_price_from_html(html: str, fuel_label: str = "") -> float | None:
         )
         return None
 
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         _LOGGER.debug(
             "ANRE Moldova: unexpected parse error for %s: %s", fuel_label, err
         )

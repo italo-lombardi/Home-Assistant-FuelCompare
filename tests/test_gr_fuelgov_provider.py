@@ -9,12 +9,11 @@ from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.gr_fuelgov import (
-    GrFuelgovProvider,
     _API_URL,
     _NATIONAL_AVG_ID,
     _NATIONAL_AVG_NAME,
+    GrFuelgovProvider,
 )
-
 
 # ---------------------------------------------------------------------------
 # Sample API payloads
@@ -934,7 +933,8 @@ async def test_async_list_stations_returns_empty_when_entries_empty_after_fetch(
     None
 ):
     """async_list_stations returns [] at line 246 when _fetch_payload returns payload with empty entries (line 246)."""
-    from unittest.mock import patch, AsyncMock as _AsyncMock
+    from unittest.mock import AsyncMock as _AsyncMock
+    from unittest.mock import patch
 
     payload_empty_entries = {"data": {"date": _DATE, "entries": []}}
 

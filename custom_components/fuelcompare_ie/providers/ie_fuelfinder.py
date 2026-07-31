@@ -93,8 +93,8 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData, MAX_STATION_URL_LEN
+from ..const import API_TIMEOUT, UA_HEADER
+from .base import MAX_STATION_URL_LEN, BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -356,7 +356,7 @@ class IEFuelFinderProvider(BaseProvider):
                 record = _find_station(stations_petrol, station_id)
                 if record:
                     return record.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -387,7 +387,7 @@ class IEFuelFinderProvider(BaseProvider):
                 self._fetch_stations(session, city=county, fuel="diesel"),
                 self._fetch_stations(session, city=county, fuel="petrol"),
             )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed for county %s: %s", county, err)
             return []
 
@@ -509,7 +509,7 @@ class IEFuelFinderProvider(BaseProvider):
                 err,
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unexpected error fetching FuelFinder stations city=%s fuel=%s: %s",
                 city,

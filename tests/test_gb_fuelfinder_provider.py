@@ -10,9 +10,9 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
-    GbFuelfinderProvider,
     _CSV_URL,
     _HEADERS,
+    GbFuelfinderProvider,
     _find_row_by_id,
     _haversine_km,
     _parse_js_timestamp,
@@ -22,7 +22,6 @@ from custom_components.fuelcompare_ie.providers.gb_fuelfinder import (
     _pence_to_gbp,
     _safe_float,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures / constants
@@ -91,7 +90,7 @@ def _make_csv_text(*rows: dict[str, str]) -> str:
     header = _CSV_HEADER
     lines = [header]
     for row in rows:
-        lines.append(",".join(row.get(k, "") for k in _BASE_ROW.keys()))
+        lines.append(",".join(row.get(k, "") for k in _BASE_ROW))
     return "\n".join(lines)
 
 

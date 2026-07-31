@@ -26,12 +26,12 @@ from typing import Any, ClassVar
 from aiohttp import ClientSession, ClientTimeout
 
 from ..const import API_TIMEOUT
+from ._geo import filter_within_radius
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -186,7 +186,7 @@ class PtDgegProvider(BaseProvider):
             resultado = data.get("resultado") or {}
             if isinstance(resultado, dict):
                 return resultado.get("Nome") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "DGEG: failed to fetch station name for %s: %s", station_id, err
             )
@@ -232,7 +232,7 @@ class PtDgegProvider(BaseProvider):
 
         try:
             data: dict[str, Any] = await _get_json(session, _SEARCH_URL, params)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("DGEG: async_list_stations request failed: %s", err)
             return []
 

@@ -20,7 +20,6 @@ from custom_components.fuelcompare_ie.sensor import (
     _parse_lastupdated,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -857,8 +856,8 @@ def test_category_sensor_handle_coordinator_update_clears_cache() -> None:
 
 async def test_setup_entry_always_creates_last_successful_fetch() -> None:
     """async_setup_entry always appends LastSuccessfulFetchSensor regardless of CAPABILITIES."""
-    from custom_components.fuelcompare_ie.sensor import async_setup_entry
     from custom_components.fuelcompare_ie.const import DOMAIN
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
 
     coord = _make_coordinator({"diesel": 1.65})
     coord.provider_capabilities = frozenset()  # empty caps — no optional sensors
@@ -880,8 +879,8 @@ async def test_setup_entry_always_creates_last_successful_fetch() -> None:
 
 async def test_setup_entry_last_successful_fetch_not_duplicated() -> None:
     """LastSuccessfulFetchSensor is created exactly once even when caps is non-empty."""
-    from custom_components.fuelcompare_ie.sensor import async_setup_entry
     from custom_components.fuelcompare_ie.const import DOMAIN
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
 
     coord = _make_coordinator({"diesel": 1.65})
     coord.provider_capabilities = frozenset({"diesel", "lastupdated"})
@@ -960,8 +959,8 @@ def test_station_page_url_sensor_unavailable_when_empty() -> None:
 
 async def test_setup_entry_always_creates_identity_sensors() -> None:
     """async_setup_entry always creates StationIdSensor, ProviderLabelSensor and CountrySensor; StationPageUrlSensor only when URL set."""
+    from custom_components.fuelcompare_ie.const import CONF_STATION_PAGE_URL, DOMAIN
     from custom_components.fuelcompare_ie.sensor import async_setup_entry
-    from custom_components.fuelcompare_ie.const import DOMAIN, CONF_STATION_PAGE_URL
 
     coord = _make_coordinator({})
     coord.provider_capabilities = frozenset()
@@ -988,8 +987,8 @@ async def test_setup_entry_always_creates_identity_sensors() -> None:
 
 async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
     """StationPageUrlSensor is skipped only when provider has no URL at all (no homepage, no template)."""
-    from custom_components.fuelcompare_ie.sensor import async_setup_entry
     from custom_components.fuelcompare_ie.const import DOMAIN
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
 
     coord = _make_coordinator({})
     coord.provider_capabilities = frozenset()
@@ -1017,8 +1016,8 @@ async def test_setup_entry_no_station_page_url_sensor_when_url_absent() -> None:
 
 async def test_setup_entry_station_page_url_from_provider_fallback() -> None:
     """StationPageUrlSensor created from provider homepage when entry.data has no URL."""
-    from custom_components.fuelcompare_ie.sensor import async_setup_entry
     from custom_components.fuelcompare_ie.const import DOMAIN
+    from custom_components.fuelcompare_ie.sensor import async_setup_entry
 
     coord = _make_coordinator({})
     coord.provider_capabilities = frozenset()

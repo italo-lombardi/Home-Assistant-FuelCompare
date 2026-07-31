@@ -39,7 +39,7 @@
         "description": "Trieu una estació, regió o país de la llista següent.",
         "data": {
           "station_id": "Estació",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Mostra l'estació al mapa"
         }
       },
       "location": {
@@ -71,16 +71,16 @@
     "abort": {
       "already_configured": "Aquesta estació ja està configurada.",
       "no_providers_for_country": "No hi ha proveïdors de dades disponibles per a aquest país.",
-      "no_counties_for_country": "No hi ha comarques configurades per al país seleccionat.",
-      "no_stations_found": "No s'han trobat estacions per a aquest comtat. Proveu amb un comtat diferent.",
-      "no_stations_found_location": "No s'han trobat estacions properes a aquestes coordenades. Proveu d'ajustar la ubicació o d'augmentar el radi de cerca.",
+      "no_counties_for_country": "No hi ha comtats configurats per al país seleccionat.",
+      "no_stations_found": "No s'han trobat estacions per a aquest comtat. Cancel·leu i proveu amb un comtat diferent.",
+      "no_stations_found_location": "No s'han trobat estacions properes a aquestes coordenades. Cancel·leu i proveu amb un radi de cerca més ampli o una ubicació diferent.",
       "no_stations_found_global": "No s'ha pogut carregar la llista del proveïdor. És possible que el servei no estigui disponible o que falti una dependència necessària. Consulteu els registres de Home Assistant per a més detalls."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie tancarà",
-      "description": "El lloc web fuelcompare.ie té previst tancar el **30 de juny de 2026**. La vostra estació **{entry_title}** deixarà de rebre actualitzacions de preus després d'aquesta data. Considereu canviar a una altra font de preus de combustible irlandesa, com ara FuelFinder IE o IE Pumps."
+      "title": "fuelcompare.ie ha tancat",
+      "description": "El lloc web fuelcompare.ie va tancar el **30 de juny de 2026** i ja no és accessible. La vostra estació **{entry_title}** no rebrà més actualitzacions de preus. Suprimiu aquesta entrada i afegiu-ne una de nova amb una altra font de preus de combustible irlandesa, com ara **FuelFinder IE** o **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Verificació del certificat TLS de pumps.ie desactivada",
@@ -177,16 +177,16 @@
         "name": "Horari d'atenció"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Proveïdor de dades"
       },
       "country_code": {
-        "name": "Country"
+        "name": "País"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL de la pàgina de l'estació"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID de l'estació"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Ubicació"
       }
     }
   },
@@ -238,9 +238,9 @@
       "init": {
         "title": "Opcions",
         "data": {
-          "api_key": "Clau API",
+          "api_key": "Clau d'API",
           "radius_km": "Radi de cerca (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Mostra l'estació al mapa"
         }
       }
     }

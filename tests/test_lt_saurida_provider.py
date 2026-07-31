@@ -9,9 +9,9 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.lt_saurida import (
-    LtSauridaProvider,
     _HEADERS,
     _PRICES_URL,
+    LtSauridaProvider,
     _find_station,
     _header_to_data_key,
     _parse_price_eur,

@@ -87,13 +87,13 @@ from zoneinfo import ZoneInfo
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
+from ._geo import filter_within_radius
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import filter_within_radius
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -252,7 +252,7 @@ class AuNswProvider(BaseProvider):
             station = station_map.get(station_id)
             if station:
                 return station.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -294,7 +294,7 @@ class AuNswProvider(BaseProvider):
 
         try:
             raw = await self._fetch_raw(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

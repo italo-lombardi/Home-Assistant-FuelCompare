@@ -7,20 +7,19 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from aiohttp import ClientError, ClientResponseError
 
-from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.al_fuel import (
-    AlFuelProvider,
     _COUNTRY_LABEL,
     _FALLBACK_URL,
     _HEADERS,
     _PRIMARY_URL,
     _STATION_ID,
+    AlFuelProvider,
     _build_station_data,
     _extract_price_from_cell,
     _parse_albania_row,
     _strip_tags,
 )
-
+from custom_components.fuelcompare_ie.providers.base import ProviderError
 
 # ---------------------------------------------------------------------------
 # HTML fixtures

@@ -52,13 +52,13 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
+from ._geo import haversine_km as _haversine_km
 from .base import (
     BaseProvider,
     ProviderError,
     StationData,
 )
-from ._geo import haversine_km as _haversine_km
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -261,7 +261,7 @@ class EsMineturProvider(BaseProvider):
 
         try:
             payload = await self._fetch_raw(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations fetch failed: %s", err)
             return []
 

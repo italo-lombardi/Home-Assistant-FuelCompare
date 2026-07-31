@@ -53,7 +53,7 @@ from typing import ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -286,7 +286,7 @@ class AlFuelProvider(BaseProvider):
         except ClientResponseError as err:
             _LOGGER.debug("AlFuel HTTP error for %s: %s", url, err)
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("AlFuel unexpected error for %s: %s", url, err)
             return None
 

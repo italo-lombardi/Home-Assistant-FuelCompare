@@ -106,9 +106,9 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from ..const import API_TIMEOUT, UA_HEADER
 from ._geo import filter_within_radius
+from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -282,7 +282,7 @@ class AuQldProvider(BaseProvider):
             site = site_map.get(station_id)
             if site:
                 return site.get("N") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "AuQldProvider: failed to fetch station name for %s: %s",
                 station_id,
@@ -331,7 +331,7 @@ class AuQldProvider(BaseProvider):
 
         try:
             sites_raw, prices_raw = await self._fetch_raw(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("AuQldProvider: async_list_stations fetch failed: %s", err)
             return []
 

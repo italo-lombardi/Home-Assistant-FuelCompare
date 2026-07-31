@@ -159,7 +159,7 @@ class _TableParser(HTMLParser):
             self._done = True
         elif tag in ("th", "td") and self._in_cell:
             self._in_cell = False
-            cell_text = "".join(self._current_text).replace("​", "").strip()
+            cell_text = "".join(self._current_text).replace("\u200b", "").strip()
             self._current_row.append(cell_text)
         elif tag == "tr" and self._in_table:
             if self._current_row:
@@ -188,7 +188,7 @@ def _header_to_data_key(header_cell: str) -> str | None:
     Returns:
         StationData key string, or None if the header is not recognised.
     """
-    normalised = header_cell.lower().replace("​", "").strip()
+    normalised = header_cell.lower().replace("\u200b", "").strip()
     # Try longest-first to avoid e.g. "dz" matching before "dyzelinas_dz"
     for fragment, key in sorted(_HEADER_TO_KEY.items(), key=lambda x: -len(x[0])):
         if fragment in normalised:
@@ -210,7 +210,7 @@ def _parse_price_eur(raw: str | None) -> float | None:
     """
     if not raw or not raw.strip():
         return None
-    cleaned = raw.replace("​", "").strip().replace(",", ".")
+    cleaned = raw.replace("\u200b", "").strip().replace(",", ".")
     try:
         val = float(cleaned)
     except (ValueError, TypeError):
@@ -449,7 +449,7 @@ class LtSauridaProvider(BaseProvider):
             station = _find_station(stations, station_id)
             if station:
                 return station.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for '%s': %s", station_id, err)
         return None
 
@@ -495,7 +495,7 @@ class LtSauridaProvider(BaseProvider):
 
         try:
             stations = await self._fetch_all_stations(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

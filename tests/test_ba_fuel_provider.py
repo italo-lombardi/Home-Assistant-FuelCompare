@@ -8,18 +8,17 @@ import pytest
 from aiohttp import ClientError, ClientResponseError
 
 from custom_components.fuelcompare_ie.providers.ba_fuel import (
-    BaFuelProvider,
     _BASE_URL,
     _CITY_SLUGS,
     _HEADER_TO_KEY,
     _HEADERS,
+    BaFuelProvider,
     _build_station_data,
     _parse_price,
     _parse_station_id,
     _parse_station_table,
 )
 from custom_components.fuelcompare_ie.providers.base import ProviderError
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures / sample data
@@ -1302,6 +1301,7 @@ async def test_async_list_stations_returns_empty_on_unexpected_exception() -> No
 def test_parse_stations_div_float_value_error_skips_price() -> None:
     """_parse_stations_div skips a price block when float() raises ValueError (lines 548-549)."""
     from unittest.mock import patch
+
     from custom_components.fuelcompare_ie.providers.ba_fuel import _parse_stations_div
 
     # HTML with a price-like text that matches the regex but we'll patch float() to raise

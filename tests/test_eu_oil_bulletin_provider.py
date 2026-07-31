@@ -22,8 +22,8 @@ import pytest
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.eu_oil_bulletin import (
-    EuOilBulletinProvider,
     _DOWNLOAD_URL,
+    EuOilBulletinProvider,
     _build_station_data,
     _parse_price_per_litre,
     _parse_sheet,
@@ -1229,8 +1229,6 @@ async def test_async_fetch_raises_provider_error_on_invalid_file_exception() -> 
     _to_pop = [k for k in sys.modules if k == "openpyxl" or k.startswith("openpyxl.")]
     for _k in _to_pop:
         sys.modules.pop(_k)
-    import openpyxl as _opx  # noqa: F401
-    import openpyxl.utils.exceptions  # noqa: F401
 
     EuOilBulletinProvider._cached_workbook_bytes = None
     EuOilBulletinProvider._cached_fetch_time = None
@@ -1256,8 +1254,6 @@ async def test_async_fetch_reraises_non_bad_zip_exception_from_ble001_handler() 
     _to_pop = [k for k in sys.modules if k == "openpyxl" or k.startswith("openpyxl.")]
     for _k in _to_pop:
         sys.modules.pop(_k)
-    import openpyxl as _opx  # noqa: F401
-    import openpyxl.utils.exceptions  # noqa: F401
 
     EuOilBulletinProvider._cached_workbook_bytes = None
     EuOilBulletinProvider._cached_fetch_time = None
@@ -1272,7 +1268,7 @@ async def test_async_fetch_reraises_non_bad_zip_exception_from_ble001_handler() 
         pass
 
     # Patch run_in_executor to run synchronously so mock is in scope
-    async def _sync_executor(self_loop, executor, func, *args):  # noqa: ARG001
+    async def _sync_executor(self_loop, executor, func, *args):
         return func(*args)
 
     with patch.object(asyncio.AbstractEventLoop, "run_in_executor", _sync_executor):

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, time as dt_time, timezone
+from datetime import datetime, timezone
+from datetime import time as dt_time
 from unittest.mock import MagicMock, patch
-
 
 from custom_components.fuelcompare_ie.binary_sensor import (
     DataFetchProblemBinarySensor,
@@ -14,7 +14,6 @@ from custom_components.fuelcompare_ie.binary_sensor import (
     _parse_time,
 )
 from tests.test_sensor import _make_coordinator
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -426,9 +425,11 @@ def test_facility_sensor_extra_state_attributes() -> None:
 
 def test_is_open_osm_standard_range() -> None:
     """'Mo-Su 07:00-23:00' correctly identifies open/closed state."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open
     from unittest.mock import patch
+
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
 
     # Simulate Monday 10:00 (open)
     with patch.object(_dt, "now") as mock_now:
@@ -457,8 +458,9 @@ def test_is_open_legacy_24_hours() -> None:
 
 def test_is_open_osm_day_closed_keyword_on_matching_day() -> None:
     """'Mo closed; Tu-Su 08:00-18:00' returns False on Monday (I-01)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open
 
     with patch.object(_dt, "now") as mock_now:
         mock_now.return_value.weekday.return_value = 0  # Monday
@@ -474,8 +476,9 @@ def test_is_open_osm_day_closed_keyword_on_matching_day() -> None:
 
 def test_is_open_osm_skips_rule_with_fewer_than_two_times() -> None:
     """Rule with only one time token is skipped; returns None when no valid rule (line 128)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # 'mo-su 07:00' has only one HH:MM token — rule is skipped, None returned
     with patch.object(_dt, "now") as mock_now:
@@ -487,8 +490,9 @@ def test_is_open_osm_skips_rule_with_fewer_than_two_times() -> None:
 
 def test_is_open_osm_skips_rule_with_invalid_hour_value() -> None:
     """Rule with hour=25 raises ValueError, rule is skipped (lines 132-133)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # 25:00-23:00 — hours[0] = '25' → dt_time(25, 0) raises ValueError → continue
     with patch.object(_dt, "now") as mock_now:
@@ -500,8 +504,9 @@ def test_is_open_osm_skips_rule_with_invalid_hour_value() -> None:
 
 def test_is_open_osm_returns_none_when_no_rule_matches() -> None:
     """Returns None when day does not match any rule (line 143)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # Only Saturday rule; simulate Monday (idx=0) -> no match -> None
     with patch.object(_dt, "now") as mock_now:
@@ -518,8 +523,9 @@ def test_is_open_osm_returns_none_when_no_rule_matches() -> None:
 
 def test_is_open_osm_midnight_crossing_returns_true_after_open() -> None:
     """Overnight rule (22:00-06:00) returns True at 23:30 (line 140)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     with patch.object(_dt, "now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
@@ -530,8 +536,9 @@ def test_is_open_osm_midnight_crossing_returns_true_after_open() -> None:
 
 def test_is_open_osm_midnight_crossing_returns_true_before_close() -> None:
     """Overnight rule (22:00-06:00) returns True at 03:00 (line 140)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     with patch.object(_dt, "now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
@@ -542,8 +549,9 @@ def test_is_open_osm_midnight_crossing_returns_true_before_close() -> None:
 
 def test_is_open_osm_midnight_crossing_returns_false_between_close_and_open() -> None:
     """Overnight rule (22:00-06:00) returns False at 10:00 (line 140)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     with patch.object(_dt, "now") as mock_now:
         mock_now.return_value.weekday.return_value = 0
@@ -554,8 +562,9 @@ def test_is_open_osm_midnight_crossing_returns_false_between_close_and_open() ->
 
 def test_is_open_osm_normalizes_2400_closing_time() -> None:
     """OSM '24:00' closing time is normalized to 00:00 (not a ValueError)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # Station open Mo-Su 07:00-24:00 — at 10:00 should be open
     with patch.object(_dt, "now") as mock_now:
@@ -567,8 +576,9 @@ def test_is_open_osm_normalizes_2400_closing_time() -> None:
 
 def test_is_open_osm_normalizes_2400_opening_time() -> None:
     """OSM '24:00' opening time is normalized to 00:00 (treats as midnight open)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # 24:00-06:00 → 00:00-06:00 crossing midnight; at 01:00 should be open
     with patch.object(_dt, "now") as mock_now:
@@ -580,8 +590,9 @@ def test_is_open_osm_normalizes_2400_opening_time() -> None:
 
 def test_is_open_osm_closed_rule_non_matching_day_continues() -> None:
     """'closed' rule for Sa does not affect Tue — continues to next rule (line 134)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # Sa is closed; Tu-Fr 08:00-18:00 — simulate Tuesday at 10:00 → open
     with patch.object(_dt, "now") as mock_now:
@@ -593,8 +604,9 @@ def test_is_open_osm_closed_rule_non_matching_day_continues() -> None:
 
 def test_is_open_osm_00_to_24_treated_as_open_all_day() -> None:
     """'00:00-24:00' triggers was_24_close → returns True immediately (line 163)."""
-    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
     import homeassistant.util.dt as _dt
+
+    from custom_components.fuelcompare_ie.binary_sensor import _is_open_osm
 
     # 00:00-24:00 normalises to open_time=00:00, close_time=00:00 with was_24_close=True
     with patch.object(_dt, "now") as mock_now:

@@ -26,7 +26,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -117,7 +117,7 @@ class HRMzoeProvider(BaseProvider):
             station = _find_station_in_data(raw, station_id)
             if station:
                 return station.get("naziv") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -134,7 +134,7 @@ class HRMzoeProvider(BaseProvider):
         county_filter = str(kwargs.get("county", "croatia")).lower()
         try:
             raw = await self._fetch_raw(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

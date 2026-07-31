@@ -31,7 +31,7 @@ from xml.etree import ElementTree as ET
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from ._geo import filter_within_radius
 from .base import BaseProvider, ProviderError, StationData
 
@@ -185,7 +185,7 @@ class AuFuelwatchProvider(BaseProvider):
             data = merged.get(station_id)
             if data:
                 return data.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_fetch_station_name failed for %s: %s", station_id, err)
         return None
 
@@ -227,7 +227,7 @@ class AuFuelwatchProvider(BaseProvider):
 
         try:
             merged = await self._fetch_all_products(session, region_code)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
@@ -263,7 +263,7 @@ class AuFuelwatchProvider(BaseProvider):
                 items = await self._fetch_product_feed(
                     session, product_code, region_code
                 )
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.debug(
                     "Failed to fetch FuelWatch product %s (code %d): %s",
                     fuel_key,

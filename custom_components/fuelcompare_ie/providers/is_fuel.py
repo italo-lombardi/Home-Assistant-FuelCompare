@@ -82,9 +82,9 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
-from .base import BaseProvider, ProviderError, StationData
+from ..const import API_TIMEOUT, UA_HEADER
 from ._geo import haversine_km
+from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -337,7 +337,7 @@ class IsFuelProvider(BaseProvider):
                 if company and name:
                     return f"{company} — {name}"
                 return name or company or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -383,7 +383,7 @@ class IsFuelProvider(BaseProvider):
 
         try:
             stations = await self._fetch_all_stations(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_list_stations failed to fetch Gasvaktin dataset: %s", err
             )

@@ -1,0 +1,248 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "選擇國家",
+        "data": {
+          "country": "國家"
+        }
+      },
+      "provider": {
+        "title": "選擇資料來源",
+        "data": {
+          "provider": "資料來源"
+        }
+      },
+      "county": {
+        "title": "選擇縣",
+        "description": "選擇您所在的縣以尋找附近的加油站。",
+        "data": {
+          "station_county": "縣"
+        }
+      },
+      "api_key": {
+        "title": "API 金鑰",
+        "description": "輸入您的免費 API 金鑰。如有需要，請[在此取得]({registration_url})。",
+        "data": {
+          "api_key": "API 金鑰"
+        }
+      },
+      "station": {
+        "title": "新增加油站",
+        "description": "{hint}",
+        "data": {
+          "station_id": "站點 ID"
+        }
+      },
+      "station_picker": {
+        "title": "選擇加油站",
+        "description": "從以下列表中選擇加油站、地區或國家。",
+        "data": {
+          "station_id": "加油站",
+          "show_on_map": "在地圖上顯示加油站"
+        }
+      },
+      "location": {
+        "title": "設定位置",
+        "description": "輸入您的位置和搜尋半徑。範圍內的加油站將會被追蹤。",
+        "data": {
+          "latitude": "緯度",
+          "longitude": "經度",
+          "radius_km": "半徑（公里）",
+          "postal_code": "郵遞區號"
+        }
+      },
+      "name": {
+        "title": "加油站名稱",
+        "description": "確認或編輯此加油站的名稱。",
+        "data": {
+          "name": "名稱"
+        }
+      }
+    },
+    "error": {
+      "invalid_station_id": "站點 ID 不得為空。",
+      "invalid_location": "座標無效。請輸入有效的緯度和經度值。",
+      "no_stations_found": "此縣找不到加油站。請嘗試其他縣。",
+      "no_stations_found_location": "此座標附近找不到加油站。請嘗試調整位置或增大搜尋半徑。",
+      "invalid_api_key": "API 金鑰不得為空。",
+      "no_stations_found_global": "無法載入提供商列表。上游服務可能已中斷，或缺少必要的相依套件。請查閱 Home Assistant 日誌以獲取詳細資訊。"
+    },
+    "abort": {
+      "already_configured": "此加油站已完成設定。",
+      "no_providers_for_country": "此國家沒有可用的資料提供商。",
+      "no_counties_for_country": "所選國家尚未設定任何縣。",
+      "no_stations_found": "此縣找不到加油站。請取消並嘗試其他縣。",
+      "no_stations_found_location": "此座標附近找不到加油站。請取消並嘗試更大的搜尋半徑或不同的位置。",
+      "no_stations_found_global": "無法載入提供商列表。上游服務可能已中斷，或缺少必要的相依套件。請查閱 Home Assistant 日誌以獲取詳細資訊。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "選項",
+        "data": {
+          "api_key": "API 金鑰",
+          "radius_km": "搜尋半徑（公里）",
+          "show_on_map": "在地圖上顯示加油站"
+        }
+      }
+    }
+  },
+  "issues": {
+    "fuelcompare_ie_deprecation": {
+      "title": "fuelcompare.ie 已停止服務",
+      "description": "fuelcompare.ie 網站已於 **2026 年 6 月 30 日** 停止服務，目前無法連線。您的加油站 **{entry_title}** 將不再收到油價更新。請刪除此項目，並使用其他愛爾蘭油價來源（例如 **FuelFinder IE** 或 **IE Pumps**）新增一個項目。"
+    },
+    "ie_pumps_tls_disabled": {
+      "title": "pumps.ie TLS 憑證驗證已停用",
+      "description": "**{entry_title}** 的 pumps.ie 提供商已停用 TLS 憑證驗證，原因是該網站的憑證已過期。資料在傳輸過程中仍經過加密，但無法驗證伺服器身份。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "adblue": {
+        "name": "AdBlue"
+      },
+      "cng": {
+        "name": "CNG"
+      },
+      "diesel": {
+        "name": "柴油"
+      },
+      "e10": {
+        "name": "E10"
+      },
+      "e85": {
+        "name": "E85"
+      },
+      "kerosene": {
+        "name": "煤油"
+      },
+      "lpg": {
+        "name": "LPG"
+      },
+      "petrol": {
+        "name": "汽油"
+      },
+      "premium_diesel": {
+        "name": "高級柴油"
+      },
+      "premium_unleaded": {
+        "name": "高級無鉛"
+      },
+      "unleaded": {
+        "name": "無鉛"
+      },
+      "address": {
+        "name": "地址"
+      },
+      "brand": {
+        "name": "品牌"
+      },
+      "county": {
+        "name": "縣"
+      },
+      "latitude": {
+        "name": "緯度"
+      },
+      "location": {
+        "name": "位置"
+      },
+      "longitude": {
+        "name": "經度"
+      },
+      "station_name": {
+        "name": "站名"
+      },
+      "accessibility": {
+        "name": "無障礙設施"
+      },
+      "amenities": {
+        "name": "便民設施"
+      },
+      "last_successful_fetch": {
+        "name": "最後成功擷取"
+      },
+      "provider_label": {
+        "name": "資料提供商"
+      },
+      "country_code": {
+        "name": "國家"
+      },
+      "station_page_url": {
+        "name": "加油站頁面網址"
+      },
+      "offerings": {
+        "name": "服務項目"
+      },
+      "opening_hours": {
+        "name": "營業時間 (OSM)"
+      },
+      "payments": {
+        "name": "付款方式"
+      },
+      "phone": {
+        "name": "電話"
+      },
+      "price_confidence": {
+        "name": "價格可信度"
+      },
+      "price_last_updated": {
+        "name": "價格最後更新"
+      },
+      "website": {
+        "name": "網站"
+      },
+      "working_hours": {
+        "name": "工作時間"
+      },
+      "station_id": {
+        "name": "站點 ID"
+      }
+    },
+    "binary_sensor": {
+      "data_fetch_problem": {
+        "name": "資料擷取問題"
+      },
+      "has_price": {
+        "name": "有價格"
+      },
+      "is_open": {
+        "name": "已開放"
+      },
+      "has_atm": {
+        "name": "ATM"
+      },
+      "has_car_wash": {
+        "name": "洗車"
+      },
+      "has_disabled_access": {
+        "name": "無障礙通道"
+      },
+      "has_electric_charging": {
+        "name": "電動車充電"
+      },
+      "has_shop": {
+        "name": "商店"
+      },
+      "has_toilet": {
+        "name": "廁所"
+      },
+      "accepts_cards": {
+        "name": "接受刷卡"
+      },
+      "accepts_cash": {
+        "name": "接受現金"
+      },
+      "accepts_contactless": {
+        "name": "接受非接觸付款"
+      }
+    },
+    "device_tracker": {
+      "station_tracker": {
+        "name": "位置"
+      }
+    }
+  }
+}

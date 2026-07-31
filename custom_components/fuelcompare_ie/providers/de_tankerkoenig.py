@@ -49,7 +49,7 @@ from typing import Any, ClassVar
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
 
-from ..const import UA_HEADER, API_TIMEOUT
+from ..const import API_TIMEOUT, UA_HEADER
 from .base import BaseProvider, ProviderError, StationData
 
 _LOGGER = logging.getLogger(__name__)
@@ -299,7 +299,7 @@ class DeTankerkoenigProvider(BaseProvider):
                     return name
                 if brand:
                     return brand
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Failed to fetch station name for %s: %s",
                 station_id,
@@ -371,7 +371,7 @@ class DeTankerkoenigProvider(BaseProvider):
             ) as resp:
                 resp.raise_for_status()
                 payload: dict[str, Any] = await resp.json(content_type=None)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations HTTP error: %s", type(err).__name__)
             return []
 

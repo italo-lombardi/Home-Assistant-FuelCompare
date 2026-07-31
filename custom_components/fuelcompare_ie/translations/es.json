@@ -14,7 +14,7 @@
         }
       },
       "station": {
-        "title": "Añadir estación Fuel Compare",
+        "title": "Añadir estación",
         "description": "{hint}",
         "data": {
           "station_id": "ID de la Estación"
@@ -46,7 +46,7 @@
         "description": "Selecciona una estación, región o país de la lista siguiente.",
         "data": {
           "station_id": "Estación",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Mostrar estación en el mapa"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Esta estación ya está configurada.",
       "no_providers_for_country": "No hay proveedores de datos disponibles para este país.",
       "no_counties_for_country": "No hay condados configurados para el país seleccionado.",
-      "no_stations_found": "No se encontraron estaciones para este condado. Pruebe con un condado diferente.",
-      "no_stations_found_location": "No se encontraron estaciones cerca de estas coordenadas. Intente ajustar la ubicación o aumentar el radio de búsqueda.",
+      "no_stations_found": "No se encontraron estaciones para este condado. Cancele e intente con un condado diferente.",
+      "no_stations_found_location": "No se encontraron estaciones cerca de estas coordenadas. Cancele e intente con un radio de búsqueda más amplio o una ubicación diferente.",
       "no_stations_found_global": "No se pudo cargar la lista del proveedor. Es posible que el servicio no esté disponible o que falte una dependencia obligatoria. Consulta los registros de Home Assistant para más detalles."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie cierra",
-      "description": "El sitio web fuelcompare.ie tiene previsto cerrar el **30 de junio de 2026**. Su estación **{entry_title}** dejará de recibir actualizaciones de precios después de esa fecha. Considere cambiar a otra fuente de precios de combustible irlandesa, como FuelFinder IE o IE Pumps."
+      "title": "fuelcompare.ie ha cerrado",
+      "description": "El sitio web fuelcompare.ie fue cerrado el **30 de junio de 2026** y ya no está disponible. Su estación **{entry_title}** no recibirá más actualizaciones de precios. Elimine esta entrada y añada una nueva utilizando otra fuente de precios de combustible irlandesa, como **FuelFinder IE** o **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "Verificación de certificado TLS de pumps.ie desactivada",
@@ -177,16 +177,16 @@
         "name": "Horario de trabajo"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Proveedor de datos"
       },
       "country_code": {
-        "name": "Country"
+        "name": "País"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL de la página de la estación"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "ID de la Estación"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Ubicación"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "Clave API",
           "radius_km": "Radio de búsqueda (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Mostrar estación en el mapa"
         }
       }
     }

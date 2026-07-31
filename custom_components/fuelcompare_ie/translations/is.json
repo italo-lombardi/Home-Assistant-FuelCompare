@@ -39,7 +39,7 @@
         "description": "Veldu stöð, svæði eða land af listanum hér að neðan.",
         "data": {
           "station_id": "Stöð",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Sýna stöð á korti"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Þessi stöð er þegar stillt.",
       "no_providers_for_country": "Engir gagnaveitendur eru tiltækir fyrir þetta land.",
       "no_counties_for_country": "Engar sýslur eru stilltar fyrir valið land.",
-      "no_stations_found": "Engar stöðvar fundust í þessari sýslu. Prófaðu aðra sýslu.",
-      "no_stations_found_location": "Engar stöðvar fundust nálægt þessum hnitum. Prófaðu að breyta staðsetningu eða stækka leitarradíusinn.",
+      "no_stations_found": "Engar stöðvar fundust í þessari sýslu. Hættu við og prófaðu aðra sýslu.",
+      "no_stations_found_location": "Engar stöðvar fundust nálægt þessum hnitum. Hættu við og prófaðu stærri leitarradíus eða aðra staðsetningu.",
       "no_stations_found_global": "Ekki tókst að hlaða lista veitunnar. Heimildin gæti verið niðri eða nauðsynlegan pakka vantar. Skoðaðu Home Assistant atburðaskrána fyrir nánari upplýsingar."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie er að loka",
-      "description": "Vefsíðan fuelcompare.ie er áætluð til að loka **30. júní 2026**. Stöðin þín **{entry_title}** mun hætta að fá verðuppfærslur eftir þann dag. Íhugaðu að skipta yfir í annan írskan eldsneytisverðgjafa, eins og FuelFinder IE eða IE Pumps."
+      "title": "fuelcompare.ie hefur lokað",
+      "description": "Vefsíðan fuelcompare.ie lokaði **30. júní 2026** og er ekki lengur aðgengileg. Stöðin þín **{entry_title}** mun ekki fá frekari verðuppfærslur. Vinsamlegast eyddu þessum færslu og bættu við nýrri með öðrum írskan eldsneytisverðgjafa, eins og **FuelFinder IE** eða **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS-vottorðsstaðfesting óvirk",
@@ -150,7 +150,7 @@
         "name": "Þjónusta"
       },
       "last_successful_fetch": {
-        "name": "Síðasta vel heppnaða sækja"
+        "name": "Síðast vel heppnað"
       },
       "offerings": {
         "name": "Tilboð"
@@ -177,21 +177,21 @@
         "name": "Vinnutímar"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Gagnaveitandi"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Land"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "URL stöðvarsíðu"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stöðvarauðkenni"
       }
     },
     "binary_sensor": {
       "data_fetch_problem": {
-        "name": "Vandamál við gagnasækja"
+        "name": "Vandamál við gagnasótt"
       },
       "has_price": {
         "name": "Er með verð"
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Staðsetning"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API-lykill",
           "radius_km": "Leitarradíus (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Sýna stöð á korti"
         }
       }
     }

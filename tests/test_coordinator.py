@@ -13,7 +13,11 @@ from aiohttp import ClientError
 from cryptography.hazmat.backends import default_backend as _default_backend
 from cryptography.hazmat.primitives.ciphers import (
     Cipher as _Cipher,
+)
+from cryptography.hazmat.primitives.ciphers import (
     algorithms as _algorithms,
+)
+from cryptography.hazmat.primitives.ciphers import (
     modes as _modes,
 )
 from homeassistant.core import HomeAssistant
@@ -233,12 +237,14 @@ async def test_async_update_data_missing_station(hass: HomeAssistant) -> None:
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = "fake_key"
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -288,12 +294,14 @@ async def test_async_update_data_client_error(hass: HomeAssistant) -> None:
     coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Error communicating with API"),
     ):
-        with pytest.raises(UpdateFailed, match="Error communicating with API"):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -792,12 +800,14 @@ async def test_encrypted_api_both_paths_fail_raises(hass: HomeAssistant) -> None
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -822,12 +832,14 @@ async def test_encrypted_api_decrypt_key_unavailable_skips_api(
     coordinator._provider._build_id = "test_build"
     # _decrypt_key stays None — JS chunk not reachable
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -843,12 +855,14 @@ async def test_async_update_data_generic_exception(hass: HomeAssistant) -> None:
     coordinator = _ie_coordinator(hass, "12345")
     coordinator._provider._build_id = "test_build"
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Unexpected error"),
     ):
-        with pytest.raises(UpdateFailed, match="Unexpected error"):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -871,12 +885,14 @@ async def test_fetch_nextjs_build_id_none_after_page_assets(
     # Then _fetch_encrypted_api also calls _fetch_page_assets, fails → returns None
     # → UpdateFailed raised
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed),
     ):
-        with pytest.raises(UpdateFailed):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -896,12 +912,14 @@ async def test_encrypted_api_empty_data_field(hass: HomeAssistant) -> None:
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -923,12 +941,14 @@ async def test_encrypted_api_empty_stations_list(hass: HomeAssistant) -> None:
     coordinator._provider._build_id = "test_build"
     coordinator._provider._decrypt_key = _TEST_DECRYPT_KEY
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -1028,12 +1048,14 @@ async def test_encrypted_api_second_decrypt_fails_returns_none(
     coordinator._provider._build_id = "build1"
     coordinator._provider._decrypt_key = "a" * 64  # stale — won't decrypt payload
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 # ---------------------------------------------------------------------------
@@ -1157,11 +1179,14 @@ def test_cryptojs_decrypt_empty_decrypted_output() -> None:
     mock_cipher_obj = MagicMock()
     mock_cipher_obj.decryptor.return_value = mock_decryptor
 
-    with patch(
-        "custom_components.fuelcompare_ie.crypto.Cipher", return_value=mock_cipher_obj
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.crypto.Cipher",
+            return_value=mock_cipher_obj,
+        ),
+        pytest.raises(ValueError, match="Decrypted output is empty"),
     ):
-        with pytest.raises(ValueError, match="Decrypted output is empty"):
-            _cryptojs_decrypt(payload, evp_key)
+        _cryptojs_decrypt(payload, evp_key)
 
 
 def test_cryptojs_decrypt_non_block_aligned_ciphertext() -> None:
@@ -1230,12 +1255,14 @@ async def test_last_successful_fetch_unchanged_on_failure(
     )
     coordinator.last_successful_fetch = prior_fetch
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=session,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=session,
+        ),
+        pytest.raises(UpdateFailed),
     ):
-        with pytest.raises(UpdateFailed):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
     assert coordinator.last_successful_fetch is prior_fetch
 
@@ -1593,12 +1620,14 @@ async def test_provider_error_raises_update_failed(hass: HomeAssistant) -> None:
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=MagicMock(),
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=MagicMock(),
+        ),
+        pytest.raises(UpdateFailed, match="Provider error: "),
     ):
-        with pytest.raises(UpdateFailed, match="Provider error: "):
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
 
 async def test_provider_error_message_is_surfaced(
@@ -1621,13 +1650,15 @@ async def test_provider_error_message_is_surfaced(
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=MagicMock(),
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=MagicMock(),
+        ),
+        caplog.at_level(logging.WARNING),
+        pytest.raises(UpdateFailed) as exc_info,
     ):
-        with caplog.at_level(logging.WARNING):
-            with pytest.raises(UpdateFailed) as exc_info:
-                await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
     assert str(exc_info.value) == f"Provider error: {msg}"
     assert msg in caplog.text
@@ -1647,12 +1678,14 @@ async def test_provider_error_message_truncated_if_too_long(
 
     coordinator = FuelCompareIECoordinator(hass, provider, "12345")
 
-    with patch(
-        "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
-        return_value=MagicMock(),
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.coordinator.async_get_clientsession",
+            return_value=MagicMock(),
+        ),
+        pytest.raises(UpdateFailed) as exc_info,
     ):
-        with pytest.raises(UpdateFailed) as exc_info:
-            await coordinator._async_update_data()
+        await coordinator._async_update_data()
 
     surfaced = str(exc_info.value)
     assert surfaced.startswith("Provider error: ")

@@ -6,11 +6,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.ie_fuelcompare import (
     IEFuelCompareProvider,
 )
-from custom_components.fuelcompare_ie.providers.base import ProviderError
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -206,7 +205,7 @@ async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() 
 
     async def _mock_fetch_page_assets(
         sess: object,
-        broad: bool = False,  # noqa: ARG001
+        broad: bool = False,
     ) -> None:
         fetch_assets_calls.append({"broad": broad})
         # After any asset refresh give the provider a "good" key so the
@@ -216,7 +215,7 @@ async def test_fetch_encrypted_api_retries_with_broad_scan_on_decrypt_failure() 
     # _cryptojs_decrypt: fail on attempts 1 and 2, succeed on attempt 3.
     decrypt_call_count = 0
 
-    def _mock_cryptojs_decrypt(enc: str, key: str) -> list:  # noqa: ARG001
+    def _mock_cryptojs_decrypt(enc: str, key: str) -> list:
         nonlocal decrypt_call_count
         decrypt_call_count += 1
         if decrypt_call_count < 3:
@@ -327,7 +326,7 @@ async def test_decrypt_with_recovery_returns_none_when_key_absent_after_broad_sc
 
     session = _make_session()
 
-    async def _mock_fetch_page_assets(sess, broad=False):  # noqa: ARG001
+    async def _mock_fetch_page_assets(sess, broad=False):
         # Never set a decrypt key — simulates failure to find key even after broad scan
         pass
 

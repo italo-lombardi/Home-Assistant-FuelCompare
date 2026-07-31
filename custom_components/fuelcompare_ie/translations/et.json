@@ -14,7 +14,7 @@
         }
       },
       "station": {
-        "title": "Lisa Fuel Compare jaam",
+        "title": "Lisa jaam",
         "description": "{hint}",
         "data": {
           "station_id": "Jaama ID"
@@ -46,7 +46,7 @@
         "description": "Vali allolevast loendist tankla, piirkond või riik.",
         "data": {
           "station_id": "Tankla",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Näita tanklat kaardil"
         }
       },
       "location": {
@@ -71,16 +71,16 @@
     "abort": {
       "already_configured": "See jaam on juba seadistatud.",
       "no_providers_for_country": "Selle riigi jaoks ei ole andmeallikaid saadaval.",
-      "no_counties_for_country": "Valitud riigi jaoks pole maakondakondasid seadistatud.",
-      "no_stations_found": "Sellest maakonnast ei leitud ühtegi tanklat. Proovi teist maakonda.",
-      "no_stations_found_location": "Nende koordinaatide lähedalt ei leitud ühtegi tanklat. Proovi asukohta muuta või suurenda otsinguraadiust.",
+      "no_counties_for_country": "Valitud riigi jaoks pole maakondi seadistatud.",
+      "no_stations_found": "Sellest maakonnast ei leitud ühtegi tanklat. Tühista ja proovi teist maakonda.",
+      "no_stations_found_location": "Nende koordinaatide lähedalt ei leitud ühtegi tanklat. Tühista ja proovi suuremat otsinguraadiust või teist asukohta.",
       "no_stations_found_global": "Pakkuja loendi laadimine ebaõnnestus. Allikas võib olla maas või on nõutav sõltuvus puudu. Üksikasjade jaoks vaata Home Assistanti logisid."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie lõpetab töö",
-      "description": "Veebisait fuelcompare.ie on kavandatud sulgeda **30. juunil 2026**. Teie jaam **{entry_title}** lõpetab pärast seda kuupäeva hinnavärskenduste saamise. Kaaluge üleminekut mõnele teisele Iiri kütusehindade allikale, näiteks FuelFinder IE või IE Pumps."
+      "title": "fuelcompare.ie on suletud",
+      "description": "Veebisait fuelcompare.ie suleti **30. juunil 2026** ja see ei ole enam kättesaadav. Teie jaam **{entry_title}** ei saa enam hinnavärskendusi. Kustutage see kirje ja lisage uus, kasutades mõnda muud Iiri kütusehindade allikat, näiteks **FuelFinder IE** või **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikaadi kontrollimine on keelatud",
@@ -177,16 +177,16 @@
         "name": "Lahtiolekuajad"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Andmepakkuja"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Riik"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Tankla lehekülje URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Jaama ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Asukoht"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API võti",
           "radius_km": "Otsinguraadius (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Näita tanklat kaardil"
         }
       }
     }

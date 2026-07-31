@@ -46,7 +46,7 @@
         "description": "Izvēlieties staciju, reģionu vai valsti no zemāk redzamā saraksta.",
         "data": {
           "station_id": "Stacija",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Rādīt staciju kartē"
         }
       },
       "location": {
@@ -72,15 +72,15 @@
       "already_configured": "Šī stacija jau ir konfigurēta.",
       "no_providers_for_country": "Šai valstij nav pieejami datu sniedzēji.",
       "no_counties_for_country": "Izvēlētajai valstij nav konfigurēti novadi.",
-      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Mēģiniet citu apgabalu.",
-      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Mēģiniet pielāgot atrašanās vietu vai palielināt meklēšanas rādiusu.",
+      "no_stations_found": "Šajā apgabalā stacijas netika atrastas. Atceliet un mēģiniet citu apgabalu.",
+      "no_stations_found_location": "Netālu no šīm koordinātēm stacijas netika atrastas. Atceliet un mēģiniet plašāku meklēšanas rādiusu vai citu atrašanās vietu.",
       "no_stations_found_global": "Nevarēja ielādēt sniedzēja sarakstu. Avots var nebūt pieejams vai trūkst nepieciešamās atkarības. Sīkāku informāciju skatiet Home Assistant žurnālos."
     }
   },
   "issues": {
     "fuelcompare_ie_deprecation": {
-      "title": "fuelcompare.ie tiek slēgts",
-      "description": "Tīmekļa vietne fuelcompare.ie ir paredzēta slēgšanai **2026. gada 30. jūnijā**. Jūsu stacija **{entry_title}** pārtrauks saņemt cenu atjauninājumus pēc šī datuma. Apsveriet iespēju pāriet uz citu Īrijas degvielas cenu avotu, piemēram, FuelFinder IE vai IE Pumps."
+      "title": "fuelcompare.ie ir slēgts",
+      "description": "Tīmekļa vietne fuelcompare.ie tika slēgta **2026. gada 30. jūnijā** un vairs nav pieejama. Jūsu stacija **{entry_title}** vairs nesaņems cenu atjauninājumus. Lūdzu, dzēsiet šo ierakstu un pievienojiet jaunu, izmantojot citu Īrijas degvielas cenu avotu, piemēram, **FuelFinder IE** vai **IE Pumps**."
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS sertifikāta verifikācija atspējota",
@@ -141,7 +141,7 @@
         "name": "Garums"
       },
       "station_name": {
-        "name": "Stacijas Nosaukums"
+        "name": "Stacijas nosaukums"
       },
       "accessibility": {
         "name": "Pieejamība"
@@ -177,16 +177,16 @@
         "name": "Darba laiks"
       },
       "provider_label": {
-        "name": "Data Provider"
+        "name": "Datu sniedzējs"
       },
       "country_code": {
-        "name": "Country"
+        "name": "Valsts"
       },
       "station_page_url": {
-        "name": "Station Page URL"
+        "name": "Stacijas lapas URL"
       },
       "station_id": {
-        "name": "Station ID"
+        "name": "Stacijas ID"
       }
     },
     "binary_sensor": {
@@ -229,7 +229,7 @@
     },
     "device_tracker": {
       "station_tracker": {
-        "name": "Location"
+        "name": "Atrašanās vieta"
       }
     }
   },
@@ -240,7 +240,7 @@
         "data": {
           "api_key": "API atslēga",
           "radius_km": "Meklēšanas rādiuss (km)",
-          "show_on_map": "Show station on map"
+          "show_on_map": "Rādīt staciju kartē"
         }
       }
     }

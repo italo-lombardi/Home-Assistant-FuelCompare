@@ -9,9 +9,9 @@ from aiohttp import ClientError
 
 from custom_components.fuelcompare_ie.providers.base import ProviderError
 from custom_components.fuelcompare_ie.providers.de_tankerkoenig import (
-    DeTankerkoenigProvider,
     _BASE_URL,
     _HEADERS,
+    DeTankerkoenigProvider,
     _build_address,
     _parse_price,
     _parse_station,
