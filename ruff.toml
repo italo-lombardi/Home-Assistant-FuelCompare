@@ -1,0 +1,4 @@
+[lint]
+ignore = [
+  "BLE001",  # broad Exception catches are intentional in provider fetch methods
+]

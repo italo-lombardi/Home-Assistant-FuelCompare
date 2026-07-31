@@ -153,10 +153,10 @@ def get_provider_or_default(key: str, default_key: str) -> type[BaseProvider]:
 
 __all__ = [
     "ALL_SENSOR_KEYS",
+    "PROVIDER_REGISTRY",
     "BaseProvider",
     "ProviderError",
     "StationData",
-    "PROVIDER_REGISTRY",
     "get_provider_class",
     "get_provider_or_default",
 ]
