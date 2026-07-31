@@ -1,4 +1,16 @@
 [lint]
 ignore = [
-  "BLE001",  # broad Exception catches are intentional in provider fetch methods
+  "E402",     # module-level import not at top — needed after pytest.importorskip()
+  "DTZ001",   # tz-aware datetime not required; provider data has no tz info
+  "DTZ007",   # strptime without %z — provider timestamps are naive by design
+  "PIE810",   # startswith tuple — clarity preferred over micro-optimisation
+  "RUF059",   # unused unpacked variables in tests are intentional destructuring
+  "SIM102",   # nested if — explicit nesting is clearer in provider logic
+  "SIM103",   # return condition directly — explicit is clearer
+  "SIM117",   # nested with — kept for readability in tests
+  "SIM118",   # key in dict.keys() — explicit in tests
+  "TRY002",   # raise Exception — acceptable in test helpers
+  "TRY004",   # prefer TypeError — existing ValueError is correct here
+  "TRY203",   # remove re-raise handler — kept for clarity
+  "TRY401",   # redundant exc in logging.exception — explicit is fine
 ]

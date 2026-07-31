@@ -90,7 +90,7 @@ def _make_csv_text(*rows: dict[str, str]) -> str:
     header = _CSV_HEADER
     lines = [header]
     for row in rows:
-        lines.append(",".join(row.get(k, "") for k in _BASE_ROW.keys()))
+        lines.append(",".join(row.get(k, "") for k in _BASE_ROW))
     return "\n".join(lines)
 
 

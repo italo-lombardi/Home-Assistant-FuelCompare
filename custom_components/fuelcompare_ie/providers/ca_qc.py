@@ -106,7 +106,7 @@ def _make_station_id(name: str, address: str) -> str:
     Returns:
         16-character lowercase hex string.
     """
-    key = f"{name}|{address}".encode("utf-8")
+    key = f"{name}|{address}".encode()
     return hashlib.md5(key, usedforsecurity=False).hexdigest()[:16]
 
 

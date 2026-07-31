@@ -694,9 +694,8 @@ async def test_download_xlsx_returns_none_on_client_response_error() -> None:
 
 async def test_parse_malta_row_raises_import_error_when_openpyxl_missing() -> None:
     """_parse_malta_row logs warning and re-raises ImportError when openpyxl absent (lines 495-500)."""
-    with patch.dict(sys.modules, {"openpyxl": None}):
-        with pytest.raises(ImportError):
-            await _parse_malta_row(b"irrelevant")
+    with patch.dict(sys.modules, {"openpyxl": None}), pytest.raises(ImportError):
+        await _parse_malta_row(b"irrelevant")
 
 
 async def test_parse_malta_row_skips_empty_rows() -> None:
@@ -837,9 +836,11 @@ def test_make_absolute_raises_on_non_http_scheme() -> None:
         query="",
         fragment="",
     )
-    with patch(
-        "custom_components.fuelcompare_ie.providers.mt_fuel.urlparse",
-        return_value=fake_parsed,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.providers.mt_fuel.urlparse",
+            return_value=fake_parsed,
+        ),
+        pytest.raises(ProviderError, match="unexpected URL scheme"),
     ):
-        with pytest.raises(ProviderError, match="unexpected URL scheme"):
-            _make_absolute("/some/file.xlsx")
+        _make_absolute("/some/file.xlsx")

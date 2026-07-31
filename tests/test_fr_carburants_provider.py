@@ -1274,11 +1274,11 @@ async def test_async_fetch_station_name_returns_none_on_http_error() -> None:
 
 async def test_async_fetch_station_name_returns_none_when_name_is_none() -> None:
     """async_fetch_station_name returns None when station has no name derivable."""
-    xml_str = """\
+    xml_str = f"""\
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <pdv_liste>
-  <pdv id="{sid}" latitude="4849000" longitude="234567" pop="R"/>
-</pdv_liste>""".format(sid=_STATION_ID)
+  <pdv id="{_STATION_ID}" latitude="4849000" longitude="234567" pop="R"/>
+</pdv_liste>"""
     zip_bytes = _make_zip(xml_str)
     resp = _make_mock_response(200, body=zip_bytes)
     session = _make_session(resp)
@@ -1824,9 +1824,11 @@ async def test_fetch_xml_raises_provider_error_on_generic_extraction_error() -> 
     def _raise_runtime(*args, **kwargs):
         raise RuntimeError("unexpected extraction error")
 
-    with patch(
-        "custom_components.fuelcompare_ie.providers.fr_carburants.zipfile.ZipFile",
-        _raise_runtime,
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.providers.fr_carburants.zipfile.ZipFile",
+            _raise_runtime,
+        ),
+        pytest.raises(ProviderError, match="ZIP extraction failed"),
     ):
-        with pytest.raises(ProviderError, match="ZIP extraction failed"):
-            await provider._fetch_xml(session)
+        await provider._fetch_xml(session)

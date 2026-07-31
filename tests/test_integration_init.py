@@ -361,7 +361,7 @@ async def test_location_mode_two_close_stations_get_distinct_ids() -> None:
 
 
 async def test_setup_entry_succeeds_when_provider_is_disabled(
-    monkeypatch: "pytest.MonkeyPatch",
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """An existing config entry whose provider has DISABLED=True still loads.
 
