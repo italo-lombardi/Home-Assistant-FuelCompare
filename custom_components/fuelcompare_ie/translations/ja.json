@@ -177,7 +177,7 @@
         "name": "サービス"
       },
       "opening_hours": {
-        "name": "営業時間（OSM）"
+        "name": "開店時間（OSM）"
       },
       "payments": {
         "name": "支払い方法"
