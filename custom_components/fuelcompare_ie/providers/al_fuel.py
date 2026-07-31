@@ -286,7 +286,7 @@ class AlFuelProvider(BaseProvider):
         except ClientResponseError as err:
             _LOGGER.debug("AlFuel HTTP error for %s: %s", url, err)
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("AlFuel unexpected error for %s: %s", url, err)
             return None
 

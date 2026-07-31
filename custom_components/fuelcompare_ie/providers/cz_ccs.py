@@ -214,7 +214,7 @@ class CzCcsProvider(BaseProvider):
         """
         try:
             payload = await self._fetch_json(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

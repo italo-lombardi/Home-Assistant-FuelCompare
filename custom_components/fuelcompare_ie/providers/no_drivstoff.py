@@ -353,7 +353,7 @@ class NoDrivstoffProvider(BaseProvider):
             if record is None:
                 return None
             return _display_name(record) or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
             return None
 
@@ -402,7 +402,7 @@ class NoDrivstoffProvider(BaseProvider):
             stations = await self._fetch_stations(
                 session, lat=lat, lng=lng, radius_km=radius_km
             )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
@@ -503,7 +503,7 @@ class NoDrivstoffProvider(BaseProvider):
                 "HTTP error fetching Drivstoffpriser stations: HTTP %s", err.status
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unexpected error fetching Drivstoffpriser stations: %s",
                 type(err).__name__,

@@ -30,7 +30,7 @@ except ImportError:  # pragma: no cover
 _RUN = os.environ.get("FUELCOMPARE_RUN_SMOKE") == "1"
 
 
-def pytest_collection_modifyitems(config, items):  # noqa: ARG001
+def pytest_collection_modifyitems(config, items):
     """Skip every smoke test unless FUELCOMPARE_RUN_SMOKE=1."""
     if _RUN:
         return

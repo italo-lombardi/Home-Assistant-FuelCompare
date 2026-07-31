@@ -290,7 +290,7 @@ class PlBenzynaProvider(BaseProvider):
         try:
             prices_data = await self._fetch_wholesale_prices(session)
             lpg_price = await self._fetch_lpg_price(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_list_stations failed to fetch ORLEN wholesale prices: %s", err
             )
@@ -347,7 +347,7 @@ class PlBenzynaProvider(BaseProvider):
             raise ProviderError(
                 f"ORLEN wholesale prices API returned HTTP {err.status}: {err.message}"
             ) from err
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             raise ProviderError(
                 f"Failed to fetch ORLEN wholesale prices: {err}"
             ) from err
@@ -385,7 +385,7 @@ class PlBenzynaProvider(BaseProvider):
             ) as response:
                 response.raise_for_status()
                 payload: Any = await response.json(content_type=None)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch ORLEN LPG prices (non-fatal): %s", err)
             return None
 

@@ -353,7 +353,7 @@ class LuCarbuProvider(BaseProvider):
                 record = _find_station(stations_sp, station_id)
                 if record:
                     return record.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -412,7 +412,7 @@ class LuCarbuProvider(BaseProvider):
                 ),
                 return_exceptions=True,
             )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
@@ -506,7 +506,7 @@ class LuCarbuProvider(BaseProvider):
                 err.status,
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Error fetching carbu.com LU stations fuel=%s: %s",
                 fuel_key,

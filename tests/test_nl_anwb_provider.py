@@ -37,7 +37,7 @@ def _make_xlsx_bytes(
       Row 3: Netherlands (when include_nl=True)
     """
     try:
-        import openpyxl  # noqa: PLC0415
+        import openpyxl
     except ImportError:
         pytest.skip("openpyxl not installed — skipping XLSX builder")
 
@@ -636,9 +636,9 @@ async def test_async_fetch_raises_provider_error_on_client_response_error() -> N
 async def test_parse_bulletin_extracts_date_from_datetime_instance() -> None:
     """Line 350: when row 0, col 0 contains a datetime instance, bulletin_date uses date().isoformat()."""
     try:
-        from datetime import datetime as _dt  # noqa: PLC0415
+        from datetime import datetime as _dt
 
-        import openpyxl  # noqa: PLC0415
+        import openpyxl
     except ImportError:
         pytest.skip("openpyxl not installed")
 

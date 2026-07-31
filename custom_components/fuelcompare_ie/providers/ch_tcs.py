@@ -285,7 +285,7 @@ class ChTcsProvider(BaseProvider):
                     or station.get("_meta", {}).get("brand")
                     or None
                 )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_fetch_station_name failed for station %s: %s", station_id, err
             )
@@ -334,7 +334,7 @@ class ChTcsProvider(BaseProvider):
 
         try:
             merged = await self._fetch_all_fuels(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 
@@ -474,7 +474,7 @@ class ChTcsProvider(BaseProvider):
                 err,
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unexpected error fetching TCS bbox fuel=%s: %s",
                 fuel,

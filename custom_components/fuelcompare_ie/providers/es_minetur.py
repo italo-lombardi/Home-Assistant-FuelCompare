@@ -261,7 +261,7 @@ class EsMineturProvider(BaseProvider):
 
         try:
             payload = await self._fetch_raw(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations fetch failed: %s", err)
             return []
 

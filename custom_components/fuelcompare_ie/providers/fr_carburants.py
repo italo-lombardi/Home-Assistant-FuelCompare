@@ -359,7 +359,7 @@ class FrCarburantsProvider(BaseProvider):
             raw_station = _find_station_in_root(root, station_id)
             if raw_station:
                 return raw_station.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -407,7 +407,7 @@ class FrCarburantsProvider(BaseProvider):
 
         try:
             root = await self._fetch_and_parse_xml(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed to fetch XML: %s", err)
             return []
 

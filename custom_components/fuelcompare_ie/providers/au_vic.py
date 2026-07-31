@@ -265,7 +265,7 @@ class AuVicProvider(BaseProvider):
             entry = station_map.get(station_id)
             if entry:
                 return entry.get("fuelStation", {}).get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -308,7 +308,7 @@ class AuVicProvider(BaseProvider):
 
         try:
             raw = await self._fetch_raw(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

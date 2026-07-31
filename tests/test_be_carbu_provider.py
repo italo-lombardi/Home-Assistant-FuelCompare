@@ -1373,7 +1373,7 @@ async def test_async_list_stations_station_without_price_uses_fallback_label() -
 
 async def test_resolve_location_raises_provider_error_on_http_response_error() -> None:
     """_resolve_location raises ProviderError when raise_for_status raises ClientResponseError."""
-    from aiohttp import ClientResponseError  # noqa: PLC0415
+    from aiohttp import ClientResponseError
 
     provider = _make_provider()
     request_info = MagicMock()
@@ -1398,7 +1398,7 @@ async def test_resolve_location_raises_provider_error_on_http_response_error() -
 
 async def test_fetch_station_listing_returns_empty_on_client_response_error() -> None:
     """_fetch_station_listing returns [] when raise_for_status raises ClientResponseError."""
-    from aiohttp import ClientResponseError  # noqa: PLC0415
+    from aiohttp import ClientResponseError
 
     provider = _provider_with_cached_location()
     request_info = MagicMock()

@@ -626,7 +626,7 @@ async def test_async_list_stations_returns_empty_on_network_error() -> None:
 
 async def test_async_fetch_passes_ssl_false() -> None:
     """Every GET request to pumps.ie uses an SSLContext with cert verification disabled."""
-    import ssl  # noqa: PLC0415
+    import ssl
 
     diesel_resp = _make_mock_response(200, _DIESEL_XML)
     petrol_resp = _make_mock_response(200, _PETROL_XML)

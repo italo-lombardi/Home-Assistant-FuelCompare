@@ -115,7 +115,7 @@ class IEFuelCompareProvider(BaseProvider):
                     return data["name"]
                 if data.get("tablename"):
                     return data["tablename"].replace("_", " ").title()
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 

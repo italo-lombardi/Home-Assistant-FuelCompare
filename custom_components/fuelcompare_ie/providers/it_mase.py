@@ -468,7 +468,7 @@ class ItMaseProvider(BaseProvider):
                 if nome and bandiera:
                     return f"{bandiera} — {nome}"
                 return nome or bandiera or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -507,7 +507,7 @@ class ItMaseProvider(BaseProvider):
 
         try:
             _price_data, _timestamps, meta_data = await self._fetch_both_csvs(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed to fetch CSVs: %s", err)
             return []
 

@@ -204,7 +204,7 @@ class MtFuelProvider(BaseProvider):
 
         try:
             prices = await _parse_malta_row(xlsx_bytes)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             raise ProviderError(
                 f"MtFuelProvider: failed to parse EU Oil Bulletin XLSX: {err}"
             ) from err
@@ -338,7 +338,7 @@ class MtFuelProvider(BaseProvider):
                     )
                     return None
                 html = await response.text(errors="replace")
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("MtFuelProvider: error scraping landing page: %s", err)
             return None
 
@@ -403,7 +403,7 @@ class MtFuelProvider(BaseProvider):
         except ClientResponseError as err:
             _LOGGER.debug("MtFuelProvider: HTTP error downloading XLSX: %s", err)
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("MtFuelProvider: unexpected error downloading XLSX: %s", err)
             return None
 
@@ -496,7 +496,7 @@ async def _parse_malta_row(xlsx_bytes: bytes) -> dict[str, float | None] | None:
         Exception:   Any other parsing error (re-raised to caller).
     """
     try:
-        import openpyxl  # noqa: PLC0415 — optional import
+        import openpyxl
     except ImportError:
         _LOGGER.warning(
             "MtFuelProvider: openpyxl is not installed.  "

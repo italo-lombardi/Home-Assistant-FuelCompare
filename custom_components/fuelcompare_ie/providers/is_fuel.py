@@ -337,7 +337,7 @@ class IsFuelProvider(BaseProvider):
                 if company and name:
                     return f"{company} — {name}"
                 return name or company or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -383,7 +383,7 @@ class IsFuelProvider(BaseProvider):
 
         try:
             stations = await self._fetch_all_stations(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_list_stations failed to fetch Gasvaktin dataset: %s", err
             )

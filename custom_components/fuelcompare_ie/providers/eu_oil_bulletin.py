@@ -253,7 +253,7 @@ class EuOilBulletinProvider(BaseProvider):
                            Excel file cannot be parsed.
         """
         try:
-            import openpyxl  # noqa: PLC0415  (lazy import — optional dependency)
+            import openpyxl
         except ImportError as err:
             raise ProviderError(
                 "openpyxl is required for the EU Oil Bulletin provider. "
@@ -282,7 +282,7 @@ class EuOilBulletinProvider(BaseProvider):
             raise ProviderError(
                 f"Failed to parse EC Oil Bulletin Excel file: {err}"
             ) from err
-        except Exception as err:  # noqa: BLE001 — catches BadZipFile and other parse errors
+        except Exception as err:
             from zipfile import BadZipFile
 
             if isinstance(err, BadZipFile):
@@ -307,7 +307,7 @@ class EuOilBulletinProvider(BaseProvider):
                         if candidate and candidate.lower() not in ("in eur", "country"):
                             week_label = candidate
                             break
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
             if not week_label:
                 week_label = datetime.now(tz=UTC).date().isoformat()
@@ -379,7 +379,7 @@ class EuOilBulletinProvider(BaseProvider):
             Empty list on any failure.
         """
         try:
-            import openpyxl  # noqa: PLC0415
+            import openpyxl
         except ImportError:
             _LOGGER.warning(
                 "openpyxl not available; EU Oil Bulletin station list unavailable."
@@ -400,7 +400,7 @@ class EuOilBulletinProvider(BaseProvider):
 
         try:
             wb_bytes = await self._fetch_excel(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "EU Oil Bulletin: failed to fetch Excel for station list: %s", err
             )
@@ -416,7 +416,7 @@ class EuOilBulletinProvider(BaseProvider):
                     data_only=True,
                 ),
             )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "EU Oil Bulletin: failed to parse Excel for station list: %s", err
             )

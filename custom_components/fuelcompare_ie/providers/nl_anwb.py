@@ -284,7 +284,7 @@ class NlAnwbProvider(BaseProvider):
             raise ProviderError(
                 f"HTTP error downloading EU Weekly Oil Bulletin: {err}"
             ) from err
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             raise ProviderError(
                 f"Connection error downloading EU Weekly Oil Bulletin: {err}"
             ) from err
@@ -311,7 +311,7 @@ async def _parse_bulletin(raw: bytes) -> StationData:
                        parsed, or the Netherlands row is not found.
     """
     try:
-        import openpyxl  # noqa: PLC0415
+        import openpyxl
     except ImportError as err:
         raise ProviderError(
             "openpyxl is required to parse the EU Weekly Oil Bulletin XLSX.  "
@@ -328,7 +328,7 @@ async def _parse_bulletin(raw: bytes) -> StationData:
                 data_only=True,
             ),
         )
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         raise ProviderError(
             f"Failed to open EU Weekly Oil Bulletin as XLSX workbook: {err}"
         ) from err
@@ -346,7 +346,7 @@ async def _parse_bulletin(raw: bytes) -> StationData:
                 # Row 1: date is in column A (index 0), not column B (index 1)
                 date_val = row[0] if len(row) > 0 else None
                 if date_val is not None:
-                    from datetime import datetime as _datetime  # noqa: PLC0415
+                    from datetime import datetime as _datetime
 
                     if isinstance(date_val, _datetime):
                         bulletin_date = date_val.date().isoformat()

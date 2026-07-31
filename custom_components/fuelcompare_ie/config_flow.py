@@ -377,7 +377,7 @@ async def _fetch_station_name(
         else:
             provider = provider_cls(station_id)
         return await provider.async_fetch_station_name(session, station_id)
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         _LOGGER.warning("Failed to fetch station name for %s: %s", station_id, err)
     return None
 
@@ -674,7 +674,7 @@ class FuelCompareIEConfigFlow(ConfigFlow, domain=DOMAIN):
                         for uid, _ in station_list
                         if (url := provider_instance.get_station_page_url(uid))
                     }
-                except Exception as err:  # noqa: BLE001
+                except Exception as err:
                     _LOGGER.warning("Failed to load station list: %s", err)
 
             station_list = sorted(station_list, key=lambda x: x[1].lower())

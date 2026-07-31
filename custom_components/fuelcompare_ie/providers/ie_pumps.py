@@ -279,7 +279,7 @@ class IePumpsProvider(BaseProvider):
                 record = _find_station(petrol_stations, station_id)
                 if record:
                     return record.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Failed to fetch station name for pumps.ie station %s: %s",
                 station_id,
@@ -327,7 +327,7 @@ class IePumpsProvider(BaseProvider):
                 self._fetch_stations(session, fuel="diesel"),
                 self._fetch_stations(session, fuel="petrol"),
             )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations fetch failed: %s", err)
             return []
 
@@ -435,7 +435,7 @@ class IePumpsProvider(BaseProvider):
                 "HTTP error fetching pumps.ie stations fuel=%s: %s", fuel, err
             )
             return None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unexpected error fetching pumps.ie stations fuel=%s: %s", fuel, err
             )

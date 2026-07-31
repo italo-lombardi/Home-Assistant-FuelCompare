@@ -451,7 +451,7 @@ class BeCarbuProvider(BaseProvider):
             town, location_id = await self._resolve_location(session, postal_code)
         except ProviderError:
             raise
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             raise ProviderError(
                 f"Failed to resolve Belgian postal code '{postal_code}': {err}"
             ) from err
@@ -466,7 +466,7 @@ class BeCarbuProvider(BaseProvider):
                 stations = await self._fetch_station_listing(
                     session, slug, town, postal_code, location_id
                 )
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.debug(
                     "BeCarbu: error fetching slug=%s for station %s: %s",
                     slug,
@@ -524,7 +524,7 @@ class BeCarbuProvider(BaseProvider):
             for s in stations_e10:
                 if s.get("station_id") == station_id:
                     return s.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "BeCarbu: failed to fetch station name for %s: %s", station_id, err
             )
@@ -579,7 +579,7 @@ class BeCarbuProvider(BaseProvider):
 
         try:
             town, location_id = await self._resolve_location(session, postal_code)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "BeCarbu: async_list_stations failed to resolve postal code %s: %s",
                 postal_code,
@@ -598,7 +598,7 @@ class BeCarbuProvider(BaseProvider):
                 ),
                 return_exceptions=True,
             )
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("BeCarbu: async_list_stations gather error: %s", err)
             return []
 
@@ -706,7 +706,7 @@ class BeCarbuProvider(BaseProvider):
             raise ProviderError(
                 f"HTTP error resolving postal code '{postal_code}': {err}"
             ) from err
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             raise ProviderError(
                 f"Unexpected error resolving postal code '{postal_code}': {err}"
             ) from err
@@ -798,7 +798,7 @@ class BeCarbuProvider(BaseProvider):
         except ClientResponseError as err:
             _LOGGER.debug("BeCarbu: HTTP error fetching slug=%s: %s", fuel_slug, err)
             return []
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "BeCarbu: unexpected error fetching slug=%s: %s", fuel_slug, err
             )

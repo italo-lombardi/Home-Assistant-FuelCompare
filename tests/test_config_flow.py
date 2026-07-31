@@ -3309,7 +3309,7 @@ async def test_async_setup_entry_ie_pumps_creates_tls_issue(
 
     created_issues: list[str] = []
 
-    def _capture_issue(hass, domain, issue_id, **kwargs):  # noqa: ANN001
+    def _capture_issue(hass, domain, issue_id, **kwargs):
         created_issues.append(issue_id)
 
     with (

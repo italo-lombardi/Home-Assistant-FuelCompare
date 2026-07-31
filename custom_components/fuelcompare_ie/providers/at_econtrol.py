@@ -143,7 +143,7 @@ class AtEcontrolProvider(BaseProvider):
             station = merged.get(str(station_id))
             if station:
                 return station.get("name") or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_fetch_station_name failed for station %s: %s", station_id, err
             )
@@ -182,7 +182,7 @@ class AtEcontrolProvider(BaseProvider):
 
         try:
             merged = await self._fetch_all_fuel_types(session, lat, lng)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("async_list_stations failed: %s", err)
             return []
 

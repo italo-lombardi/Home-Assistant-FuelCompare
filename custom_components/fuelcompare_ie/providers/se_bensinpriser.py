@@ -291,7 +291,7 @@ class SEBensinpriserProvider(BaseProvider):
                 if name and address:
                     return f"{name} — {address}"
                 return name or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Failed to fetch station name for %s: %s", station_id, err)
         return None
 
@@ -336,7 +336,7 @@ class SEBensinpriserProvider(BaseProvider):
 
         try:
             stations = await self._fetch_all_stations(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "async_list_stations failed to fetch Bensinpriser.nu dataset: %s", err
             )

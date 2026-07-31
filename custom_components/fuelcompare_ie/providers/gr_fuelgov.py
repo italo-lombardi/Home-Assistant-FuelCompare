@@ -206,7 +206,7 @@ class GrFuelgovProvider(BaseProvider):
             entry = self._select_entry(payload)
             name: str | None = entry.get("prefecture", {}).get("name")
             return name or None
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("GrFuelgovProvider: failed to fetch station name: %s", err)
             return None
 
@@ -235,7 +235,7 @@ class GrFuelgovProvider(BaseProvider):
         """
         try:
             payload = await self._fetch_payload(session)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("GrFuelgovProvider: async_list_stations failed: %s", err)
             return []
 
@@ -312,7 +312,7 @@ class GrFuelgovProvider(BaseProvider):
                 "GrFuelgovProvider: HTTP error %s fetching %s", err.status, _API_URL
             )
             raise
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "GrFuelgovProvider: connection error fetching %s: %s", _API_URL, err
             )
