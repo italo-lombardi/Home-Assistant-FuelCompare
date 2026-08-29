@@ -1198,6 +1198,24 @@ def test_build_index_station_code_coerced_to_string() -> None:
     assert "972" in prices_map
 
 
+def test_build_index_skips_station_with_falsy_code() -> None:
+    """A station whose ``code`` is falsy is not added to station_map (branch 393->391).
+
+    The ``if code:`` guard is False, so the station is skipped and the loop
+    continues to the next entry. A valid station following it is still indexed.
+    """
+    raw = {
+        "stations": [
+            {**_BASE_STATION, "code": None},  # falsy → skipped
+            {**_BASE_STATION, "code": 972},  # valid → indexed
+        ],
+        "prices": [],
+    }
+    station_map, _ = _build_index(raw)
+    assert "972" in station_map
+    assert len(station_map) == 1
+
+
 # ---------------------------------------------------------------------------
 # _build_station_data (module-level helper)
 # ---------------------------------------------------------------------------

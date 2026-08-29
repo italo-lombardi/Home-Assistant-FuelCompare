@@ -894,6 +894,25 @@ def test_parse_table_skips_blank_brand_row() -> None:
     assert "   " not in result
 
 
+def test_parse_table_parser_drops_empty_tr() -> None:
+    """A real ``<tr></tr>`` with no cells is dropped by the parser (branch 174->176).
+
+    Feeding genuine HTML (not a mocked parser) exercises _TableParser.handle_endtag:
+    the empty row's ``if self._current_row:`` guard is False, so no row is appended
+    and only the header + data rows survive.
+    """
+    html = (
+        "<html><body><table>"
+        "<tr><th>Benzinselskab</th><th>Diesel (B7)</th></tr>"
+        "<tr></tr>"  # empty row → dropped, no cells collected
+        "<tr><td>Circle K</td><td>13,89</td></tr>"
+        "</table></body></html>"
+    )
+    result = _parse_table(html)
+    assert "Circle K" in result
+    assert result["Circle K"]["diesel"] == pytest.approx(13.89)
+
+
 @pytest.mark.asyncio
 async def test_async_list_stations_returns_empty_list_when_brand_table_empty() -> None:
     """async_list_stations returns [] when _fetch_table returns {} (line 452)."""

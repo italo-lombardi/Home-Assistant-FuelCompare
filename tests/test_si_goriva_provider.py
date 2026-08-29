@@ -1234,6 +1234,28 @@ async def test_async_list_stations_label_includes_address() -> None:
 
 
 @pytest.mark.asyncio
+async def test_async_list_stations_label_omits_empty_address() -> None:
+    """An empty address is not appended to the label (branch 293->295).
+
+    ``address`` is falsy, so the ``if address:`` guard is False and only the
+    primary name plus the id suffix appear in the label.
+    """
+    franchise_resp = _make_mock_response(200, json_data=_BASE_FRANCHISE_LIST)
+    station = {**_BASE_STATION, "name": "No Address Postaja", "address": ""}
+    page1 = _make_mock_response(200, json_data=_search_page([station]))
+    session = _make_session(franchise_resp, page1)
+
+    provider = _default_provider()
+    result = await provider.async_list_stations(
+        session, lat=46.0517, lng=14.5079, radius_km=10.0
+    )
+
+    _sid, label = result[0]
+    assert "Iga ulica 1" not in label
+    assert "(#" in label
+
+
+@pytest.mark.asyncio
 async def test_async_list_stations_handles_invalid_station_coords() -> None:
     """async_list_stations skips distance check when station coords are invalid."""
     bad_coords_station = {**_BASE_STATION, "lat": "invalid", "lng": "bad"}

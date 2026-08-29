@@ -380,6 +380,18 @@ def test_build_address_postcode_only() -> None:
     assert "Musterstadt" in address
 
 
+def test_build_address_empty_string_postcode_and_place_appends_nothing() -> None:
+    """Empty-string postCode + empty place enters the block but skips append (branch 103->105).
+
+    ``postCode`` is an empty string (not None) so the outer guard is True, but
+    since it is falsy ``location`` falls back to the empty ``place``. The
+    ``if location:`` guard is then False, so nothing is appended and the result
+    is None (no street either).
+    """
+    station = {"postCode": "", "place": ""}
+    assert _build_address(station) is None
+
+
 # ---------------------------------------------------------------------------
 # _parse_station
 # ---------------------------------------------------------------------------

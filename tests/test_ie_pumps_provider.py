@@ -1038,3 +1038,69 @@ def test_warn_ssl_once_logs_warning_exactly_once(
         assert "expired" in warnings[0].message
     finally:
         _mod._SSL_WARNING_EMITTED = original
+
+
+# ---------------------------------------------------------------------------
+# Remaining branch coverage
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_none_when_present_lists_have_no_match() -> None:
+    """Station name is None when both non-empty fuel lists lack the station.
+
+    Both diesel and petrol lists are populated (so the `if diesel_stations` /
+    `if petrol_stations` outer guards pass) but neither contains the requested
+    ID, so _find_station returns None in both — branch 276->278 (diesel no match
+    falls through to petrol) and branch 280->288 (petrol no match returns None).
+    """
+    diesel_resp = _make_mock_response(200, _DIESEL_XML)  # has 1234, 9999
+    petrol_resp = _make_mock_response(200, _PETROL_XML)  # has 1234
+    session = _make_session(diesel_resp, petrol_resp)
+
+    provider = IePumpsProvider("5555")
+    name = await provider.async_fetch_station_name(session, "5555")
+
+    assert name is None
+
+
+async def test_async_list_stations_skips_station_without_id() -> None:
+    """async_list_stations skips a station dict with an empty ID (branch 340->338)."""
+    from unittest.mock import patch
+
+    provider = IePumpsProvider(_STATION_ID)
+
+    no_id = {
+        "ID": "",
+        "name": "No Id Station",
+        "address": "Somewhere",
+        "county": "Dublin",
+        "lat": 53.3498,
+        "lng": -6.2603,
+        "price_eur": 1.739,
+        "fuel": "diesel",
+    }
+    valid = {
+        "ID": _STATION_ID,
+        "name": "Test Station",
+        "address": "Main Street, Dublin",
+        "county": "Dublin",
+        "lat": 53.3498,
+        "lng": -6.2603,
+        "price_eur": 1.739,
+        "fuel": "diesel",
+    }
+
+    async def _mock_fetch(session, fuel):
+        if fuel == "diesel":
+            return [no_id, valid]
+        return []
+
+    with patch.object(provider, "_fetch_stations", side_effect=_mock_fetch):
+        session = MagicMock()
+        result = await provider.async_list_stations(
+            session, lat=53.3498, lng=-6.2603, radius_km=50.0
+        )
+
+    ids = [sid for sid, _ in result]
+    # The empty-ID station is dropped; only the valid station survives.
+    assert ids == [_STATION_ID]

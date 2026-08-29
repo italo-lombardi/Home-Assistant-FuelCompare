@@ -1041,3 +1041,81 @@ async def test_setup_entry_station_page_url_from_provider_fallback() -> None:
     assert "StationPageUrlSensor" in type_names
     url_sensors = [e for e in added if type(e).__name__ == "StationPageUrlSensor"]
     assert url_sensors[0].native_value == "https://www.tankerkoenig.de"
+
+
+# ---------------------------------------------------------------------------
+# Remaining branch coverage
+# ---------------------------------------------------------------------------
+
+
+def test_fuel_price_sensor_native_value_none_when_fuel_value_none() -> None:
+    """FuelPriceSensor.native_value returns None when the fuel value is None but data exists.
+
+    Covers branch 224->229: coordinator.data is truthy but data.get(fuel_type) is
+    None, so the `if value is not None` guard is False and the method returns None.
+    """
+    sensor = _make_fuel_sensor("unleaded", data={"unleaded": None, "diesel": 1.75})
+    assert sensor.native_value is None
+
+
+def test_fuel_price_sensor_extra_attrs_unparseable_lastupdated_omitted() -> None:
+    """extra_state_attributes omits price_last_updated when lastupdated is unparseable.
+
+    Covers branch 251->253: lastupdated is present (not None) so the outer guard
+    passes, but _parse_lastupdated returns None for the garbage value, so the
+    `if parsed is not None` guard is False and no price_last_updated key is added.
+    """
+    sensor = _make_fuel_sensor(
+        "unleaded", data={"unleaded": 1.85, "lastupdated": "not-a-timestamp"}
+    )
+    attrs = sensor.extra_state_attributes
+    assert "price_last_updated" not in attrs
+    assert attrs["fuel_type"] == "unleaded"
+
+
+def test_opening_hours_sensor_extra_attrs_no_data() -> None:
+    """StationOpeningHoursSensor.extra_state_attributes with no data returns only station_id.
+
+    Covers branch 472->479: coordinator.data is None so the `if self.coordinator.data`
+    guard is False and only the base dict is returned.
+    """
+    sensor = _make_opening_hours_sensor(None)
+    assert sensor.extra_state_attributes == {"station_id": "12345"}
+
+
+def test_opening_hours_sensor_extra_attrs_website_only() -> None:
+    """extra_state_attributes includes website but not phone when phone is None.
+
+    Covers branch 475->477: phone is None so the phone key is skipped, while
+    website is present and added.
+    """
+    sensor = _make_opening_hours_sensor(
+        {"opening_hours": "24/7", "phone": None, "website": "http://bp.com"}
+    )
+    attrs = sensor.extra_state_attributes
+    assert "phone" not in attrs
+    assert attrs["website"] == "http://bp.com"
+
+
+def test_opening_hours_sensor_extra_attrs_phone_only() -> None:
+    """extra_state_attributes includes phone but not website when website is None.
+
+    Covers branch 477->479: website is None so the website key is skipped after
+    phone has been added.
+    """
+    sensor = _make_opening_hours_sensor(
+        {"opening_hours": "24/7", "phone": "+353-1-123", "website": None}
+    )
+    attrs = sensor.extra_state_attributes
+    assert attrs["phone"] == "+353-1-123"
+    assert "website" not in attrs
+
+
+def test_simple_float_sensor_native_value_none_when_value_none() -> None:
+    """StationSimpleFloatSensor.native_value returns None when the value is None but data exists.
+
+    Covers branch 553->558: coordinator.data is truthy but data.get(data_key) is
+    None, so the `if val is not None` guard is False and the method returns None.
+    """
+    sensor = _make_simple_float_sensor("latitude", {"latitude": None, "name": "X"})
+    assert sensor.native_value is None

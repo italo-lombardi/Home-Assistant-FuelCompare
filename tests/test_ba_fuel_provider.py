@@ -1349,3 +1349,150 @@ async def test_async_fetch_raises_provider_error_for_unknown_city_slug() -> None
     # "fakecity" is not in _CITY_SLUGS
     with pytest.raises(ProviderError, match="Unknown city slug"):
         await provider.async_fetch(session, "fakecity:0")
+
+
+# ---------------------------------------------------------------------------
+# Remaining branch coverage
+# ---------------------------------------------------------------------------
+
+
+def test_parse_station_table_whitespace_only_cell_ignored() -> None:
+    """A <td> containing only whitespace produces an empty cell text (branch 474->exit).
+
+    In handle_data the parser is inside a cell but data.strip() is empty, so the
+    `if stripped` guard is False and nothing is appended — the diesel column ends
+    up empty/None while the other columns still parse.
+    """
+    html = """
+<html><body>
+<table>
+  <tr>
+    <th>Naziv</th>
+    <th>Adresa</th>
+    <th>Diesel</th>
+    <th>Super 95</th>
+  </tr>
+  <tr>
+    <td>OMV Whitespace</td>
+    <td>Some Street 1</td>
+    <td>
+       
+    </td>
+    <td>2,800</td>
+  </tr>
+</table>
+</body></html>
+"""
+    stations = _parse_station_table(html)
+
+    assert len(stations) == 1
+    assert stations[0]["name"] == "OMV Whitespace"
+    # The whitespace-only diesel cell yields no price.
+    assert stations[0]["diesel"] is None
+    assert stations[0]["unleaded"] == pytest.approx(2.80)
+
+
+def test_parse_station_table_duplicate_fuel_header_keeps_first() -> None:
+    """A second header mapping to an already-seen data_key is ignored (branch 613->615).
+
+    Two "Diesel" columns both map to fuel_cols['diesel']; the first wins and the
+    second hits the `if data_key not in fuel_cols` False branch (break without
+    overwriting), so the diesel price is read from the first Diesel column.
+    """
+    html = """
+<html><body>
+<table>
+  <tr>
+    <th>Naziv</th>
+    <th>Diesel</th>
+    <th>Diesel</th>
+  </tr>
+  <tr>
+    <td>OMV Dup Headers</td>
+    <td>2,750</td>
+    <td>9,990</td>
+  </tr>
+</table>
+</body></html>
+"""
+    stations = _parse_station_table(html)
+
+    assert len(stations) == 1
+    # First Diesel column wins (index 1), not the second (9.99).
+    assert stations[0]["diesel"] == pytest.approx(2.75)
+
+
+def test_parse_stations_div_out_of_range_price_skipped() -> None:
+    """A price-shaped token outside 0.3-5.0 is not collected (branch 514->527).
+
+    "6,00" matches the price regex and parses to 6.0, which fails the
+    `0.3 <= val <= 5.0` range check, so it is not appended to prices_found.
+    """
+    from custom_components.fuelcompare_ie.providers.ba_fuel import _parse_stations_div
+
+    html = """<html><body>
+<div id="item_0">
+<span>Out Of Range Station</span>
+<span>Some Street Address</span>
+<span>6,00</span>
+<span>2,75</span>
+<span>2,80</span>
+</div>
+</body></html>"""
+    stations = _parse_stations_div(html)
+
+    assert len(stations) == 1
+    # 6.00 was skipped; the two in-range prices fill diesel/unleaded.
+    assert stations[0]["diesel"] == pytest.approx(2.75)
+    assert stations[0]["unleaded"] == pytest.approx(2.80)
+
+
+def test_parse_stations_div_short_and_numeric_tokens_skipped() -> None:
+    """Short or all-numeric non-price tokens are ignored (branch 519->527).
+
+    "AB" is too short (len <= 5) and "123 456" is all-numeric, so neither the
+    name nor the address branch fires for them; only the longer text becomes the
+    name.
+    """
+    from custom_components.fuelcompare_ie.providers.ba_fuel import _parse_stations_div
+
+    html = """<html><body>
+<div id="item_0">
+<span>AB</span>
+<span>123 456</span>
+<span>Proper Station Name</span>
+<span>2,75</span>
+<span>2,80</span>
+</div>
+</body></html>"""
+    stations = _parse_stations_div(html)
+
+    assert len(stations) == 1
+    assert stations[0]["name"] == "Proper Station Name"
+
+
+def test_parse_stations_div_third_text_block_ignored_when_name_and_address_set() -> (
+    None
+):
+    """A third text block is ignored once name and address are set (branch 523->527).
+
+    The first non-numeric text becomes the name, the second the address; a third
+    non-numeric text hits the `elif not current_block.get('address')` False branch
+    and is dropped rather than overwriting either field.
+    """
+    from custom_components.fuelcompare_ie.providers.ba_fuel import _parse_stations_div
+
+    html = """<html><body>
+<div id="item_0">
+<span>Primary Station Name</span>
+<span>First Address Line</span>
+<span>Extra Ignored Text</span>
+<span>2,75</span>
+<span>2,80</span>
+</div>
+</body></html>"""
+    stations = _parse_stations_div(html)
+
+    assert len(stations) == 1
+    assert stations[0]["name"] == "Primary Station Name"
+    assert stations[0]["address"] == "First Address Line"

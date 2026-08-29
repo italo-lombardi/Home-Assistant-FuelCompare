@@ -399,6 +399,36 @@ def test_extract_prices_raises_provider_error_on_malformed_payload() -> None:
         _extract_prices_from_jsonstat2({"broken": True})
 
 
+def test_extract_prices_skips_out_of_range_flat_index() -> None:
+    """Time indices beyond the value array are skipped (branch 232->227).
+
+    ``size`` claims 3 time periods but the ``value`` array has a single element.
+    Scanning newest→oldest, the first two flat indices (2, 1) are >= len(values)
+    so the ``flat_idx < len(values)`` guard is False and the loop advances until
+    it reaches the valid index 0.
+    """
+    payload = {
+        "dataset": {
+            "id": ["energia_22_20200205", "Tiedot", "timeperiod_m"],
+            "size": [1, 1, 3],  # 1 commodity, 3 time periods claimed
+            "dimension": {
+                "energia_22_20200205": {
+                    "category": {"index": {"A": 0}, "label": {"A": "95E10"}},
+                },
+                "Tiedot": {"category": {"index": {"hinta": 0}}},
+                "timeperiod_m": {
+                    "category": {
+                        "index": {"2026M01": 0, "2026M02": 1, "2026M03": 2},
+                    },
+                },
+            },
+            "value": [1.712],  # only one value present → indices 1 and 2 skipped
+        }
+    }
+    prices = _extract_prices_from_jsonstat2(payload)
+    assert prices.get("A") == pytest.approx(1.712)
+
+
 # ---------------------------------------------------------------------------
 # async_fetch — success path
 # ---------------------------------------------------------------------------

@@ -692,7 +692,23 @@ async def test_download_xlsx_returns_none_on_client_response_error() -> None:
     assert result is None
 
 
-async def test_parse_malta_row_raises_import_error_when_openpyxl_missing() -> None:
+async def test_download_xlsx_non_200_non_404_returns_none_and_keeps_cache() -> None:
+    """A 500 status returns None without clearing the cached URL (branch 399->401).
+
+    ``response.status`` is not 200 and not in (404, 410), so the cache-clearing
+    block is skipped and the method returns None with the cached URL intact.
+    """
+    provider = MtFuelProvider()
+    provider._cached_xlsx_url = _FALLBACK_XLSX_URL
+
+    xlsx_resp = _make_mock_response(500, body=b"")
+    xlsx_resp.read = AsyncMock(return_value=b"")
+    session = _make_session(xlsx_resp)
+
+    result = await provider._download_xlsx(session, _FALLBACK_XLSX_URL)
+    assert result is None
+    # 500 is transient — cached URL must NOT be cleared.
+    assert provider._cached_xlsx_url == _FALLBACK_XLSX_URL
     """_parse_malta_row logs warning and re-raises ImportError when openpyxl absent (lines 495-500)."""
     with patch.dict(sys.modules, {"openpyxl": None}), pytest.raises(ImportError):
         await _parse_malta_row(b"irrelevant")

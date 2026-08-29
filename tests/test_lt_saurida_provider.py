@@ -781,6 +781,53 @@ def test_parse_table_skips_rows_with_empty_station_name() -> None:
 
 
 # ---------------------------------------------------------------------------
+# _parse_table — branch 165->167: empty <tr> dropped by the parser
+# ---------------------------------------------------------------------------
+
+
+def test_parse_table_parser_drops_empty_tr() -> None:
+    """A real empty ``<tr></tr>`` is dropped by _TableParser (branch 165->167).
+
+    Feeding genuine HTML exercises handle_endtag: the empty row's
+    ``if self._current_row:`` guard is False, so no row is appended.
+    """
+    html = (
+        "<table>"
+        "<tr><th>Degalinė</th><th>Dyzelinas_B7</th></tr>"
+        "<tr></tr>"  # empty row → dropped
+        "<tr><td>Real Station</td><td>1.529</td></tr>"
+        "</table>"
+    )
+    result = _parse_table(html)
+    assert len(result) == 1
+    assert result[0]["name"] == "Real Station"
+
+
+# ---------------------------------------------------------------------------
+# _parse_table — branch 267->263: unrecognised header column skipped
+# ---------------------------------------------------------------------------
+
+
+def test_parse_table_skips_unrecognised_header_column() -> None:
+    """A header column that maps to no data key is skipped (branch 267->263).
+
+    ``_header_to_data_key`` returns None for the unrecognised 'Papildoma' column,
+    so ``if data_key:`` is False and it is not added to col_index_to_key; the
+    recognised diesel column is still parsed.
+    """
+    html = (
+        "<table>"
+        "<tr><th>Degalinė</th><th>Papildoma</th><th>Dyzelinas_B7</th></tr>"
+        "<tr><td>Real Station</td><td>ignored</td><td>1.529</td></tr>"
+        "</table>"
+    )
+    result = _parse_table(html)
+    assert len(result) == 1
+    assert result[0]["name"] == "Real Station"
+    assert result[0]["diesel"] == pytest.approx(1.529)
+
+
+# ---------------------------------------------------------------------------
 # async_list_stations — line 512: empty stations list returns []
 # ---------------------------------------------------------------------------
 

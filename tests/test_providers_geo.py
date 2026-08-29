@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import runpy
+
 import pytest
 
+from custom_components.fuelcompare_ie.providers import _geo
 from custom_components.fuelcompare_ie.providers._geo import (
     filter_within_radius,
     haversine_km,
@@ -80,3 +83,14 @@ def test_filter_radius_boundary_inclusive() -> None:
     rows = [("fremantle", {"latitude": -32.0569, "longitude": 115.7439})]
     assert filter_within_radius(rows, -31.9523, 115.8613, 16.5) == rows
     assert filter_within_radius(rows, -31.9523, 115.8613, 15.0) == []
+
+
+def test_module_self_check_runs_as_main(capsys: pytest.CaptureFixture[str]) -> None:
+    """Executing the module as __main__ runs its assert-based self-check.
+
+    This exercises the `if __name__ == "__main__"` block (lines 78-125) which
+    validates haversine distances and filter_within_radius behaviour end to
+    end; a broken helper would raise AssertionError here.
+    """
+    runpy.run_path(_geo.__file__, run_name="__main__")
+    assert capsys.readouterr().out.strip() == "ok"

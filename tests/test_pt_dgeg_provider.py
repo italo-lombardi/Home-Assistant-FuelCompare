@@ -1309,3 +1309,106 @@ def test_search_url_points_to_dgeg() -> None:
     assert "dgeg.gov.pt" in _SEARCH_URL
     assert "PesquisarPostos" in _SEARCH_URL
     assert _SEARCH_URL.startswith("https://")
+
+
+# ---------------------------------------------------------------------------
+# Remaining branch coverage
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_station_name_none_when_resultado_truthy_non_dict() -> None:
+    """async_fetch_station_name returns None when resultado is a truthy non-dict.
+
+    A non-empty list survives the `or {}` fallback so `isinstance(resultado, dict)`
+    is False (branch 187->193) and the method falls through to return None.
+    """
+    bad = {"status": True, "resultado": ["unexpected", "list", "payload"]}
+    resp = _make_mock_response(200, json_data=bad)
+    session = _make_session(resp)
+
+    provider = PtDgegProvider(_STATION_ID)
+    name = await provider.async_fetch_station_name(session, _STATION_ID)
+
+    assert name is None
+
+
+async def test_async_list_stations_skips_row_with_unmapped_fuel() -> None:
+    """A search row whose Combustivel has no _FUEL_NAME_MAP entry is not priced.
+
+    The `key and preco_raw` guard is False (branch 278->246) so no price is
+    recorded, but the station itself is still listed from its first row.
+    """
+    row_unmapped = {
+        **_SEARCH_ROW_DIESEL,
+        "Combustivel": "Gasóleo especial",  # deliberately unmapped
+        "Preco": "1,999 €",
+    }
+    search_data = {"resultado": [row_unmapped]}
+    resp = _make_mock_response(200, json_data=search_data)
+    session = _make_session(resp)
+
+    provider = PtDgegProvider(_STATION_ID)
+    result = await provider.async_list_stations(session)
+
+    assert len(result) == 1
+    assert result[0][0] == "12345"
+
+
+async def test_async_list_stations_skips_row_with_unparsable_price() -> None:
+    """A mapped fuel with an unparsable Preco records no price (branch 280->246)."""
+    row_bad_price = {**_SEARCH_ROW_DIESEL, "Preco": "n/a"}
+    search_data = {"resultado": [row_bad_price]}
+    resp = _make_mock_response(200, json_data=search_data)
+    session = _make_session(resp)
+
+    provider = PtDgegProvider(_STATION_ID)
+    result = await provider.async_list_stations(session)
+
+    # Station still listed even though its only price failed to parse.
+    assert len(result) == 1
+    assert result[0][0] == "12345"
+
+
+async def test_async_list_stations_label_omits_address_when_absent() -> None:
+    """A station without a Morada yields a label with no address segment (307->309)."""
+    row_no_address = {
+        **_SEARCH_ROW_DIESEL,
+        "Morada": None,
+        "Nome": "Posto Sem Morada",
+        "Marca": "Posto Sem Morada",
+    }
+    search_data = {"resultado": [row_no_address]}
+    resp = _make_mock_response(200, json_data=search_data)
+    session = _make_session(resp)
+
+    provider = PtDgegProvider(_STATION_ID)
+    result = await provider.async_list_stations(session)
+
+    _sid, label = result[0]
+    # Label is just "{primary} (#{sid[:8]})" with no ", {address}" segment.
+    assert label == "Posto Sem Morada (#12345)"
+
+
+def test_parse_station_skips_unparsable_price_but_keeps_timestamp() -> None:
+    """_parse_station ignores a mapped fuel whose Preco is unparsable (branch 355->359).
+
+    The price stays absent from the result, yet the entry's DataAtualizacao still
+    contributes to lastupdated tracking.
+    """
+    resultado = {
+        "Nome": "GALP Teste",
+        "Marca": "GALP",
+        "Morada": _MORADA,
+        "Combustiveis": [
+            {
+                "TipoCombustivel": "Gasóleo simples",
+                "Preco": "sem preço",  # mapped fuel, unparsable price
+                "DataAtualizacao": "2026-06-13T08:00:00",
+            }
+        ],
+    }
+
+    result = _parse_station(_STATION_ID, resultado)
+
+    assert result["diesel"] is None
+    assert result["lastupdated"] == "2026-06-13T08:00:00"
