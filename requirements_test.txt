@@ -1,6 +1,7 @@
-pytest>=7.0
-pytest-homeassistant-custom-component>=0.13.357,<0.13.358
-pytest-cov>=4.0
+pytest>=9.0
+pytest-asyncio>=1.4.0
+pytest-homeassistant-custom-component>=0.13.356
+pytest-cov>=7.1.0
 openpyxl>=3.1.5
 beautifulsoup4>=4.15.0
 cryptography>=41.0.0
