@@ -672,6 +672,21 @@ def test_day_matches_trailing_comma_skips_empty_segment() -> None:
     assert _day_matches("mo,", 2) is False  # Wednesday doesn't match
 
 
+def test_day_matches_multi_dash_segment_falls_through_to_next() -> None:
+    """A segment with 3+ dash parts matches neither range nor single-day arm.
+
+    'mo-fr-sa' splits to ['mo','fr','sa'] (len 3): the len==2 range arm and the
+    len==1 single-day arm are both skipped, so the loop continues to the next
+    segment (branch 210->190). The following ',tu' segment then matches Tuesday.
+    """
+    from custom_components.fuelcompare_ie.binary_sensor import _day_matches
+
+    # First segment (3 parts) is unparseable and skipped; 'tu' matches idx 1.
+    assert _day_matches("mo-fr-sa,tu", 1) is True
+    # No later segment matches → False, having traversed the 3-part segment.
+    assert _day_matches("mo-fr-sa,we", 0) is False
+
+
 # ---------------------------------------------------------------------------
 # StationIsOpenBinarySensor — OSM string priority (line 252)
 # ---------------------------------------------------------------------------

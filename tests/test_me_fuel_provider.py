@@ -516,6 +516,34 @@ async def test_async_fetch_raises_when_no_xlsx_resource_found() -> None:
         await provider.async_fetch(session, _STATION_ID_ME)
 
 
+@pytest.mark.asyncio
+async def test_async_fetch_falls_back_to_description_when_parse_yields_prices() -> None:
+    """async_fetch uses the description-parse fallback when it yields prices (branch 228->234).
+
+    With no XLSX URL but a parseable description, ``_parse_prices_from_description``
+    returns non-None prices, so the ``not any(...)`` guard is False and execution
+    falls through to build StationData from those prices.
+    """
+    description = (
+        "EUROSUPER 98 1,70 eur\n"
+        "EUROSUPER 95 1,66 eur\n"
+        "EURODIEZEL 1,64 eur\n"
+        "LOŽ ULJE 1,59 eur"
+    )
+
+    provider = _default_provider()
+    provider._fetch_xlsx_url = AsyncMock(return_value=(None, _MODIFIED, description))
+
+    session = MagicMock()
+    data = await provider.async_fetch(session, _STATION_ID_ME)
+
+    assert data["unleaded"] == pytest.approx(1.66)
+    assert data["premium_unleaded"] == pytest.approx(1.70)
+    assert data["diesel"] == pytest.approx(1.64)
+    assert data["kerosene"] == pytest.approx(1.59)
+    assert data["lastupdated"] == _MODIFIED
+
+
 # ---------------------------------------------------------------------------
 # async_fetch — XLSX download error handling
 # ---------------------------------------------------------------------------

@@ -945,6 +945,178 @@ async def test_station_picker_empty_list_with_uid_aborts_not_clobbers(
         PROVIDER_REGISTRY.pop("au_empty_clobber_test", None)
 
 
+async def test_station_picker_no_provider_cls_silent_create_with_uid(
+    hass: HomeAssistant,
+) -> None:
+    """Station picker silently creates the entry when provider_cls is unknown.
+
+    Covers config_flow.py branch 652->680 (provider_cls falsy skips the station
+    list fetch) and lines 727-729 (silent-create path): with a unique_id already
+    set and a non-station-id lookup mode, an empty list aborts on duplicate then
+    proceeds to async_step_name.
+    """
+    from unittest.mock import MagicMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    mock_hass = MagicMock()
+    flow.hass = mock_hass
+    flow.context = {"source": "user", "unique_id": "fuelcompare_ie_manual_abc"}
+    # Unknown provider key → PROVIDER_REGISTRY.get() returns None (provider_cls falsy)
+    flow._provider_key = "does_not_exist_provider_key"
+    flow._country = "IE"
+    flow._station_county = ""
+    flow._latitude = None
+    flow._longitude = None
+    flow._radius_km = 10.0
+    flow._postal_code = ""
+    flow._api_key = ""
+    flow._station_list = []
+    flow._station_url_map = {}
+    flow._station_id = ""
+
+    abort_called = False
+    name_called = False
+
+    def _record_abort():
+        nonlocal abort_called
+        abort_called = True
+
+    async def _mock_name():
+        nonlocal name_called
+        name_called = True
+        return {"type": "create_entry", "title": "manual", "data": {}}
+
+    with (
+        patch(
+            "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+            return_value=MagicMock(),
+        ),
+        patch.object(flow, "_abort_if_unique_id_configured", side_effect=_record_abort),
+        patch.object(flow, "async_step_name", side_effect=_mock_name),
+    ):
+        result = await flow.async_step_station_picker(user_input=None)
+
+    assert abort_called, "silent-create must guard against duplicates first"
+    assert name_called, "silent-create must proceed to async_step_name"
+    assert result["type"] == "create_entry"
+
+
+async def test_station_picker_no_provider_cls_no_uid_aborts(
+    hass: HomeAssistant,
+) -> None:
+    """Station picker aborts with 'no_stations_found' when there is no unique_id.
+
+    Covers config_flow.py line 731 (fallback abort): provider_cls is unknown so
+    mode defaults to 'manual_id', which is neither global_list nor a search mode,
+    and with no unique_id set the silent-create guard at line 727 is False, so the
+    flow falls through to the catch-all abort.
+    """
+    from unittest.mock import MagicMock, patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+
+    flow = FuelCompareIEConfigFlow()
+    flow.hass = MagicMock()
+    flow.context = {"source": "user"}  # no unique_id
+    flow._provider_key = "does_not_exist_provider_key"
+    flow._country = "IE"
+    flow._station_county = ""
+    flow._latitude = None
+    flow._longitude = None
+    flow._radius_km = 10.0
+    flow._postal_code = ""
+    flow._api_key = ""
+    flow._station_list = []
+    flow._station_url_map = {}
+    flow._station_id = ""
+
+    with patch(
+        "custom_components.fuelcompare_ie.config_flow.async_get_clientsession",
+        return_value=MagicMock(),
+    ):
+        result = await flow.async_step_station_picker(user_input=None)
+
+    assert result["type"] == "abort"
+    assert result["reason"] == "no_stations_found"
+
+
+async def test_async_step_location_station_id_mode_skips_suggested_name(
+    hass: HomeAssistant,
+) -> None:
+    """Location step does not set a location-based suggested name for station-id providers.
+
+    Covers config_flow.py branch 824->829: for a location_search provider whose
+    CONFIG_MODE is 'station_id', `_is_station_id_mode` is True so the location-based
+    _suggested_name assignment is skipped and the flow proceeds straight to the
+    station picker (which sets the real name after the user picks a station).
+    """
+    from unittest.mock import patch
+
+    from custom_components.fuelcompare_ie.config_flow import FuelCompareIEConfigFlow
+    from custom_components.fuelcompare_ie.providers import PROVIDER_REGISTRY
+    from custom_components.fuelcompare_ie.providers.base import BaseProvider
+
+    class _StationIdLocationProvider(BaseProvider):
+        COUNTRY = "AU"
+        PROVIDER_KEY = "au_station_id_location_test"
+        LABEL = "Station Id Location Test"
+        CONFIG_MODE = "station_id"
+        STATION_LOOKUP_MODE = "location_search"
+        CURRENCY = "A$"
+        CAPABILITIES: frozenset = frozenset({"name", "latitude", "longitude"})
+
+        def __init__(self, station_id: str, **_: object) -> None:
+            pass
+
+        async def async_fetch(self, session, station_id):
+            return {}
+
+        async def async_list_stations(self, session, **kwargs):
+            return []
+
+    PROVIDER_REGISTRY["au_station_id_location_test"] = _StationIdLocationProvider
+    try:
+        flow = FuelCompareIEConfigFlow()
+        flow.hass = hass
+        flow.context = {"source": "user"}
+        flow._provider_key = "au_station_id_location_test"
+        flow._country = "AU"
+        flow._station_county = ""
+        flow._radius_km = 10.0
+        flow._postal_code = ""
+        flow._api_key = ""
+        flow._suggested_name = ""
+
+        picker_called = False
+
+        async def _mock_picker():
+            nonlocal picker_called
+            picker_called = True
+            return {"type": "form", "step_id": "station_picker"}
+
+        with (
+            patch.object(flow, "async_set_unique_id", new=AsyncMock(return_value=None)),
+            patch.object(flow, "_abort_if_unique_id_configured", return_value=None),
+            patch.object(flow, "async_step_station_picker", side_effect=_mock_picker),
+        ):
+            result = await flow.async_step_location(
+                user_input={
+                    "latitude": -33.8688,
+                    "longitude": 151.2093,
+                    "radius_km": 10,
+                }
+            )
+
+        assert picker_called
+        assert result["step_id"] == "station_picker"
+        # station-id mode: no location-based fallback name is set here.
+        assert flow._suggested_name == ""
+    finally:
+        PROVIDER_REGISTRY.pop("au_station_id_location_test", None)
+
+
 async def test_async_step_api_key_empty_key_shows_error(
     hass: HomeAssistant,
 ) -> None:

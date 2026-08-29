@@ -1528,3 +1528,196 @@ def test_extract_price_from_text_decimal_match_value_error() -> None:
         result = _extract_price_from_text("1.invalid")
 
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# _parse_station_html — address from data attribute (branch 290->298)
+# ---------------------------------------------------------------------------
+
+
+def test_parse_station_html_uses_data_address_attribute() -> None:
+    """A station whose data-address attribute is present skips the address fallback.
+
+    With address_raw already set from the data attribute, the `if not address_raw`
+    fallback (line 290) is skipped (branch 290->298) and the attribute value is used.
+    """
+    html = (
+        "<html><body>"
+        '<div class="station-content" data-id="77001" data-lat="50.85" '
+        'data-lng="4.35" data-address="Chaussee de Louvain 100">'
+        '<span class="station-name">Data Attr Station</span>'
+        '<span class="prix">1,799</span>'
+        '<img class="brand-logo" alt="Q8" src="/logo.png"/>'
+        "</div></body></html>"
+    )
+
+    stations = _parse_station_html(html, "diesel")
+
+    assert len(stations) == 1
+    assert stations[0]["address"] == "Chaussee de Louvain 100"
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — merge branches (608->614, 611->609, 614->621, 617->615)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_skips_diesel_when_result_not_list() -> None:
+    """When the diesel listing fetch raises, diesel_result is an Exception, not a list.
+
+    gather(return_exceptions=True) surfaces the exception as the result, so the
+    `isinstance(diesel_result, list)` guard is False (branch 608->614) and only the
+    E10 stations are merged.
+    """
+    from unittest.mock import patch
+
+    provider = _provider_with_cached_location()
+    session = MagicMock()
+
+    e10_stations = [
+        {
+            "station_id": "88001",
+            "name": "E10 Only",
+            "brand": "BP",
+            "address": "Rue X",
+            "latitude": 50.85,
+            "longitude": 4.35,
+            "price": 1.75,
+        }
+    ]
+
+    async def _fake_fetch(_session, fuel_slug, *_args, **_kwargs):
+        if fuel_slug == _FUEL_KEY_TO_SLUG["diesel"]:
+            raise ClientError("diesel listing failed")
+        return e10_stations
+
+    with patch.object(provider, "_fetch_station_listing", side_effect=_fake_fetch):
+        results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
+
+    ids = [sid for sid, _ in results]
+    assert ids == ["88001"]
+
+
+async def test_async_list_stations_skips_e10_when_result_not_list() -> None:
+    """When the E10 listing fetch raises, e10_result is an Exception, not a list.
+
+    The `isinstance(e10_result, list)` guard is False (branch 614->621) so only the
+    diesel stations are merged.
+    """
+    from unittest.mock import patch
+
+    provider = _provider_with_cached_location()
+    session = MagicMock()
+
+    diesel_stations = [
+        {
+            "station_id": "88002",
+            "name": "Diesel Only",
+            "brand": "Q8",
+            "address": "Rue Y",
+            "latitude": 50.85,
+            "longitude": 4.35,
+            "price": 1.90,
+        }
+    ]
+
+    async def _fake_fetch(_session, fuel_slug, *_args, **_kwargs):
+        if fuel_slug == _FUEL_KEY_TO_SLUG["diesel"]:
+            return diesel_stations
+        raise ClientError("e10 listing failed")
+
+    with patch.object(provider, "_fetch_station_listing", side_effect=_fake_fetch):
+        results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
+
+    ids = [sid for sid, _ in results]
+    assert ids == ["88002"]
+
+
+async def test_async_list_stations_skips_stations_without_station_id() -> None:
+    """Stations missing station_id are skipped in both merge loops (611->609, 617->615)."""
+    from unittest.mock import patch
+
+    provider = _provider_with_cached_location()
+    session = MagicMock()
+
+    diesel_stations = [
+        {
+            "station_id": "",
+            "name": "No Id Diesel",
+            "latitude": 50.85,
+            "longitude": 4.35,
+        },
+        {
+            "station_id": "90001",
+            "name": "Valid Diesel",
+            "brand": "Q8",
+            "address": "Rue Z",
+            "latitude": 50.85,
+            "longitude": 4.35,
+            "price": 1.80,
+        },
+    ]
+    e10_stations = [
+        {"station_id": None, "name": "No Id E10", "latitude": 50.86, "longitude": 4.36},
+    ]
+
+    async def _fake_fetch(_session, fuel_slug, *_args, **_kwargs):
+        if fuel_slug == _FUEL_KEY_TO_SLUG["diesel"]:
+            return diesel_stations
+        return e10_stations
+
+    with patch.object(provider, "_fetch_station_listing", side_effect=_fake_fetch):
+        results = await provider.async_list_stations(session, postal_code=_POSTAL_CODE)
+
+    ids = [sid for sid, _ in results]
+    # Only the one station with a truthy station_id survives the merge.
+    assert ids == ["90001"]
+
+
+# ---------------------------------------------------------------------------
+# _resolve_location — postal-code matching loop (branches 723->729, 725->723)
+# ---------------------------------------------------------------------------
+
+
+async def test_resolve_location_no_exact_match_uses_first_entry() -> None:
+    """When no entry matches the postal code, _resolve_location keeps payload[0].
+
+    Every entry's pc differs from the requested code, so the `pc == postal_code`
+    guard is always False (branch 725->723) and the loop finishes without break
+    (branch 723->729), leaving the first entry selected.
+    """
+    payload = [
+        {"n": "Antwerp", "id": "11", "pc": "2000"},
+        {"n": "Ghent", "id": "22", "pc": "9000"},
+    ]
+    provider = _make_provider()
+    loc_resp = _make_json_response(payload)
+    session = MagicMock()
+    session.get = MagicMock(return_value=loc_resp)
+
+    town, location_id = await provider._resolve_location(session, "1000")
+
+    # First entry is retained because no pc matched "1000".
+    assert town == "antwerp"
+    assert location_id == "11"
+
+
+async def test_resolve_location_matches_later_entry() -> None:
+    """_resolve_location selects the entry whose pc matches, skipping earlier ones.
+
+    The first entry's pc differs (branch 725->723 -> continue) before the second
+    entry matches and breaks the loop.
+    """
+    payload = [
+        {"n": "Antwerp", "id": "11", "pc": "2000"},
+        {"n": "Brussels", "id": "42", "pc": "1000"},
+    ]
+    provider = _make_provider()
+    loc_resp = _make_json_response(payload)
+    session = MagicMock()
+    session.get = MagicMock(return_value=loc_resp)
+
+    town, location_id = await provider._resolve_location(session, "1000")
+
+    assert town == "brussels"
+    assert location_id == "42"

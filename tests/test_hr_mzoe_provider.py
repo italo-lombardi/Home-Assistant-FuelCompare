@@ -281,6 +281,19 @@ def test_extract_prices_handles_invalid_cijena() -> None:
     assert result == {}
 
 
+def test_extract_prices_skips_nonpositive_price() -> None:
+    """A parseable but non-positive cijena is not recorded (branch 229->215).
+
+    ``float(cijena)`` succeeds but ``price > 0`` is False, so the append is
+    skipped and the loop moves on. With no positive prices the result is empty.
+    """
+    vrsta_tip = {5: 1}
+    gorivo_vrsta = {10: 5}
+    station = {"cjenici": [{"gorivo_id": 10, "cijena": "0"}]}
+    result = _extract_prices(station, vrsta_tip, gorivo_vrsta)
+    assert result == {}
+
+
 # ---------------------------------------------------------------------------
 # _parse_station — lat/lng ValueError/TypeError paths
 # ---------------------------------------------------------------------------

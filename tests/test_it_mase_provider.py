@@ -276,6 +276,43 @@ def test_parse_price_csv_skips_unknown_fuel_type() -> None:
     assert "unleaded" in prices["3464"]
 
 
+def test_parse_price_csv_unmapped_fuel_without_timestamp_skipped() -> None:
+    """Unmapped fuel with no dtComu skips the timestamp block (branch 165->169).
+
+    'Cherosene' is unmapped and the row omits the dtComu field, so iso_ts is
+    None: the ``if iso_ts is not None`` guard is False and neither price nor
+    timestamp is recorded.
+    """
+    csv = (
+        "Estrazione del 2026-06-13\n"
+        "idImpianto|descCarburante|prezzo|isSelf\n"
+        "7777|Cherosene|1.500|0\n"
+    )
+    text = _skip_banner(csv)
+    prices, timestamps = _parse_price_csv(text)
+    assert "7777" not in prices
+    assert "7777" not in timestamps
+
+
+def test_parse_price_csv_unmapped_fuel_keeps_latest_timestamp() -> None:
+    """Older second unmapped-fuel timestamp does not overwrite (branch 167->169).
+
+    Both rows are unmapped. The first records the newer dtComu (10:00); the
+    second is older (08:00), so ``existing is None or iso_ts > existing`` is
+    False and the stored timestamp is left unchanged.
+    """
+    csv = (
+        "Estrazione del 2026-06-13\n"
+        "idImpianto|descCarburante|prezzo|isSelf|dtComu\n"
+        "8888|Cherosene|1.500|0|13/06/2026 10:00:00\n"
+        "8888|Cherosene|1.500|0|13/06/2026 08:00:00\n"
+    )
+    text = _skip_banner(csv)
+    prices, timestamps = _parse_price_csv(text)
+    assert "8888" not in prices  # unmapped → no price recorded
+    assert timestamps["8888"] == "2026-06-13T10:00:00"
+
+
 def test_parse_price_csv_skips_zero_price() -> None:
     """_parse_price_csv ignores rows with price <= 0."""
     csv = (

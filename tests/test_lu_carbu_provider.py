@@ -897,6 +897,27 @@ async def test_async_list_stations_returns_empty_when_api_returns_empty() -> Non
     assert results == []
 
 
+async def test_async_list_stations_skips_diesel_station_with_falsy_id() -> None:
+    """A diesel station whose ``id`` is falsy is skipped when merging (branch 428->426).
+
+    The ``if sid:`` guard in the diesel merge loop is False for the empty-id
+    station, so it is not added to ``merged``; the valid station still appears.
+    """
+    no_id = {**_STATION_STRASSEN, "id": ""}
+    valid = {**_STATION_STRASSEN, "id": "LU-VALID", "name": "Valid Station"}
+    resp = _make_mock_response(200, body=[no_id, valid])
+    session = _make_session(resp)
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    results = await provider.async_list_stations(
+        session, lat=49.617, lng=6.076, radius_km=20.0
+    )
+
+    sids = {sid for sid, _label in results}
+    assert "LU-VALID" in sids
+    assert "" not in sids
+
+
 async def test_async_list_stations_label_includes_station_name() -> None:
     """async_list_stations label includes the station name."""
     resp = _make_mock_response(200, body=[_STATION_STRASSEN])
@@ -1070,6 +1091,30 @@ async def test_fetch_fuel_stations_returns_empty_for_unwrappable_dict() -> None:
     """_fetch_fuel_stations returns [] when dict payload has no known list key (line 534)."""
     wrapped = {"unknown_key": [_STATION_STRASSEN]}
     resp = _make_mock_response(200, body=wrapped)
+    session = _make_session(resp)
+
+    provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)
+    result = await provider._fetch_fuel_stations(
+        session,
+        fuel_key="diesel",
+        fuel_id=_FUEL_IDS["diesel"],
+        lat=49.617,
+        lng=6.076,
+        radius_km=10.0,
+    )
+
+    assert result == []
+
+
+async def test_fetch_fuel_stations_returns_empty_for_non_list_non_dict_payload() -> (
+    None
+):
+    """A scalar payload is neither list nor dict → returns [] (branch 519->524).
+
+    ``isinstance(payload, list)`` and ``isinstance(payload, dict)`` are both
+    False, so control skips straight to the final ``return []``.
+    """
+    resp = _make_mock_response(200, body="unexpected string payload")
     session = _make_session(resp)
 
     provider = LuCarbuProvider(_STATION_ID, latitude=49.617, longitude=6.076)

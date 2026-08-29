@@ -1114,6 +1114,50 @@ def test_build_index_rejects_price_above_999_cents() -> None:
     assert "unleaded" not in prices_map.get(_SITE_ID, {})
 
 
+def test_build_index_skips_site_without_s_key() -> None:
+    """_build_index skips a site whose 'S' id is None (branch 462->460).
+
+    The site is not added to site_map, so a later station using it would fall
+    through, while a sibling site with a valid 'S' is indexed normally.
+    """
+    site_no_id = {"N": "No Id Site", "Lat": 53.0, "Lng": -6.0}  # no "S"
+    site_map, _, _ = _build_index([site_no_id, _BASE_SITE], [])
+
+    assert _SITE_ID in site_map
+    # The id-less site produced no entry.
+    assert len(site_map) == 1
+
+
+def test_build_index_timestamp_captured_only_once_per_site() -> None:
+    """A second price entry for the same site does not overwrite the timestamp.
+
+    The first entry populates timestamps_map[site]; the second hits the
+    `if site_id_str not in timestamps_map` False branch (474->479) and its
+    timestamp is ignored, so the first timestamp is retained.
+    """
+    entries = [
+        {
+            "SiteId": int(_SITE_ID),
+            "FuelId": 2,
+            "Price": 1799,
+            "TransactionDateutc": "2024-01-15T10:00:00",
+        },
+        {
+            "SiteId": int(_SITE_ID),
+            "FuelId": 3,
+            "Price": 1759,
+            "TransactionDateutc": "2024-02-20T12:00:00",
+        },
+    ]
+    _, prices_map, timestamps_map = _build_index([], entries)
+
+    # First timestamp wins; second entry's timestamp is discarded.
+    assert timestamps_map[_SITE_ID] == "2024-01-15T10:00:00"
+    # Both prices were still recorded.
+    assert "unleaded" in prices_map[_SITE_ID]
+    assert "diesel" in prices_map[_SITE_ID]
+
+
 # ---------------------------------------------------------------------------
 # _build_station_data — invalid / None Lng (lines 560-561)
 # ---------------------------------------------------------------------------

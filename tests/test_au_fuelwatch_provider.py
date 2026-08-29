@@ -459,6 +459,17 @@ def test_parse_price_non_numeric_returns_none() -> None:
     assert _parse_price("abc") is None
 
 
+def test_parse_price_already_in_dollars_returned_asis() -> None:
+    """A value <= 10 is treated as already in AUD/litre, not cents (branch 403->405).
+
+    The ``if value > 10`` guard is False, so the value is returned without the
+    divide-by-100 conversion.
+    """
+    assert _parse_price("1.533") == pytest.approx(1.533)
+    # Boundary: exactly 10 is not > 10, so returned as-is.
+    assert _parse_price("10") == pytest.approx(10.0)
+
+
 # ---------------------------------------------------------------------------
 # _parse_lat_lng
 # ---------------------------------------------------------------------------

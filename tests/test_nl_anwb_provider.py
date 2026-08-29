@@ -384,6 +384,20 @@ async def test_parse_bulletin_sets_lastupdated() -> None:
 
 
 @pytest.mark.asyncio
+async def test_parse_bulletin_none_date_cell_leaves_lastupdated_unset() -> None:
+    """A None date cell in row 0 skips the date-parse block (branch 348->355).
+
+    ``date_val`` is None, so the ``if date_val is not None`` guard is False and
+    bulletin_date is never set; lastupdated stays None while prices still parse.
+    """
+    raw = _make_xlsx_bytes(bulletin_date=None)
+    data = await _parse_bulletin(raw)
+    assert data.get("lastupdated") is None
+    # Prices from later rows are still parsed correctly.
+    assert data.get("unleaded") is not None
+
+
+@pytest.mark.asyncio
 async def test_parse_bulletin_raises_when_nl_row_missing() -> None:
     """_parse_bulletin raises ProviderError when Netherlands row is absent."""
     raw = _make_xlsx_bytes(include_nl=False)

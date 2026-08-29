@@ -336,6 +336,50 @@ def test_build_station_data_returns_dict() -> None:
     assert isinstance(result, dict)
 
 
+def test_build_station_data_no_address_gives_none_full_address() -> None:
+    """A feature without an Address yields address=None (branch 176->180)."""
+    feature = {
+        "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [_LNG, _LAT]},
+        "properties": {
+            "Name": _STATION_NAME,
+            "brand": "Petro-Canada",
+            "Address": None,
+            "PostalCode": "H2X 1Y2",
+            "Region": "Montréal",
+            "Prices": [
+                {"GasType": "Régulier", "Price": "179.9¢", "IsAvailable": True},
+            ],
+        },
+    }
+    result = _build_station_data(feature, _STATION_ID)
+    # address falsy → full_address stays None even though a postal code exists.
+    assert result["address"] is None
+
+
+def test_build_station_data_unparseable_available_price_skipped() -> None:
+    """An available price for a valid gas type that fails to parse is skipped (branch 196->186)."""
+    feature = {
+        "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [_LNG, _LAT]},
+        "properties": {
+            "Name": _STATION_NAME,
+            "brand": "Petro-Canada",
+            "Address": _STATION_ADDRESS,
+            "Region": "Montréal",
+            "Prices": [
+                # Valid gas type, available, but the price cannot be parsed.
+                {"GasType": "Régulier", "Price": "N/A", "IsAvailable": True},
+                {"GasType": "Diesel", "Price": "185.4¢", "IsAvailable": True},
+            ],
+        },
+    }
+    result = _build_station_data(feature, _STATION_ID)
+    # unparseable unleaded price is dropped; diesel still parses.
+    assert result["unleaded"] is None
+    assert result["diesel"] == pytest.approx(1.854)
+
+
 def test_build_station_data_unleaded_price() -> None:
     """Régulier → unleaded price correctly parsed."""
     result = _build_station_data(_BASE_FEATURE, _STATION_ID)

@@ -230,6 +230,38 @@ async def test_unload_entry_coordinator_none_fallback() -> None:
     assert Platform.DEVICE_TRACKER in unloaded_platforms
 
 
+async def test_unload_entry_failed_unload_skips_cleanup() -> None:
+    """When async_unload_platforms returns False, cleanup is skipped (branch 241->248).
+
+    The entry stays loaded, so hass.data is NOT popped, repair issues are NOT
+    deleted, and async_unload_entry returns False.
+    """
+    from custom_components.fuelcompare_ie import async_unload_entry
+    from custom_components.fuelcompare_ie.const import DOMAIN
+
+    entry = _make_entry(provider_key="ie_fuelcompare", station_id="123")
+
+    hass = MagicMock()
+    hass.data = {DOMAIN: {entry.entry_id: MagicMock()}}
+
+    async def failed_unload(e, platforms):
+        return False
+
+    hass.config_entries = MagicMock()
+    hass.config_entries.async_unload_platforms = failed_unload
+
+    with patch(
+        "custom_components.fuelcompare_ie.async_delete_issue"
+    ) as mock_delete_issue:
+        result = await async_unload_entry(hass, entry)
+
+    assert result is False
+    # Entry data retained because unload failed.
+    assert entry.entry_id in hass.data[DOMAIN]
+    # Repair issues left in place.
+    mock_delete_issue.assert_not_called()
+
+
 # ---------------------------------------------------------------------------
 # Location-mode station_id derivation — collision avoidance
 # ---------------------------------------------------------------------------

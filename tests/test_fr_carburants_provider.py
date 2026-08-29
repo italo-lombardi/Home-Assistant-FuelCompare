@@ -443,6 +443,56 @@ def test_parse_pdv_station_id() -> None:
     assert result["id"] == _STATION_ID
 
 
+def test_parse_pdv_ignores_unknown_child_tags() -> None:
+    """A child element with an unrecognised tag is skipped (branch 154->138).
+
+    The <services> and <pop> children match none of the adresse/ville/horaires/prix
+    branches, so the elif chain falls through and the loop continues; the known
+    fields are still parsed correctly.
+    """
+    xml_str = """\
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<pdv_liste>
+  <pdv id="12345678" latitude="4365100" longitude="354700" cp="34150" pop="R">
+    <adresse>1 RUE DES FLEURS</adresse>
+    <ville>MONTPELLIER</ville>
+    <services><service>Boutique</service></services>
+    <prix nom="Gazole" id="1" maj="2024-03-15 10:30:00" valeur="1.799"/>
+  </pdv>
+</pdv_liste>
+"""
+    root = ET.fromstring(xml_str.encode("iso-8859-1"))
+    pdv = next(root.iter("pdv"))
+    result = _parse_pdv(pdv)
+
+    assert result["id"] == "12345678"
+    assert result["prices"]["diesel"] == pytest.approx(1.799)
+
+
+def test_parse_pdv_prix_without_maj_still_records_price() -> None:
+    """A <prix> with no maj attribute records the price but no timestamp (branch 161->138).
+
+    The `if maj` guard is False, so the maj timestamp is not appended; with no
+    timestamps at all, lastupdated is None while the price is still parsed.
+    """
+    xml_str = """\
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<pdv_liste>
+  <pdv id="12345678" latitude="4365100" longitude="354700" cp="34150" pop="R">
+    <adresse>1 RUE DES FLEURS</adresse>
+    <ville>MONTPELLIER</ville>
+    <prix nom="Gazole" id="1" valeur="1.799"/>
+  </pdv>
+</pdv_liste>
+"""
+    root = ET.fromstring(xml_str.encode("iso-8859-1"))
+    pdv = next(root.iter("pdv"))
+    result = _parse_pdv(pdv)
+
+    assert result["prices"]["diesel"] == pytest.approx(1.799)
+    assert result["lastupdated"] is None
+
+
 def test_parse_pdv_coordinates() -> None:
     """_parse_pdv converts scaled integer coordinates to decimal degrees."""
     xml_str = _PDV_XML_TEMPLATE.format(sid=_STATION_ID, auto24="")

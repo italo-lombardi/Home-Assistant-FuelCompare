@@ -687,3 +687,86 @@ def test_warn_403_once_logs_warning_exactly_once(caplog) -> None:
         assert "bot-detection" in warnings[0].message
     finally:
         _mod._403_WARNING_EMITTED = False
+
+
+# ---------------------------------------------------------------------------
+# Remaining branch coverage
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_national_retry_covers_meta_and_no_match_branches() -> None:
+    """National retry after a stale county cache exercises the retry-loop branches.
+
+    With _cached_county set the first (county) search finds nothing, so the flow
+    retries nationally. In the retry loop:
+      - diesel returns the matching record → sets station_meta.
+      - petrol returns the matching record too, but station_meta is already set
+        (branch 309->303: the meta assignment is skipped).
+      - kerosene returns only a non-matching station → record is None
+        (branch 307->303: continue without recording).
+    """
+    provider = IEFuelFinderProvider(_STATION_ID, county="cork")
+    assert provider._cached_county == "cork"
+
+    async def _mock_fetch(session, city, fuel):
+        if city == "cork":
+            # Stale county cache: station is not in Cork anymore.
+            return []
+        # National retry.
+        if fuel == "diesel":
+            return [_DIESEL_RECORD]
+        if fuel == "petrol":
+            return [_PETROL_RECORD]
+        if fuel == "kerosene":
+            return [_OTHER_STATION]  # present but not our station
+        return []
+
+    with patch.object(provider, "_fetch_stations", side_effect=_mock_fetch):
+        session = MagicMock()
+        data = await provider.async_fetch(session, _STATION_ID)
+
+    assert data["diesel"] == pytest.approx(1.839, abs=1e-4)
+    assert data["unleaded"] == pytest.approx(1.859, abs=1e-4)
+    # kerosene was only reported for a different station, so ours has none.
+    assert data.get("kerosene") is None
+
+
+async def test_async_fetch_skips_county_cache_when_meta_has_no_county() -> None:
+    """When the matched record has no county, the cache is not updated (branch 322->325)."""
+    provider = IEFuelFinderProvider(_STATION_ID)
+    assert provider._cached_county is None
+
+    record_no_county = {**_DIESEL_RECORD, "county": None}
+
+    async def _mock_fetch(session, city, fuel):
+        if fuel == "diesel":
+            return [record_no_county]
+        return []
+
+    with patch.object(provider, "_fetch_stations", side_effect=_mock_fetch):
+        session = MagicMock()
+        data = await provider.async_fetch(session, _STATION_ID)
+
+    # county_raw was falsy so the county cache stays unset.
+    assert provider._cached_county is None
+    assert data["diesel"] == pytest.approx(1.839, abs=1e-4)
+
+
+async def test_async_list_stations_skips_station_without_id() -> None:
+    """async_list_stations skips a station record with no id (branch 403->401)."""
+    provider = IEFuelFinderProvider(_STATION_ID)
+
+    no_id_station = {**_DIESEL_RECORD, "id": None}
+
+    async def _mock_fetch(session, city, fuel):
+        if fuel == "diesel":
+            return [no_id_station, _DIESEL_RECORD]
+        return []
+
+    with patch.object(provider, "_fetch_stations", side_effect=_mock_fetch):
+        session = MagicMock()
+        result = await provider.async_list_stations(session, county="dublin")
+
+    ids = [uid for uid, _ in result]
+    # The record with no id is dropped; only the valid station remains.
+    assert ids == [_STATION_ID]

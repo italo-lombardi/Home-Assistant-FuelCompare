@@ -782,3 +782,86 @@ async def test_async_fetch_lpg_non_positive_value_skipped() -> None:
     data = await provider.async_fetch(session, "PL")
 
     assert data.get("lpg") is None
+
+
+# ---------------------------------------------------------------------------
+# async_list_stations — label with no parsable prices (branches 307->309,
+# 309->311, 311->314, 315->318)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_list_stations_label_omits_prices_when_all_unparsable() -> None:
+    """When every wholesale/LPG price is unparsable the label carries no price parts.
+
+    Pb95, ONEkodiesel and every LPG record are zero/None so _parse_price_pln* all
+    return None; the label must fall back to the bare national heading with no
+    " — Pb95: …" suffix appended.
+    """
+    payload = [
+        {"productName": "Pb95", "value": 0, "effectiveDate": "2026-06-13"},
+        {"productName": "ONEkodiesel", "value": 0, "effectiveDate": "2026-06-13"},
+    ]
+    resp_wholesale = _make_mock_response(200, json_data=payload)
+    resp_lpg = _make_mock_response(
+        200, json_data=[{"voivodeship": "Mazowieckie", "value": 0}]
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    assert len(result) == 1
+    _uid, label = result[0]
+    assert label == "ORLEN Poland — national wholesale"
+    assert "PLN/L" not in label
+
+
+async def test_async_list_stations_label_includes_diesel_and_lpg() -> None:
+    """When only diesel and LPG parse, the label lists exactly those two parts.
+
+    Pb95 is zero (unparsable) so its branch is skipped, while diesel and LPG are
+    valid — exercising the diesel (309->311) and LPG (311->314) append branches
+    without the Pb95 one.
+    """
+    payload = [
+        {"productName": "Pb95", "value": 0, "effectiveDate": "2026-06-13"},
+        {"productName": "ONEkodiesel", "value": 5597, "effectiveDate": "2026-06-13"},
+    ]
+    resp_wholesale = _make_mock_response(200, json_data=payload)
+    resp_lpg = _make_mock_response(
+        200, json_data=[{"voivodeship": "Mazowieckie", "value": 2.80}]
+    )
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    result = await provider.async_list_stations(session, lat=_LAT, lng=_LNG)
+
+    _uid, label = result[0]
+    assert "Pb95" not in label
+    assert "Diesel: 5.5970 PLN/L" in label
+    assert "LPG: 2.8000 PLN/L" in label
+
+
+# ---------------------------------------------------------------------------
+# _build_station_data — record without effectiveDate (branch 437->441)
+# ---------------------------------------------------------------------------
+
+
+async def test_async_fetch_record_without_effective_date_still_maps_price() -> None:
+    """A wholesale record with no effectiveDate still maps its price (437->441).
+
+    The date_str is falsy so the latest_date update is skipped, but the product
+    price must still be recorded, and with no dated records lastupdated is None.
+    """
+    payload = [
+        {"productName": "Pb95", "value": 5228},  # no effectiveDate key
+    ]
+    resp_wholesale = _make_mock_response(200, json_data=payload)
+    resp_lpg = _make_mock_response(200, json_data=[])
+    session = _make_session(resp_wholesale, resp_lpg)
+
+    provider = _make_provider()
+    data = await provider.async_fetch(session, "PL")
+
+    assert data["unleaded"] == pytest.approx(5.228, abs=1e-4)
+    assert data["lastupdated"] is None
