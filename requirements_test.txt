@@ -4,4 +4,4 @@ pytest-homeassistant-custom-component>=0.13.356
 pytest-cov>=7.1.0
 openpyxl>=3.1.5
 beautifulsoup4>=4.15.0
-cryptography>=41.0.0
+cryptography>=50.0.1
