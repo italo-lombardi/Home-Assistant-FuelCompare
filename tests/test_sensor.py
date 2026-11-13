@@ -122,6 +122,28 @@ async def test_parse_lastupdated_invalid() -> None:
     assert _parse_lastupdated("not-a-date") is None
 
 
+async def test_parse_lastupdated_embedded_iso_date() -> None:
+    """Free-text header with an embedded ISO date (EC Oil Bulletin) parses."""
+    result = _parse_lastupdated("Oil Bulletin 2026-06-08")
+    assert result == datetime(2026, 6, 8, 0, 0, tzinfo=timezone.utc)
+
+
+async def test_parse_lastupdated_embedded_dmy_date() -> None:
+    """Free-text header with an embedded DD/MM/YYYY date parses."""
+    result = _parse_lastupdated("Updated 08/06/2026")
+    assert result == datetime(2026, 6, 8, 0, 0, tzinfo=timezone.utc)
+
+
+async def test_parse_lastupdated_embedded_invalid_iso_date() -> None:
+    """ISO-shaped but invalid date (month 13) falls through to None."""
+    assert _parse_lastupdated("Bulletin 2026-13-45") is None
+
+
+async def test_parse_lastupdated_embedded_invalid_dmy_date() -> None:
+    """DMY-shaped but invalid date falls through to None."""
+    assert _parse_lastupdated("Updated 99/99/9999") is None
+
+
 # ---------------------------------------------------------------------------
 # FuelPriceSensor — native_value
 # ---------------------------------------------------------------------------
