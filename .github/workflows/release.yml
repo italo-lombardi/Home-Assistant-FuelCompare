@@ -48,6 +48,7 @@ jobs:
         if: steps.existing.outputs.preserve != 'true'
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          # Strip pre-release suffix (e.g. 0.4.0-beta.1 → 0.4.0) for changelog lookup
           BASE_VERSION="${VERSION%%-*}"
           CHANGES=$(awk "/^## \[$BASE_VERSION\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
           REPO_URL="${{ github.server_url }}/${{ github.repository }}"
