@@ -41,6 +41,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `working_hours`); uk deprecation description was missing the
   "delete and re-add" instruction.
 
+## [0.7.4] - 2026-11-14
+
+### Fixed
+- **"Price last updated" sensor no longer stuck `unknown` for EC Weekly Oil
+  Bulletin entries.** The EU bulletin provider stores the free-text header
+  string (e.g. `"Oil Bulletin 2026-06-08"`) as the price timestamp, but the
+  sensor only parsed strict ISO formats, so every EU/IE/IT entry showed the
+  `price_last_updated` sensor and attribute as `unknown` indefinitely. The
+  parser now falls back to extracting an embedded `YYYY-MM-DD` or `DD/MM/YYYY`
+  date from the header after the ISO attempts fail. Fuel-price values are
+  unchanged; only the timestamp now populates.
+- **Russian `premium_diesel` / `premium_unleaded` fuel names translated.**
+  They were left in English after the locale was added; now `Премиум-дизель`
+  and `Премиум неэтилированный` (qualifier-first per native-speaker review).
+
+### Internal
+- **Repaired three stale live smoke tests** (`ba_fuel`, `me_fuel`,
+  `lt_saurida`) whose constructor calls still passed `latitude`/`longitude`/
+  `radius_km` kwargs the providers no longer accept, raising `TypeError`
+  before any network call. Coordinates are supplied to `async_list_stations`,
+  not the constructor; the stale kwargs are dropped. No shipped-code change.
+
 ## [0.7.3] - 2026-07-22
 
 ### Added

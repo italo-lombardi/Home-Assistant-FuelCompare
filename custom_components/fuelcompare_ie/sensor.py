@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json as json_lib
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -119,6 +120,26 @@ def _parse_lastupdated(raw: str | None) -> datetime | None:
         return dt
     except (ValueError, AttributeError):
         pass
+    # Fallback: extract a date embedded in a free-text header, e.g. the EC Oil
+    # Bulletin's "Oil Bulletin 2026-06-08". Try ISO (YYYY-MM-DD) then DD/MM/YYYY.
+    iso_match = re.search(r"\d{4}-\d{2}-\d{2}", value)
+    if iso_match:
+        try:
+            return datetime.strptime(iso_match.group(), "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            )
+        except ValueError:
+            pass
+    dmy_match = re.search(r"\d{2}/\d{2}/\d{4}", value)
+    if dmy_match:
+        try:
+            # Slash format is assumed day-first (European); correct for the EC
+            # Oil Bulletin. A future MM/DD source would need its own branch.
+            return datetime.strptime(dmy_match.group(), "%d/%m/%Y").replace(
+                tzinfo=timezone.utc
+            )
+        except ValueError:
+            pass
     _LOGGER.debug("Could not parse lastupdated value: %r", raw)
     return None
 

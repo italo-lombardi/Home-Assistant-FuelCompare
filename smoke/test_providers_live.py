@@ -61,7 +61,7 @@ pytestmark = [pytest.mark.smoke, pytest.mark.asyncio]
 
 # ── BA: cijenegoriva.ba — Sarajevo ──────────────────────────────────────────
 async def test_ba_fuel_sarajevo(session) -> None:
-    prov = BaFuelProvider("", latitude=43.8563, longitude=18.4131, radius_km=25.0)
+    prov = BaFuelProvider("")
     stations = await prov.async_list_stations(
         session, lat=43.8563, lng=18.4131, radius_km=25.0
     )
@@ -114,7 +114,7 @@ async def test_lu_carbu_luxembourg_city(session) -> None:
 
 # ── ME: Min. of Energy — Podgorica ──────────────────────────────────────────
 async def test_me_fuel_podgorica(session) -> None:
-    prov = MeFuelProvider("", latitude=42.4304, longitude=19.2594, radius_km=15.0)
+    prov = MeFuelProvider("")
     stations = await prov.async_list_stations(
         session, lat=42.4304, lng=19.2594, radius_km=15.0
     )
@@ -330,7 +330,7 @@ async def test_it_mase_rome(session) -> None:
 
 # ── LT: saurida.lt — Vilnius ────────────────────────────────────────────────
 async def test_lt_saurida_vilnius(session) -> None:
-    prov = LtSauridaProvider("", latitude=54.6872, longitude=25.2797, radius_km=5.0)
+    prov = LtSauridaProvider("")
     stations = await prov.async_list_stations(
         session, lat=54.6872, lng=25.2797, radius_km=5.0
     )
