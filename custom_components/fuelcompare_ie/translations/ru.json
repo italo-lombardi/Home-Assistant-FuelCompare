@@ -126,10 +126,10 @@
         "name": "Бензин"
       },
       "premium_diesel": {
-        "name": "Premium Diesel"
+        "name": "Дизель Премиум"
       },
       "premium_unleaded": {
-        "name": "Premium Unleaded"
+        "name": "Неэтилированный Премиум"
       },
       "unleaded": {
         "name": "Неэтилированный"
