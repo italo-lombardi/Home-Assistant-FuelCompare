@@ -44,6 +44,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.4] - 2026-11-14
 
 ### Fixed
+- **Native-speaker corrections to the Chinese, Japanese, and Korean locales.**
+  Strings per native-speaker agent validation 2026-11-14:
+  - **zh-Hant / zh-Hans:** `is_open` was "已開放/已开放" ("made accessible") →
+    "營業中/营业中" ("open for business"); zh-Hant provider terms de-Mainlandised
+    ("提供商"→"供應商"/"資料來源清單", "便民設施"→"便利設施", "列表"→"清單",
+    "增大"→"擴大"); zh-Hans standardised on 加油站 (站点/站名 → 加油站/加油站名称)
+    and added Latin spacing ("站点ID"→"加油站 ID", "页面URL"→"页面 URL").
+  - **ja:** pump-convention fuel names — unleaded 無鉛→レギュラー, premium
+    unleaded プレミアム無鉛→ハイオク, premium diesel →ハイグレード軽油;
+    opening-hours label aligned to 営業時間（OSM）.
+  - **ko:** fuel names 무연→무연휘발유, 프리미엄 무연→고급휘발유, 프리미엄
+    경유→고급경유; Irish administrative unit 지역→카운티 (with object/subject
+    particle agreement 을→를 / 이→가 for the vowel-final loanword);
+    `last_successful_fetch` tightened.
+  - **tr:** reviewed, no changes needed (pump terms already correct).
 - **"Price last updated" sensor no longer stuck `unknown` for EC Weekly Oil
   Bulletin entries.** The EU bulletin provider stores the free-text header
   string (e.g. `"Oil Bulletin 2026-06-08"`) as the price timestamp, but the

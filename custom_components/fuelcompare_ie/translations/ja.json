@@ -126,13 +126,13 @@
         "name": "ガソリン"
       },
       "premium_diesel": {
-        "name": "プレミアム軽油"
+        "name": "ハイグレード軽油"
       },
       "premium_unleaded": {
-        "name": "プレミアム無鉛"
+        "name": "ハイオク"
       },
       "unleaded": {
-        "name": "無鉛"
+        "name": "レギュラー"
       },
       "address": {
         "name": "住所"
@@ -177,7 +177,7 @@
         "name": "サービス"
       },
       "opening_hours": {
-        "name": "開店時間（OSM）"
+        "name": "営業時間（OSM）"
       },
       "payments": {
         "name": "支払い方法"

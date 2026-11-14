@@ -36,7 +36,7 @@
       },
       "station_picker": {
         "title": "選擇加油站",
-        "description": "從以下列表中選擇加油站、地區或國家。",
+        "description": "從以下清單中選擇加油站、地區或國家。",
         "data": {
           "station_id": "加油站",
           "show_on_map": "在地圖上顯示加油站"
@@ -64,17 +64,17 @@
       "invalid_station_id": "站點 ID 不得為空。",
       "invalid_location": "座標無效。請輸入有效的緯度和經度值。",
       "no_stations_found": "此縣找不到加油站。請嘗試其他縣。",
-      "no_stations_found_location": "此座標附近找不到加油站。請嘗試調整位置或增大搜尋半徑。",
+      "no_stations_found_location": "此座標附近找不到加油站。請嘗試調整位置或擴大搜尋半徑。",
       "invalid_api_key": "API 金鑰不得為空。",
-      "no_stations_found_global": "無法載入提供商列表。上游服務可能已中斷，或缺少必要的相依套件。請查閱 Home Assistant 日誌以獲取詳細資訊。"
+      "no_stations_found_global": "無法載入資料來源清單。上游服務可能已中斷，或缺少必要的相依套件。請查閱 Home Assistant 日誌以獲取詳細資訊。"
     },
     "abort": {
       "already_configured": "此加油站已完成設定。",
-      "no_providers_for_country": "此國家沒有可用的資料提供商。",
+      "no_providers_for_country": "此國家沒有可用的資料供應商。",
       "no_counties_for_country": "所選國家尚未設定任何縣。",
       "no_stations_found": "此縣找不到加油站。請取消並嘗試其他縣。",
       "no_stations_found_location": "此座標附近找不到加油站。請取消並嘗試更大的搜尋半徑或不同的位置。",
-      "no_stations_found_global": "無法載入提供商列表。上游服務可能已中斷，或缺少必要的相依套件。請查閱 Home Assistant 日誌以獲取詳細資訊。"
+      "no_stations_found_global": "無法載入資料來源清單。上游服務可能已中斷，或缺少必要的相依套件。請查閱 Home Assistant 日誌以獲取詳細資訊。"
     }
   },
   "options": {
@@ -96,7 +96,7 @@
     },
     "ie_pumps_tls_disabled": {
       "title": "pumps.ie TLS 憑證驗證已停用",
-      "description": "**{entry_title}** 的 pumps.ie 提供商已停用 TLS 憑證驗證，原因是該網站的憑證已過期。資料在傳輸過程中仍經過加密，但無法驗證伺服器身份。"
+      "description": "**{entry_title}** 的 pumps.ie 供應商已停用 TLS 憑證驗證，原因是該網站的憑證已過期。資料在傳輸過程中仍經過加密，但無法驗證伺服器身份。"
     }
   },
   "entity": {
@@ -159,13 +159,13 @@
         "name": "無障礙設施"
       },
       "amenities": {
-        "name": "便民設施"
+        "name": "便利設施"
       },
       "last_successful_fetch": {
         "name": "最後成功擷取"
       },
       "provider_label": {
-        "name": "資料提供商"
+        "name": "資料供應商"
       },
       "country_code": {
         "name": "國家"
@@ -209,7 +209,7 @@
         "name": "有價格"
       },
       "is_open": {
-        "name": "已開放"
+        "name": "營業中"
       },
       "has_atm": {
         "name": "ATM"

@@ -14,10 +14,10 @@
         }
       },
       "county": {
-        "title": "지역 선택",
-        "description": "주유소를 찾으려면 지역을 선택하세요.",
+        "title": "카운티 선택",
+        "description": "주유소를 찾으려면 카운티를 선택하세요.",
         "data": {
-          "station_county": "지역"
+          "station_county": "카운티"
         }
       },
       "api_key": {
@@ -36,7 +36,7 @@
       },
       "station_picker": {
         "title": "주유소 선택",
-        "description": "아래 목록에서 주유소, 지역 또는 국가를 선택하세요.",
+        "description": "아래 목록에서 주유소, 카운티 또는 국가를 선택하세요.",
         "data": {
           "station_id": "주유소",
           "show_on_map": "지도에 표시"
@@ -63,7 +63,7 @@
     "error": {
       "invalid_station_id": "주유소 ID는 비워둘 수 없습니다.",
       "invalid_location": "유효하지 않은 좌표입니다. 올바른 위도 및 경도 값을 입력하세요.",
-      "no_stations_found": "이 지역에서 주유소를 찾을 수 없습니다. 다른 지역을 시도하세요.",
+      "no_stations_found": "이 카운티에서 주유소를 찾을 수 없습니다. 다른 카운티를 시도하세요.",
       "no_stations_found_location": "이 좌표 근처에 주유소가 없습니다. 위치를 조정하거나 검색 반경을 늘려보세요.",
       "invalid_api_key": "API 키는 비워둘 수 없습니다.",
       "no_stations_found_global": "공급자 목록을 불러올 수 없습니다. 상위 서버가 다운되었거나 필수 종속성이 없을 수 있습니다. Home Assistant 로그를 확인하세요."
@@ -71,8 +71,8 @@
     "abort": {
       "already_configured": "이 주유소는 이미 설정되어 있습니다.",
       "no_providers_for_country": "이 국가에 사용 가능한 데이터 공급자가 없습니다.",
-      "no_counties_for_country": "선택한 국가에 설정된 지역이 없습니다.",
-      "no_stations_found": "이 지역에서 주유소를 찾을 수 없습니다. 취소하고 다른 지역을 시도하세요.",
+      "no_counties_for_country": "선택한 국가에 설정된 카운티가 없습니다.",
+      "no_stations_found": "이 카운티에서 주유소를 찾을 수 없습니다. 취소하고 다른 카운티를 시도하세요.",
       "no_stations_found_location": "이 좌표 근처에 주유소가 없습니다. 취소하고 더 넓은 반경 또는 다른 위치를 시도하세요.",
       "no_stations_found_global": "공급자 목록을 불러올 수 없습니다. 상위 서버가 다운되었거나 필수 종속성이 없을 수 있습니다. Home Assistant 로그를 확인하세요."
     }
@@ -126,13 +126,13 @@
         "name": "휘발유"
       },
       "premium_diesel": {
-        "name": "프리미엄 경유"
+        "name": "고급경유"
       },
       "premium_unleaded": {
-        "name": "프리미엄 무연"
+        "name": "고급휘발유"
       },
       "unleaded": {
-        "name": "무연"
+        "name": "무연휘발유"
       },
       "address": {
         "name": "주소"
@@ -141,7 +141,7 @@
         "name": "브랜드"
       },
       "county": {
-        "name": "지역"
+        "name": "카운티"
       },
       "latitude": {
         "name": "위도"
@@ -162,7 +162,7 @@
         "name": "편의시설"
       },
       "last_successful_fetch": {
-        "name": "마지막 성공적 수신"
+        "name": "마지막 성공 수신"
       },
       "provider_label": {
         "name": "데이터 공급자"
