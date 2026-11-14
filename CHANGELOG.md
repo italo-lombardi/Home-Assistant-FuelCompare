@@ -52,6 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   parser now falls back to extracting an embedded `YYYY-MM-DD` or `DD/MM/YYYY`
   date from the header after the ISO attempts fail. Fuel-price values are
   unchanged; only the timestamp now populates.
+- **Russian `premium_diesel` / `premium_unleaded` fuel names translated.**
+  They were left in English after the locale was added; now `Премиум-дизель`
+  and `Премиум неэтилированный` (qualifier-first per native-speaker review).
 
 ### Internal
 - **Repaired three stale live smoke tests** (`ba_fuel`, `me_fuel`,
